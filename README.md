@@ -8,8 +8,8 @@ The Routing package provides classes and helpers to handle the routing of HTTP r
 
 ## Requirements
 
-The package requires PHP 5.2 or later. The [icanboogie/prototype](https://packagist.org/packages/icanboogie/http)
-package is also required.
+The package requires PHP 5.3 or later.  
+The [icanboogie/http](https://packagist.org/packages/icanboogie/http) package is also required.
 
 
 
