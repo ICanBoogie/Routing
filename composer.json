@@ -1,7 +1,7 @@
 {
-    "name": "icanboogie/rounting",
+    "name": "icanboogie/routing",
     "type": "library",
-    "description": "Request rounting.",
+    "description": "Request routing.",
     "keywords": ["library"],
     "homepage": "http://icanboogie.org/",
     "license": "BSD-3-Clause",
