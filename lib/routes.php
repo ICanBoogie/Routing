@@ -83,18 +83,26 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 	{
 		$method = strtoupper($method);
 
-		if ($method == 'ANY' || in_array($method, Request::$methods))
+		if ($method === Request::METHOD_ANY || in_array($method, Request::$methods))
 		{
 			list($pattern, $controller) = $arguments;
 
-			$this[$method . ' ' . $pattern] = array
+			$definition = array
 			(
 				'pattern' => $pattern,
 				'via' => $method,
 				'controller' => $controller
 			);
 
-			return $this[$method . ' ' . $pattern];
+			$id = $method . ' ' . $pattern;
+			$this[$id] = $definition;
+
+			if ($method === Request::METHOD_GET)
+			{
+				$this[Request::METHOD_HEAD . ' ' . $pattern] = array_merge($definition, array('via' => Request::METHOD_HEAD));
+			}
+
+			return $this[$id];
 		}
 
 		throw new MethodNotDefined(array($method, $this));
@@ -330,75 +338,6 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 			)
 		);
 	}
-
-	/*
-	 * TODO-20120906: move all of this to Routes:
-	 *
-	 * $core->routes->any('/', function(Request $request) { return 'index!'; });
-	 *
-	 * -> use __call() (get() seams tricky)
-	 */
-	protected function route($method, $path, $callback, array $options=array())
-	{
-		Routes::add
-		(
-			$method . ' ' . $path, array
-			(
-				'pattern' => $path,
-				'via' => $method,
-				'callback' => $callback
-			)
-
-			+ $options
-		);
-	}
-
-	/*
-	 *
-	 */
-
-	/*
-	public function any($path, $callback, array $options=array())
-	{
-		$this->route(Request::METHOD_ANY, $path, $callback, $options);
-	}
-
-	public function get($path, $callback, array $options=array())
-	{
-		$this->route(Request::METHOD_GET, $path, $callback, $options);
-		$this->route(Request::METHOD_HEAD, $path, $callback, $options);
-	}
-
-	public function post($path, $callback, array $options=array())
-	{
-		$this->route(Request::METHOD_POST, $path, $callback, $options);
-	}
-
-	public function put($path, $callback, array $options=array())
-	{
-		$this->route(Request::METHOD_PUT, $path, $callback, $options);
-	}
-
-	public function delete($path, $callback, array $options=array())
-	{
-		$this->route(Request::METHOD_DELETE, $path, $callback, $options);
-	}
-
-	public function head($path, $callback, array $options=array())
-	{
-		$this->route(Request::METHOD_HEAD, $path, $callback, $options);
-	}
-
-	public function options($path, $callback, array $options=array())
-	{
-		$this->route(Request::METHOD_OPTIONS, $path, $callback, $options);
-	}
-
-	public function patch($path, $callback, array $options=array())
-	{
-		$this->route(Request::METHOD_PATCH, $path, $callback, $options);
-	}
-	*/
 }
 
 /*
