@@ -22,6 +22,7 @@
         "icanboogie/http": "1.0.*"
     },
     "autoload": {
-        "classmap": [ "lib/" ]
+        "classmap": [ "lib/" ],
+        "files": [ "lib/helpers.php" ]
     }
 }

@@ -19,40 +19,6 @@ use ICanBoogie\HTTP\Response;
  */
 class Route extends Object
 {
-	static public $contextualize_callback; // TODO-20121128: remove, use ICanBoogie\Routing\contextualize
-
-	/**
-	 * Contextualize the route.
-	 *
-	 * If the #{@link $contextualize_callback} class property is defined, the callback is used to
-	 * contextualize the route, otherwise the route is returned as is.
-	 *
-	 * @param string $str
-	 *
-	 * @return string
-	 */
-	static public function contextualize($str) // TODO-20121128: remove, use ICanBoogie\Routing\contextualize
-	{
-		return self::$contextualize_callback ? call_user_func(self::$contextualize_callback, $str) : $str;
-	}
-
-	static public $decontextualize_callback; // TODO-20121128: remove, use ICanBoogie\Routing\decontextualize
-
-	/**
-	 * Decontextualize the route.
-	 *
-	 * If the #{@link $decontextualize_callback} class property is defined, the callback is used to
-	 * decontextualize the route, otherwise the route is returned as is.
-	 *
-	 * @param string $str
-	 *
-	 * @return string
-	 */
-	static public function decontextualize($str) // TODO-20121128: remove, use ICanBoogie\Routing\decontextualize
-	{
-		return self::$decontextualize_callback ? call_user_func(self::$decontextualize_callback, $str) : $str;
-	}
-
 	static private $parse_cache = array();
 
 	/**

@@ -9,26 +9,34 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie;
+namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 
+use ICanBoogie\Route;
+use ICanBoogie\Routes;
+
 /**
  * Dispatches requests among the defined routes.
+ *
+ * If a route matching the request is found, the `$route` and `$decontextualized_path`
+ * properties are add to the request object. `$route` holds the route object,
+ * `$decontextualized_path` holds the decontextualized path. The path is decontextualized using
+ * the {@link \ICanBoogie\Routing\decontextualized()} function.
  *
  * <pre>
  * use ICanBoogie\HTTP\Dispatcher;
  *
- * $dispatcher = new Dispatcher(array('routes' => 'ICanBoogie\RouteDispatcher'));
+ * $dispatcher = new Dispatcher(array('routes' => 'ICanBoogie\Routing\Dispatcher'));
  * </pre>
  */
-class RouteDispatcher implements \ICanBoogie\HTTP\IDispatcher
+class Dispatcher implements \ICanBoogie\HTTP\IDispatcher
 {
 	public function __invoke(Request $request)
 	{
-		$path = rtrim(Route::decontextualize($request->normalized_path), '/');
+		$path = rtrim(\ICanBoogie\Routing\decontextualize($request->normalized_path), '/');
 
 		#
 		# we trim ending '/' but we leave it for the index.
@@ -48,20 +56,28 @@ class RouteDispatcher implements \ICanBoogie\HTTP\IDispatcher
 
 		if ($route->location)
 		{
-			return new RedirectResponse(Route::contextualize($route->location), 302);
+			return new RedirectResponse(\ICanBoogie\Routing\contextualize($route->location), 302);
 		}
 
 		$request->path_params = $captured + $request->path_params;
 		$request->params = $captured + $request->params;
+		$request->route = $route;
+		$request->decontextualized_path = $path;
 
 		return $this->dispatch($route, $request);
 	}
 
+	/**
+	 * Dispatches the route.
+	 *
+	 * @param Route $route
+	 * @param Request $request
+	 *
+	 * @return \ICanBoogie\HTTP\Response|null
+	 */
 	protected function dispatch(Route $route, Request $request)
 	{
-		$response = null;
-
-		new RouteDispatcher\BeforeDispatchEvent($this, $route, $request, $response);
+		new Dispatcher\BeforeDispatchEvent($this, $route, $request, $response);
 
 		if (!$response)
 		{
@@ -78,8 +94,6 @@ class RouteDispatcher implements \ICanBoogie\HTTP\IDispatcher
 				$controller = new $controller_class($route);
 			}
 
-			$request->route = $route;
-
 			$response = $controller($request);
 
 			if ($response !== null && !($response instanceof Response))
@@ -91,11 +105,14 @@ class RouteDispatcher implements \ICanBoogie\HTTP\IDispatcher
 			}
 		}
 
-		new RouteDispatcher\DispatchEvent($this, $route, $request, $response);
+		new Dispatcher\DispatchEvent($this, $route, $request, $response);
 
 		return $response;
 	}
 
+	/**
+	 * Rethrows the exception than was thrown during dispatch.
+	 */
 	public function rescue(\Exception $exception, Request $request)
 	{
 		throw $exception;
@@ -106,15 +123,15 @@ class RouteDispatcher implements \ICanBoogie\HTTP\IDispatcher
  * Events
  */
 
-namespace ICanBoogie\RouteDispatcher;
+namespace ICanBoogie\Routing\Dispatcher;
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
+use ICanBoogie\Routing\Dispatcher;
 use ICanBoogie\Route;
-use ICanBoogie\RouteDispatcher as Dispatcher;
 
 /**
- * Event class for the `ICanBoogie\RouteDispatcher::dispatch:before` event.
+ * Event class for the `ICanBoogie\Routing\Dispatcher::dispatch:before` event.
  *
  * Third parties may use this event to provide a response to the request before the route is
  * mapped. The event is usually used by third parties to redirect requests or provide cached
@@ -165,7 +182,7 @@ class BeforeDispatchEvent extends \ICanBoogie\Event
 }
 
 /**
- * Event class for the `ICanBoogie\RouteDispatcher::dispatch` event.
+ * Event class for the `ICanBoogie\Routing\Dispatcher::dispatch` event.
  *
  * Third parties may use this event to alter the response before it is returned by the dispatcher.
  */

@@ -35,7 +35,6 @@ function decontextualize($pathname)
 	return Helpers::decontextualize($pathname);
 }
 
-
 /**
  * Patchable helpers.
  */
