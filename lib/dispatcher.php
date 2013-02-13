@@ -205,7 +205,7 @@ class DispatchEvent extends \ICanBoogie\Event
 	/**
 	 * Reference to the response.
 	 *
-	 * @var \ICanBoogie\HTTP\Response
+	 * @var \ICanBoogie\HTTP\Response|null
 	 */
 	public $response;
 
@@ -215,7 +215,7 @@ class DispatchEvent extends \ICanBoogie\Event
 	 * @param Dispatcher $target
 	 * @param array $payload
 	 */
-	public function __construct(Dispatcher $target, Route $route, Request $request, Response &$response)
+	public function __construct(Dispatcher $target, Route $route, Request $request, &$response)
 	{
 		$this->route = $route;
 		$this->request = $request;
