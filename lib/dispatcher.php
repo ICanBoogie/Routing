@@ -24,7 +24,7 @@ use ICanBoogie\Routes;
  * If a route matching the request is found, the `$route` and `$decontextualized_path`
  * properties are add to the request object. `$route` holds the route object,
  * `$decontextualized_path` holds the decontextualized path. The path is decontextualized using
- * the {@link \ICanBoogie\Routing\decontextualized()} function.
+ * the {@link decontextualize()} function.
  *
  * <pre>
  * use ICanBoogie\HTTP\Dispatcher;
@@ -36,7 +36,7 @@ class Dispatcher implements \ICanBoogie\HTTP\IDispatcher
 {
 	public function __invoke(Request $request)
 	{
-		$path = rtrim(\ICanBoogie\Routing\decontextualize($request->normalized_path), '/');
+		$path = rtrim(decontextualize($request->normalized_path), '/');
 
 		#
 		# we trim ending '/' but we leave it for the index.
@@ -56,7 +56,7 @@ class Dispatcher implements \ICanBoogie\HTTP\IDispatcher
 
 		if ($route->location)
 		{
-			return new RedirectResponse(\ICanBoogie\Routing\contextualize($route->location), 302);
+			return new RedirectResponse(contextualize($route->location), 302);
 		}
 
 		$request->path_params = $captured + $request->path_params;
@@ -84,8 +84,8 @@ class Dispatcher implements \ICanBoogie\HTTP\IDispatcher
 			$controller = $route->controller;
 
 			#
-			# if the controller is not a callable then it is considred as a class name and use to
-			# instantiate the controller.
+			# if the controller is not a callable then it is considered as a class name and
+			# is used to instantiate the controller.
 			#
 
 			if (!is_callable($controller))
@@ -111,10 +111,24 @@ class Dispatcher implements \ICanBoogie\HTTP\IDispatcher
 	}
 
 	/**
-	 * Rethrows the exception than was thrown during dispatch.
+	 * Fires {@link \ICanBoogie\Routing\Dispatcher\RescueEvent} and returns the response provided
+	 * by third parties. If no response was provided, the exception (or the exception provided by
+	 * third parties) is rethrown.
+	 *
+	 * @return \ICanBoogie\HTTP\Response
 	 */
 	public function rescue(\Exception $exception, Request $request)
 	{
+		if (isset($request->route))
+		{
+			new Dispatcher\RescueEvent($exception, $request, $request->route, $response);
+
+			if ($response)
+			{
+				return $response;
+			}
+		}
+
 		throw $exception;
 	}
 }
@@ -127,8 +141,8 @@ namespace ICanBoogie\Routing\Dispatcher;
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
-use ICanBoogie\Routing\Dispatcher;
 use ICanBoogie\Route;
+use ICanBoogie\Routing\Dispatcher;
 
 /**
  * Event class for the `ICanBoogie\Routing\Dispatcher::dispatch:before` event.
@@ -222,5 +236,36 @@ class DispatchEvent extends \ICanBoogie\Event
 		$this->response = &$response;
 
 		parent::__construct($target, 'dispatch');
+	}
+}
+
+/**
+ * Event class for the `ICanBoogie\Routing\Dispatcher::rescue` event.
+ *
+ * Third parties may use this event to _rescue_ an exception by providing a suitable response.
+ * Third parties may also use this event to replace the exception to rethrow.
+ */
+class RescueEvent extends \ICanBoogie\Exception\RescueEvent
+{
+	/**
+	 * Route to rescue.
+	 *
+	 * @var \ICanBoogie\Route
+	 */
+	public $route;
+
+	/**
+	 * Initializes the {@link $route} property.
+	 *
+	 * @param \Exception $target
+	 * @param \ICanBoogie\HTTP\Request $request
+	 * @param \ICanBoogie\Route $route
+	 * @param \ICanBoogie\HTTP\Response|null $response
+	 */
+	public function __construct(\Exception &$target, Request $request, Route $route, &$response)
+	{
+		$this->route = $route;
+
+		parent::__construct($target, $request, $response);
 	}
 }

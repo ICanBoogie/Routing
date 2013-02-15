@@ -9,9 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie;
+namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\Request;
+use ICanBoogie\Route;
 
 class Controller
 {
@@ -25,7 +26,7 @@ class Controller
 	 */
 	static public function format_class_name($namespace, $name)
 	{
-		return $namespace . '\\' . ucfirst(camelize(strtr($name, '_', '-'))) . 'Controller';
+		return $namespace . '\\' . ucfirst(\ICanBoogie\camelize(strtr($name, '_', '-'))) . 'Controller';
 	}
 
 	/**

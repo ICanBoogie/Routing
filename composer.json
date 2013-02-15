@@ -17,9 +17,10 @@
 		"issues": "https://github.com/ICanBoogie/Routing/issues",
 		"source": "https://github.com/ICanBoogie/Routing"
 	},
+	"minimum-stability": "dev",
     "require": {
         "php": ">=5.2.0",
-        "icanboogie/http": "1.0.*"
+        "icanboogie/http": "*"
     },
     "autoload": {
         "classmap": [ "lib/" ],

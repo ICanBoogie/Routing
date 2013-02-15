@@ -57,8 +57,6 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 
 		if (func_num_args() > 1)
 		{
-			echo "CALL GET<br />";
-
 			return self::$instance->__call('get', func_get_args());
 		}
 
