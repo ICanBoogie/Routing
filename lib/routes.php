@@ -230,6 +230,7 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 
 				foreach ($fragments as $module_root => &$fragment)
 				{
+					$module_root = dirname(dirname($module_root)) . DIRECTORY_SEPARATOR;
 					$module_id = isset($module_roots[$module_root]) ? $module_roots[$module_root] : null;
 
 					foreach ($fragment as $route_id => &$route)
@@ -249,7 +250,7 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 
 				$routes = array();
 
-				foreach ($fragments as $path => $fragment)
+				foreach ($fragments as $fragment)
 				{
 					foreach ($fragment as $id => $route)
 					{

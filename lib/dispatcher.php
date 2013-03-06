@@ -73,7 +73,7 @@ class Dispatcher implements \ICanBoogie\HTTP\IDispatcher
 	 * @param Route $route
 	 * @param Request $request
 	 *
-	 * @return \ICanBoogie\HTTP\Response|null
+	 * @return Response|null
 	 */
 	protected function dispatch(Route $route, Request $request)
 	{

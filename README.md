@@ -38,7 +38,7 @@ Create a `composer.json` file and run `php composer.phar install` command to ins
 The package is [available on GitHub](https://github.com/ICanBoogie/Routing), its repository can be
 cloned with the following command line:
 
-	$ git clone git://github.com/ICanBoogie/Routing.git
+	$ git clone git://github.com/ICanBoogie/Routing.git routing
 
 
 

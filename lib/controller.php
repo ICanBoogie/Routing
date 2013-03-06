@@ -14,21 +14,11 @@ namespace ICanBoogie\Routing;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Route;
 
-class Controller
+/**
+ * A route controller.
+ */
+abstract class Controller
 {
-	/**
-	 * Formats the specified namespace and name into a controller class name.
-	 *
-	 * @param string $namespace The namespace of the module defining the controller.
-	 * @param string $name The name of the controller file.
-	 *
-	 * @return string
-	 */
-	static public function format_class_name($namespace, $name)
-	{
-		return $namespace . '\\' . ucfirst(\ICanBoogie\camelize(strtr($name, '_', '-'))) . 'Controller';
-	}
-
 	/**
 	 * The route to control.
 	 *
@@ -51,10 +41,7 @@ class Controller
 	 *
 	 * @param Request $request
 	 *
-	 * @return Response
+	 * @return \ICanBoogie\HTTP\Response
 	 */
-	public function __invoke(Request $request)
-	{
-
-	}
+	abstract public function __invoke(Request $request);
 }

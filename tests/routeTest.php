@@ -9,9 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Tests\Core\Route;
-
-use ICanBoogie\Routing\Dispatcher;
+namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\HTTP\Request;
