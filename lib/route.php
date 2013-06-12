@@ -131,7 +131,7 @@ class Route extends Object
 	 *
 	 * @return string The formatted route.
 	 */
-	static public function format($pattern, $values=null)
+	static public function format_pattern($pattern, $values=null)
 	{
 		$url = '';
 		$parsed = self::parse($pattern);
@@ -244,5 +244,13 @@ class Route extends Object
 		}
 
 		return parent::__get($property);
+	}
+
+	/**
+	 * @see format_pattern()
+	 */
+	public function format($values=null)
+	{
+		return self::format_pattern($this->pattern, $values);
 	}
 }
