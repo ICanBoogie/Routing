@@ -345,17 +345,33 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 
 /**
  * Exception thrown when a route does not exists.
+ *
+ * @property-read string $id The identifier of the route.
  */
 class RouteNotDefined extends \Exception
 {
+	private $id;
+
 	/**
 	 * @param string $id Identifier of the route.
 	 * @param int $code
 	 * @param \Exception $previous
 	 */
-	public function __construct($id, $code=404, \Exception $previous)
+	public function __construct($id, $code=404, \Exception $previous=null)
 	{
+		$this->id = $id;
+
 		parent::__construct("The route <q>$id</q> is not defined.", $code, $previous);
+	}
+
+	public function __get($property)
+	{
+		if ($property == 'id')
+		{
+			return $this->id;
+		}
+
+		throw new PropertyNotDefined(array($property, $this));
 	}
 }
 
