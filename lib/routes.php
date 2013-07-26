@@ -271,8 +271,10 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 	/**
 	 * Search for a route matching the specified pathname and method.
 	 *
-	 * @param string $uri The URI to match.
-	 * @param array|null $captured The parameters captured from the URI.
+	 * @param string $uri The URI to match. If the URI includes a query string it is removed
+	 * before searching for a matching route.
+	 * @param array|null $captured The parameters captured from the URI. If the URI included a
+	 * query string, its parsed params are stored under the `__query__` key.
 	 * @param string $method One of HTTP\Request::METHOD_* methods.
 	 * @param string $namespace Namespace restriction.
 	 *
@@ -290,6 +292,15 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 		$found = null;
 		$pattern = null;
 
+		$qs = null;
+		$qs_pos = strpos($uri, '?');
+
+		if ($qs_pos !== false)
+		{
+			$qs = substr($uri, $qs_pos + 1);
+			$uri = substr($uri, 0, $qs_pos);
+		}
+
 		foreach ($this->routes as $id => $route)
 		{
 			$pattern = $route['pattern'];
@@ -302,6 +313,12 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 			if (!Route::match($uri, $pattern, $captured))
 			{
 				continue;
+			}
+
+			if ($method == Request::METHOD_ANY)
+			{
+				$found = true;
+				break;
 			}
 
 			$route_method = $route['via'];
@@ -327,6 +344,13 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 		if (!$found)
 		{
 			return;
+		}
+
+		if ($qs)
+		{
+			parse_str($qs, $parsed_query_string);
+
+			$captured['__query__'] = $parsed_query_string;
 		}
 
 		return new Route
