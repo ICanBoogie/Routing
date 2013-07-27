@@ -13,157 +13,49 @@ namespace ICanBoogie;
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
+use ICanBoogie\Routing\Pattern;
 
 /**
  * A route.
+ *
+ * @property-read \ICanBooogie\Routing\Pattern $pattern The pattern of the route.
  */
 class Route extends Object
 {
-	static private $parse_cache = array();
-
 	/**
-	 * Parses a route pattern and return an array of interleaved paths and parameters, parameters
-	 * and the regular expression for the specified pattern.
-	 *
-	 * @param string $pattern The route pattern.
-	 *
-	 * @return array
+	 * @deprecated
 	 */
-	static public function parse($pattern) // TODO-20121128: as helper, or a Pattern class ?
+	static public function parse($pattern)
 	{
-		if (isset(self::$parse_cache[$pattern]))
-		{
-			return self::$parse_cache[$pattern];
-		}
+		$pattern = Pattern::from($pattern);
 
-		$regex = '#^';
-		$interleave = array();
-		$params = array();
-		$n = 0;
-
-		$parts = preg_split('#(:\w+|<(\w+:)?([^>]+)>)#', $pattern, -1, PREG_SPLIT_DELIM_CAPTURE);
-
-		for ($i = 0, $j = count($parts); $i < $j ;)
-		{
-			$part = $parts[$i++];
-
-			$regex .= preg_quote($part, '#');
-			$interleave[] = $part;
-
-			if ($i == $j)
-			{
-				break;
-			}
-
-			$part = $parts[$i++];
-
-			if ($part{0} == ':')
-			{
-				$identifier = substr($part, 1);
-				$separator = $parts[$i];
-				$selector = $separator ? '[^/\\' . $separator{0} . ']+' : '[^/]+';
-			}
-			else
-			{
-				$identifier = substr($parts[$i++], 0, -1);
-
-				if (!$identifier)
-				{
-					$identifier = $n++;
-				}
-
-				$selector = $parts[$i++];
-			}
-
-			$regex .= '(' . $selector . ')';
-			$interleave[] = array($identifier, $selector);
-			$params[] = $identifier;
-		}
-
-		$regex .= '$#';
-
-		return self::$parse_cache[$pattern] = array($interleave, $params, $regex);
+		return array($pattern->interleaved, $pattern->params, $pattern->regex);
 	}
 
 	/**
-	 * Checks if a pathname matches a route pattern.
-	 *
-	 * @param string $pathname The pathname.
-	 * @param string $pattern The pattern of the route.
-	 * @param array $captured The parameters captured from the pathname.
-	 *
-	 * @return boolean
+	 * @deprecated
 	 */
 	static public function match($pathname, $pattern, &$captured=null)
 	{
-		$captured = array();
-		$parsed = self::parse($pattern);
+		$pattern = Pattern::from($pattern);
 
-		list(, $params, $regex) = $parsed;
-
-		#
-		# $params is empty if the pattern is a plain string, in which case we can do a simple
-		# string comparison.
-		#
-
-		$match = $params ? preg_match($regex, $pathname, $values) : $pathname === $pattern;
-
-		if (!$match)
-		{
-			return false;
-		}
-
-		if ($params)
-		{
-			array_shift($values);
-
-			$captured = array_combine($params, $values);
-		}
-
-		return true;
+		return $pattern->match($pathname, $captured);
 	}
 
 	/**
-	 * Returns a route formatted using a pattern and values.
-	 *
-	 * @param string $pattern The route pattern
-	 * @param mixed $values The values to format the pattern, either as an array or an object.
-	 *
-	 * @return string The formatted route.
+	 * @deprecated
 	 */
 	static public function format_pattern($pattern, $values=null)
 	{
-		$url = '';
-		$parsed = self::parse($pattern);
-
-		if (is_array($values))
-		{
-			foreach ($parsed[0] as $i => $value)
-			{
-				$url .= ($i % 2) ? urlencode($values[$value[0]]) : $value;
-			}
-		}
-		else
-		{
-			foreach ($parsed[0] as $i => $value)
-			{
-				$url .= ($i % 2) ? urlencode($values->$value[0]) : $value;
-			}
-		}
-
-		return $url;
+		return Pattern::from($pattern)->format($values);
 	}
 
 	/**
-	 * Checks if the given string is a route pattern.
-	 *
-	 * @param string $pattern
-	 *
-	 * @return bool `true` if the given pattern is a route pattern, `false` otherwise.
+	 * @deprecated
 	 */
 	static public function is_pattern($pattern)
 	{
-		return (strpos($pattern, '<') !== false) || (strpos($pattern, ':') !== false);
+		return Pattern::is_pattern($pattern);
 	}
 
 	/**
@@ -176,9 +68,14 @@ class Route extends Object
 	/**
 	 * Pattern of the route.
 	 *
-	 * @var string
+	 * @var \ICanBooogie\Routing\Pattern
 	 */
-	public $pattern;
+	private $pattern;
+
+	protected function volatile_get_pattern()
+	{
+		return $this->pattern;
+	}
 
 	/**
 	 * Redirect location.
@@ -218,7 +115,7 @@ class Route extends Object
 	 */
 	public function __construct($pattern, array $properties)
 	{
-		$this->pattern = $pattern;
+		$this->pattern = Pattern::from($pattern);
 
 		foreach ($properties as $property => $value)
 		{
@@ -247,10 +144,14 @@ class Route extends Object
 	}
 
 	/**
-	 * @see format_pattern()
+	 * Formats the route with the specified values.
+	 *
+	 * Note: The formatting of the route is defered to its {@link Pattern} instance.
+	 *
+	 * @return string
 	 */
 	public function format($values=null)
 	{
-		return self::format_pattern($this->pattern, $values);
+		return $this->pattern->format($values);
 	}
 }

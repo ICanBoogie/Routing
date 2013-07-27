@@ -15,6 +15,7 @@ use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Prototype\MethodNotDefined;
+use ICanBoogie\Routing\Pattern;
 
 /**
  * The route collection.
@@ -310,7 +311,9 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 				continue;
 			}
 
-			if (!Route::match($uri, $pattern, $captured))
+			$pattern = Pattern::from($pattern);
+
+			if (!$pattern->match($uri, $captured))
 			{
 				continue;
 			}
