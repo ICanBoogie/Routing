@@ -36,18 +36,14 @@ class Dispatcher implements \ICanBoogie\HTTP\IDispatcher
 {
 	public function __invoke(Request $request)
 	{
-		$path = rtrim(decontextualize($request->normalized_path), '/');
+		$decontextualized_path = decontextualize($request->normalized_path);
 
-		#
-		# we trim ending '/' but we leave it for the index.
-		#
-
-		if (!$path)
+		if ($decontextualized_path != '/')
 		{
-			$path = '/';
+			$decontextualized_path = rtrim($decontextualized_path, '/');
 		}
 
-		$route = Routes::get()->find($path, $captured, $request->method);
+		$route = Routes::get()->find($decontextualized_path, $captured, $request->method);
 
 		if (!$route)
 		{
@@ -62,7 +58,7 @@ class Dispatcher implements \ICanBoogie\HTTP\IDispatcher
 		$request->path_params = $captured + $request->path_params;
 		$request->params = $captured + $request->params;
 		$request->route = $route;
-		$request->decontextualized_path = $path;
+		$request->decontextualized_path = $decontextualized_path;
 
 		return $this->dispatch($route, $request);
 	}
