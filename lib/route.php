@@ -144,6 +144,16 @@ class Route extends Object
 	}
 
 	/**
+	 * Returns the pattern of the route.
+	 *
+	 * @return string
+	 */
+	public function __toString()
+	{
+		return (string) $this->pattern;
+	}
+
+	/**
 	 * Formats the route with the specified values.
 	 *
 	 * Note: The formatting of the route is defered to its {@link Pattern} instance.
