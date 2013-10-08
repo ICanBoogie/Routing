@@ -117,6 +117,8 @@ class Route extends Object
 	{
 		$this->pattern = Pattern::from($pattern);
 
+		unset($properties['pattern']);
+
 		foreach ($properties as $property => $value)
 		{
 			$this->$property = $value;
