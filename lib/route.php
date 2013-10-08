@@ -11,8 +11,6 @@
 
 namespace ICanBoogie;
 
-use ICanBoogie\HTTP\Request;
-use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Pattern;
 
 /**
