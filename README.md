@@ -8,8 +8,7 @@ The Routing package provides classes and helpers to handle the routing of HTTP r
 
 ## Requirements
 
-The package requires PHP 5.3 or later.  
-The [icanboogie/http](https://packagist.org/packages/icanboogie/http) package is also required.
+The package requires PHP 5.3 or later.
 
 
 
@@ -28,6 +27,10 @@ Create a `composer.json` file and run `php composer.phar install` command to ins
     }
 }
 ```
+
+The following packages are required, you might want to check them out:
+
+* [icanboogie/http](https://packagist.org/packages/icanboogie/http)
 
 
 

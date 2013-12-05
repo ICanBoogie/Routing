@@ -70,7 +70,7 @@ class Route extends Object
 	 */
 	private $pattern;
 
-	protected function volatile_get_pattern()
+	protected function get_pattern()
 	{
 		return $this->pattern;
 	}
