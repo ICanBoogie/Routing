@@ -21,49 +21,6 @@ use ICanBoogie\Routing\Pattern;
 class Route extends Object
 {
 	/**
-	 * @deprecated
-	 */
-	static public function parse($pattern)
-	{
-		$pattern = Pattern::from($pattern);
-
-		return array($pattern->interleaved, $pattern->params, $pattern->regex);
-	}
-
-	/**
-	 * @deprecated
-	 */
-	static public function match($pathname, $pattern, &$captured=null)
-	{
-		$pattern = Pattern::from($pattern);
-
-		return $pattern->match($pathname, $captured);
-	}
-
-	/**
-	 * @deprecated
-	 */
-	static public function format_pattern($pattern, $values=null)
-	{
-		return Pattern::from($pattern)->format($values);
-	}
-
-	/**
-	 * @deprecated
-	 */
-	static public function is_pattern($pattern)
-	{
-		return Pattern::is_pattern($pattern);
-	}
-
-	/**
-	 * Identifier of the route.
-	 *
-	 * @var string
-	 */
-	public $id;
-
-	/**
 	 * Pattern of the route.
 	 *
 	 * @var \ICanBooogie\Routing\Pattern
@@ -76,6 +33,25 @@ class Route extends Object
 	}
 
 	/**
+	 * Controller's class name or function.
+	 *
+	 * @var string
+	 */
+	private $controller;
+
+	protected function get_controller()
+	{
+		return $this->controller;
+	}
+
+	/**
+	 * Identifier of the route.
+	 *
+	 * @var string
+	 */
+	public $id;
+
+	/**
 	 * Redirect location.
 	 *
 	 * If the property is defined the route is considered an alias.
@@ -83,20 +59,6 @@ class Route extends Object
 	 * @var string
 	 */
 	public $location;
-
-	/**
-	 * Class of the controller.
-	 *
-	 * @var string
-	 */
-	public $class;
-
-	/**
-	 * Callback of the controller.
-	 *
-	 * @var callable
-	 */
-	public $callback;
 
 	/**
 	 * Request methods accepted by the route.
