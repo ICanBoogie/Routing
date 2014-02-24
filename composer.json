@@ -20,7 +20,7 @@
 	"minimum-stability": "dev",
 	"require": {
 		"php": ">=5.3.0",
-		"icanboogie/http": "2.x-dev"
+		"icanboogie/http": "2.x"
 	},
 	"autoload": {
 		"classmap": [ "lib/" ],
