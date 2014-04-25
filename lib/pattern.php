@@ -54,6 +54,13 @@ class Pattern
 		$interleaved = array();
 		$params = array();
 		$n = 0;
+		$catchall = false;
+
+		if ($pattern{strlen($pattern) - 1} == '*')
+		{
+			$catchall = true;
+			$pattern = substr($pattern, 0, -1);
+		}
 
 		$parts = preg_split('#(:\w+|<(\w+:)?([^>]+)>)#', $pattern, -1, PREG_SPLIT_DELIM_CAPTURE);
 
@@ -94,7 +101,12 @@ class Pattern
 			$params[] = $identifier;
 		}
 
-		$regex .= '$#';
+		if (!$catchall)
+		{
+			$regex .= '$';
+		}
+
+		$regex .= '#';
 
 		return array($interleaved, $params, $regex);
 	}
