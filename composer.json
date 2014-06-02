@@ -2,7 +2,7 @@
 	"name": "icanboogie/routing",
 	"type": "library",
 	"description": "Request routing.",
-	"keywords": ["library"],
+	"keywords": [ "routing" ],
 	"homepage": "http://icanboogie.org/",
 	"license": "BSD-3-Clause",
 	"authors": [
@@ -19,7 +19,7 @@
 	},
 	"minimum-stability": "dev",
 	"require": {
-		"php": ">=5.3.0",
+		"php": ">=5.4.0",
 		"icanboogie/http": "2.x"
 	},
 	"autoload": {
