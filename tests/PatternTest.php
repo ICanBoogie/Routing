@@ -37,9 +37,9 @@ class PatternTest extends \PHPUnit_Framework_TestCase
 		$p = Pattern::from($s);
 
 		$this->assertEquals('/blog/', $p->interleaved[0]);
-		$this->assertEquals(array('categoryslug', '[^/\/]+'), $p->interleaved[1]);
+		$this->assertEquals([ 'categoryslug', '[^/\/]+' ], $p->interleaved[1]);
 		$this->assertEquals('/', $p->interleaved[2]);
-		$this->assertEquals(array('slug', '[^/\.]+'), $p->interleaved[3]);
+		$this->assertEquals([ 'slug', '[^/\.]+' ], $p->interleaved[3]);
 		$this->assertEquals('.html', $p->interleaved[4]);
 
 		$this->assertEquals('categoryslug', $p->params[0]);
@@ -53,9 +53,9 @@ class PatternTest extends \PHPUnit_Framework_TestCase
 		$p = Pattern::from('/blog/<categoryslug:[^/]+>/<slug:[^\.]+>.html');
 
 		$this->assertEquals('/blog/', $p->interleaved[0]);
-		$this->assertEquals(array('categoryslug', '[^/]+'), $p->interleaved[1]);
+		$this->assertEquals([ 'categoryslug', '[^/]+' ], $p->interleaved[1]);
 		$this->assertEquals('/', $p->interleaved[2]);
-		$this->assertEquals(array('slug', '[^\.]+'), $p->interleaved[3]);
+		$this->assertEquals([ 'slug', '[^\.]+' ], $p->interleaved[3]);
 		$this->assertEquals('.html', $p->interleaved[4]);
 
 		$this->assertEquals('categoryslug', $p->params[0]);
@@ -71,12 +71,12 @@ class PatternTest extends \PHPUnit_Framework_TestCase
 		$rc = $pattern->match('/news/2012-06-this-is-an-example.html', $captured);
 
 		$this->assertTrue($rc);
-		$this->assertEquals(array('year' => 2012, 'month' => 06, 'slug' => 'this-is-an-example', 'format' => 'html'), $captured);
+		$this->assertEquals([ 'year' => 2012, 'month' => 06, 'slug' => 'this-is-an-example', 'format' => 'html' ], $captured);
 
 		$rc = $pattern->match('/news/2012-this-is-an-example.html', $captured);
 
 		$this->assertTrue($rc);
-		$this->assertEquals(array('year' => 2012, 'month' => 'this', 'slug' => 'is-an-example', 'format' => 'html'), $captured);
+		$this->assertEquals([ 'year' => 2012, 'month' => 'this', 'slug' => 'is-an-example', 'format' => 'html' ], $captured);
 
 		# using regex
 
@@ -85,7 +85,7 @@ class PatternTest extends \PHPUnit_Framework_TestCase
 		$rc = $pattern->match('/news/2012-06-this-is-an-example.html', $captured);
 
 		$this->assertTrue($rc);
-		$this->assertEquals(array('year' => 2012, 'month' => 06, 'slug' => 'this-is-an-example', 'format' => 'html'), $captured);
+		$this->assertEquals([ 'year' => 2012, 'month' => 06, 'slug' => 'this-is-an-example', 'format' => 'html' ], $captured);
 
 		#
 		# matching should fail because "this" does not match \d{2}
@@ -104,6 +104,6 @@ class PatternTest extends \PHPUnit_Framework_TestCase
 		$rc = $pattern->match('/news/2012-06-this-is-an-example.html', $captured);
 
 		$this->assertTrue($rc);
-		$this->assertEquals(array(2012, 06, 'this-is-an-example', 'html'), $captured);
+		$this->assertEquals([ 2012, 06, 'this-is-an-example', 'html' ], $captured);
 	}
 }

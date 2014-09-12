@@ -29,7 +29,7 @@ class BeforeCollectRoutesEvent extends \ICanBoogie\Event
 	/**
 	 * The event is constructed with the type `routing.collect_routes:before`.
 	 *
-	 * @param array $payload
+	 * @param array $fragments Reference to the fragments to alter.
 	 */
 	public function __construct(&$fragments)
 	{

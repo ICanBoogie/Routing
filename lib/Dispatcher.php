@@ -106,10 +106,11 @@ class Dispatcher implements \ICanBoogie\HTTP\IDispatcher
 
 			if ($response !== null && !($response instanceof Response))
 			{
-				$response = new Response($response, 200, array
-				(
+				$response = new Response($response, 200, [
+
 					'Content-Type' => 'text/html; charset=utf-8'
-				));
+
+				]);
 			}
 		}
 

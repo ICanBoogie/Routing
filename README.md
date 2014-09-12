@@ -8,7 +8,7 @@ The Routing package provides classes and helpers to handle the routing of HTTP r
 
 ## Requirements
 
-The package requires PHP 5.3 or later.
+The package requires PHP 5.4 or later.
 
 
 
@@ -41,7 +41,7 @@ The following packages are required, you might want to check them out:
 The package is [available on GitHub](https://github.com/ICanBoogie/Routing), its repository can be
 cloned with the following command line:
 
-	$ git clone git://github.com/ICanBoogie/Routing.git routing
+	$ git clone git://github.com/ICanBoogie/Routing.git
 
 
 

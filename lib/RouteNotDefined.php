@@ -39,6 +39,6 @@ class RouteNotDefined extends \Exception
 			return $this->id;
 		}
 
-		throw new PropertyNotDefined(array($property, $this));
+		throw new PropertyNotDefined([ $property, $this ]);
 	}
 }

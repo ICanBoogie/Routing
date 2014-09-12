@@ -50,7 +50,9 @@ class BeforeDispatchEvent extends \ICanBoogie\Event
 	 * The event is constructed with the type `dispatch:before`.
 	 *
 	 * @param Dispatcher $target
-	 * @param array $payload
+	 * @param Route $route
+	 * @param Request $request
+	 * @param mixed $response
 	 */
 	public function __construct(Dispatcher $target, Route $route, Request $request, &$response)
 	{
