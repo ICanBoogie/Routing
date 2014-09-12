@@ -23,7 +23,10 @@
 		"icanboogie/http": "2.x"
 	},
 	"autoload": {
-		"classmap": [ "lib/" ],
+		"psr-4": {
+			"ICanBoogie\\Routing\\": "lib/"
+		},
+
 		"files": [ "helpers.php" ]
 	}
 }

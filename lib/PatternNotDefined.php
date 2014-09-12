@@ -11,12 +11,10 @@
 
 namespace ICanBoogie\Routing;
 
-interface RoutingException
-{
-
-}
-
-class PatternNotDefined extends \InvalidArgumentException implements RoutingException
+/**
+ * Exception thrown when the pattern of a route is not defined.
+ */
+class PatternNotDefined extends \InvalidArgumentException implements Exception
 {
 
 }
