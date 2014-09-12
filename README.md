@@ -1,6 +1,12 @@
-# Routing
+# Routing [![Build Status](https://secure.travis-ci.org/ICanBoogie/Routing.svg?branch=2.1)](http://travis-ci.org/ICanBoogie/Routing)
 
-The Routing package provides classes and helpers to handle the routing of HTTP requests. 
+The Routing package provides classes and helpers to handle the routing of HTTP requests.
+
+
+
+
+
+----------
 
 
 
@@ -16,19 +22,20 @@ The package requires PHP 5.4 or later.
 
 ## Installation
 
-The recommended way to install this package is through [composer](http://getcomposer.org/).
+The recommended way to install this package is through [Composer](http://getcomposer.org/).
 Create a `composer.json` file and run `php composer.phar install` command to install it:
 
 ```json
 {
-    "minimum-stability": "dev",
-    "require": {
-		"icanboogie/routing": "dev-master"
-    }
+	"minimum-stability": "dev",
+
+	"require": {
+		"icanboogie/routing": "2.x"
+	}
 }
 ```
 
-The following packages are required, you might want to check them out:
+The following package is required, you might want to check it out:
 
 * [icanboogie/http](https://packagist.org/packages/icanboogie/http)
 
@@ -41,7 +48,7 @@ The following packages are required, you might want to check them out:
 The package is [available on GitHub](https://github.com/ICanBoogie/Routing), its repository can be
 cloned with the following command line:
 
-	$ git clone git://github.com/ICanBoogie/Routing.git
+	$ git clone https://github.com/ICanBoogie/Routing.git
 
 
 
@@ -65,10 +72,14 @@ The test suite is ran with the `make test` command. [Composer](http://getcompose
 automatically installed as well as all dependencies required to run the suite. You can later
 clean the directory with the `make clean` command.
 
+The package is continuously tested by [Travis CI](http://about.travis-ci.org/).
+
+[![Build Status](https://secure.travis-ci.org/ICanBoogie/Routing.svg?branch=2.1)](http://travis-ci.org/ICanBoogie/Routing)
+
 
 
 
 
 ## License
 
-ICanBoogie/Routing is licensed under the New BSD License - See the LICENSE file for details.
+ICanBoogie/Routing is licensed under the New BSD License - See the [LICENSE](LICENSE) file for details.
