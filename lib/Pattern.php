@@ -24,13 +24,13 @@ use ICanBoogie\PropertyNotReadable;
  * $pattern = Pattern::from("/blog/<year:\d{4}>-<month:\d{2}>-:slug.html");
  * echo $pattern;       // "/blog/<year:\d{4}>-<month:\d{2}>-:slug.html"
  *
- * $pathname = $pattern->format(array('year' => "2013", 'month' => "07", 'slug' => "test-is-a-test"));
+ * $pathname = $pattern->format([ 'year' => "2013", 'month' => "07", 'slug' => "test-is-a-test" ]);
  * echo $pathname;      // "/blog/2013-07-this-is-a-test.html"
  *
  * $matching = $pattern->match($pathname, $captured);
  *
  * var_dump($matching); // true
- * var_dump($captured); // array('year' => "2013", 'month' => "07", 'slug' => "test-is-a-test")
+ * var_dump($captured); // [ 'year' => "2013", 'month' => "07", 'slug' => "test-is-a-test" ]
  * </pre>
  *
  * @property-read string $pattern The pattern.
@@ -51,8 +51,8 @@ class Pattern
 	static private function parse($pattern)
 	{
 		$regex = '#^';
-		$interleaved = array();
-		$params = array();
+		$interleaved = [];
+		$params = [];
 		$n = 0;
 		$catchall = false;
 
@@ -97,7 +97,7 @@ class Pattern
 			}
 
 			$regex .= '(' . $selector . ')';
-			$interleaved[] = array($identifier, $selector);
+			$interleaved[] = [ $identifier, $selector ];
 			$params[] = $identifier;
 		}
 
@@ -108,7 +108,7 @@ class Pattern
 
 		$regex .= '#';
 
-		return array($interleaved, $params, $regex);
+		return [ $interleaved, $params, $regex ];
 	}
 
 	/**
@@ -203,11 +203,11 @@ class Pattern
 
 	public function __get($property)
 	{
-		static $gettable = array('pattern', 'interleaved', 'params', 'regex');
+		static $gettable = [ 'pattern', 'interleaved', 'params', 'regex' ];
 
 		if (!in_array($property, $gettable))
 		{
-			throw new PropertyNotReadable(array($property, $this));
+			throw new PropertyNotReadable([ $property, $this ]);
 		}
 
 		return $this->$property;

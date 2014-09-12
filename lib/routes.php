@@ -53,25 +53,26 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 		{
 			list($pattern, $controller) = $arguments;
 
-			$definition = array
-			(
+			$definition = [
+
 				'pattern' => $pattern,
 				'via' => $method,
 				'controller' => $controller
-			);
+
+			];
 
 			$id = $method . ' ' . $pattern;
 			$this[$id] = $definition;
 
 			if ($method === Request::METHOD_GET)
 			{
-				$this[Request::METHOD_HEAD . ' ' . $pattern] = array_merge($definition, array('via' => Request::METHOD_HEAD));
+				$this[Request::METHOD_HEAD . ' ' . $pattern] = array_merge($definition, [ 'via' => Request::METHOD_HEAD ]);
 			}
 
 			return $this[$id];
 		}
 
-		throw new MethodNotDefined(array($method, $this));
+		throw new MethodNotDefined([ $method, $this ]);
 	}
 
 	public function getIterator()
@@ -120,21 +121,20 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 	{
 		if (empty($route['pattern']))
 		{
-			throw new \LogicException(format
-			(
-				"Route %id has no pattern. !route", array
-				(
-					'id' => $id,
-					'route' => $route
-				)
-			));
+			throw new \LogicException(format("Route %id has no pattern. !route", [
+
+				'id' => $id,
+				'route' => $route
+
+			]));
 		}
 
-		$this->routes[$id] = $route + array
-		(
+		$this->routes[$id] = $route + [
+
 			'id' => $id,
 			'via' => Request::METHOD_ANY
-		);
+
+		];
 	}
 
 	static public function add($id, $definition)
@@ -169,7 +169,7 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 	 */
 	public function find($uri, &$captured=null, $method=Request::METHOD_ANY, $namespace=null)
 	{
-		$captured = array();
+		$captured = [];
 
 		if ($namespace)
 		{
@@ -242,12 +242,6 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 			$captured['__query__'] = $parsed_query_string;
 		}
 
-		return new Route
-		(
-			$pattern, $route + array
-			(
-				'id' => $id
-			)
-		);
+		return new Route($pattern, $route + [ 'id' => $id ]);
 	}
 }

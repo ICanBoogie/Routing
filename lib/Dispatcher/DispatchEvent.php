@@ -48,7 +48,9 @@ class DispatchEvent extends \ICanBoogie\Event
 	 * The event is constructed with the type `dispatch`.
 	 *
 	 * @param Dispatcher $target
-	 * @param array $payload
+	 * @param Route $route
+	 * @param Request $request
+	 * @param mixed $response
 	 */
 	public function __construct(Dispatcher $target, Route $route, Request $request, &$response)
 	{
