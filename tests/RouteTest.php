@@ -13,8 +13,6 @@ namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\HTTP\Request;
-use ICanBoogie\Route;
-use ICanBoogie\Routes;
 
 class RouteTest extends \PHPUnit_Framework_TestCase
 {
@@ -28,13 +26,13 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 
 	public function testRouteCallbackResponse()
 	{
-		$routes = Routes::get();
+		$routes = new Routes;
 		$routes->get('/', function(Request $request)
 		{
 			return 'madonna';
 		});
 
-		$dispatcher = new Dispatcher();
+		$dispatcher = new Dispatcher($routes);
 
 		$response = $dispatcher(Request::from(array('path' => '/', 'method' => 'GET')));
 

@@ -9,21 +9,19 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie;
-
-use ICanBoogie\Routing\Pattern;
+namespace ICanBoogie\Routing;
 
 /**
  * A route.
  *
- * @property-read \ICanBooogie\Routing\Pattern $pattern The pattern of the route.
+ * @property-read Pattern $pattern The pattern of the route.
  */
-class Route extends Object
+class Route extends \ICanBoogie\Object
 {
 	/**
 	 * Pattern of the route.
 	 *
-	 * @var \ICanBooogie\Routing\Pattern
+	 * @var Pattern
 	 */
 	private $pattern;
 

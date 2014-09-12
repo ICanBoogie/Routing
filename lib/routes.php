@@ -9,73 +9,40 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie;
+namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Prototype\MethodNotDefined;
-use ICanBoogie\Routing\Pattern;
 
 /**
- * The route collection.
- *
- * Initial routes are collected from the "routes" config.
- *
- *
- *
- * Event: ICanBoogie\Routes::collect:before
- * ----------------------------------------
- *
- * Third parties may use the event {@link Routes\BeforeCollectEvent} to alter the configuration
- * fragments before they are synthesized. The event is fired during {@link __construct()}.
- *
- *
- *
- * Event: ICanBoogie\Routes::collect
- * ---------------------------------
- *
- * Third parties may use the event {@link Routes\CollectEvent} to alter the routes read from
- * the configuration. The event is fired during {@link __construct()}.
+ * A route collection.
  */
 class Routes implements \IteratorAggregate, \ArrayAccess
 {
-	static protected $instance;
+	const DEFAULT_ROUTE_CLASS = 'ICanBoogie\Routing\Route';
 
 	/**
-	 * Returns the singleton instance of the class.
+	 * Route definitions.
 	 *
-	 * @return \ICanBoogie\Routes
+	 * @var array
 	 */
-	static public function get()
-	{
-		if (!self::$instance)
-		{
-			self::$instance = new static();
-		}
-
-		# patch to support $routes->get('/', ... )
-
-		if (func_num_args() > 1)
-		{
-			return self::$instance->__call('get', func_get_args());
-		}
-
-		return self::$instance;
-	}
-
-	protected $routes = array();
-
-	protected $instances = array();
-
-	protected $default_route_class = 'ICanBoogie\Route';
+	protected $routes = [];
 
 	/**
-	 * Collects routes definitions from the "routes" config.
+	 * Route instances.
+	 *
+	 * @var Route[]
 	 */
-	protected function __construct()
+	protected $instances = [];
+
+	public function __construct(array $routes=[])
 	{
-		$this->routes = $this->collect();
+		foreach ($routes as $route_id => $route)
+		{
+			$this[$route_id] = $route;
+		}
 	}
 
 	public function __call($method, array $arguments)
@@ -131,7 +98,7 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 
 		$properties = $this->routes[$id];
 
-		$class = $this->default_route_class;
+		$class = static::DEFAULT_ROUTE_CLASS;
 
 		if (isset($properties['class']))
 		{
@@ -148,8 +115,6 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 	 * @param array $route The route definition.
 	 *
 	 * @throws \LogicException if the route definition is invalid.
-	 *
-	 * @see ArrayAccess::offsetSet()
 	 */
 	public function offsetSet($id, $route)
 	{
@@ -188,85 +153,6 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 	public function offsetUnset($offset)
 	{
 		unset($this->routes[$offset]);
-	}
-
-	/**
-	 * Returns route collection.
-	 *
-	 * The collection is built in 4 steps:
-	 *
-	 * 1. Routes are traversed to add the `module` and `via` properties. If the route is defined
-	 * by a module the `module` property is set to the id of the module, otherwise it is set
-	 * to `null`. The `via` property is set to {@link Request::METHOD_ANY} if it is not defined.
-	 *
-	 * 2. The {@link Routes\BeforeCollectEvent} event is fired.
-	 *
-	 * @return array
-	 */
-	protected function collect()
-	{
-		global $core;
-
-		// TODO-20121119: all of this should be outside the class, in a configurator
-
-		if (!isset($core))
-		{
-			return array();
-		}
-
-		$collection = $this;
-
-		return $core->configs->synthesize
-		(
-			'routes', function($fragments) use($collection)
-			{
-				global $core;
-
-				$module_roots = array();
-
-				foreach ($core->modules->descriptors as $module_id => $descriptor)
-				{
-					$module_roots[$descriptor[Module::T_PATH]] = $module_id;
-				}
-
-				foreach ($fragments as $module_root => &$fragment)
-				{
-					$module_root = dirname(dirname($module_root)) . DIRECTORY_SEPARATOR;
-					$module_id = isset($module_roots[$module_root]) ? $module_roots[$module_root] : null;
-
-					foreach ($fragment as $route_id => &$route)
-					{
-						$route += array
-						(
-							'via' => Request::METHOD_ANY,
-							'module' => $module_id
-						);
-					}
-				}
-
-				unset($fragment);
-				unset($route);
-
-				new Routes\BeforeCollectEvent($collection, array('fragments' => &$fragments));
-
-				$routes = array();
-
-				foreach ($fragments as $fragment)
-				{
-					foreach ($fragment as $id => $route)
-					{
-						$routes[$id] = $route + array
-						(
-							'pattern' => null
-						);
-					}
-				}
-
-				new Routes\CollectEvent($collection, array('routes' => &$routes));
-
-				return $routes;
-			}
-		);
 	}
 
 	/**
@@ -406,15 +292,15 @@ class RouteNotDefined extends \Exception
  * EVENTS
  */
 
-namespace ICanBoogie\Routes;
+namespace ICanBoogie\Routing;
 
 /**
- * Event class for the `ICanBoogie\Events::collect:before` event.
+ * Event class for the `routing.collect_routes:before` event.
  *
  * Third parties may use this event to alter the configuration fragments before they are
  * synthesized.
  */
-class BeforeCollectEvent extends \ICanBoogie\Event
+class BeforeCollectRoutesEvent extends \ICanBoogie\Event
 {
 	/**
 	 * Reference to the configuration fragments.
@@ -424,23 +310,24 @@ class BeforeCollectEvent extends \ICanBoogie\Event
 	public $fragments;
 
 	/**
-	 * The event is constructed with the type `alter:before`.
+	 * The event is constructed with the type `routing.collect_routes:before`.
 	 *
-	 * @param \ICanBoogie\Routes $target The routes collection.
 	 * @param array $payload
 	 */
-	public function __construct(\ICanBoogie\Routes $target, array $payload)
+	public function __construct(&$fragments)
 	{
-		parent::__construct($target, 'collect:before', $payload);
+		$this->fragments = &$fragments;
+
+		parent::__construct(null, 'routing.collect_routes:before');
 	}
 }
 
 /**
- * Event class for the `ICanBoogie\Events::collect` event.
+ * Event class for the `routing.collect_routes` event.
  *
  * Third parties may use this event to alter the routes read from the configuration.
  */
-class CollectEvent extends \ICanBoogie\Event
+class CollectRoutesEvent extends \ICanBoogie\Event
 {
 	/**
 	 * Reference to the routes.
@@ -455,8 +342,10 @@ class CollectEvent extends \ICanBoogie\Event
 	 * @param \ICanboogie\Routes $target The routes collection.
 	 * @param array $payload
 	 */
-	public function __construct(\ICanboogie\Routes $target, array $payload)
+	public function __construct(array &$routes)
 	{
-		parent::__construct($target, 'collect', $payload);
+		$this->routes = &$routes;
+
+		parent::__construct(null, 'collect_routes');
 	}
 }

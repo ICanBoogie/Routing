@@ -12,7 +12,6 @@
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\Request;
-use ICanBoogie\Route;
 
 /**
  * A route controller.

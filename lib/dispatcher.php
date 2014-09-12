@@ -15,25 +15,34 @@ use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 
-use ICanBoogie\Route;
-use ICanBoogie\Routes;
-
 /**
- * Dispatches requests among the defined routes.
+ * Dispatche requests among the defined routes.
  *
  * If a route matching the request is found, the `$route` and `$decontextualized_path`
- * properties are add to the request object. `$route` holds the route object,
+ * properties are added to the {@link Request} instance. `$route` holds the {@link Route} instance,
  * `$decontextualized_path` holds the decontextualized path. The path is decontextualized using
  * the {@link decontextualize()} function.
- *
- * <pre>
- * use ICanBoogie\HTTP\Dispatcher;
- *
- * $dispatcher = new Dispatcher(array('routes' => 'ICanBoogie\Routing\Dispatcher'));
- * </pre>
  */
 class Dispatcher implements \ICanBoogie\HTTP\IDispatcher
 {
+	/**
+	 * Route collection.
+	 *
+	 * @var Routes
+	 */
+	protected $routes;
+
+	public function __construct(Routes $routes=null)
+	{
+		// FIXME-20140912: we should be independant from the core, the way dispatcher are created should be enhanced
+		if (!$routes && class_exists('ICanBoogie\Core'))
+		{
+			$routes = \ICanBoogie\Core::get()->routes;
+		}
+
+		$this->routes = $routes;
+	}
+
 	public function __invoke(Request $request)
 	{
 		$decontextualized_path = decontextualize($request->normalized_path);
@@ -43,7 +52,7 @@ class Dispatcher implements \ICanBoogie\HTTP\IDispatcher
 			$decontextualized_path = rtrim($decontextualized_path, '/');
 		}
 
-		$route = Routes::get()->find($decontextualized_path, $captured, $request->method);
+		$route = $this->routes->find($decontextualized_path, $captured, $request->method);
 
 		if (!$route)
 		{
@@ -137,8 +146,8 @@ namespace ICanBoogie\Routing\Dispatcher;
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
-use ICanBoogie\Route;
 use ICanBoogie\Routing\Dispatcher;
+use ICanBoogie\Routing\Route;
 
 /**
  * Event class for the `ICanBoogie\Routing\Dispatcher::dispatch:before` event.
@@ -152,21 +161,21 @@ class BeforeDispatchEvent extends \ICanBoogie\Event
 	/**
 	 * The route.
 	 *
-	 * @var \ICanBoogie\Route
+	 * @var Route
 	 */
 	public $route;
 
 	/**
 	 * The HTTP request.
 	 *
-	 * @var \ICanBoogie\HTTP\Request
+	 * @var Request
 	 */
 	public $request;
 
 	/**
 	 * Reference to the HTTP response.
 	 *
-	 * @var \ICanBoogie\HTTP\Response
+	 * @var Response
 	 */
 	public $response;
 
@@ -201,21 +210,21 @@ class DispatchEvent extends \ICanBoogie\Event
 	/**
 	 * The route.
 	 *
-	 * @var \ICanBoogie\Route
+	 * @var Route
 	 */
 	public $route;
 
 	/**
 	 * The request.
 	 *
-	 * @var \ICanBoogie\HTTP\Request
+	 * @var Request
 	 */
 	public $request;
 
 	/**
 	 * Reference to the response.
 	 *
-	 * @var \ICanBoogie\HTTP\Response|null
+	 * @var Response|null
 	 */
 	public $response;
 
@@ -246,7 +255,7 @@ class RescueEvent extends \ICanBoogie\Exception\RescueEvent
 	/**
 	 * Route to rescue.
 	 *
-	 * @var \ICanBoogie\Route
+	 * @var Route
 	 */
 	public $route;
 
@@ -254,9 +263,9 @@ class RescueEvent extends \ICanBoogie\Exception\RescueEvent
 	 * Initializes the {@link $route} property.
 	 *
 	 * @param \Exception $target
-	 * @param \ICanBoogie\HTTP\Request $request
-	 * @param \ICanBoogie\Route $route
-	 * @param \ICanBoogie\HTTP\Response|null $response
+	 * @param Request $request
+	 * @param Route $route
+	 * @param Response|null $response
 	 */
 	public function __construct(\Exception &$target, Request $request, Route $route, &$response)
 	{
