@@ -12,39 +12,16 @@
 namespace ICanBoogie\Routing;
 
 /**
- * Contextualize a pathname.
- *
- * @param string $pathname
- *
- * @return string
- */
-function contextualize($pathname)
-{
-	return Helpers::contextualize($pathname);
-}
-
-/**
- * Decontextualize a pathname.
- *
- * @param string $pathname
- *
- * @return string
- */
-function decontextualize($pathname)
-{
-	return Helpers::decontextualize($pathname);
-}
-
-/**
  * Patchable helpers.
  */
 class Helpers
 {
-	static private $jumptable = array
-	(
-		'contextualize' => array(__CLASS__, 'contextualize'),
-		'decontextualize' => array(__CLASS__, 'decontextualize')
-	);
+	static private $jumptable = [
+
+		'contextualize' => [ __CLASS__, 'contextualize' ],
+		'decontextualize' => [ __CLASS__, 'decontextualize' ]
+
+	];
 
 	/**
 	 * Calls the callback of a patchable function.
