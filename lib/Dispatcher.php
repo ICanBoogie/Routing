@@ -26,7 +26,7 @@ use ICanBoogie\Routing\Dispatcher\RescueEvent;
  * `$decontextualized_path` holds the decontextualized path. The path is decontextualized using
  * the {@link decontextualize()} function.
  */
-class Dispatcher implements \ICanBoogie\HTTP\IDispatcher
+class Dispatcher implements \ICanBoogie\HTTP\DispatcherInterface
 {
 	/**
 	 * Route collection.
