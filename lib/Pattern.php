@@ -216,27 +216,32 @@ class Pattern
 	/**
 	 * Formats a pattern with the specified values.
 	 *
-	 * @param mixed $values The values to format the pattern, either as an array or an object.
+	 * @param mixed $values The values to format the pattern, either as an array or an object. If
+	 * value is an instance of {@link ToSlug} the `to_slug()` method is used to transform the
+	 * instance into a URL component.
 	 *
 	 * @return string
 	 */
 	public function format($values=null)
 	{
 		$url = '';
+		$values = (object) $values;;
 
-		if (is_array($values))
+		foreach ($this->interleaved as $i => $value)
 		{
-			foreach ($this->interleaved as $i => $value)
+			if ($i % 2)
 			{
-				$url .= ($i % 2) ? urlencode($values[$value[0]]) : $value;
+				$value = $values->$value[0];
+
+				if ($value instanceof ToSlug)
+				{
+					$value = $value->to_slug();
+				}
+
+				$value = urlencode($value);
 			}
-		}
-		else
-		{
-			foreach ($this->interleaved as $i => $value)
-			{
-				$url .= ($i % 2) ? urlencode($values->$value[0]) : $value;
-			}
+
+			$url .= $value;
 		}
 
 		return $url;

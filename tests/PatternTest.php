@@ -11,6 +11,8 @@
 
 namespace ICanBoogie\Routing;
 
+use ICanBoogie\Routing\PatternTest\WithToSlug;
+
 class PatternTest extends \PHPUnit_Framework_TestCase
 {
 	public function testToString()
@@ -105,5 +107,36 @@ class PatternTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertTrue($rc);
 		$this->assertEquals([ 2012, 06, 'this-is-an-example', 'html' ], $captured);
+	}
+
+	public function test_to_slug()
+	{
+		$pattern = Pattern::from('/categories/:category/:slug.html');
+
+		$this->assertEquals('/categories/mathieu/ete-2000.html', $pattern->format([
+
+			'category' => new WithToSlug('Mathieu'),
+			'slug' => new WithToSlug("Été 2000")
+
+		]));
+	}
+}
+
+namespace ICanBoogie\Routing\PatternTest;
+
+use ICanBoogie\Routing\ToSlug;
+
+class WithToSlug implements ToSlug
+{
+	public $title;
+
+	public function __construct($title)
+	{
+		$this->title = $title;
+	}
+
+	public function to_slug()
+	{
+		return \ICanBoogie\normalize($this->title);
 	}
 }
