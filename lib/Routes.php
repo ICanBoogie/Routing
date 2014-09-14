@@ -11,9 +11,7 @@
 
 namespace ICanBoogie\Routing;
 
-use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
-use ICanBoogie\HTTP\Response;
 use ICanBoogie\Prototype\MethodNotDefined;
 
 /**
