@@ -69,7 +69,7 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 				$this[Request::METHOD_HEAD . ' ' . $pattern] = array_merge($definition, [ 'via' => Request::METHOD_HEAD ]);
 			}
 
-			return $this[$id];
+			return $this;
 		}
 
 		throw new MethodNotDefined([ $method, $this ]);
@@ -176,20 +176,14 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 			$namespace = '/' . $namespace . '/';
 		}
 
-		$found = null;
 		$pattern = null;
-
-		$qs = null;
-		$qs_pos = strpos($uri, '?');
-
-		if ($qs_pos !== false)
-		{
-			$qs = substr($uri, $qs_pos + 1);
-			$uri = substr($uri, 0, $qs_pos);
-		}
+		$parsed = parse_url($uri) + [ 'query' => null ];
+		$path = $parsed['path'];
 
 		foreach ($this->routes as $id => $route)
 		{
+			# namespace
+
 			$pattern = $route['pattern'];
 
 			if ($namespace && strpos($pattern, $namespace) !== 0)
@@ -197,51 +191,44 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 				continue;
 			}
 
-			$pattern = Pattern::from($pattern);
+			# via
 
-			if (!$pattern->match($uri, $captured))
+			if ($method != Request::METHOD_ANY)
+			{
+				$via = $route['via'];
+
+				if (is_array($via))
+				{
+					if (!in_array($method, $via))
+					{
+						continue;
+					}
+				}
+				else if ($via !== Request::METHOD_ANY && $via !== $method)
+				{
+					continue;
+				}
+			}
+
+			# pattern
+
+			if (!Pattern::from($pattern)->match($path, $captured))
 			{
 				continue;
 			}
 
-			if ($method == Request::METHOD_ANY)
+			# found it!
+
+			$query = $parsed['query'];
+
+			if ($query)
 			{
-				$found = true;
-				break;
+				parse_str($query, $parsed_query_string);
+
+				$captured['__query__'] = $parsed_query_string;
 			}
 
-			$route_method = $route['via'];
-
-			if (is_array($route_method))
-			{
-				if (in_array($method, $route_method))
-				{
-					$found = true;
-					break;
-				}
-			}
-			else
-			{
-				if ($route_method === Request::METHOD_ANY || $route_method === $method)
-				{
-					$found = true;
-					break;
-				}
-			}
+			return $this[$id];
 		}
-
-		if (!$found)
-		{
-			return;
-		}
-
-		if ($qs)
-		{
-			parse_str($qs, $parsed_query_string);
-
-			$captured['__query__'] = $parsed_query_string;
-		}
-
-		return new Route($pattern, $route + [ 'id' => $id ]);
 	}
 }
