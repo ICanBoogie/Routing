@@ -119,7 +119,7 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 	{
 		if (empty($route['pattern']))
 		{
-			throw new \LogicException(format("Route %id has no pattern. !route", [
+			throw new PatternNotDefined(\ICanBoogie\format("Route %id has no pattern. !route", [
 
 				'id' => $id,
 				'route' => $route
