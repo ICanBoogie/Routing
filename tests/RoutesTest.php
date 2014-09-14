@@ -15,6 +15,52 @@ use ICanBoogie\HTTP\Request;
 
 class RoutesTest extends \PHPUnit_Framework_TestCase
 {
+	/**
+	 * @expectedException ICanBoogie\Routing\PatternNotDefined
+	 */
+	public function test_pattern_not_defined()
+	{
+		new Routes([
+
+			'home' => [
+
+				'controller' => 'dummy'
+
+			]
+
+		]);
+	}
+
+	/**
+	 * @expectedException ICanBoogie\Routing\ControllerNotDefined
+	 */
+	public function test_controller_not_defined()
+	{
+		new Routes([
+
+			'home' => [
+
+				'pattern' => '/'
+
+			]
+
+		]);
+	}
+
+	public function test_controller_not_defined_but_location()
+	{
+		new Routes([
+
+			'home' => [
+
+				'pattern' => '/',
+				'location' => '/go/to/madonna'
+
+			]
+
+		]);
+	}
+
 	public function test_define_route()
 	{
 		$test = $this;
