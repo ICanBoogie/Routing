@@ -21,6 +21,8 @@ class Hooks
 	 * @return array
 	 *
 	 * @throws PatternNotDefined if a pattern is missing from a route definition.
+	 * @throws ControllerNotDefined if a controller is missing from a route definition and no
+	 * location is defined.
 	 */
 	static public function synthesize_routes_config(array $fragments)
 	{
@@ -35,6 +37,16 @@ class Hooks
 				if (empty($route['pattern']))
 				{
 					throw new PatternNotDefined(\ICanBoogie\format("Pattern is not defined for route %id in %pathname.", [
+
+						'id' => $id,
+						'pathname' => $pathname
+
+					]));
+				}
+
+				if (empty($route['controller']) && empty($route['location']))
+				{
+					throw new ControllerNotDefined(\ICanBoogie\format("Controller is not defined for route %id in %pathname.", [
 
 						'id' => $id,
 						'pathname' => $pathname

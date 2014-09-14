@@ -127,6 +127,16 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 			]));
 		}
 
+		if (empty($route['controller']) && empty($route['location']))
+		{
+			throw new ControllerNotDefined(\ICanBoogie\format("Route %id has no controller. !route", [
+
+				'id' => $id,
+				'route' => $route
+
+			]));
+		}
+
 		$this->routes[$id] = $route + [
 
 			'id' => $id,
