@@ -120,6 +120,25 @@ class PatternTest extends \PHPUnit_Framework_TestCase
 
 		]));
 	}
+
+	public function test_unnamed_params()
+	{
+		$pattern = Pattern::from("/admin/dealers/<\d+>/edit/<\d+>");
+
+		$this->assertEquals("/admin/dealers/123/edit/456", $pattern->format([ 123, 456 ]));
+	}
+
+	public function test_named_params()
+	{
+		$object = (object) [
+
+			'nid' => 123,
+			'slug' => "madonna"
+
+		];
+
+		$this->assertEquals("/news/123-madonna.html", Pattern::from("/news/:nid-:slug.html")->format($object));
+	}
 }
 
 namespace ICanBoogie\Routing\PatternTest;

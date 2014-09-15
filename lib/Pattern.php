@@ -225,13 +225,14 @@ class Pattern
 	public function format($values=null)
 	{
 		$url = '';
-		$values = (object) $values;;
+		$is_array = is_array($values);
 
 		foreach ($this->interleaved as $i => $value)
 		{
 			if ($i % 2)
 			{
-				$value = $values->$value[0];
+				$key = $value[0];
+				$value = $is_array ? $values[$key] : $values->$key;
 
 				if ($value instanceof ToSlug)
 				{
