@@ -164,4 +164,53 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 		$this->assertInstanceOf('ICanBoogie\Routing\Route', $route);
 		$this->assertEquals('articles:delete', $route->id);
 	}
+
+	/**
+	 * 'api:articles:activate' should win over 'api:nodes:activate' because more static parts
+	 * are defined before the first capture.
+	 */
+	public function test_weigth()
+	{
+		$routes = new Routes([
+
+			'api:nodes:activate' => [
+
+				'pattern' => '/api/:constructor/:id/active',
+				'controller' => 'dummy',
+				'via' => 'PUT'
+
+			],
+
+			'api:articles:activate' => [
+
+				'pattern' => '/api/articles/:id/active',
+				'controller' => 'dummy',
+				'via' => 'PUT'
+
+			]
+
+		]);
+
+		$route = $routes->find('/api/articles/123/active', $captured, Request::METHOD_PUT);
+		$this->assertInstanceOf('ICanBoogie\Routing\Route', $route);
+		$this->assertEquals('api:articles:activate', $route->id);
+	}
+
+	public function test_nameless_capture()
+	{
+		$routes = new Routes([
+
+			'admin:articles/edit' => [
+
+				'pattern' => '/admin/articles/<\d+>/edit',
+				'controller' => 'dummy'
+
+			]
+
+		]);
+
+		$route = $routes->find('/admin/articles/123/edit', $captured);
+		$this->assertInstanceOf('ICanBoogie\Routing\Route', $route);
+		$this->assertEquals('admin:articles/edit', $route->id);
+	}
 }
