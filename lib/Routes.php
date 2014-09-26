@@ -67,6 +67,8 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 				$this[Request::METHOD_HEAD . ' ' . $pattern] = array_merge($definition, [ 'via' => Request::METHOD_HEAD ]);
 			}
 
+			$this->revoke_cache();
+
 			return $this;
 		}
 
@@ -143,6 +145,8 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 			'via' => Request::METHOD_ANY
 
 		];
+
+		$this->revoke_cache();
 	}
 
 	/**
@@ -153,6 +157,8 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 	public function offsetUnset($offset)
 	{
 		unset($this->routes[$offset]);
+
+		$this->revoke_cache();
 	}
 
 	/**
@@ -176,59 +182,171 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 			$namespace = '/' . $namespace . '/';
 		}
 
-		$pattern = null;
 		$parsed = parse_url($uri) + [ 'query' => null ];
 		$path = $parsed['path'];
 
-		foreach ($this->routes as $id => $route)
-		{
-			# namespace
+		#
+		# Determine if a route matches prerequisites.
+		#
+		$matchable = function($pattern, $via) use($method, $namespace) {
 
-			$pattern = $route['pattern'];
+			# namespace
 
 			if ($namespace && strpos($pattern, $namespace) !== 0)
 			{
-				continue;
+				return false;
 			}
 
 			# via
 
 			if ($method != Request::METHOD_ANY)
 			{
-				$via = $route['via'];
-
 				if (is_array($via))
 				{
 					if (!in_array($method, $via))
 					{
-						continue;
+						return false;
 					}
 				}
 				else if ($via !== Request::METHOD_ANY && $via !== $method)
 				{
-					continue;
+					return false;
 				}
 			}
 
-			# pattern
+			return true;
+		};
 
-			if (!Pattern::from($pattern)->match($path, $captured))
+		#
+		# Search for a matching static route.
+		#
+		$map_static = function($routes) use($path, &$matchable) {
+
+			foreach ($routes as $id => $route)
 			{
-				continue;
+				$pattern = $route['pattern'];
+				$via = $route['via'];
+
+				if (!$matchable($pattern, $via) || $pattern != $path)
+				{
+					continue;
+				}
+
+				return $id;
 			}
+		};
 
-			# found it!
+		#
+		# Search for a matching dynamic route.
+		#
+		$map_dynamic = function($routes) use($path, &$matchable, &$captured) {
 
-			$query = $parsed['query'];
-
-			if ($query)
+			foreach ($routes as $id => $route)
 			{
-				parse_str($query, $parsed_query_string);
+				$pattern = $route['pattern'];
+				$via = $route['via'];
 
-				$captured['__query__'] = $parsed_query_string;
+				if (!$matchable($pattern, $via) || !Pattern::from($pattern)->match($path, $captured))
+				{
+					continue;
+				}
+
+				return $id;
 			}
+		};
 
-			return $this[$id];
+		list($static, $dynamic) = $this->sort_routes();
+
+		$id = null;
+
+		if ($static)
+		{
+			$id = $map_static($static);
 		}
+
+		if (!$id && $dynamic)
+		{
+			$id = $map_dynamic($dynamic);
+		}
+
+		if (!$id)
+		{
+			return;
+		}
+
+		$query = $parsed['query'];
+
+		if ($query)
+		{
+			parse_str($query, $parsed_query_string);
+
+			$captured['__query__'] = $parsed_query_string;
+		}
+
+		return $this[$id];
+	}
+
+	private $static;
+	private $dynamic;
+
+	/**
+	 * Revoke the cache used by the {@link sort_routes} method.
+	 */
+	private function revoke_cache()
+	{
+		$this->static = null;
+		$this->dynamic = null;
+	}
+
+	/**
+	 * Sort routes according to their type and computed weight.
+	 *
+	 * Routes and grouped in two groups: static routes and dynamic routes. The difference between
+	 * static and dynamic routes is that dynamic routes capture parameters from the path and thus
+	 * require a regex to compute the match, whereas static routes only require is simple string
+	 * comparison.
+	 *
+	 * Dynamic routes are ordered according to their weight, which is computed from the number
+	 * of static parts before the first capture. The more static parts, the lighter the route is.
+	 *
+	 * @return array An array with the static routes and dynamic routes.
+	 */
+	private function sort_routes()
+	{
+		if ($this->static !== null)
+		{
+			return [ $this->static, $this->dynamic ];
+		}
+
+		$static = [];
+		$dynamic = [];
+		$weights = [];
+
+		foreach ($this->routes as $id => $definition)
+		{
+			$pattern = $definition['pattern'];
+			$first_capture_position = strpos($pattern, ':') ?: strpos($pattern, '<');
+
+			if ($first_capture_position === false)
+			{
+				$static[$id] = $definition;
+			}
+			else
+			{
+				$dynamic[$id] = $definition;
+				$weights[$id] = substr_count($pattern, '/', 0, $first_capture_position);
+			}
+		}
+
+		\ICanBoogie\stable_sort($dynamic, function($v, $k) use($weights) {
+
+			return -$weights[$k];
+
+		});
+
+		$this->static = $static;
+		$this->dynamic = $dynamic;
+
+		return [ $static, $dynamic ];
 	}
 }
