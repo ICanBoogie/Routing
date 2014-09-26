@@ -145,18 +145,10 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 		];
 	}
 
-	static public function add($id, $definition)
-	{
-		$routes = static::get();
-		$routes[$id] = $definition;
-	}
-
 	/**
 	 * Removes a route.
 	 *
 	 * @param string $offset The identifier of the route.
-	 *
-	 * @see ArrayAccess::offsetUnset()
 	 */
 	public function offsetUnset($offset)
 	{
