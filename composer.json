@@ -28,5 +28,18 @@
 		},
 
 		"files": [ "helpers.php" ]
+	},
+
+	"extra": {
+
+		"icanboogie": {
+
+			"config-path": "config",
+			"config-constructor": {
+
+				"routes": "ICanBoogie\\Routing\\Hooks::synthesize_routes_config"
+
+			}
+		}
 	}
 }
