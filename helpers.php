@@ -34,3 +34,13 @@ function decontextualize($pathname)
 {
 	return Helpers::decontextualize($pathname);
 }
+
+/**
+ * Absolutize a RUL.
+ *
+ * @param string $url
+ */
+function absolutize_url($url)
+{
+	return Helpers::absolutize_url($url);
+}
