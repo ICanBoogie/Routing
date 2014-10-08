@@ -13,13 +13,18 @@ namespace ICanBoogie\Routing;
 
 /**
  * Patchable helpers.
+ *
+ * @method string contextualize() contextualize($pathname)
+ * @method string decontextualize() decontextualize($pathname)
+ * @method string absolutize_url() absolutize_url($url)
  */
 class Helpers
 {
 	static private $jumptable = [
 
-		'contextualize' => [ __CLASS__, 'contextualize' ],
-		'decontextualize' => [ __CLASS__, 'decontextualize' ]
+		'contextualize'   => [ __CLASS__, 'contextualize' ],
+		'decontextualize' => [ __CLASS__, 'decontextualize' ],
+		'absolutize_url'  => [ __CLASS__, 'absolutize_url' ]
 
 	];
 
@@ -66,5 +71,10 @@ class Helpers
 	static private function decontextualize($pathname)
 	{
 		return $pathname;
+	}
+
+	static private function absolutize_url($url)
+	{
+		return 'http://' . $_SERVER['HTTP_HOST'] . $url;
 	}
 }

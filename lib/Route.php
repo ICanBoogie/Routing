@@ -123,10 +123,10 @@ class Route extends \ICanBoogie\Object
 	 *
 	 * Note: The formatting of the route is defered to its {@link Pattern} instance.
 	 *
-	 * @return string
+	 * @return FormattedRoute
 	 */
 	public function format($values=null)
 	{
-		return $this->pattern->format($values);
+		return new FormattedRoute($this->pattern->format($values), $this);
 	}
 }

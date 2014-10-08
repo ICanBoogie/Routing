@@ -39,4 +39,24 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 		$this->assertInstanceOf('ICanBoogie\HTTP\Response', $response);
 		$this->assertEquals('madonna', $response->body);
 	}
+
+	public function test_format()
+	{
+		$route = new Route('/news/:year-:month-:slug.html', []);
+
+		$formatted_route = $route->format([
+
+			'year' => '2014',
+			'month' => '06',
+			'slug' => 'madonna-queen-of-pop'
+
+		]);
+
+		$expected_url = '/news/2014-06-madonna-queen-of-pop.html';
+
+		$this->assertInstanceOf('ICanBoogie\Routing\FormattedRoute', $formatted_route);
+		$this->assertEquals($expected_url, (string) $formatted_route);
+		$this->assertEquals($expected_url, $formatted_route->url);
+		$this->assertEquals("http://icanboogie.org{$expected_url}", $formatted_route->absolute_url);
+	}
 }

@@ -59,6 +59,13 @@ return [
 
 	],
 
+	'articles:view' => [
+
+		'pattern' => '/articles/:year-:month-:slug.html',
+		'controller' => 'Website\Modules\Blog\Controller'
+
+	],
+
 	'articles:new' => [
 
 		'pattern' => '/articles/new',
@@ -138,6 +145,41 @@ var_dump($captured);   // [ 'nid' => 123 ]
 
 
 
+## Route
+
+Routes are represented by [Route][] instances. They are usually created from route definitions, and
+contains all the properties of their definition.
+
+```php
+<?php
+
+$route = $routes['articles:view'];
+echo get_class($route); // ICanBoogie\Routing\Route;
+```
+
+A route can be formatted into a relative URL with its `format()` methods and appropriate properties.
+The method returns a [FormattedRoute][] instance which can be used as a string. Its `url` property
+holds the URL contextualized with `contextualize()` and its `absolute_url` property holds the
+contextualized URL absolutized with the `absolute_url()` function.
+
+```php
+<?php
+
+$route = $routes['articles:view'];
+echo $route->pattern;      // /articles/:year-:month-:slug.html
+
+$url = $route->format([ 'year' => '2014', 'month' => '06', 'slug' => 'madonna-queen-of-pop' ]);
+echo $url;                 // /articles/2014-06-madonna-queen-of-pop.html
+echo get_class($url);      // ICanBoogie\Routing\FormattedRoute
+echo $url->absolute_url;   // http://icanboogie.org/articles/2014-06-madonna-queen-of-pop.html
+
+$url->route === $route;    // true
+```
+
+
+
+
+
 ## Dispatching a request
 
 The Routing package provides a [Request][] dispatcher that can be used as a sub-dispatcher by a
@@ -190,6 +232,53 @@ The following exceptions are defined:
 - [ControllerNotDefined][]: Thrown when trying to define a route without a controller nor location.
 - [PatternNotDefined][]: Thrown when trying to define a route without pattern.
 - [RouteNotDefined][]: Thrown when trying to obtain a route that is not defined in a [Routes][] instance.
+
+
+
+
+
+## Helpers
+
+The following helpers are available:
+
+- [contextualize](http://icanboogie.org/docs/function-ICanBoogie.Routing.contextualize.html): Contextualize a pathname.
+- [decontextualize](http://icanboogie.org/docs/function-ICanBoogie.Routing.decontextualize.html): Decontextualize a pathname.
+- [absolutize_url](http://icanboogie.org/docs/function-ICanBoogie.Routing.absolutize_url.html): Absolutize an URL.
+
+
+
+
+
+### Patching helpers
+
+Helpers can be patched using the `Helpers::patch()` method.
+
+The following code demonstrates how routes can _start_ with the custom path "my/application":
+
+```php
+<?php
+
+use ICanBoogie\Routing;
+
+$path = "my/application";
+
+Routing\Helpers::patch('contextualize', function ($str) use($path) {
+
+	return $path . $str;
+
+});
+
+Routing\Helpers::patch('decontextualize', function ($str) use($path) {
+
+	if (strpos($str, $path . '/') === 0)
+	{
+		$str = substr($str, strlen($path));
+	}
+
+	return $str;
+
+});
+```
 
 
 
@@ -280,6 +369,7 @@ ICanBoogie/Routing is licensed under the New BSD License - See the [LICENSE](LIC
 [ICanBoogie]: http://icanboogie.org/
 [ICanBoogie\HTTP\Dispatcher]: http://icanboogie.org/docs/namespace-ICanBoogie.HTTP.Dispatcher.html
 [ControllerNotDefined]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ControllerNotDefined.html
+[FormattedRoute]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.FormattedRoute.html
 [Pattern]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Pattern.html
 [PatternNotDefined]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.PatternNotDefined.html
 [Request]: http://icanboogie.org/docs/namespace-ICanBoogie.HTTP.Request.html
