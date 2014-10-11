@@ -10,13 +10,49 @@ but can also return a string (or a stringifyable object) to produce a simple `te
 
 
 
+## Dispatching a request
+
+The Routing package provides a [Request][] dispatcher that can be used as a sub-dispatcher by a
+[ICanBoogie\HTTP\Dispatcher][] instance, or as a stand-alone dispatcher.
+
+```php
+<?php
+
+use ICanBoogie\Routing\Dispatcher;
+
+$request = Request::from([
+
+	'url' => "/articles/123",
+	'is_delete' => true
+
+]);
+
+$dispatcher = new Dispatcher($routes);
+$response = $dispatcher($request);
+```
+
+Before the route is dispatched the `ICanBoogie\Routing\Dispatcher::dispatch:before` event of class
+[BeforeDispatchEvent][] is fired. Event hooks may use this event to provide a response and cancel
+the dispatching.
+
+If an exception is raised during the dispatching, the `ICanBoogie\Routing\Route::rescue` event
+of class [RescueEvent][] is fired. Event hooks may use this event to rescue the route and
+provide a response, or replace the exception that will be thrown if the rescue fails.
+
+The `ICanBoogie\Routing\Dispatcher::dispatch` event of class [DispatchEvent][] is fired if 
+the route has been dispatched successfully. Event hooks may use this event to alter the response.
+
+
+
+
+
 ## Defining routes
 
 Routes are usually defined in `routes` configuration fragments, but can also be defined during
 runtime. The pattern is required to define a route, and the controller too if no location
 is defined. The following options are available:
 
-- `class`: If you want ot use another class than [Route][].
+- `class`: If you want or use another class than [Route][].
 - `location`: To redirect the route to another location.
 - `via`: If the route needs to respond to one or more HTTP methods.
 
@@ -174,31 +210,6 @@ echo get_class($url);      // ICanBoogie\Routing\FormattedRoute
 echo $url->absolute_url;   // http://icanboogie.org/articles/2014-06-madonna-queen-of-pop.html
 
 $url->route === $route;    // true
-```
-
-
-
-
-
-## Dispatching a request
-
-The Routing package provides a [Request][] dispatcher that can be used as a sub-dispatcher by a
-[ICanBoogie\HTTP\Dispatcher][] instance, or as a standalone dispatcher.
-
-```php
-<?php
-
-use ICanBoogie\Routing\Dispatcher;
-
-$request = Request::from([
-
-	'url' => "/articles/123",
-	'is_delete' => true
-
-]);
-
-$dispatcher = new Dispatcher($routes);
-$response = $dispatcher($request);
 ```
 
 
@@ -366,13 +377,16 @@ ICanBoogie/Routing is licensed under the New BSD License - See the [LICENSE](LIC
 
 
 
+[BeforeDispatchEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Dispatcher.BeforeDispatchEvent.html
 [ICanBoogie]: http://icanboogie.org/
 [ICanBoogie\HTTP\Dispatcher]: http://icanboogie.org/docs/namespace-ICanBoogie.HTTP.Dispatcher.html
 [ControllerNotDefined]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ControllerNotDefined.html
+[DispatchEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Dispatcher.DispatchEvent.html
 [FormattedRoute]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.FormattedRoute.html
 [Pattern]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Pattern.html
 [PatternNotDefined]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.PatternNotDefined.html
 [Request]: http://icanboogie.org/docs/namespace-ICanBoogie.HTTP.Request.html
+[RescueEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Route.RescueEvent.html
 [response]: http://icanboogie.org/docs/namespace-ICanBoogie.HTTP.Response.html
 [Route]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Route.html
 [RouteNotDefined]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.RouteNotDefined.html

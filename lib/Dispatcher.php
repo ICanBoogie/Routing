@@ -16,7 +16,7 @@ use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Dispatcher\BeforeDispatchEvent;
 use ICanBoogie\Routing\Dispatcher\DispatchEvent;
-use ICanBoogie\Routing\Dispatcher\RescueEvent;
+use ICanBoogie\Routing\Route\RescueEvent;
 
 /**
  * Dispatch requests among the defined routes.
