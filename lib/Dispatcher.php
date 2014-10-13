@@ -130,7 +130,7 @@ class Dispatcher implements \ICanBoogie\HTTP\DispatcherInterface
 	{
 		if (isset($request->route))
 		{
-			new RescueEvent($exception, $request, $request->route, $response);
+			new RescueEvent($request->route, $exception, $request, $response);
 
 			if ($response)
 			{
