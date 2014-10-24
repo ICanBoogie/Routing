@@ -16,7 +16,7 @@ namespace ICanBoogie\Routing;
  *
  * @property-read string $id The identifier of the route.
  */
-class RouteNotDefined extends \Exception
+class RouteNotDefined extends \Exception implements Exception
 {
 	use \ICanBoogie\GetterTrait;
 
