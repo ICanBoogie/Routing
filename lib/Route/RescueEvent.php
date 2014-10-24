@@ -12,9 +12,6 @@
 namespace ICanBoogie\Routing\Route;
 
 use ICanBoogie\HTTP\Request;
-use ICanBoogie\HTTP\Response;
-use ICanBoogie\Routing\Dispatcher;
-use ICanBoogie\Routing\Exception;
 use ICanBoogie\Routing\Route;
 
 /**
@@ -23,7 +20,7 @@ use ICanBoogie\Routing\Route;
  * Event hooks may use this event to _rescue_ a route by providing a suitable response, or
  * replace the exception to throw if the rescue fails.
  */
-class RescueEvent extends \ICanBoogie\Event implements Exception
+class RescueEvent extends \ICanBoogie\Event
 {
 	/**
 	 * Reference to the exception to throw if the rescue fails.
@@ -42,7 +39,7 @@ class RescueEvent extends \ICanBoogie\Event implements Exception
 	/**
 	 * Reference to the response that rescue the route.
 	 *
-	 * @var Response
+	 * @var \ICanBoogie\HTTP\Response
 	 */
 	public $response;
 
@@ -52,7 +49,7 @@ class RescueEvent extends \ICanBoogie\Event implements Exception
 	 * @param Route $route
 	 * @param \Exception $target Reference to the exception thrown while dispatching the route.
 	 * @param Request $request
-	 * @param Response|null $response
+	 * @param \ICanBoogie\HTTP\Response|null $response
 	 */
 	public function __construct(Route $target, \Exception &$exception, Request $request, &$response)
 	{
