@@ -311,17 +311,10 @@ The package requires PHP 5.4 or later.
 
 ## Installation
 
-The recommended way to install this package is through [Composer](http://getcomposer.org/).
-Create a `composer.json` file and run `php composer.phar install` command to install it:
+The recommended way to install this package is through [Composer](http://getcomposer.org/):
 
-```json
-{
-	"minimum-stability": "dev",
-
-	"require": {
-		"icanboogie/routing": "2.x"
-	}
-}
+```
+composer require icanboogie/routing
 ```
 
 The following package is required, you might want to check it out:
