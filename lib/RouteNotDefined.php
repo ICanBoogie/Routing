@@ -18,7 +18,14 @@ namespace ICanBoogie\Routing;
  */
 class RouteNotDefined extends \Exception
 {
+	use \ICanBoogie\GetterTrait;
+
 	private $id;
+
+	protected function get_id()
+	{
+		return $this->id;
+	}
 
 	/**
 	 * @param string $id Identifier of the route.
@@ -30,15 +37,5 @@ class RouteNotDefined extends \Exception
 		$this->id = $id;
 
 		parent::__construct("The route <q>$id</q> is not defined.", $code, $previous);
-	}
-
-	public function __get($property)
-	{
-		if ($property == 'id')
-		{
-			return $this->id;
-		}
-
-		throw new PropertyNotDefined([ $property, $this ]);
 	}
 }
