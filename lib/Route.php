@@ -121,7 +121,7 @@ class Route extends \ICanBoogie\Object
 	/**
 	 * Formats the route with the specified values.
 	 *
-	 * Note: The formatting of the route is defered to its {@link Pattern} instance.
+	 * Note: The formatting of the route is deferred to its {@link Pattern} instance.
 	 *
 	 * @return FormattedRoute
 	 */

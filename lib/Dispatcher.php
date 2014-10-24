@@ -37,10 +37,10 @@ class Dispatcher implements \ICanBoogie\HTTP\DispatcherInterface
 
 	public function __construct(Routes $routes=null)
 	{
-		// FIXME-20140912: we should be independant from the core, the way dispatcher are created should be enhanced
+		// FIXME-20140912: we should be independent from the core, the way dispatcher are created should be enhanced
 		if (!$routes && class_exists('ICanBoogie\Core'))
 		{
-			$routes = \ICanBoogie\Core::get()->routes;
+			$routes = \ICanBoogie\app()->routes;
 		}
 
 		$this->routes = $routes;
@@ -122,7 +122,7 @@ class Dispatcher implements \ICanBoogie\HTTP\DispatcherInterface
 	/**
 	 * Fires {@link \ICanBoogie\Routing\Dispatcher\RescueEvent} and returns the response provided
 	 * by third parties. If no response was provided, the exception (or the exception provided by
-	 * third parties) is rethrown.
+	 * third parties) is re-thrown.
 	 *
 	 * @return \ICanBoogie\HTTP\Response
 	 */
