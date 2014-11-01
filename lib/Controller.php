@@ -12,11 +12,12 @@
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\Request;
+use ICanBoogie\Object;
 
 /**
  * A route controller.
  */
-abstract class Controller
+abstract class Controller extends Object
 {
 	/**
 	 * The route to control.
