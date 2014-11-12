@@ -62,11 +62,6 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 			$id = $method . ' ' . $pattern;
 			$this[$id] = $definition;
 
-			if ($method === Request::METHOD_GET)
-			{
-				$this[Request::METHOD_HEAD . ' ' . $pattern] = array_merge($definition, [ 'via' => Request::METHOD_HEAD ]);
-			}
-
 			$this->revoke_cache();
 
 			return $this;
