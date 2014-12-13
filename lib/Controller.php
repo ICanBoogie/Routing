@@ -11,6 +11,7 @@
 
 namespace ICanBoogie\Routing;
 
+use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Object;
 
@@ -44,4 +45,18 @@ abstract class Controller extends Object
 	 * @return \ICanBoogie\HTTP\Response
 	 */
 	abstract public function __invoke(Request $request);
+
+	/**
+	 * Redirects the request.
+	 *
+	 * @param string $url The URL to redirect the request to.
+	 * @param int $status Status code (defaults to 302).
+	 * @param array $headers Additional headers.
+	 *
+	 * @return RedirectResponse
+	 */
+	public function redirect($url, $status=302, array $headers=[])
+	{
+		return new RedirectResponse($url, $status, $headers);
+	}
 }
