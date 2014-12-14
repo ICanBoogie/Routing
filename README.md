@@ -152,6 +152,7 @@ $routes->any('/articles', function(Request $request) { }, [ 'as' => 'articles' ]
 $routes->get('/articles/new', function(Request $request) { }, [ 'as' => 'articles:new' ]);
 $routes->post('/articles/new', function(Request $request) { }, [ 'as' => 'articles:create' ]);
 $routes->delete('/articles/<nid:\d+>', function(Request $request) { }, [ 'as' => 'articles:delete' ]);
+$routes->any('/read-write', function(Request $request) { }, [ 'via' => [ 'GET', 'POST' ] ]);
 ```
 
 

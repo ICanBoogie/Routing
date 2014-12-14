@@ -75,7 +75,7 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 
 		$route = $routes->find('/');
 		$this->assertInstanceOf('ICanBoogie\Routing\Route', $route);
-		$this->assertEquals('ANY /', $route->id);
+		$this->assertStringStartsWith('anonymous_', $route->id);
 
 		$response = $dispatcher(Request::from('/'));
 		$this->assertInstanceOf('ICanBoogie\HTTP\Response', $response);
@@ -210,5 +210,132 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 		$route = $routes->find('/admin/articles/123/edit', $captured);
 		$this->assertInstanceOf('ICanBoogie\Routing\Route', $route);
 		$this->assertEquals('admin:articles/edit', $route->id);
+	}
+
+	/**
+	 * @dataProvider provide_test_add_with_method
+	 */
+	public function test_add_with_method($method, $pattern, $controller, $options, $expected)
+	{
+		$routes = new Routes;
+		$route = $routes->$method($pattern, $controller, $options);
+
+		foreach ($expected as $property => $value)
+		{
+			$this->assertEquals($route->$property, $value);
+		}
+	}
+
+	public function provide_test_add_with_method()
+	{
+		$to = 'My\Dummy\Controller';
+
+		return [
+
+			[ 'any', '/', $to , [], [
+
+				'controller' => $to,
+				'via' => 'ANY'
+
+			] ],
+
+			[ 'connect', '/', $to , [], [
+
+				'controller' => $to,
+				'via' => 'CONNECT'
+
+			] ],
+
+			[ 'delete', '/', $to , [], [
+
+				'controller' => $to,
+				'via' => 'DELETE'
+
+			] ],
+
+			[ 'get', '/', $to , [], [
+
+				'controller' => $to,
+				'via' => 'GET'
+
+			] ],
+
+			[ 'head', '/', $to , [], [
+
+				'controller' => $to,
+				'via' => 'HEAD'
+
+			] ],
+
+			[ 'options', '/', $to , [], [
+
+				'controller' => $to,
+				'via' => 'OPTIONS'
+
+			] ],
+
+			[ 'post', '/', $to , [], [
+
+				'controller' => $to,
+				'via' => 'POST'
+
+			] ],
+
+			[ 'put', '/', $to , [], [
+
+				'controller' => $to,
+				'via' => 'PUT'
+
+			] ],
+
+			[ 'patch', '/', $to , [], [
+
+				'controller' => $to,
+				'via' => 'PATCH'
+
+			] ],
+
+			[ 'trace', '/', $to , [], [
+
+				'controller' => $to,
+				'via' => 'TRACE'
+
+			] ],
+
+			[ 'get', '/', $to, [
+
+				'controller' => 'INVALID OVERRIDE'
+
+			], [
+
+				'controller' => $to,
+				'via' => 'GET'
+
+			] ],
+
+			[ 'get', '/', $to, [
+
+				'as' => 'article:show'
+
+			], [
+
+				'controller' => $to,
+				'id' => 'article:show',
+				'via' => 'GET'
+
+			] ],
+
+			[ 'any', '/', $to, [
+
+				'via' => [ 'GET', 'POST' ]
+
+			], [
+
+				'controller' => $to,
+				'via' => [ 'GET', 'POST' ]
+
+			] ],
+
+		];
 	}
 }

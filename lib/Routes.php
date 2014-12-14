@@ -32,6 +32,13 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 {
 	const DEFAULT_ROUTE_CLASS = 'ICanBoogie\Routing\Route';
 
+	static private $anonymous_id_count;
+
+	static private function generate_anonymous_id()
+	{
+		return 'anonymous_route_' . ++self::$anonymous_id_count;
+	}
+
 	/**
 	 * Route definitions.
 	 *
@@ -60,25 +67,25 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 
 		if ($method === Request::METHOD_ANY || in_array($method, Request::$methods))
 		{
-			list($pattern, $controller) = $arguments;
+			list($pattern, $controller, $options) = $arguments + [ 2 => [] ];
 
 			$definition = [
 
-				'pattern' => $pattern,
-				'via' => $method,
-				'controller' => $controller
+					'controller' => $controller,
+					'pattern' => $pattern
 
-			];
+			] + $options + [ 'via' => $method ];
 
-			$id = $method . ' ' . $pattern;
+			$id = empty($definition['as']) ? self::generate_anonymous_id() : $definition['as'];
+
+			unset($definition['as']);
+
 			$this[$id] = $definition;
 
-			$this->revoke_cache();
-
-			return $this;
+			return $this[$id];
 		}
 
-		throw new MethodNotDefined([ $method, $this ]);
+		throw new MethodNotDefined($method, $this);
 	}
 
 	public function getIterator()
@@ -118,7 +125,7 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 	/**
 	 * Adds or replaces a route.
 	 *
-	 * @param mixed $offset The identifier of the route.
+	 * @param string $id The identifier of the route.
 	 * @param array $route The route definition.
 	 *
 	 * @throws \LogicException if the route definition is invalid.
