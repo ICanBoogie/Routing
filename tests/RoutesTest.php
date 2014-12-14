@@ -63,13 +63,11 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 
 	public function test_define_route()
 	{
-		$test = $this;
-
 		$routes = new Routes;
 		$dispatcher = new Dispatcher($routes);
-		$routes->any('/', function() use($test) {
+		$routes->any('/', function(Request $request) {
 
-			$test->assertInstanceOf('ICanBoogie\Routing\Route', $this);
+			$this->assertInstanceOf('ICanBoogie\HTTP\Request', $request);
 
 			return "Hello world";
 

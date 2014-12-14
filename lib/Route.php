@@ -81,11 +81,6 @@ class Route extends \ICanBoogie\Object
 		{
 			$this->$property = $value;
 		}
-
-		if ($this->controller instanceof \Closure)
-		{
-			$this->controller = $this->controller->bindTo($this);
-		}
 	}
 
 	public function __get($property)
