@@ -57,6 +57,11 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 	{
 		foreach ($routes as $route_id => $route)
 		{
+			if (is_numeric($route_id))
+			{
+				$route_id = null;
+			}
+
 			$this[$route_id] = $route;
 		}
 	}
@@ -76,16 +81,56 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 
 			] + $options + [ 'via' => $method ];
 
-			$id = empty($definition['as']) ? self::generate_anonymous_id() : $definition['as'];
+			$this->add($definition);
 
-			unset($definition['as']);
-
-			$this[$id] = $definition;
-
-			return $this[$id];
+			return $this;
 		}
 
 		throw new MethodNotDefined($method, $this);
+	}
+
+	protected function add(array $definition)
+	{
+		if (empty($definition['as']))
+		{
+			$definition['as'] = self::generate_anonymous_id();
+		}
+
+		$id = $definition['id'] = $definition['as'];
+
+		unset($definition['as']);
+
+		#
+
+		if (empty($definition['pattern']))
+		{
+			throw new PatternNotDefined(\ICanBoogie\format("Route %id has no pattern. !route", [
+
+				'id' => $id,
+				'route' => $definition
+
+			]));
+		}
+
+		if (empty($definition['controller']) && empty($definition['location']))
+		{
+			throw new ControllerNotDefined(\ICanBoogie\format("Route %id has no controller. !route", [
+
+				'id' => $id,
+				'route' => $definition
+
+			]));
+		}
+
+		$this->routes[$id] = $definition + [
+
+			'via' => Request::METHOD_ANY
+
+		];
+
+		$this->revoke_cache();
+
+		return $this;
 	}
 
 	public function getIterator()
@@ -123,43 +168,14 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 	}
 
 	/**
-	 * Adds or replaces a route.
+	 * Define a route.
 	 *
 	 * @param string $id The identifier of the route.
 	 * @param array $route The route definition.
-	 *
-	 * @throws \LogicException if the route definition is invalid.
 	 */
 	public function offsetSet($id, $route)
 	{
-		if (empty($route['pattern']))
-		{
-			throw new PatternNotDefined(\ICanBoogie\format("Route %id has no pattern. !route", [
-
-				'id' => $id,
-				'route' => $route
-
-			]));
-		}
-
-		if (empty($route['controller']) && empty($route['location']))
-		{
-			throw new ControllerNotDefined(\ICanBoogie\format("Route %id has no controller. !route", [
-
-				'id' => $id,
-				'route' => $route
-
-			]));
-		}
-
-		$this->routes[$id] = $route + [
-
-			'id' => $id,
-			'via' => Request::METHOD_ANY
-
-		];
-
-		$this->revoke_cache();
+		$this->add([ 'as' => $id ] + $route);
 	}
 
 	/**
