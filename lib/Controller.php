@@ -14,9 +14,36 @@ namespace ICanBoogie\Routing;
 use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Object;
+use ICanBoogie\PropertyNotDefined;
 
 /**
  * A route controller.
+ *
+ * # Accessing the application's properties
+ *
+ * The class tries to retrieve undefined properties from the application, so the following code
+ * yields the same results:
+ *
+ * ```php
+ * <?php
+ *
+ * $view->app->models
+ * # or
+ * $view->models
+ * ```
+ *
+ * But because `request` is defined by the controller the following code might not yield the same
+ * results:
+ *
+ * ```php
+ * <?php
+ *
+ * $view->app->request
+ * # or
+ * $view->request
+ * ```
+ *
+ * @property-read \ICanBoogie\Core $app The application.
  */
 abstract class Controller extends Object
 {
@@ -45,6 +72,31 @@ abstract class Controller extends Object
 	 * @return \ICanBoogie\HTTP\Response
 	 */
 	abstract public function __invoke(Request $request);
+
+	/**
+	 * Tries to get the undefined property from the application.
+	 *
+	 * @param string $property
+	 * @param bool $success
+	 *
+	 * @return mixed
+	 */
+	public function last_chance_get($property, &$success)
+	{
+		try
+		{
+			$value = $this->app->$property;
+			$success = true;
+
+			return $value;
+		}
+		catch (PropertyNotDefined $e)
+		{
+			// We don't mind that the property is not defined by the app
+		}
+
+		return parent::last_chance_get($property, $success);
+	}
 
 	/**
 	 * Redirects the request.
