@@ -55,13 +55,22 @@ abstract class Controller extends Object
 	protected $route;
 
 	/**
+	 * The request.
+	 *
+	 * @var Request
+	 */
+	protected $request;
+
+	/**
 	 * Initializes the {@link $route} property.
 	 *
 	 * @param Route $route The route to control.
+	 * @param Request $request The request.
 	 */
-	public function __construct(Route $route)
+	public function __construct(Route $route, Request $request)
 	{
 		$this->route = $route;
+		$this->request = $request;
 	}
 
 	/**

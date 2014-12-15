@@ -46,6 +46,11 @@ class Dispatcher implements \ICanBoogie\HTTP\DispatcherInterface
 		$this->routes = $routes;
 	}
 
+	/**
+	 * @param Request $request
+	 *
+	 * @return Response|null
+	 */
 	public function __invoke(Request $request)
 	{
 		$decontextualized_path = decontextualize($request->normalized_path);
@@ -89,29 +94,7 @@ class Dispatcher implements \ICanBoogie\HTTP\DispatcherInterface
 
 		if (!$response)
 		{
-			$controller = $route->controller;
-
-			#
-			# if the controller is not a callable then it is considered as a class name and
-			# is used to instantiate the controller.
-			#
-
-			if (!is_callable($controller))
-			{
-				$controller_class = $controller;
-				$controller = new $controller_class($route);
-			}
-
-			$response = $controller($request);
-
-			if ($response !== null && !($response instanceof Response))
-			{
-				$response = new Response($response, 200, [
-
-					'Content-Type' => 'text/html; charset=utf-8'
-
-				]);
-			}
+			$response = $this->respond($route, $request);
 		}
 
 		new DispatchEvent($this, $route, $request, $response);
@@ -120,9 +103,55 @@ class Dispatcher implements \ICanBoogie\HTTP\DispatcherInterface
 	}
 
 	/**
+	 * Returns a response for the route and request.
+	 *
+	 * If the controller's result is not `null` but is not in instance of {@link Response}, its
+	 * result is wrapped in a {@link response} instance with the status code 200 and the
+	 * `Content-Type` "text/html; charset=utf-8".
+	 *
+	 * @param Route $route
+	 * @param Request $request
+	 *
+	 * @return Response|mixed
+	 */
+	protected function respond(Route $route, Request $request)
+	{
+		$controller = $route->controller;
+		$controller_args = [ $request ];
+
+		if (!is_callable($controller))
+		{
+			$controller = new $controller($route, $request);
+		}
+
+		if (!($controller instanceof Controller))
+		{
+			$controller_args = array_merge($controller_args, array_values($request->path_params));
+		}
+
+		$response = call_user_func_array($controller, $controller_args);
+
+		if ($response !== null && !($response instanceof Response))
+		{
+			$response = new Response($response, 200, [
+
+				'Content-Type' => 'text/html; charset=utf-8'
+
+			]);
+		}
+
+		return $response;
+	}
+
+	/**
 	 * Fires {@link \ICanBoogie\Routing\Dispatcher\RescueEvent} and returns the response provided
 	 * by third parties. If no response was provided, the exception (or the exception provided by
 	 * third parties) is re-thrown.
+	 *
+	 * @param \Exception $exception The exception to rescue.
+	 * @param Request $request The request being dispatched.
+	 *
+	 * @throws \Exception if the exception cannot be rescued.
 	 *
 	 * @return \ICanBoogie\HTTP\Response
 	 */
