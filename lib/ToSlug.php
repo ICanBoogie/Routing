@@ -12,7 +12,7 @@
 namespace ICanBoogie\Routing;
 
 /**
- * An insterface used to turn an instance into a slug.
+ * An interface used to turn an instance into a slug.
  *
  * @see http://en.wikipedia.org/wiki/Semantic_URL#Slug
  */

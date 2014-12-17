@@ -36,7 +36,7 @@ class Helpers
 	 *
 	 * @return mixed
 	 */
-	static public function __callstatic($name, array $arguments)
+	static public function __callStatic($name, array $arguments)
 	{
 		return call_user_func_array(self::$jumptable[$name], $arguments);
 	}
@@ -45,7 +45,7 @@ class Helpers
 	 * Patches a patchable function.
 	 *
 	 * @param string $name Name of the function.
-	 * @param collable $callback Callback.
+	 * @param callable $callback Callback.
 	 *
 	 * @throws \RuntimeException is attempt to patch an undefined function.
 	 */

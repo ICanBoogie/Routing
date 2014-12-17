@@ -27,9 +27,9 @@ use ICanBoogie\PropertyNotDefined;
  * ```php
  * <?php
  *
- * $view->app->models
+ * $this->app->models
  * # or
- * $view->models
+ * $this->models
  * ```
  *
  * But because `request` is defined by the controller the following code might not yield the same
@@ -38,9 +38,9 @@ use ICanBoogie\PropertyNotDefined;
  * ```php
  * <?php
  *
- * $view->app->request
+ * $this->app->request
  * # or
- * $view->request
+ * $this->request
  * ```
  *
  * @property-read \ICanBoogie\Core $app The application.

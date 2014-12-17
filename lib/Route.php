@@ -130,6 +130,8 @@ class Route extends \ICanBoogie\Object
 	 *
 	 * Note: The formatting of the route is deferred to its {@link Pattern} instance.
 	 *
+	 * @param object|array|null $values
+	 *
 	 * @return FormattedRoute
 	 */
 	public function format($values=null)

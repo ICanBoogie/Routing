@@ -288,7 +288,7 @@ return [
 ];
 ```
 
-The HTTP method is used as a prefix for the method handling the action. The prefix 'any' is used
+The HTTP method is used as a prefix for the method handling the action. The prefix "any" is used
 for method that handle any kind of HTTP method, they are a fallback when more accurate methods are
 not available.
 
@@ -492,11 +492,12 @@ ICanBoogie/Routing is licensed under the New BSD License - See the [LICENSE](LIC
 
 
 
-[ActionController][]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionController.html
-[ActionNotDefined][]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionNotDefined.html
+[ActionController]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionController.html
+[ActionNotDefined]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionNotDefined.html
 [BeforeDispatchEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Dispatcher.BeforeDispatchEvent.html
 [ICanBoogie]: http://icanboogie.org/
 [ICanBoogie\HTTP\Dispatcher]: http://icanboogie.org/docs/namespace-ICanBoogie.HTTP.Dispatcher.html
+[Controller]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Controller.html
 [ControllerNotDefined]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ControllerNotDefined.html
 [DispatchEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Dispatcher.DispatchEvent.html
 [FormattedRoute]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.FormattedRoute.html
