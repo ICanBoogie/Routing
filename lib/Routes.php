@@ -122,6 +122,25 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 			]));
 		}
 
+		#
+		# Separate controller class from its action.
+		#
+
+		if (isset($definition['controller']))
+		{
+			$controller = $definition['controller'];
+
+			if (is_string($controller) && strpos($controller, '#'))
+			{
+				list($controller, $action) = explode('#', $controller);
+
+				$definition['controller'] = $controller;
+				$definition['action'] = $action;
+			}
+		}
+
+		#
+
 		$this->routes[$id] = $definition + [
 
 			'via' => Request::METHOD_ANY

@@ -218,7 +218,8 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 	public function test_add_with_method($method, $pattern, $controller, $options, $expected)
 	{
 		$routes = new Routes;
-		$route = $routes->$method($pattern, $controller, $options);
+		$routes->$method($pattern, $controller, $options);
+		$route = $routes->find('/');
 
 		foreach ($expected as $property => $value)
 		{

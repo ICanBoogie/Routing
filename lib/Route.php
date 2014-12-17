@@ -43,6 +43,18 @@ class Route extends \ICanBoogie\Object
 	}
 
 	/**
+	 * Controller action.
+	 *
+	 * @var string
+	 */
+	private $action;
+
+	protected function get_action()
+	{
+		return $this->action;
+	}
+
+	/**
 	 * Identifier of the route.
 	 *
 	 * @var string

@@ -217,6 +217,125 @@ $url->route === $route;    // true
 
 
 
+## Controllers
+
+Previous examples demonstrated how closures could be used to handle routes. Closures are
+perfectly fine when you start building your application, but as soon as it grows you might want to
+use controller classes instead to better organize your application. For instance, the
+[ActionController][] can group related HTTP request handling logic into a class.
+
+
+
+
+
+### Basic controllers
+
+Basic controllers extend from [Controller][] and implement the `__invoke` method.
+
+```php
+<?php
+
+use ICanBoogie\HTTP\Request;
+use ICanBoogie\Routing\Controller;
+
+class BasicController extends Controller
+{
+	public function __invoke(Request $request)
+	{
+		// Your code goes here, and should return a string or a Response instance
+	}
+}
+```
+
+Although any class implementing `__invoke` is suitable as a controller, it is recommended to extend
+[Controller][] because it makes accessing your application features much easier. Also, you might
+benefits from prototype methods and event hooks attached to the [Controller][] class.
+
+
+
+
+
+### Action controllers
+
+Action controllers can group related HTTP request handling logic into a class and use HTTP methods
+to separate concerns.
+
+The following example demonstrate how an action controller can be used to display a contact form,
+handle its submission, and redirect the user to a _success_ page. The action invoked inside the
+controller is defined after the '#' character.
+
+```php
+<?php
+
+// routes.php
+
+return [
+
+	'contact' => [
+
+		'pattern' => '/contact',
+		'controller' => 'AppController#contact'
+
+	],
+
+	'contact:ok' => [
+
+		'pattern' => '/contact/success.html'
+		'controller' => 'AppController#contact_ok'
+
+	]
+
+];
+```
+
+The HTTP method is used as a prefix for the method handling the action. The prefix 'any' is used
+for method that handle any kind of HTTP method, they are a fallback when more accurate methods are
+not available.
+
+```php
+<?php
+
+use ICanBoogie\Routing\ActionController
+
+class AppController extends ActionController
+{
+	protected function any_contact()
+	{
+		return new ContactForm;
+	}
+
+	protected function post_contact()
+	{
+		$form = new ContactForm;
+		$request = $this->request;
+
+		if (!$form->validate($request->params, $errors))
+		{
+			return $this->redirect($this->routes['contact']);
+		}
+
+		// …
+
+		$email = $request['email'];
+		$message = $request['message'];
+
+		// …
+
+		return $this->redirect($this->routes['contact:ok']);
+	}
+
+	protected function any_contact_success()
+	{
+		return "Your message has been sent.";
+	}
+}
+```
+
+
+
+
+
+
 ## Exceptions
 
 The exceptions defined by the package implement the `ICanBoogie\Routing\Exception` interface,
@@ -241,6 +360,8 @@ catch (\Exception $e)
 
 The following exceptions are defined:
 
+- [ActionNotDefined][]: Thrown when an action is not defined, for instance when a route using
+an [ActionController][] has an empty `action` property'.
 - [ControllerNotDefined][]: Thrown when trying to define a route without a controller nor location.
 - [PatternNotDefined][]: Thrown when trying to define a route without pattern.
 - [RouteNotDefined][]: Thrown when trying to obtain a route that is not defined in a [Routes][] instance.
@@ -371,6 +492,8 @@ ICanBoogie/Routing is licensed under the New BSD License - See the [LICENSE](LIC
 
 
 
+[ActionController][]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionController.html
+[ActionNotDefined][]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionNotDefined.html
 [BeforeDispatchEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Dispatcher.BeforeDispatchEvent.html
 [ICanBoogie]: http://icanboogie.org/
 [ICanBoogie\HTTP\Dispatcher]: http://icanboogie.org/docs/namespace-ICanBoogie.HTTP.Dispatcher.html
