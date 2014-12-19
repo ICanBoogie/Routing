@@ -22,10 +22,26 @@ use ICanBoogie\Routing\ActionController\BeforeActionEvent;
  */
 class ActionController extends Controller
 {
+	/**
+	 * The request.
+	 *
+	 * @var Request
+	 */
+	protected $request;
+
+	/**
+	 * Dispatch the request to the appropriate method.
+	 *
+	 * The {@link $request} property is initialized.
+	 *
+	 * @param Request $request
+	 *
+	 * @return \ICanBoogie\HTTP\Response
+	 */
 	public function __invoke(Request $request)
 	{
 		$this->request = $request;
-		$route = $this->route;
+		$route = $this->request->route;
 
 		if (!$route->action)
 		{
