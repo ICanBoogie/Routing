@@ -74,7 +74,7 @@ class Dispatcher implements \ICanBoogie\HTTP\DispatcherInterface
 
 		$request->path_params = $captured + $request->path_params;
 		$request->params = $captured + $request->params;
-		$request->route = $route;
+		$request->context->route = $route;
 		$request->decontextualized_path = $decontextualized_path;
 
 		return $this->dispatch($route, $request);
@@ -157,9 +157,9 @@ class Dispatcher implements \ICanBoogie\HTTP\DispatcherInterface
 	 */
 	public function rescue(\Exception $exception, Request $request)
 	{
-		if (isset($request->route))
+		if (isset($request->context->route))
 		{
-			new RescueEvent($request->route, $exception, $request, $response);
+			new RescueEvent($request->context->route, $exception, $request, $response);
 
 			if ($response)
 			{

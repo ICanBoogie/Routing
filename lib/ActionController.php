@@ -41,7 +41,7 @@ class ActionController extends Controller
 	public function __invoke(Request $request)
 	{
 		$this->request = $request;
-		$route = $this->request->route;
+		$route = $this->request->context->route;
 
 		if (!$route->action)
 		{
