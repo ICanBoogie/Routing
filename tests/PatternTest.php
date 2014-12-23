@@ -139,6 +139,22 @@ class PatternTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertEquals("/news/123-madonna.html", Pattern::from("/news/:nid-:slug.html")->format($object));
 	}
+
+	public function test_formatting_without_values()
+	{
+		$expected = "just-a-url.html";
+		$pattern = Pattern::from($expected);
+		$this->assertEquals($expected, $pattern->format());
+	}
+
+	/**
+	 * @expectedException \ICanBoogie\Routing\PatternRequiresValues
+	 */
+	public function test_formatting_without_values_when_they_are_required()
+	{
+		$pattern = Pattern::from(":year-:month.html");
+		$pattern->format();
+	}
 }
 
 namespace ICanBoogie\Routing\PatternTest;

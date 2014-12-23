@@ -221,9 +221,17 @@ class Pattern
 	 * instance into a URL component.
 	 *
 	 * @return string
+	 *
+	 * @throws PatternRequiresValues in attempt to format a pattern requiring values without
+	 * providing any.
 	 */
 	public function format($values=null)
 	{
+		if (!$values && $this->params)
+		{
+			throw new PatternRequiresValues($this);
+		}
+
 		$url = '';
 		$is_array = is_array($values);
 
