@@ -59,4 +59,28 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals($expected_url, $formatted_route->url);
 		$this->assertEquals("http://icanboogie.org{$expected_url}", $formatted_route->absolute_url);
 	}
+
+	public function test_get_url()
+	{
+		$expected = "/my-awesome-url.html";
+		$route = new Route($expected, []);
+		$this->assertEquals($expected, $route->url);
+	}
+
+	/**
+	 * @expectedException \ICanBoogie\Routing\PatternRequiresValues
+	 */
+	public function test_get_url_requiring_values()
+	{
+		$expected = "/:year-:month.html";
+		$route = new Route($expected, []);
+		$this->assertEquals($expected, $route->url);
+	}
+
+	public function test_get_absolute_url()
+	{
+		$expected = "/my-awesome-url.html";
+		$route = new Route($expected, []);
+		$this->assertEquals("http://icanboogie.org" . $expected, $route->absolute_url);
+	}
 }

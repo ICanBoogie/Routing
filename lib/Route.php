@@ -15,6 +15,8 @@ namespace ICanBoogie\Routing;
  * A route.
  *
  * @property-read Pattern $pattern The pattern of the route.
+ * @property-read string $url The contextualized URL of the route.
+ * @property-read string $absolute_url The contextualized absolute URL of the route.
  */
 class Route extends \ICanBoogie\Object
 {
@@ -108,8 +110,14 @@ class Route extends \ICanBoogie\Object
 
 					return $provider($this);
 				}
+
+				return $this->format()->url;
 			}
 			break;
+
+			case 'absolute_url':
+
+				return $this->format()->absolute_url;
 		}
 
 		return parent::__get($property);
