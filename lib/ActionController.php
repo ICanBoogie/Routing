@@ -19,6 +19,8 @@ use ICanBoogie\Routing\ActionController\BeforeActionEvent;
  * Base class for action controllers.
  *
  * @package ICanBoogie\Routing
+ *
+ * @property-read string $action The action being executed.
  */
 class ActionController extends Controller
 {
@@ -28,6 +30,14 @@ class ActionController extends Controller
 	 * @var Request
 	 */
 	protected $request;
+
+	/**
+	 * @return string
+	 */
+	protected function get_action()
+	{
+		return $this->route->action;
+	}
 
 	/**
 	 * Dispatch the request to the appropriate method.
@@ -41,14 +51,13 @@ class ActionController extends Controller
 	public function __invoke(Request $request)
 	{
 		$this->request = $request;
-		$route = $this->request->context->route;
+		$action = $this->action;
 
-		if (!$route->action)
+		if (!$action)
 		{
 			throw new ActionNotDefined("Action not defined in route.");
 		}
 
-		$action = $route->action;
 		$method_name = strtolower($request->method) . '_' . $action;
 		$method_args = $request->path_params;
 
@@ -60,6 +69,7 @@ class ActionController extends Controller
 		#
 
 		$response = null;
+		$route = $this->request->context->route;
 
 		new BeforeActionEvent($this, $action, $response, $route, $request);
 

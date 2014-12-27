@@ -45,6 +45,7 @@ class A extends ActionController
 	public function any_view($year, $month, $slug)
 	{
 		$test = $this->request->test;
+		$test->assertEquals('view', $this->action);
 		$test->assertEquals(3, func_num_args());
 		$test->assertEquals(2014, $year);
 		$test->assertEquals(12, $month);
