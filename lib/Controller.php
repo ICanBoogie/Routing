@@ -146,7 +146,7 @@ abstract class Controller extends Object
 	 *
 	 * @return \ICanBoogie\HTTP\Response|mixed
 	 */
-	abstract public function respond(Request $request);
+	abstract protected function respond(Request $request);
 
 	/**
 	 * Tries to get the undefined property from the application.
