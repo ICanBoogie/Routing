@@ -69,16 +69,15 @@ class ActionController extends Controller
 		#
 
 		$response = null;
-		$route = $this->request->context->route;
 
-		new BeforeActionEvent($this, $action, $response, $route, $request);
+		new BeforeActionEvent($this, $response);
 
 		if (!$response)
 		{
 			$response = call_user_func_array([ $this, $method_name ], $method_args);
 		}
 
-		new ActionEvent($this, $action, $response, $route, $request);
+		new ActionEvent($this, $response);
 
 		return $response;
 	}

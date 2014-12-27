@@ -12,19 +12,17 @@
 namespace ICanBoogie\Routing\ActionController;
 
 use ICanBoogie\Event;
-use ICanBoogie\HTTP\Request;
-use ICanBoogie\Routing\Controller;
-use ICanBoogie\Routing\Route;
+use ICanBoogie\Routing\ActionController;
 
+/**
+ * Event class for the `ICanBoogie\Routing\ActionController::action` event.
+ *
+ * Event hooks may use this event to alter the response of the action.
+ *
+ * @package ICanBoogie\Routing\ActionController
+ */
 class ActionEvent extends Event
 {
-	/**
-	 * The action performed by the controller.
-	 *
-	 * @var string
-	 */
-	public $action;
-
 	/**
 	 * Reference to the response returned by the controller.
 	 *
@@ -33,34 +31,14 @@ class ActionEvent extends Event
 	public $response;
 
 	/**
-	 * The route that matched the request.
-	 *
-	 * @var Route
-	 */
-	public $route;
-
-	/**
-	 * The request.
-	 *
-	 * @var Request
-	 */
-	public $request;
-
-	/**
 	 * The event is constructed with the type 'action:before'.
 	 *
-	 * @param Controller $target
-	 * @param string $action;
+	 * @param ActionController $target
 	 * @param mixed $response
-	 * @param Route $route
-	 * @param Request $request
 	 */
-	public function __construct(Controller $target, $action, &$response, Route $route, Request $request)
+	public function __construct(ActionController $target, &$response)
 	{
-		$this->action = $action;
-		$this->route = $route;
-		$this->request = $request;
-		$this->response = $response;
+		$this->response = &$response;
 
 		parent::__construct($target, 'action');
 	}
