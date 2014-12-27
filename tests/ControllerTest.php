@@ -72,7 +72,7 @@ use ICanBoogie\Routing\HubControllerInterface;
 
 class MySampleController extends Controller
 {
-	public function __invoke(Request $request)
+	public function respond(Request $request)
 	{
 		$request->test->assertInstanceOf('ICanBoogie\HTTP\Request', $request);
 		$request->test->assertEquals(1, func_num_args());

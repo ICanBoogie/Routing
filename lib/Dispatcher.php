@@ -121,7 +121,7 @@ class Dispatcher implements \ICanBoogie\HTTP\DispatcherInterface
 
 		if (!is_callable($controller))
 		{
-			$controller = new $controller($route);
+			$controller = new $controller;
 		}
 
 		if (!($controller instanceof Controller))

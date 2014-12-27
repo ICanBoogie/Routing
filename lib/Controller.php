@@ -13,8 +13,11 @@ namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\Response;
 use ICanBoogie\Object;
 use ICanBoogie\PropertyNotDefined;
+use ICanBoogie\Routing\Controller\BeforeRespondEvent;
+use ICanBoogie\Routing\Controller\RespondEvent;
 
 /**
  * A route controller.
@@ -44,7 +47,9 @@ use ICanBoogie\PropertyNotDefined;
  * ```
  *
  * @property-read string $name The name of the controller.
+ * @property-read Request $request The request being dispatched.
  * @property-read Route $route The route being dispatched.
+ * @property Response $response.
  * @property-read \ICanBoogie\Core $app The application.
  */
 abstract class Controller extends Object
@@ -66,35 +71,82 @@ abstract class Controller extends Object
 	}
 
 	/**
-	 * The route to control.
-	 *
-	 * @var Route
+	 * @var Request
 	 */
-	protected $route;
+	private $request;
 
-	protected function get_route()
+	protected function get_request()
 	{
-		return $this->route;
+		return $this->request;
 	}
 
 	/**
-	 * Initializes the {@link $route} property.
-	 *
-	 * @param Route $route The route to control.
+	 * @return Route
 	 */
-	public function __construct(Route $route)
+	protected function get_route()
 	{
-		$this->route = $route;
+		return $this->request->context->route;
+	}
+
+	protected function lazy_get_response()
+	{
+		return new Response;
 	}
 
 	/**
 	 * Controls the route and returns a response.
 	 *
+	 * The response is obtained by invoking `respond()`, when the result is a {@link Response}
+	 * instance it is returned as is, when the `$response` property has been initialized the result
+	 * is used as its body and the response is returned, otherwise the result is returned as is.
+	 *
+	 * The `ICanBoogie\Routing\Controller::respond:before` event of class
+	 * {@link Controller\BeforeRespondEvent} is fired before invoking `respond()`, the
+	 * `ICanBoogie\Routing\Controller::respond:before` event of class
+	 * {@link Controller\RespondEvent} is fired after.
+	 *
 	 * @param Request $request
 	 *
-	 * @return \ICanBoogie\HTTP\Response
+	 * @return \ICanBoogie\HTTP\Response|mixed
 	 */
-	abstract public function __invoke(Request $request);
+	final public function __invoke(Request $request)
+	{
+		$this->request = $request;
+
+		$response = null;
+
+		new BeforeRespondEvent($this, $response);
+
+		if (!$response)
+		{
+			$response = $this->respond($request);
+		}
+
+		new RespondEvent($this, $response);
+
+		if ($response instanceof Response)
+		{
+			return $response;
+		}
+
+		if ($response && isset($this->response))
+		{
+			$this->response->body = $response;
+
+			return $this->response;
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Respond to the request.
+	 *
+	 * @param Request $request
+	 *
+	 * @return \ICanBoogie\HTTP\Response|mixed
+	 */
+	abstract public function respond(Request $request);
 
 	/**
 	 * Tries to get the undefined property from the application.

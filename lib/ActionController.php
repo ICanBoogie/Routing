@@ -46,9 +46,9 @@ class ActionController extends Controller
 	 *
 	 * @param Request $request
 	 *
-	 * @return \ICanBoogie\HTTP\Response
+	 * @return \ICanBoogie\HTTP\Response|mixed
 	 */
-	public function __invoke(Request $request)
+	public function respond(Request $request)
 	{
 		$this->request = $request;
 		$action = $this->action;
