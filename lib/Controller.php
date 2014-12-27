@@ -181,7 +181,7 @@ abstract class Controller extends Object
 	/**
 	 * Redirects the request.
 	 *
-	 * @param string $url The URL to redirect the request to.
+	 * @param Route|string $url The URL to redirect the request to.
 	 * @param int $status Status code (defaults to 302).
 	 * @param array $headers Additional headers.
 	 *
@@ -189,6 +189,11 @@ abstract class Controller extends Object
 	 */
 	public function redirect($url, $status=302, array $headers=[])
 	{
+		if ($url instanceof Route)
+		{
+			$url = $url->url;
+		}
+
 		return new RedirectResponse($url, $status, $headers);
 	}
 }
