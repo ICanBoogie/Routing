@@ -230,7 +230,7 @@ use controller classes instead to better organize your application. For instance
 
 ### Basic controllers
 
-Basic controllers extend from [Controller][] and implement the `__invoke` method.
+Basic controllers extend from [Controller][] and implement the `respond` method.
 
 ```php
 <?php
@@ -238,9 +238,9 @@ Basic controllers extend from [Controller][] and implement the `__invoke` method
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Routing\Controller;
 
-class BasicController extends Controller
+class MyArticlesController extends Controller
 {
-	public function __invoke(Request $request)
+	protected function respond(Request $request)
 	{
 		// Your code goes here, and should return a string or a Response instance
 	}
@@ -249,7 +249,30 @@ class BasicController extends Controller
 
 Although any class implementing `__invoke` is suitable as a controller, it is recommended to extend
 [Controller][] because it makes accessing your application features much easier. Also, you might
-benefits from prototype methods and event hooks attached to the [Controller][] class.
+benefit from prototype methods and event hooks attached to the [Controller][] class. The
+following properties are available as well:
+
+- `name`: The name of the controller, extracted from its class name e.g. "my_articles".
+- `request`: The request being dispatched.
+- `route`: The route matching the request.
+
+Also, undefined properties are forwarded to the application, thus you can use
+`$this->app->modules` or simply `$this->modules`.
+
+
+
+
+
+#### Controller response
+
+The response to the request is obtained by invoking `respond()`, when the result is a [Response][]
+instance it is returned as is, when the `$response` property has been initialized the result
+is used as its body and the response is returned, otherwise the result is returned as is.
+
+The `ICanBoogie\Routing\Controller::respond:before` event of class
+[Controller\BeforeRespondEvent][] is fired before invoking `respond()`, the
+`ICanBoogie\Routing\Controller::respond:before` event of class [Controller\RespondEvent][] is
+fired after.
 
 
 
@@ -331,6 +354,10 @@ class AppController extends ActionController
 }
 ```
 
+The `ICanBoogie\Routing\ActionController::action:before` event of class
+[ActionController\BeforeActionEvent] if fired before the action method s invoked, the 
+The `ICanBoogie\Routing\ActionController::action` event of class
+[ActionController\ActionEvent] if fired after.
 
 
 
@@ -493,11 +520,15 @@ ICanBoogie/Routing is licensed under the New BSD License - See the [LICENSE](LIC
 
 
 [ActionController]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionController.html
+[ActionController\BeforeActionEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionController.BeforeActionEvent.html
+[ActionController\ActionEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionController.ActionEvent.html
 [ActionNotDefined]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionNotDefined.html
 [BeforeDispatchEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Dispatcher.BeforeDispatchEvent.html
 [ICanBoogie]: http://icanboogie.org/
 [ICanBoogie\HTTP\Dispatcher]: http://icanboogie.org/docs/namespace-ICanBoogie.HTTP.Dispatcher.html
 [Controller]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Controller.html
+[Controller\BeforeRespondEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Controller.BeforeRespondEvent.html
+[Controller\RespondEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Controller.RespondEvent.html
 [ControllerNotDefined]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ControllerNotDefined.html
 [DispatchEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Dispatcher.DispatchEvent.html
 [FormattedRoute]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.FormattedRoute.html
