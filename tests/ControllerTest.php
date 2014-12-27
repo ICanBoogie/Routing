@@ -50,7 +50,7 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
 			'default' => [
 
 				'pattern' => '/blog/<year:\d{4}>-<month:\d{2}>-:slug.html',
-				'controller' => 'ICanBoogie\Routing\ControllerTest\A'
+				'controller' => 'ICanBoogie\Routing\ControllerTest\MySampleController'
 			]
 		]);
 
@@ -70,12 +70,13 @@ use ICanBoogie\HTTP\Request;
 use ICanBoogie\Routing\Controller;
 use ICanBoogie\Routing\HubControllerInterface;
 
-class A extends Controller
+class MySampleController extends Controller
 {
 	public function __invoke(Request $request)
 	{
 		$request->test->assertInstanceOf('ICanBoogie\HTTP\Request', $request);
 		$request->test->assertEquals(1, func_num_args());
+		$request->test->assertEquals("my_sample", $this->name);
 
 		return 'HERE';
 	}

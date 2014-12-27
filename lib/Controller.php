@@ -43,10 +43,27 @@ use ICanBoogie\PropertyNotDefined;
  * $this->request
  * ```
  *
+ * @property-read string $name The name of the controller.
  * @property-read \ICanBoogie\Core $app The application.
  */
 abstract class Controller extends Object
 {
+	/**
+	 * Return the name of the controller, extracted from its class name.
+	 *
+	 * @return string|null The underscored name of the controller, or `null` if it cannot be
+	 * extracted.
+	 */
+	protected function get_name()
+	{
+		$controller_class = get_class($this);
+
+		if (preg_match('/(\w+)Controller$/', $controller_class, $matches))
+		{
+			return \ICanBoogie\underscore($matches[1]);
+		}
+	}
+
 	/**
 	 * The route to control.
 	 *
