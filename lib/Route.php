@@ -61,7 +61,12 @@ class Route extends \ICanBoogie\Object
 	 *
 	 * @var string
 	 */
-	public $id;
+	private $id;
+
+	protected function get_id()
+	{
+		return $this->id;
+	}
 
 	/**
 	 * Redirect location.
@@ -70,14 +75,24 @@ class Route extends \ICanBoogie\Object
 	 *
 	 * @var string
 	 */
-	public $location;
+	private $location;
+
+	protected function get_location()
+	{
+		return $this->location;
+	}
 
 	/**
 	 * Request methods accepted by the route.
 	 *
 	 * @var string
 	 */
-	public $via;
+	private $via;
+
+	protected function get_via()
+	{
+		return $this->via;
+	}
 
 	/**
 	 * Initializes the {@link $pattern} property and the properties provided.
