@@ -19,7 +19,7 @@
 	},
 	"require": {
 		"php": ">=5.4.0",
-		"icanboogie/http": "2.x"
+		"icanboogie/http": "2.2.x"
 	},
 	"autoload": {
 		"psr-4": {
