@@ -25,13 +25,6 @@ use ICanBoogie\Routing\ActionController\BeforeActionEvent;
 class ActionController extends Controller
 {
 	/**
-	 * The request.
-	 *
-	 * @var Request
-	 */
-	protected $request;
-
-	/**
 	 * @return string
 	 */
 	protected function get_action()
@@ -50,7 +43,6 @@ class ActionController extends Controller
 	 */
 	public function respond(Request $request)
 	{
-		$this->request = $request;
 		$action = $this->action;
 
 		if (!$action)

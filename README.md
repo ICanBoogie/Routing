@@ -355,9 +355,9 @@ class AppController extends ActionController
 ```
 
 The `ICanBoogie\Routing\ActionController::action:before` event of class
-[ActionController\BeforeActionEvent] if fired before the action method s invoked, the 
-The `ICanBoogie\Routing\ActionController::action` event of class
-[ActionController\ActionEvent] if fired after.
+[ActionController\BeforeActionEvent] if fired before the action method is invoked, the
+`ICanBoogie\Routing\ActionController::action` event of class
+[ActionController\ActionEvent] is fired after.
 
 
 
