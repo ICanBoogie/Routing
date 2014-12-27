@@ -77,6 +77,7 @@ class MySampleController extends Controller
 		$request->test->assertInstanceOf('ICanBoogie\HTTP\Request', $request);
 		$request->test->assertEquals(1, func_num_args());
 		$request->test->assertEquals("my_sample", $this->name);
+		$request->test->assertInstanceOf('ICanBoogie\Routing\Route', $this->route);
 
 		return 'HERE';
 	}

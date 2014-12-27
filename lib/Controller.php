@@ -44,6 +44,7 @@ use ICanBoogie\PropertyNotDefined;
  * ```
  *
  * @property-read string $name The name of the controller.
+ * @property-read Route $route The route being dispatched.
  * @property-read \ICanBoogie\Core $app The application.
  */
 abstract class Controller extends Object
@@ -70,6 +71,11 @@ abstract class Controller extends Object
 	 * @var Route
 	 */
 	protected $route;
+
+	protected function get_route()
+	{
+		return $this->route;
+	}
 
 	/**
 	 * Initializes the {@link $route} property.
