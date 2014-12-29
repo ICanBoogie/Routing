@@ -1,10 +1,10 @@
 # Routing [![Build Status](https://secure.travis-ci.org/ICanBoogie/Routing.svg?branch=2.1)](http://travis-ci.org/ICanBoogie/Routing)
 
-The Routing package provides classes and helpers to handle URL rewriting in native PHP. It
-provides an API to redirect incoming requests to controllers. A request is redirected, or
-_mapped_, using a dispatcher and routes, which are usually defined in `routes` configuration
-fragments but can also be defined during runtime. Controllers usually return a [Response][],
-but can also return a string (or a stringifyable object) to produce a simple `text/html` response.
+The Routing package provides an API to handle URL rewriting in native PHP. A request is redirected,
+or _mapped_, to a controller using a dispatcher and a collection of routes, which can be defined
+using `routes` configuration fragments or at runtime using a collection. Controllers usually
+return a [Response][], but can also return a string—or an instance implementing `__toString()`—to
+produce a `text/html` response.
 
 
 
@@ -12,13 +12,27 @@ but can also return a string (or a stringifyable object) to produce a simple `te
 
 ## Dispatching a request
 
-The Routing package provides a [Request][] dispatcher that can be used as a sub-dispatcher by a
-[ICanBoogie\HTTP\Dispatcher][] instance, or as a stand-alone dispatcher.
+The package provides a request dispatcher that can be used stand-alone, or as a sub-dispatcher
+for [ICanBoogie\HTTP\Dispatcher][].
 
 ```php
 <?php
 
+use ICanBoogie\HTTP\Request;
 use ICanBoogie\Routing\Dispatcher;
+use ICanBoogie\Routing\Routes;
+
+$routes = new Routes([
+
+	'articles/delete' => [
+	
+		'controller' => 'ArticlesController#delete',
+		'pattern' => '/articles/<id:\d+>',
+		'via' => Request::METHOD_DELETE
+	
+	]
+
+]);
 
 $request = Request::from([
 
@@ -29,18 +43,20 @@ $request = Request::from([
 
 $dispatcher = new Dispatcher($routes);
 $response = $dispatcher($request);
+$response();
 ```
 
 Before the route is dispatched the `ICanBoogie\Routing\Dispatcher::dispatch:before` event of class
-[BeforeDispatchEvent][] is fired. Event hooks may use this event to provide a response and cancel
-the dispatching.
+[Dispatcher\BeforeDispatchEvent][] is fired. Event hooks may use this event to provide a response
+and cancel the dispatching.
 
-If an exception is raised during the dispatching, the `ICanBoogie\Routing\Route::rescue` event
-of class [RescueEvent][] is fired. Event hooks may use this event to rescue the route and
+If an exception is raised during the dispatch, the `ICanBoogie\Routing\Route::rescue` event
+of class [Route\RescueEvent][] is fired. Event hooks may use this event to rescue the route and
 provide a response, or replace the exception that will be thrown if the rescue fails.
 
-The `ICanBoogie\Routing\Dispatcher::dispatch` event of class [DispatchEvent][] is fired if 
-the route has been dispatched successfully. Event hooks may use this event to alter the response.
+The `ICanBoogie\Routing\Dispatcher::dispatch` event of class [Dispatcher\DispatchEvent][] is fired
+if the route has been dispatched successfully. Event hooks may use this event to alter the
+response.
 
 
 
@@ -52,12 +68,12 @@ Routes are usually defined in `routes` configuration fragments, but can also be 
 runtime. The pattern is required to define a route, and the controller too if no location
 is defined. The following options are available:
 
-- `class`: If you want or use another class than [Route][].
+- `class`: If the route should be instantiated from a class other than [Route][].
 - `location`: To redirect the route to another location.
 - `via`: If the route needs to respond to one or more HTTP methods.
 
-Defined options are copied into the [Route][] instance, even customized ones. Use this
-feature if your controller requires additional information about a route.
+The options used to define a route are copied in its instance, even custom ones, which might be
+useful to provide additional information to a controller.
 
 The [PatternNotDefined][] exception is thrown if the pattern is not defined, and the
 [ControllerNotDefined][] exception is thrown if the controller and the location are not defined.
@@ -68,7 +84,7 @@ The [PatternNotDefined][] exception is thrown if the pattern is not defined, and
 
 ### Defining routes using `routes` configuration fragments
 
-The most efficient way to define routes is through the `routes` configuration fragments because
+The most efficient way to define routes is through `routes` configuration fragments, because
 it doesn't require application logic (additional code) and the synthesized configuration can be
 cached.
 
@@ -129,7 +145,7 @@ return [
 ];
 ```
 
-Note that using configuration fragments requires [ICanBoogie][].
+**Note:** Using configuration fragments requires [ICanBoogie][].
 
 
 
@@ -137,12 +153,14 @@ Note that using configuration fragments requires [ICanBoogie][].
 
 ### Defining routes during runtime
 
-Routes can also be defined during runtime through a [Routes][] instance.
+Routes can also be defined during runtime using the [Routes][] instance that is provided to the
+dispatcher.
 
 ```php
 <?php
 
 use ICanBoogie\HTTP\Request;
+use ICanBoogie\Routing\Dispatcher;
 use ICanBoogie\Routing\Routes;
 
 $routes = new Routes;
@@ -152,6 +170,10 @@ $routes->any('/articles', function(Request $request) { }, [ 'as' => 'articles' ]
 $routes->get('/articles/new', function(Request $request) { }, [ 'as' => 'articles:new' ]);
 $routes->post('/articles/new', function(Request $request) { }, [ 'as' => 'articles:create' ]);
 $routes->delete('/articles/<nid:\d+>', function(Request $request) { }, [ 'as' => 'articles:delete' ]);
+
+$dispatcher = new Dispatcher($routes);
+
+# routes can also be defined afterwards
 $routes->any('/read-write', function(Request $request) { }, [ 'via' => [ 'GET', 'POST' ] ]);
 ```
 
@@ -161,7 +183,7 @@ $routes->any('/read-write', function(Request $request) { }, [ 'via' => [ 'GET', 
 
 ## Mapping a path to a route
 
-A [Routes][] instance is used to map paths to routes. A HTTP method and a namespace can optionally
+Routes are mapped using a [Routes][] instance. A HTTP method and a namespace can optionally
 be specified to determine the route more accurately. The parameters captured from the routes are
 stored in the `$captured` variable, passed by reference. If the path contains a query string,
 it is parsed and stored under `__query__` in `$captured`.
@@ -194,10 +216,12 @@ $route = $routes['articles:view'];
 echo get_class($route); // ICanBoogie\Routing\Route;
 ```
 
-A route can be formatted into a relative URL with its `format()` methods and appropriate properties.
-The method returns a [FormattedRoute][] instance which can be used as a string. Its `url` property
-holds the URL contextualized with `contextualize()` and its `absolute_url` property holds the
-contextualized URL absolutized with the `absolute_url()` function.
+A route can be formatted into a relative URL using its `format()` method and appropriate properties.
+The method returns a [FormattedRoute][] instance, which can be used as a string. The following
+properties are available:
+
+- `url`: The URL contextualized with `contextualize()`.
+- `absolute_url`: The contextualized URL _absolutized_ with the `absolute_url()` function.
 
 ```php
 <?php
@@ -230,7 +254,7 @@ use controller classes instead to better organize your application. For instance
 
 ### Basic controllers
 
-Basic controllers extend from [Controller][] and implement the `respond` method.
+Basic controllers extend from [Controller][] and must implement the `respond` method.
 
 ```php
 <?php
@@ -249,15 +273,17 @@ class MyArticlesController extends Controller
 
 Although any class implementing `__invoke` is suitable as a controller, it is recommended to extend
 [Controller][] because it makes accessing your application features much easier. Also, you might
-benefit from prototype methods and event hooks attached to the [Controller][] class. The
-following properties are available as well:
+benefit from prototype methods and event hooks attached to the [Controller][] class, such as the
+`view` property added by the [icanboogie/view][] package.
+
+The following properties are provided by the class:
 
 - `name`: The name of the controller, extracted from its class name e.g. "my_articles".
 - `request`: The request being dispatched.
 - `route`: The route matching the request.
 
 Also, undefined properties are forwarded to the application, thus you can use
-`$this->app->modules` or simply `$this->modules`.
+`$this->modules` instead of `$this->app->modules`.
 
 
 
@@ -312,7 +338,7 @@ return [
 ```
 
 The HTTP method is used as a prefix for the method handling the action. The prefix "any" is used
-for method that handle any kind of HTTP method, they are a fallback when more accurate methods are
+for methods that handle any kind of HTTP method, they are a fallback when more accurate methods are
 not available.
 
 ```php
@@ -519,24 +545,25 @@ ICanBoogie/Routing is licensed under the New BSD License - See the [LICENSE](LIC
 
 
 
+[icanboogie/view]: https://github.com/ICanBoogie/View
 [ActionController]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionController.html
 [ActionController\BeforeActionEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionController.BeforeActionEvent.html
 [ActionController\ActionEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionController.ActionEvent.html
 [ActionNotDefined]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionNotDefined.html
-[BeforeDispatchEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Dispatcher.BeforeDispatchEvent.html
+[Dispatcher\BeforeDispatchEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Dispatcher.BeforeDispatchEvent.html
+[Dispatcher\DispatchEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Dispatcher.DispatchEvent.html
 [ICanBoogie]: http://icanboogie.org/
 [ICanBoogie\HTTP\Dispatcher]: http://icanboogie.org/docs/namespace-ICanBoogie.HTTP.Dispatcher.html
 [Controller]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Controller.html
 [Controller\BeforeRespondEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Controller.BeforeRespondEvent.html
 [Controller\RespondEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Controller.RespondEvent.html
 [ControllerNotDefined]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ControllerNotDefined.html
-[DispatchEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Dispatcher.DispatchEvent.html
 [FormattedRoute]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.FormattedRoute.html
 [Pattern]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Pattern.html
 [PatternNotDefined]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.PatternNotDefined.html
 [Request]: http://icanboogie.org/docs/namespace-ICanBoogie.HTTP.Request.html
-[RescueEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Route.RescueEvent.html
-[response]: http://icanboogie.org/docs/namespace-ICanBoogie.HTTP.Response.html
+[Response]: http://icanboogie.org/docs/namespace-ICanBoogie.HTTP.Response.html
 [Route]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Route.html
+[Route\RescueEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Route.RescueEvent.html
 [RouteNotDefined]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.RouteNotDefined.html
 [Routes]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Routes.html
