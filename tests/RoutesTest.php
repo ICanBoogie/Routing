@@ -161,6 +161,9 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 		$route = $routes->find('/articles/123', $captured, Request::METHOD_DELETE, 'articles');
 		$this->assertInstanceOf('ICanBoogie\Routing\Route', $route);
 		$this->assertEquals('articles:delete', $route->id);
+
+		$route = $routes->find('//articles', $captured);
+		$this->assertEmpty($route);
 	}
 
 	/**

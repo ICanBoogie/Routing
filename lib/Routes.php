@@ -230,8 +230,13 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 			$namespace = '/' . $namespace . '/';
 		}
 
-		$parsed = parse_url($uri) + [ 'query' => null ];
+		$parsed = (array) parse_url($uri) + [ 'path' => null, 'query' => null ];
 		$path = $parsed['path'];
+
+		if (!$path)
+		{
+			return false;
+		}
 
 		#
 		# Determine if a route matches prerequisites.
