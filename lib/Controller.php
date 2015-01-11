@@ -101,7 +101,7 @@ abstract class Controller extends Object
 	/**
 	 * Controls the route and returns a response.
 	 *
-	 * The response is obtained by invoking `respond()`, when the result is a {@link Response}
+	 * The response is obtained by invoking `respond()`. When the result is a {@link Response}
 	 * instance it is returned as is, when the `$response` property has been initialized the result
 	 * is used as its body and the response is returned, otherwise the result is returned as is.
 	 *
