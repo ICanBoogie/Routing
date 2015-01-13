@@ -130,7 +130,7 @@ class Pattern
 	 *
 	 * @param mixed $pattern
 	 *
-	 * @return \ICanBoogie\Pattern
+	 * @return Pattern
 	 */
 	static public function from($pattern)
 	{
