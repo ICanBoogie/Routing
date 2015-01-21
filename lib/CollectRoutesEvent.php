@@ -28,7 +28,7 @@ class CollectRoutesEvent extends \ICanBoogie\Event
 	/**
 	 * The event is constructed with the type `collect`.
 	 *
-	 * @param \ICanboogie\Routes $target The routes collection.
+	 * @param array $routes The route collection.
 	 */
 	public function __construct(array &$routes)
 	{

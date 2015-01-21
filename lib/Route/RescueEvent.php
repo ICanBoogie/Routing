@@ -46,8 +46,8 @@ class RescueEvent extends \ICanBoogie\Event
 	/**
 	 * The event is constructed with the type `rescue`.
 	 *
-	 * @param Route $route
-	 * @param \Exception $target Reference to the exception thrown while dispatching the route.
+	 * @param Route $target
+	 * @param \Exception $exception Reference to the exception thrown while dispatching the route.
 	 * @param Request $request
 	 * @param \ICanBoogie\HTTP\Response|null $response
 	 */

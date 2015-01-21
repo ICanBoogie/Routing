@@ -64,7 +64,7 @@ class Dispatcher implements \ICanBoogie\HTTP\DispatcherInterface
 
 		if (!$route)
 		{
-			return;
+			return null;
 		}
 
 		if ($route->location)

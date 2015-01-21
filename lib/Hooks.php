@@ -66,15 +66,17 @@ class Hooks
 	/**
 	 * Returns the route collection.
 	 *
+	 * @param \ICanBoogie\Core $app
+	 *
 	 * @return Routes
 	 */
-	static public function core_get_routes(\ICanBoogie\Core $core)
+	static public function core_get_routes(\ICanBoogie\Core $app)
 	{
 		static $routes;
 
 		if (!$routes)
 		{
-			$definitions = $core->configs['routes'];
+			$definitions = $app->configs['routes'];
 			$routes = new Routes($definitions);
 		}
 

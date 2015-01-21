@@ -73,6 +73,8 @@ abstract class Controller extends Object
 		{
 			return \ICanBoogie\underscore($matches[1]);
 		}
+
+		return null;
 	}
 
 	/**

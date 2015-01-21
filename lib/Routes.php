@@ -287,6 +287,8 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 
 				return $id;
 			}
+
+			return null;
 		};
 
 		#
@@ -306,6 +308,8 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 
 				return $id;
 			}
+
+			return null;
 		};
 
 		list($static, $dynamic) = $this->sort_routes();
@@ -324,7 +328,7 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 
 		if (!$id)
 		{
-			return;
+			return null;
 		}
 
 		$query = $parsed['query'];

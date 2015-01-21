@@ -15,6 +15,7 @@ namespace ICanBoogie\Routing;
  * A route.
  *
  * @property-read Pattern $pattern The pattern of the route.
+ * @property-read string $controller The class name of the controller.
  * @property-read string|null $action Controller action.
  * @property-read string $id Route identifier.
  * @property-read string|null $location Redirection destination.
