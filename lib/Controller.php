@@ -93,6 +93,9 @@ abstract class Controller extends Object
 		return $this->request->context->route;
 	}
 
+	/**
+	 * @return Response
+	 */
 	protected function lazy_get_response()
 	{
 		return new Response;
@@ -195,5 +198,45 @@ abstract class Controller extends Object
 		}
 
 		return new RedirectResponse($url, $status, $headers);
+	}
+
+	/**
+	 * Forwards the request.
+	 *
+	 * @param Route|mixed $destination
+	 *
+	 * @return mixed
+	 */
+	protected function forward_to($destination)
+	{
+		if ($destination instanceof Route)
+		{
+			$route = $destination;
+			$route->pattern->match($this->request->uri, $captured);
+
+			$request = $this->request->change([
+
+				'path_params' => $captured
+
+			]);
+
+			$request->context->route = $route;
+
+			$controller_class = $route->controller;
+			$controller = new $controller_class;
+
+			return $controller($request);
+		}
+
+		if (is_object($destination))
+		{
+			$destination = "instance of " . get_class($destination);
+		}
+		else if (is_array($destination))
+		{
+			$destination = json_encode($destination);
+		}
+
+		throw new \InvalidArgumentException("Don't know how to forward to: $destination.");
 	}
 }
