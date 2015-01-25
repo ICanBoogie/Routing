@@ -1,4 +1,4 @@
-# Routing [![Build Status](https://secure.travis-ci.org/ICanBoogie/Routing.svg?branch=2.1)](http://travis-ci.org/ICanBoogie/Routing)
+# Routing [![Build Status](https://secure.travis-ci.org/ICanBoogie/Routing.svg?branch=master)](http://travis-ci.org/ICanBoogie/Routing)
 
 The Routing package provides an API to handle URL rewriting in native PHP. A request is redirected,
 or _mapped_, to a controller using a dispatcher and a collection of routes, which can be defined
@@ -531,7 +531,7 @@ clean the directory with the `make clean` command.
 
 The package is continuously tested by [Travis CI](http://about.travis-ci.org/).
 
-[![Build Status](https://secure.travis-ci.org/ICanBoogie/Routing.svg?branch=2.1)](http://travis-ci.org/ICanBoogie/Routing)
+[![Build Status](https://secure.travis-ci.org/ICanBoogie/Routing.svg?branch=master)](http://travis-ci.org/ICanBoogie/Routing)
 
 
 
