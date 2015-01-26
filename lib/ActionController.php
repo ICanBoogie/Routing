@@ -43,6 +43,31 @@ class ActionController extends Controller
 	 */
 	public function respond(Request $request)
 	{
+		list($method_name, $method_args) = $this->resolve_action_method($request);
+
+		$response = null;
+
+		new BeforeActionEvent($this, $response);
+
+		if (!$response)
+		{
+			$response = call_user_func_array([ $this, $method_name ], $method_args);
+		}
+
+		new ActionEvent($this, $response);
+
+		return $response;
+	}
+
+	/**
+	 * Resolves action method from request.
+	 *
+	 * @param Request $request
+	 *
+	 * @return array
+	 */
+	protected function resolve_action_method(Request $request)
+	{
 		$action = $this->action;
 
 		if (!$action)
@@ -58,19 +83,6 @@ class ActionController extends Controller
 			$method_name = 'any_' . $action;
 		}
 
-		#
-
-		$response = null;
-
-		new BeforeActionEvent($this, $response);
-
-		if (!$response)
-		{
-			$response = call_user_func_array([ $this, $method_name ], $method_args);
-		}
-
-		new ActionEvent($this, $response);
-
-		return $response;
+		return [ $method_name, $method_args ];
 	}
 }
