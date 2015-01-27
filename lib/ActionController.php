@@ -43,15 +43,14 @@ class ActionController extends Controller
 	 */
 	public function respond(Request $request)
 	{
-		list($method_name, $method_args) = $this->resolve_action_method($request);
-
+		$callable = $this->resolve_action($request);
 		$response = null;
 
 		new BeforeActionEvent($this, $response);
 
 		if (!$response)
 		{
-			$response = call_user_func_array([ $this, $method_name ], $method_args);
+			$response = $callable();
 		}
 
 		new ActionEvent($this, $response);
@@ -60,13 +59,13 @@ class ActionController extends Controller
 	}
 
 	/**
-	 * Resolves action method from request.
+	 * Resolves the action into a callable.
 	 *
 	 * @param Request $request
 	 *
-	 * @return array
+	 * @return callable
 	 */
-	protected function resolve_action_method(Request $request)
+	protected function resolve_action(Request $request)
 	{
 		$action = $this->action;
 
@@ -75,14 +74,22 @@ class ActionController extends Controller
 			throw new ActionNotDefined("Action not defined in route.");
 		}
 
-		$method_name = strtolower($request->method) . '_' . $action;
+		$method_name = 'action_' . strtolower($request->method) . '_' . $action;
 		$method_args = $request->path_params;
 
 		if (!method_exists($this, $method_name))
 		{
-			$method_name = 'any_' . $action;
+			$method_name = 'action_any_' . $action;
+
+			if (!method_exists($this, $method_name))
+			{
+				$method_name = 'action_' . $action;
+			}
 		}
 
-		return [ $method_name, $method_args ];
+		return function() use($method_name, $method_args)
+		{
+			return call_user_func_array([ $this, $method_name ], $method_args);
+		};
 	}
 }

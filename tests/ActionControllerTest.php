@@ -42,7 +42,7 @@ use ICanBoogie\Routing\ActionController;
 
 class A extends ActionController
 {
-	public function any_view($year, $month, $slug)
+	protected function action_view($year, $month, $slug)
 	{
 		$test = $this->request->test;
 		$test->assertEquals('view', $this->action);

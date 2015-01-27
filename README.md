@@ -1,10 +1,9 @@
 # Routing [![Build Status](https://secure.travis-ci.org/ICanBoogie/Routing.svg?branch=master)](http://travis-ci.org/ICanBoogie/Routing)
 
-The Routing package provides an API to handle URL rewriting in native PHP. A request is redirected,
-or _mapped_, to a controller using a dispatcher and a collection of routes, which can be defined
-using `routes` configuration fragments or at runtime using a collection. Controllers usually
-return a [Response][], but can also return a string—or an instance implementing `__toString()`—to
-produce a `text/html` response.
+The **Routing** package provides an API to handle URL rewriting in native PHP. A request is mapped
+to a route, which in turn gets dispatched to a controller, and possibly an action. If the
+process is successful a response is returned. Many events are fired during the process to allow
+event hooks to alter the request, the route, the controller, or the response.
 
 
 
@@ -339,7 +338,7 @@ return [
 
 The HTTP method is used as a prefix for the method handling the action. The prefix "any" is used
 for methods that handle any kind of HTTP method, they are a fallback when more accurate methods are
-not available.
+not available. If you don't care about that, you can omit the HTTP method.
 
 ```php
 <?php
@@ -348,12 +347,12 @@ use ICanBoogie\Routing\ActionController
 
 class AppController extends ActionController
 {
-	protected function any_contact()
+	protected function action_any_contact()
 	{
 		return new ContactForm;
 	}
 
-	protected function post_contact()
+	protected function action_post_contact()
 	{
 		$form = new ContactForm;
 		$request = $this->request;
@@ -373,7 +372,7 @@ class AppController extends ActionController
 		return $this->redirect($this->routes['contact:ok']);
 	}
 
-	protected function any_contact_success()
+	protected function action_contact_success()
 	{
 		return "Your message has been sent.";
 	}
@@ -381,9 +380,13 @@ class AppController extends ActionController
 ```
 
 The `ICanBoogie\Routing\ActionController::action:before` event of class
-[ActionController\BeforeActionEvent] if fired before the action method is invoked, the
-`ICanBoogie\Routing\ActionController::action` event of class
-[ActionController\ActionEvent] is fired after.
+[ActionController\BeforeActionEvent] is fired before the action method is invoked. Event hooks may
+use this event to alter to alter the request or the controller before the action is invoked. Event
+hooks my also use this event to provide a response and cancel the action altogether.
+
+The `ICanBoogie\Routing\ActionController::action` event of class [ActionController\ActionEvent]
+is fired after the action is executed. Event hooks may used this event to alter the response,
+ or replace it. The event is fired even if the response is empty.
 
 
 
