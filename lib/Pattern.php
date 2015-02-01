@@ -11,6 +11,7 @@
 
 namespace ICanBoogie\Routing;
 
+use ICanBoogie\Accessor\AccessorTrait;
 use ICanBoogie\PropertyNotReadable;
 
 /**
@@ -40,6 +41,8 @@ use ICanBoogie\PropertyNotReadable;
  */
 class Pattern
 {
+	use AccessorTrait;
+
 	/**
 	 * Parses a route pattern and returns an array of interleaved paths and parameters, the
 	 * parameter names and the regular expression for the specified pattern.
@@ -101,12 +104,13 @@ class Pattern
 			$params[] = $identifier;
 		}
 
-		if (!$catchall)
+		if ($catchall)
 		{
-			$regex .= '$';
+			$regex .= '(.+)';
+			$params[] = 'all';
 		}
 
-		$regex .= '#';
+		$regex .= '$#';
 
 		return [ $interleaved, $params, $regex ];
 	}
@@ -152,28 +156,48 @@ class Pattern
 	 *
 	 * @var string
 	 */
-	protected $pattern;
+	private $pattern;
+
+	protected function get_pattern()
+	{
+		return $this->pattern;
+	}
 
 	/**
 	 * Interleaved pattern.
 	 *
 	 * @var array
 	 */
-	protected $interleaved;
+	private $interleaved;
+
+	protected function get_interleaved()
+	{
+		return $this->interleaved;
+	}
 
 	/**
 	 * Params of the pattern.
 	 *
 	 * @var array
 	 */
-	protected $params;
+	private $params;
+
+	protected function get_params()
+	{
+		return $this->params;
+	}
 
 	/**
 	 * Regex of the pattern.
 	 *
 	 * @var string
 	 */
-	protected $regex;
+	private $regex;
+
+	protected function get_regex()
+	{
+		return $this->regex;
+	}
 
 	/**
 	 * Initializes the {@link $pattern}, {@link $interleaved}, {@link $params} and {@link $regex}
@@ -201,59 +225,65 @@ class Pattern
 		return $this->pattern;
 	}
 
-	public function __get($property)
-	{
-		static $gettable = [ 'pattern', 'interleaved', 'params', 'regex' ];
-
-		if (!in_array($property, $gettable))
-		{
-			throw new PropertyNotReadable([ $property, $this ]);
-		}
-
-		return $this->$property;
-	}
-
 	/**
 	 * Formats a pattern with the specified values.
 	 *
-	 * @param mixed $values The values to format the pattern, either as an array or an object. If
-	 * value is an instance of {@link ToSlug} the `to_slug()` method is used to transform the
-	 * instance into a URL component.
+	 * @param array|object $values The values to format the pattern, either as an array or an
+	 * object. If value is an instance of {@link ToSlug} the `to_slug()` method is used to
+	 * transform the instance into a URL component.
 	 *
 	 * @return string
 	 *
 	 * @throws PatternRequiresValues in attempt to format a pattern requiring values without
 	 * providing any.
 	 */
-	public function format($values=null)
+	public function format($values = null)
 	{
-		if (!$values && $this->params)
-		{
-			throw new PatternRequiresValues($this);
-		}
+		$this->assert_values($values);
 
 		$url = '';
 		$is_array = is_array($values);
 
 		foreach ($this->interleaved as $i => $value)
 		{
-			if ($i % 2)
-			{
-				$key = $value[0];
-				$value = $is_array ? $values[$key] : $values->$key;
-
-				if ($value instanceof ToSlug)
-				{
-					$value = $value->to_slug();
-				}
-
-				$value = urlencode($value);
-			}
-
-			$url .= $value;
+			$url .= $i % 2 ? $this->resolve_part($values, $is_array, $value[0]) : $value;
 		}
 
 		return $url;
+	}
+
+	/**
+	 * Asserts that the values provided are okay to format the pattern.
+	 *
+	 * @param $values
+	 */
+	private function assert_values($values)
+	{
+		if (!$values && $this->params)
+		{
+			throw new PatternRequiresValues($this);
+		}
+	}
+
+	/**
+	 * Resolves part of the formatted URL.
+	 *
+	 * @param array|object $container
+	 * @param bool $is_array
+	 * @param string $key
+	 *
+	 * @return string
+	 */
+	private function resolve_part($container, $is_array, $key)
+	{
+		$value = $is_array ? $container[$key] : $container->$key;
+
+		if ($value instanceof ToSlug)
+		{
+			$value = $value->to_slug();
+		}
+
+		return urlencode($value);
 	}
 
 	/**
@@ -262,10 +292,12 @@ class Pattern
 	 * @param string $pathname The pathname.
 	 * @param array $captured The parameters captured from the pathname.
 	 *
-	 * @return boolean `true` if the pathname matches the pattern, `false` otherwise.
+	 * @return bool `true` if the pathname matches the pattern, `false` otherwise.
 	 */
-	public function match($pathname, &$captured=null)
+	public function match($pathname, &$captured = null)
 	{
+		$captured = [];
+
 		#
 		# `params` is empty if the pattern is a plain string,
 		# thus we can simply compare strings.

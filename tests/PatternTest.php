@@ -15,6 +15,21 @@ use ICanBoogie\Routing\PatternTest\WithToSlug;
 
 class PatternTest extends \PHPUnit_Framework_TestCase
 {
+	public function test_is_pattern()
+	{
+		$this->assertTrue(Pattern::is_pattern('/<year:\d{4}>'));
+		$this->assertTrue(Pattern::is_pattern('/articles/:slug'));
+		$this->assertFalse(Pattern::is_pattern('/path/to/somewhere.html'));
+	}
+
+	public function test_from_should_return_same()
+	{
+		$s = '/articles/:slug';
+		$p = Pattern::from($s);
+		$this->assertSame($p, Pattern::from($s));
+		$this->assertSame($p, Pattern::from($p));
+	}
+
 	public function testToString()
 	{
 		$s = '/news/:year-:month-:slug.:format';
@@ -64,6 +79,25 @@ class PatternTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals('slug', $p->params[1]);
 
 		$this->assertEquals('#^/blog/([^/]+)/([^\.]+)\.html$#', $p->regex);
+	}
+
+	public function test_should_match_pathname()
+	{
+		$pathname = '/gifs/cats.html';
+		$pattern = Pattern::from($pathname);
+		$this->assertEquals($pathname, $pattern->pattern);
+		$this->assertTrue($pattern->match($pathname));
+	}
+
+	public function test_should_catch_them_all()
+	{
+		$pattern = Pattern::from('/articles/2014-*');
+		$this->assertTrue($pattern->match('/articles/2014-madonna', $capture));
+		$this->assertEquals([ 'all' => 'madonna' ], $capture);
+		$this->assertTrue($pattern->match('/articles/2014-lady-gaga', $capture));
+		$this->assertEquals([ 'all' => 'lady-gaga' ], $capture);
+		$this->assertFalse($pattern->match('/articles/2015-lady-gaga', $capture));
+		$this->assertEmpty($capture);
 	}
 
 	public function testMatchingAndCapture()
@@ -123,7 +157,7 @@ class PatternTest extends \PHPUnit_Framework_TestCase
 
 	public function test_unnamed_params()
 	{
-		$pattern = Pattern::from("/admin/dealers/<\d+>/edit/<\d+>");
+		$pattern = Pattern::from('/admin/dealers/<\d+>/edit/<\d+>');
 
 		$this->assertEquals("/admin/dealers/123/edit/456", $pattern->format([ 123, 456 ]));
 	}
