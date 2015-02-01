@@ -1,4 +1,11 @@
-# Routing [![Build Status](https://secure.travis-ci.org/ICanBoogie/Routing.svg?branch=master)](http://travis-ci.org/ICanBoogie/Routing)
+# Routing
+
+[![Release](https://img.shields.io/github/release/ICanBoogie/Routing.svg)](https://github.com/ICanBoogie/Routing/releases)
+[![Build Status](https://img.shields.io/travis/ICanBoogie/Routing/2.2.svg)](http://travis-ci.org/ICanBoogie/Routing)
+[![HHVM](https://img.shields.io/hhvm/icanboogie/routing/2.2.svg)](http://hhvm.h4cc.de/package/icanboogie/routing)
+[![Code Quality](https://img.shields.io/scrutinizer/g/ICanBoogie/Routing/2.2.svg)](https://scrutinizer-ci.com/g/ICanBoogie/Routing)
+[![Code Coverage](https://img.shields.io/coveralls/ICanBoogie/Routing/2.2.svg)](https://coveralls.io/r/ICanBoogie/Routing)
+[![Packagist](https://img.shields.io/packagist/dt/icanboogie/routing.svg)](https://packagist.org/packages/icanboogie/routing)
 
 The **Routing** package provides an API to handle URL rewriting in native PHP. A request is mapped
 to a route, which in turn gets dispatched to a controller, and possibly an action. If the
@@ -534,7 +541,8 @@ clean the directory with the `make clean` command.
 
 The package is continuously tested by [Travis CI](http://about.travis-ci.org/).
 
-[![Build Status](https://secure.travis-ci.org/ICanBoogie/Routing.svg?branch=master)](http://travis-ci.org/ICanBoogie/Routing)
+[![Build Status](https://img.shields.io/travis/ICanBoogie/Routing/2.2.svg)](http://travis-ci.org/ICanBoogie/Routing)
+[![Code Coverage](https://img.shields.io/coveralls/ICanBoogie/Routing/2.2.svg)](https://coveralls.io/r/ICanBoogie/Routing)
 
 
 
