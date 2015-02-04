@@ -11,14 +11,14 @@
 
 namespace ICanBoogie\Routing;
 
-use ICanBoogie\GetterTrait;
+use ICanBoogie\Accessor\AccessorTrait;
 
 /**
  * Exception thrown in attempt to format a pattern requiring values without providing any.
  */
 class PatternRequiresValues extends \InvalidArgumentException implements Exception
 {
-	use GetterTrait;
+	use AccessorTrait;
 
 	private $pattern;
 

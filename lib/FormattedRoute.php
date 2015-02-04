@@ -11,6 +11,8 @@
 
 namespace ICanBoogie\Routing;
 
+use ICanBoogie\Accessor\AccessorTrait;
+
 /**
  * Representation of a formatted route.
  *
@@ -20,7 +22,7 @@ namespace ICanBoogie\Routing;
  */
 class FormattedRoute
 {
-	use \ICanBoogie\GetterTrait;
+	use AccessorTrait;
 
 	/**
 	 * The relative URL created by {@link Route::format()}.

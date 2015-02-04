@@ -39,7 +39,7 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
 		$request = Request::from("/blog/2014-12-my-awesome-post.html");
 		$response = $dispatcher($request);
 		$this->assertInstanceOf('ICanBoogie\HTTP\Response', $response);
-		$this->assertTrue($response->is_successful);
+		$this->assertTrue($response->status->is_successful);
 		$this->assertEquals('HERE', $response->body);
 	}
 
@@ -59,7 +59,7 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
 		$request->test = $this;
 		$response = $dispatcher($request);
 		$this->assertInstanceOf('ICanBoogie\HTTP\Response', $response);
-		$this->assertTrue($response->is_successful);
+		$this->assertTrue($response->status->is_successful);
 		$this->assertEquals('HERE', $response->body);
 	}
 }

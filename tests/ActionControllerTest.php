@@ -31,7 +31,7 @@ class ActionControllerTest extends \PHPUnit_Framework_TestCase
 		$request->test = $this;
 		$response = $dispatcher($request);
 		$this->assertInstanceOf('ICanBoogie\HTTP\Response', $response);
-		$this->assertTrue($response->is_successful);
+		$this->assertTrue($response->status->is_successful);
 		$this->assertEquals('HERE', $response->body);
 	}
 }

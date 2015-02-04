@@ -11,6 +11,8 @@
 
 namespace ICanBoogie\Routing;
 
+use ICanBoogie\Accessor\AccessorTrait;
+
 /**
  * Exception thrown when a route does not exists.
  *
@@ -18,7 +20,7 @@ namespace ICanBoogie\Routing;
  */
 class RouteNotDefined extends \Exception implements Exception
 {
-	use \ICanBoogie\GetterTrait;
+	use AccessorTrait;
 
 	private $id;
 
