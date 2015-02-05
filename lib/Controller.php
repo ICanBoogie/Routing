@@ -56,6 +56,7 @@ use ICanBoogie\Routing\Controller\RespondEvent;
  * provided by the icanboogie/module package)
  * @property-read \ICanBoogie\ActiveRecord\Model $model The primary model of the module. (This
  * getter is provided by the icanboogie/module package)
+ * @property-read \ICanBoogie\Events $events Provided through prototype getters or through `$app`.
  */
 abstract class Controller extends Object
 {
