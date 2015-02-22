@@ -1,6 +1,6 @@
 # Routing
 
-[![Release](https://img.shields.io/github/release/ICanBoogie/Routing.svg)](https://github.com/ICanBoogie/Routing/releases)
+[![Release](https://img.shields.io/packagist/v/icanboogie/routing.svg)](https://packagist.org/packages/icanboogie/routing)
 [![Build Status](https://img.shields.io/travis/ICanBoogie/Routing/master.svg)](http://travis-ci.org/ICanBoogie/Routing)
 [![HHVM](https://img.shields.io/hhvm/icanboogie/routing.svg)](http://hhvm.h4cc.de/package/icanboogie/routing)
 [![Code Quality](https://img.shields.io/scrutinizer/g/ICanBoogie/Routing/master.svg)](https://scrutinizer-ci.com/g/ICanBoogie/Routing)
@@ -90,68 +90,8 @@ The [PatternNotDefined][] exception is thrown if the pattern is not defined, and
 
 ### Defining routes using `routes` configuration fragments
 
-The most efficient way to define routes is through `routes` configuration fragments, because
-it doesn't require application logic (additional code) and the synthesized configuration can be
-cached.
-
-```php
-<?php
-
-// config/routes.php
-
-use ICanBoogie\HTTP\Request;
-
-return [
-
-	'home' => [
-
-		'pattern' => '/',
-		'controller' => 'Website\Routing\Controller'
-
-	],
-
-	'articles' => [
-
-		'pattern' => '/articles',
-		'controller' => 'Website\Modules\Blog\Controller'
-
-	],
-
-	'articles:view' => [
-
-		'pattern' => '/articles/:year-:month-:slug.html',
-		'controller' => 'Website\Modules\Blog\Controller'
-
-	],
-
-	'articles:new' => [
-
-		'pattern' => '/articles/new',
-		'controller' => 'Website\Modules\Blog\Controller',
-		'via' => Request::METHOD_GET
-
-	],
-
-	'articles:save' => [
-
-		'pattern' => '/articles',
-		'controller' => 'Website\Modules\Blog\Controller',
-		'via' => [ Request::METHOD_POST, Request::METHOD_PATCH ]
-
-	],
-
-	'articles:delete' => [
-
-		'pattern' => '/articles/<nid:\d+>',
-		'controller' => 'Website\Modules\Blog\Controller',
-		'via' => Request::METHOD_DELETE
-
-	]
-
-];
-```
-
-**Note:** Using configuration fragments requires [ICanBoogie][].
+Routes can be defined using `routes` configuration fragments, but for that the package needs to be
+bound to [ICanBoogie][] using [icanboogie/bind-routing][].
 
 
 
@@ -556,6 +496,7 @@ ICanBoogie/Routing is licensed under the New BSD License - See the [LICENSE](LIC
 
 
 
+[icanboogie/bind-routing]: https://github.com/ICanBoogie/bind-routing
 [icanboogie/view]: https://github.com/ICanBoogie/View
 [ActionController]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionController.html
 [ActionController\BeforeActionEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionController.BeforeActionEvent.html
