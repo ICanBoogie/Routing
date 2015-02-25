@@ -7,7 +7,7 @@
 [![Code Coverage](https://img.shields.io/coveralls/ICanBoogie/Routing/master.svg)](https://coveralls.io/r/ICanBoogie/Routing)
 [![Packagist](https://img.shields.io/packagist/dt/icanboogie/routing.svg)](https://packagist.org/packages/icanboogie/routing)
 
-The **Routing** package provides an API to handle URL rewriting in native PHP. A request is mapped
+The **Routing** package handles URL rewriting in native PHP. A request is mapped
 to a route, which in turn gets dispatched to a controller, and possibly an action. If the
 process is successful a response is returned. Many events are fired during the process to allow
 event hooks to alter the request, the route, the controller, or the response.
@@ -18,8 +18,8 @@ event hooks to alter the request, the route, the controller, or the response.
 
 ## Dispatching a request
 
-The package provides a request dispatcher that can be used stand-alone, or as a sub-dispatcher
-for [ICanBoogie\HTTP\Dispatcher][].
+The package provides a request dispatcher that can be used on its own, or as a sub-dispatcher
+of a [ICanBoogie\HTTP\Dispatcher][] instance.
 
 ```php
 <?php
@@ -52,13 +52,31 @@ $response = $dispatcher($request);
 $response();
 ```
 
+
+
+
+
+### Before a route is dispatched
+
 Before the route is dispatched the `ICanBoogie\Routing\Dispatcher::dispatch:before` event of class
 [Dispatcher\BeforeDispatchEvent][] is fired. Event hooks may use this event to provide a response
 and cancel the dispatching.
 
+
+
+
+
+### Rescuing an exception
+
 If an exception is raised during the dispatch, the `ICanBoogie\Routing\Route::rescue` event
 of class [Route\RescueEvent][] is fired. Event hooks may use this event to rescue the route and
 provide a response, or replace the exception that will be thrown if the rescue fails.
+
+
+
+
+
+### A route is dispatched
 
 The `ICanBoogie\Routing\Dispatcher::dispatch` event of class [Dispatcher\DispatchEvent][] is fired
 if the route has been dispatched successfully. Event hooks may use this event to alter the
@@ -71,14 +89,14 @@ response.
 ## Defining routes
 
 Routes are usually defined in `routes` configuration fragments, but can also be defined during
-runtime. The pattern is required to define a route, and the controller too if no location
+runtime. A pattern is required to define a route, and the controller too if no location
 is defined. The following options are available:
 
 - `class`: If the route should be instantiated from a class other than [Route][].
 - `location`: To redirect the route to another location.
 - `via`: If the route needs to respond to one or more HTTP methods.
 
-The options used to define a route are copied in its instance, even custom ones, which might be
+The options used to define a route are copied to its instance, even custom ones, which might be
 useful to provide additional information to a controller.
 
 The [PatternNotDefined][] exception is thrown if the pattern is not defined, and the
@@ -90,8 +108,7 @@ The [PatternNotDefined][] exception is thrown if the pattern is not defined, and
 
 ### Defining routes using `routes` configuration fragments
 
-Routes can be defined using `routes` configuration fragments, but for that the package needs to be
-bound to [ICanBoogie][] using [icanboogie/bind-routing][].
+If the package is bound to [ICanBoogie][] using [icanboogie/bind-routing][], routes can be defined using `routes` configuration fragments. Refer to [icanboogie/bind-routing][] documentation to learn more about this feature.
 
 
 
@@ -328,7 +345,7 @@ class AppController extends ActionController
 
 The `ICanBoogie\Routing\ActionController::action:before` event of class
 [ActionController\BeforeActionEvent] is fired before the action method is invoked. Event hooks may
-use this event to alter to alter the request or the controller before the action is invoked. Event
+use this event to alter the request or the controller before the action is invoked. Event
 hooks my also use this event to provide a response and cancel the action altogether.
 
 The `ICanBoogie\Routing\ActionController::action` event of class [ActionController\ActionEvent]
@@ -364,7 +381,7 @@ catch (\Exception $e)
 The following exceptions are defined:
 
 - [ActionNotDefined][]: Thrown when an action is not defined, for instance when a route using
-an [ActionController][] has an empty `action` property'.
+an [ActionController][] has an empty `action` property.
 - [ControllerNotDefined][]: Thrown when trying to define a route without a controller nor location.
 - [PatternNotDefined][]: Thrown when trying to define a route without pattern.
 - [RouteNotDefined][]: Thrown when trying to obtain a route that is not defined in a [Routes][] instance.

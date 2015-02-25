@@ -15,6 +15,8 @@ use ICanBoogie\Accessor\AccessorTrait;
 
 /**
  * Exception thrown in attempt to format a pattern requiring values without providing any.
+ *
+ * @property-read string $pattern
  */
 class PatternRequiresValues extends \InvalidArgumentException implements Exception
 {
@@ -27,14 +29,9 @@ class PatternRequiresValues extends \InvalidArgumentException implements Excepti
 		return $this->pattern;
 	}
 
-	public function __construct(Pattern $pattern, $message=null, $code=500, \Exception $previous=null)
+	public function __construct(Pattern $pattern, $message = "The pattern requires values to be formatted.", $code = 500, \Exception $previous = null)
 	{
 		$this->pattern = $pattern;
-
-		if (!$message)
-		{
-			$message = "The pattern requires values to be formatted.";
-		}
 
 		parent::__construct($message, $code, $previous);
 	}

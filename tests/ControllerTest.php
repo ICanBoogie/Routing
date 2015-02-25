@@ -12,9 +12,93 @@
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\Response;
 
 class ControllerTest extends \PHPUnit_Framework_TestCase
 {
+	public function test_lazy_get_response()
+	{
+		$controller = $this
+			->getMockBuilder('ICanBoogie\Routing\Controller')
+			->disableOriginalConstructor()
+			->getMockForAbstractClass();
+
+		/* @var $controller Controller */
+
+		$response = $controller->response;
+
+		$this->assertInstanceOf('ICanBoogie\HTTP\Response', $response);
+		$this->assertSame($response, $controller->response);
+	}
+
+	public function test_invoke_should_return_response_from_respond()
+	{
+		$request = Request::from('/');
+
+		$response = new Response;
+
+		$controller = $this
+			->getMockBuilder('ICanBoogie\Routing\Controller')
+			->disableOriginalConstructor()
+			->setMethods([ 'respond' ])
+			->getMockForAbstractClass();
+		$controller
+			->expects($this->once())
+			->method('respond')
+			->willReturn($response);
+
+		/* @var $controller Controller */
+
+		$this->assertSame($response, $controller($request));
+	}
+
+	public function test_invoke_should_return_string()
+	{
+		$request = Request::from('/');
+
+		$body = "some string" . uniqid();
+
+		$controller = $this
+			->getMockBuilder('ICanBoogie\Routing\Controller')
+			->disableOriginalConstructor()
+			->setMethods([ 'respond' ])
+			->getMockForAbstractClass();
+		$controller
+			->expects($this->once())
+			->method('respond')
+			->willReturn($body);
+
+		/* @var $controller Controller */
+
+		$response = $controller($request);
+		$this->assertSame($body, $response);
+	}
+
+	public function test_invoke_should_return_string_in_response()
+	{
+		$request = Request::from('/');
+
+		$body = "some string" . uniqid();
+
+		$controller = $this
+			->getMockBuilder('ICanBoogie\Routing\Controller')
+			->disableOriginalConstructor()
+			->setMethods([ 'respond' ])
+			->getMockForAbstractClass();
+		$controller
+			->expects($this->once())
+			->method('respond')
+			->willReturn($body);
+
+		/* @var $controller Controller */
+
+		$response = $controller->response;
+		$this->assertInstanceOf('ICanBoogie\HTTP\Response', $response);
+		$response2 = $controller($request);
+		$this->assertSame($response, $response2);
+		$this->assertSame($body, $response2->body);
+	}
+
 	public function test_closure()
 	{
 		$routes = new Routes([
