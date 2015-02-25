@@ -183,7 +183,7 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 			$class = $properties['class'];
 		}
 
-		return $this->instances[$id] = new $class($properties['pattern'], $properties);
+		return $this->instances[$id] = new $class($this, $properties['pattern'], $properties);
 	}
 
 	/**
