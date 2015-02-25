@@ -204,6 +204,62 @@ $url->route === $route;    // true
 
 
 
+### Assigning a formatting value to a route
+
+The `assign()` method is used to assign a formatting value to a route. It returns an updated
+clone of the route which can be formatted without requiring a formatting value. This is very
+helpful when you need to pass around an instance of a route that is ready to be formatted.
+
+The following example demonstrates how the `assign()` method can be used to assign a formatting
+value to a route, that can later be used like a URL string:
+
+```php
+<?php
+
+use ICanBoogie\Routing\Routes;
+
+$routes = new Routes([
+
+	'article:show' => [
+	
+		'pattern' => '/articles/<year:\d{4}>-<month:\d{2}>.html',
+		'controller' => 'ArticlesController#show'
+	
+	]
+
+]);
+
+$route = $routes['article:show']->assign([ 'year' => 2015, 'month' => '02' ]);
+$routes['article:show'] === $routes['article:show'];   // true
+$route === $routes['article:show'];                    // false
+$route->formatting_value;                              // [ 'year' => 2015, 'month' => 02 ]
+$route->has_formatting_value;                          // true
+
+echo $route;
+// /articles/2015-02.html
+echo $route->absolute_url;
+// http://icanboogie.org/articles/2015-02.html
+echo $route->format([ 'year' => 2016, 'month' => 10 ]);
+// /articles/2016-10.html
+```
+
+**Note:** Assigning a formatting value to an _assigned_ route creates another instance of the
+route. Also, the formatting value is reset when an _assigned_ route is cloned.
+
+Whether a route has an assigned formatting value or not, the `format()` method still requires
+a formatting value, it does *not* use the assign formatting value. Thus, if you want to format
+a route with its assigned formatting value use the `formatting_value` property:
+
+```php
+<?php
+
+echo $route->format($route->formatting_value);
+```
+
+
+
+
+
 ## Controllers
 
 Previous examples demonstrated how closures could be used to handle routes. Closures are

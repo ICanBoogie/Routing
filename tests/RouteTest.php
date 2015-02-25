@@ -43,15 +43,18 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 
 	public function testRouteCallbackResponse()
 	{
+		$request = Request::from('/');
+
 		$routes = new Routes;
-		$routes->get('/', function(Request $request)
+		$routes->get('/', function(Request $r) use ($request)
 		{
+			$this->assertSame($request, $r);
+
 			return 'madonna';
 		});
 
 		$dispatcher = new Dispatcher($routes);
-
-		$response = $dispatcher(Request::from(array('path' => '/', 'method' => 'GET')));
+		$response = $dispatcher($request);
 
 		$this->assertInstanceOf('ICanBoogie\HTTP\Response', $response);
 		$this->assertEquals('madonna', $response->body);
@@ -99,5 +102,59 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 		$expected = "/my-awesome-url.html";
 		$route = new Route($this->routes, $expected, []);
 		$this->assertEquals("http://icanboogie.org" . $expected, $route->absolute_url);
+	}
+
+	/**
+	 * @dataProvider provide_invalid_construct_properties
+	 * @expectedException \InvalidArgumentException
+	 *
+	 * @param $properties
+	 */
+	public function test_should_throw_exception_on_invalid_construct_property($properties)
+	{
+		new Route($this->routes, '/', $properties);
+	}
+
+	public function provide_invalid_construct_properties()
+	{
+		return [
+
+			[ [ 'formatting_value' => uniqid() ] ],
+			[ [ 'routes' => uniqid() ] ],
+			[ [ 'url' => uniqid() ] ],
+			[ [ 'absolute_url' => uniqid() ] ]
+
+		];
+	}
+
+	public function test_with()
+	{
+		$year = uniqid();
+		$month = uniqid();
+		$formatting_value = [ 'year' => $year, 'month' => $month ];
+		$r1 = new Route($this->routes, '/:year-:month.html', []);
+		$this->assertNull($r1->formatting_value);
+		$this->assertFalse($r1->has_formatting_value);
+
+		$r2 = $r1->assign($formatting_value);
+		$this->assertInstanceOf('ICanBoogie\Routing\Route', $r2);
+		$this->assertNotSame($r1, $r2);
+		$this->assertSame($formatting_value, $r2->formatting_value);
+		$this->assertTrue($r2->has_formatting_value);
+
+		$expected_url = "/{$year}-{$month}.html";
+
+		$this->assertSame($expected_url, $r2->url);
+		$this->assertSame($expected_url, (string) $r2);
+	}
+
+	public function test_should_reset_formatting_value_on_clone()
+	{
+		$formatting_value = [ 'a' => uniqid() ];
+		$route = (new Route($this->routes, '/', []))->assign($formatting_value);
+
+		$route2 = clone $route;
+		$this->assertNull($route2->formatting_value);
+		$this->assertFalse($route2->has_formatting_value);
 	}
 }

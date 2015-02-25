@@ -25,9 +25,13 @@ use ICanBoogie\Object;
  * @property-read string|array|null $via The supported HTTP methods.
  * @property-read string $url The contextualized URL of the route.
  * @property-read string $absolute_url The contextualized absolute URL of the route.
+ * @property-read mixed $formatting_value The value used to format the route.
+ * @property-read bool $has_formatting_value `true` if the route has a formatting value, `false` otherwise.
  */
 class Route extends Object
 {
+	static protected $invalid_construct_properties = [ 'formatting_value', 'routes', 'url', 'absolute_url' ];
+
 	/**
 	 * Pattern of the route.
 	 *
@@ -103,6 +107,33 @@ class Route extends Object
 	}
 
 	/**
+	 * Formatting value.
+	 *
+	 * @var mixed
+	 */
+	private $formatting_value;
+
+	/**
+	 * Returns the formatting value.
+	 *
+	 * @return mixed
+	 */
+	protected function get_formatting_value()
+	{
+		return $this->formatting_value;
+	}
+
+	/**
+	 * Whether the route has a formatting value.
+	 *
+	 * @return bool `true` if the route has a formatting value, `false` otherwise.
+	 */
+	protected function get_has_formatting_value()
+	{
+		return $this->formatting_value !== null;
+	}
+
+	/**
 	 * The route collection this route belongs to.
 	 *
 	 * @var Routes
@@ -121,15 +152,17 @@ class Route extends Object
 	 */
 	protected function get_url()
 	{
+		// @codeCoverageIgnoreStart
 		if (isset($this->url_provider))
 		{
 			$class = $this->url_provider;
 			$provider = new $class();
 
-			return $provider($this);
+			return $provider($this, $this->formatting_value);
 		}
+		// @codeCoverageIgnoreEnd
 
-		return $this->format()->url;
+		return $this->format($this->formatting_value)->url;
 	}
 
 	/**
@@ -139,7 +172,7 @@ class Route extends Object
 	 */
 	protected function get_absolute_url()
 	{
-		return $this->format()->absolute_url;
+		return $this->format($this->formatting_value)->absolute_url;
 	}
 
 	/**
@@ -156,20 +189,48 @@ class Route extends Object
 
 		unset($properties['pattern']);
 
+		$this->assert_properties_are_valid($properties, self::$invalid_construct_properties);
+
 		foreach ($properties as $property => $value)
 		{
 			$this->$property = $value;
 		}
 	}
 
+	public function __clone()
+	{
+		$this->formatting_value = null;
+	}
+
 	/**
-	 * Returns the pattern of the route.
+	 * Formats a route into a relative URL using its formatting value.
 	 *
 	 * @return string
 	 */
 	public function __toString()
 	{
-		return (string) $this->pattern;
+		return (string) $this->url;
+	}
+
+	/**
+	 * Asserts that properties are valid.
+	 *
+	 * @param array $properties
+	 * @param array $invalid
+	 *
+	 * @throws \InvalidArgumentException if a property is not valid.
+	 */
+	protected function assert_properties_are_valid(array $properties, array $invalid)
+	{
+		$invalid = array_combine($invalid, $invalid);
+		$invalid = array_intersect_key($properties, $invalid);
+
+		if (!$invalid)
+		{
+			return;
+		}
+
+		throw new \InvalidArgumentException("Invalid construct property: " . implode(', ', $invalid));
 	}
 
 	/**
@@ -184,5 +245,20 @@ class Route extends Object
 	public function format($values = null)
 	{
 		return new FormattedRoute($this->pattern->format($values), $this);
+	}
+
+	/**
+	 * Assigns a formatting value to a route.
+	 *
+	 * @param mixed $formatting_value A formatting value.
+	 *
+	 * @return Route A new route bound to a formatting value.
+	 */
+	public function assign($formatting_value)
+	{
+		$clone = clone $this;
+		$clone->formatting_value = $formatting_value;
+
+		return $clone;
 	}
 }
