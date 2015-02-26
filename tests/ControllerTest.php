@@ -13,9 +13,26 @@ namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
+use ICanBoogie\Routing\ControllerTest\MySampleController;
 
 class ControllerTest extends \PHPUnit_Framework_TestCase
 {
+	public function test_should_get_name()
+	{
+		$controller = new MySampleController;
+		$this->assertEquals('my_sample', $controller->name);
+	}
+
+	public function test_should_not_get_name()
+	{
+		$controller = $this
+			->getMockBuilder('ICanBoogie\Routing\Controller')
+			->disableOriginalConstructor()
+			->getMockForAbstractClass();
+
+		$this->assertNull($controller->name);
+	}
+
 	public function test_lazy_get_response()
 	{
 		$controller = $this
@@ -152,7 +169,6 @@ namespace ICanBoogie\Routing\ControllerTest;
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Routing\Controller;
-use ICanBoogie\Routing\HubControllerInterface;
 
 class MySampleController extends Controller
 {

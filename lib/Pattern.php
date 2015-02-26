@@ -12,7 +12,6 @@
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\Accessor\AccessorTrait;
-use ICanBoogie\PropertyNotReadable;
 
 /**
  * Representation of a route pattern.
@@ -53,10 +52,6 @@ class Pattern
 	 */
 	static private function parse($pattern)
 	{
-		$regex = '#^';
-		$interleaved = [];
-		$params = [];
-		$n = 0;
 		$catchall = false;
 
 		if ($pattern{strlen($pattern) - 1} == '*')
@@ -66,6 +61,32 @@ class Pattern
 		}
 
 		$parts = preg_split('#(:\w+|<(\w+:)?([^>]+)>)#', $pattern, -1, PREG_SPLIT_DELIM_CAPTURE);
+		list($interleaved, $params, $regex) = self::parse_parts($parts);
+
+		if ($catchall)
+		{
+			$regex .= '(.+)';
+			$params[] = 'all';
+		}
+
+		$regex .= '$#';
+
+		return [ $interleaved, $params, $regex ];
+	}
+
+	/**
+	 * Parses pattern parts.
+	 *
+	 * @param array $parts
+	 *
+	 * @return array
+	 */
+	static private function parse_parts(array $parts)
+	{
+		$regex = '#^';
+		$interleaved = [];
+		$params = [];
+		$n = 0;
 
 		for ($i = 0, $j = count($parts); $i < $j ;)
 		{
@@ -104,15 +125,17 @@ class Pattern
 			$params[] = $identifier;
 		}
 
-		if ($catchall)
-		{
-			$regex .= '(.+)';
-			$params[] = 'all';
-		}
-
-		$regex .= '$#';
-
 		return [ $interleaved, $params, $regex ];
+	}
+
+	static protected function read_value_from_array($container, $key)
+	{
+		return $container[$key];
+	}
+
+	static protected function read_value_from_object($container, $key)
+	{
+		return $container->$key;
 	}
 
 	/**
@@ -239,45 +262,48 @@ class Pattern
 	 */
 	public function format($values = null)
 	{
-		$this->assert_values($values);
+		if (!$this->params)
+		{
+			return $this->pattern;
+		}
 
+		if (!$values)
+		{
+			throw new PatternRequiresValues($this);
+		}
+
+		return $this->format_parts($values);
+	}
+
+	/**
+	 * Formats pattern parts.
+	 *
+	 * @param array|object $container
+	 *
+	 * @return string
+	 */
+	private function format_parts($container)
+	{
 		$url = '';
-		$is_array = is_array($values);
+		$method = 'read_value_from_' . (is_array($container) ? 'array' : 'object');
 
 		foreach ($this->interleaved as $i => $value)
 		{
-			$url .= $i % 2 ? $this->resolve_part($values, $is_array, $value[0]) : $value;
+			$url .= $i % 2 ? $this->format_part(self::$method($container, $value[0])) : $value;
 		}
 
 		return $url;
 	}
 
 	/**
-	 * Asserts that the values provided are okay to format the pattern.
+	 * Formats pattern part.
 	 *
-	 * @param $values
-	 */
-	private function assert_values($values)
-	{
-		if (!$values && $this->params)
-		{
-			throw new PatternRequiresValues($this);
-		}
-	}
-
-	/**
-	 * Resolves part of the formatted URL.
-	 *
-	 * @param array|object $container
-	 * @param bool $is_array
-	 * @param string $key
+	 * @param mixed $value
 	 *
 	 * @return string
 	 */
-	private function resolve_part($container, $is_array, $key)
+	private function format_part($value)
 	{
-		$value = $is_array ? $container[$key] : $container->$key;
-
 		if ($value instanceof ToSlug)
 		{
 			$value = $value->to_slug();

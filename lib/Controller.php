@@ -49,7 +49,7 @@ use ICanBoogie\Routing\Controller\RespondEvent;
  * @property-read string $name The name of the controller.
  * @property-read Request $request The request being dispatched.
  * @property-read Route $route The route being dispatched.
- * @property Response $response.
+ * @property Response $response
  * @property-read \ICanBoogie\Core $app The application.
  *
  * @property-read \ICanBoogie\Module $module The module defining the route. (This getter is
@@ -167,7 +167,7 @@ abstract class Controller extends Object
 	 *
 	 * @return mixed
 	 */
-	public function last_chance_get($property, &$success)
+	protected function last_chance_get($property, &$success)
 	{
 		try
 		{
@@ -193,7 +193,7 @@ abstract class Controller extends Object
 	 *
 	 * @return RedirectResponse
 	 */
-	public function redirect($url, $status=302, array $headers=[])
+	public function redirect($url, $status = 302, array $headers = [])
 	{
 		if ($url instanceof Route)
 		{

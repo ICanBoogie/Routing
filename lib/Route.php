@@ -152,16 +152,6 @@ class Route extends Object
 	 */
 	protected function get_url()
 	{
-		// @codeCoverageIgnoreStart
-		if (isset($this->url_provider))
-		{
-			$class = $this->url_provider;
-			$provider = new $class();
-
-			return $provider($this, $this->formatting_value);
-		}
-		// @codeCoverageIgnoreEnd
-
 		return $this->format($this->formatting_value)->url;
 	}
 

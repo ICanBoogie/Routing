@@ -31,12 +31,27 @@ class FormattedRoute
 	 */
 	protected $url;
 
+	protected function get_url()
+	{
+		return contextualize((string) $this);
+	}
+
+	protected function get_absolute_url()
+	{
+		return absolutize_url($this->get_url());
+	}
+
 	/**
-	 * The {@link Route} instance that created the relative URL.
+	 * The {@link Route} instance that created this instance.
 	 *
 	 * @var Route
 	 */
 	protected $route;
+
+	protected function get_route()
+	{
+		return $this->route;
+	}
 
 	/**
 	 * Initialize the {@link $url} and {@link $route} properties.
@@ -53,20 +68,5 @@ class FormattedRoute
 	public function __toString()
 	{
 		return $this->url;
-	}
-
-	protected function get_url()
-	{
-		return contextualize((string) $this);
-	}
-
-	protected function get_route()
-	{
-		return $this->route;
-	}
-
-	protected function get_absolute_url()
-	{
-		return absolutize_url($this->url);
 	}
 }

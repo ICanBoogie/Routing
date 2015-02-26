@@ -219,9 +219,9 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 	 * @param string $method One of HTTP\Request::METHOD_* methods.
 	 * @param string $namespace Namespace restriction.
 	 *
-	 * @return Route
+	 * @return Route|false|null
 	 */
-	public function find($uri, &$captured=null, $method=Request::METHOD_ANY, $namespace=null)
+	public function find($uri, &$captured = null, $method = Request::METHOD_ANY, $namespace = null)
 	{
 		$captured = [];
 
