@@ -15,8 +15,30 @@ use ICanBoogie\HTTP\Request;
 
 class RoutesTest extends \PHPUnit_Framework_TestCase
 {
+	public function test_anonymous_routes()
+	{
+		$routes = new Routes([
+
+			[ 'controller' => uniqid(), 'pattern' => uniqid() ],
+			[ 'controller' => uniqid(), 'pattern' => uniqid() ]
+
+		]);
+
+		$this->assertFalse(isset($routes[0]));
+		$this->assertFalse(isset($routes[1]));
+	}
+
 	/**
-	 * @expectedException ICanBoogie\Routing\PatternNotDefined
+	 * @expectedException \ICanBoogie\Prototype\MethodNotDefined
+	 */
+	public function test_should_throw_exception_on_invalid_http_method()
+	{
+		$routes = new Routes;
+		$routes->invalid_http_method([ 'controller' => uniqid(), 'pattern'=> uniqid() ]);
+	}
+
+	/**
+	 * @expectedException \ICanBoogie\Routing\PatternNotDefined
 	 */
 	public function test_pattern_not_defined()
 	{
@@ -32,7 +54,7 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @expectedException ICanBoogie\Routing\ControllerNotDefined
+	 * @expectedException \ICanBoogie\Routing\ControllerNotDefined
 	 */
 	public function test_controller_not_defined()
 	{
@@ -80,6 +102,96 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 		$response = $dispatcher(Request::from('/'));
 		$this->assertInstanceOf('ICanBoogie\HTTP\Response', $response);
 		$this->assertEquals("Hello world", $response->body);
+	}
+
+	public function test_offsetGet()
+	{
+		$one_pattern = '/' . uniqid();
+		$one_controller = function() {};
+
+		$routes = new Routes([
+
+			'one' => [
+
+				'pattern' => $one_pattern,
+				'controller' => $one_controller
+
+			]
+
+		]);
+
+		$route = $routes['one'];
+		$this->assertInstanceOf('ICanBoogie\Routing\Route', $route);
+		$this->assertInstanceOf('ICanBoogie\Routing\Pattern', $route->pattern);
+		$this->assertSame($one_pattern, (string) $route->pattern);
+		$this->assertSame($one_controller, $route->controller);
+	}
+
+	public function test_route_class()
+	{
+		$one_pattern = '/' . uniqid();
+		$one_controller = function() {};
+		$one_class = __CLASS__ . '\MyRouteClass';
+
+		$routes = new Routes([
+
+			'one' => [
+
+				'pattern' => $one_pattern,
+				'controller' => $one_controller,
+				'class' => $one_class
+
+			]
+
+		]);
+
+		$one = $routes['one'];
+		$this->assertInstanceOf($one_class, $one);
+	}
+
+	/**
+	 * @expectedException \ICanBoogie\Routing\RouteNotDefined
+	 */
+	public function test_offsetGet_undefined()
+	{
+		$routes = new Routes;
+		$routes[uniqid()];
+	}
+
+	public function test_iterator()
+	{
+		$routes = new Routes;
+		$routes->get('/' . uniqid(), function() {}, [
+
+			'as' => 'one'
+
+		]);
+
+		$routes['two'] = [
+
+			'pattern' => '/' . uniqid(),
+			'controller' => function() {}
+
+		];
+
+		$routes['three'] = [
+
+			'pattern' => '/' . uniqid(),
+			'controller' => function() {}
+
+		];
+
+		unset($routes['two']);
+
+		$names = [];
+
+		foreach ($routes as $id => $definition)
+		{
+			$names[] = $id;
+			$this->assertInternalType('array', $definition);
+		}
+
+		$this->assertEquals([ 'one', 'three' ], $names);
 	}
 
 	public function test_find()
@@ -342,4 +454,13 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 
 		];
 	}
+}
+
+namespace ICanBoogie\Routing\RoutesTest;
+
+use ICanBoogie\Routing\Route;
+
+class MyRouteClass extends Route
+{
+
 }
