@@ -65,7 +65,7 @@ class Pattern
 
 		if ($catchall)
 		{
-			$regex .= '(.+)';
+			$regex .= '(.*)';
 			$params[] = 'all';
 		}
 

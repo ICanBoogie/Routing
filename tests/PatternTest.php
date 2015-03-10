@@ -92,6 +92,8 @@ class PatternTest extends \PHPUnit_Framework_TestCase
 	public function test_should_catch_them_all()
 	{
 		$pattern = Pattern::from('/articles/2014-*');
+		$this->assertTrue($pattern->match('/articles/2014-', $capture));
+		$this->assertEquals([ 'all' => '' ], $capture);
 		$this->assertTrue($pattern->match('/articles/2014-madonna', $capture));
 		$this->assertEquals([ 'all' => 'madonna' ], $capture);
 		$this->assertTrue($pattern->match('/articles/2014-lady-gaga', $capture));
