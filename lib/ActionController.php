@@ -12,8 +12,6 @@
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\Request;
-use ICanBoogie\Routing\ActionController\ActionEvent;
-use ICanBoogie\Routing\ActionController\BeforeActionEvent;
 
 /**
  * Base class for action controllers.
@@ -41,21 +39,11 @@ class ActionController extends Controller
 	 *
 	 * @return \ICanBoogie\HTTP\Response|mixed
 	 */
-	public function respond(Request $request)
+	public function action(Request $request)
 	{
 		$callable = $this->resolve_action($request);
-		$response = null;
 
-		new BeforeActionEvent($this, $response);
-
-		if (!$response)
-		{
-			$response = $callable();
-		}
-
-		new ActionEvent($this, $response);
-
-		return $response;
+		return $callable();
 	}
 
 	/**

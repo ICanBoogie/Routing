@@ -15,25 +15,25 @@ use ICanBoogie\Event;
 use ICanBoogie\Routing\Controller;
 
 /**
- * Event class for the `ICanBoogie\Routing\Controller::respond:before` event.
+ * Event class for the `ICanBoogie\Routing\Controller::action:before` event.
  *
- * Event hooks may use this event to alter respond obtained by the controller.
+ * Event hooks may use this event to alter the result returned by the `action()` method.
  *
  * @package ICanBoogie\Routing\Controller
  */
-class RespondEvent extends Event
+class ActionEvent extends Event
 {
 	/**
-	 * Reference to the response.
+	 * Reference to the result.
 	 *
-	 * @var \ICanBoogie\HTTP\Response|mixed
+	 * @var mixed
 	 */
-	public $response;
+	public $result;
 
-	public function __construct(Controller $target, &$response)
+	public function __construct(Controller $target, &$result)
 	{
-		$this->response = &$response;
+		$this->result = &$result;
 
-		parent::__construct($target, 'respond');
+		parent::__construct($target, 'action');
 	}
 }

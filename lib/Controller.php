@@ -16,8 +16,8 @@ use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Object;
 use ICanBoogie\PropertyNotDefined;
-use ICanBoogie\Routing\Controller\BeforeRespondEvent;
-use ICanBoogie\Routing\Controller\RespondEvent;
+use ICanBoogie\Routing\Controller\BeforeActionEvent;
+use ICanBoogie\Routing\Controller\ActionEvent;
 
 /**
  * A route controller.
@@ -107,14 +107,14 @@ abstract class Controller extends Object
 	/**
 	 * Controls the route and returns a response.
 	 *
-	 * The response is obtained by invoking `respond()`. When the result is a {@link Response}
+	 * The response is obtained by invoking `action()`. When the result is a {@link Response}
 	 * instance it is returned as is, when the `$response` property has been initialized the result
 	 * is used as its body and the response is returned, otherwise the result is returned as is.
 	 *
-	 * The `ICanBoogie\Routing\Controller::respond:before` event of class
-	 * {@link Controller\BeforeRespondEvent} is fired before invoking `respond()`, the
-	 * `ICanBoogie\Routing\Controller::respond:before` event of class
-	 * {@link Controller\RespondEvent} is fired after.
+	 * The `ICanBoogie\Routing\Controller::action:before` event of class
+	 * {@link Controller\BeforeActionEvent} is fired before invoking `action()`, the
+	 * `ICanBoogie\Routing\Controller::action:before` event of class
+	 * {@link Controller\ActionEvent} is fired after.
 	 *
 	 * @param Request $request
 	 *
@@ -124,40 +124,40 @@ abstract class Controller extends Object
 	{
 		$this->request = $request;
 
-		$response = null;
+		$result = null;
 
-		new BeforeRespondEvent($this, $response);
+		new BeforeActionEvent($this, $result);
 
-		if (!$response)
+		if (!$result)
 		{
-			$response = $this->respond($request);
+			$result = $this->action($request);
 		}
 
-		new RespondEvent($this, $response);
+		new ActionEvent($this, $result);
 
-		if ($response instanceof Response)
+		if ($result instanceof Response)
 		{
-			return $response;
+			return $result;
 		}
 
-		if ($response && isset($this->response))
+		if ($result && isset($this->response))
 		{
-			$this->response->body = $response;
+			$this->response->body = $result;
 
 			return $this->response;
 		}
 
-		return $response;
+		return $result;
 	}
 
 	/**
-	 * Respond to the request.
+	 * Performs the proper action for the request.
 	 *
 	 * @param Request $request
 	 *
 	 * @return \ICanBoogie\HTTP\Response|mixed
 	 */
-	abstract protected function respond(Request $request);
+	abstract protected function action(Request $request);
 
 	/**
 	 * Tries to get the undefined property from the application.

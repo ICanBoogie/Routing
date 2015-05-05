@@ -58,9 +58,9 @@ $response();
 
 ### Before a route is dispatched
 
-Before the route is dispatched the `ICanBoogie\Routing\Dispatcher::dispatch:before` event of class
+Before a route is dispatched the `ICanBoogie\Routing\Dispatcher::dispatch:before` event of class
 [Dispatcher\BeforeDispatchEvent][] is fired. Event hooks may use this event to provide a response
-and cancel the dispatching.
+and thus cancel the dispatching.
 
 
 
@@ -273,7 +273,9 @@ use controller classes instead to better organize your application. For instance
 
 ### Basic controllers
 
-Basic controllers extend from [Controller][] and must implement the `respond` method.
+Basic controllers extend from [Controller][] and must implement the `action` method.
+
+**Note:** The `action` method is invoked _from within_ the controller, by the `__invoke` method, and is better _protected_.
 
 ```php
 <?php
@@ -283,7 +285,7 @@ use ICanBoogie\Routing\Controller;
 
 class MyArticlesController extends Controller
 {
-	protected function respond(Request $request)
+	protected function action(Request $request)
 	{
 		// Your code goes here, and should return a string or a Response instance
 	}
@@ -310,14 +312,24 @@ Also, undefined properties are forwarded to the application, thus you can use
 
 #### Controller response
 
-The response to the request is obtained by invoking `respond()`, when the result is a [Response][]
-instance it is returned as is, when the `$response` property has been initialized the result
-is used as its body and the response is returned, otherwise the result is returned as is.
+When invoked, the controller should return a result or `null` if it can't handle the request. The `__invoke()` method handles the result of the `action()` method. If the result is a [Response][] instance it is returned as is; if the [Response][] instance attached to the controller has been initialized (through the `$this->response` getter, for instance), the result is used as the body of the response; otherwise,  the result is returned as is.
 
-The `ICanBoogie\Routing\Controller::respond:before` event of class
-[Controller\BeforeRespondEvent][] is fired before invoking `respond()`, the
-`ICanBoogie\Routing\Controller::respond:before` event of class [Controller\RespondEvent][] is
-fired after.
+
+
+
+
+#### Before the action is executed
+
+The `ICanBoogie\Routing\Controller::action:before` event of class
+[Controller\BeforeActionEvent][] is fired before invoking `action()`. Event hooks may use this event to provide a response and thus cancelling the action. Event hooks may also use this event to alter the controller before the action is executed.
+
+
+
+
+
+#### After the action is executed
+
+The `ICanBoogie\Routing\Controller::action:before` event of class [Controller\ActionEvent][] is fired after `action()` was invoked. Event hooks may use this event to alter the result of the method.
 
 
 
@@ -398,15 +410,6 @@ class AppController extends ActionController
 	}
 }
 ```
-
-The `ICanBoogie\Routing\ActionController::action:before` event of class
-[ActionController\BeforeActionEvent] is fired before the action method is invoked. Event hooks may
-use this event to alter the request or the controller before the action is invoked. Event
-hooks my also use this event to provide a response and cancel the action altogether.
-
-The `ICanBoogie\Routing\ActionController::action` event of class [ActionController\ActionEvent]
-is fired after the action is executed. Event hooks may used this event to alter the response,
- or replace it. The event is fired even if the response is empty.
 
 
 
@@ -580,8 +583,8 @@ ICanBoogie/Routing is licensed under the New BSD License - See the [LICENSE](LIC
 [ICanBoogie]: http://icanboogie.org/
 [ICanBoogie\HTTP\Dispatcher]: http://icanboogie.org/docs/namespace-ICanBoogie.HTTP.Dispatcher.html
 [Controller]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Controller.html
-[Controller\BeforeRespondEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Controller.BeforeRespondEvent.html
-[Controller\RespondEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Controller.RespondEvent.html
+[Controller\BeforeActionEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Controller.BeforeActionEvent.html
+[Controller\ActionEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Controller.ActionEvent.html
 [ControllerNotDefined]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ControllerNotDefined.html
 [FormattedRoute]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.FormattedRoute.html
 [Pattern]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Pattern.html

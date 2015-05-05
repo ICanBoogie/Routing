@@ -48,7 +48,7 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
 		$this->assertSame($response, $controller->response);
 	}
 
-	public function test_invoke_should_return_response_from_respond()
+	public function test_invoke_should_return_response_from_action()
 	{
 		$request = Request::from('/');
 
@@ -57,11 +57,11 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
 		$controller = $this
 			->getMockBuilder('ICanBoogie\Routing\Controller')
 			->disableOriginalConstructor()
-			->setMethods([ 'respond' ])
+			->setMethods([ 'action' ])
 			->getMockForAbstractClass();
 		$controller
 			->expects($this->once())
-			->method('respond')
+			->method('action')
 			->willReturn($response);
 
 		/* @var $controller Controller */
@@ -78,11 +78,11 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
 		$controller = $this
 			->getMockBuilder('ICanBoogie\Routing\Controller')
 			->disableOriginalConstructor()
-			->setMethods([ 'respond' ])
+			->setMethods([ 'action' ])
 			->getMockForAbstractClass();
 		$controller
 			->expects($this->once())
-			->method('respond')
+			->method('action')
 			->willReturn($body);
 
 		/* @var $controller Controller */
@@ -100,11 +100,11 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
 		$controller = $this
 			->getMockBuilder('ICanBoogie\Routing\Controller')
 			->disableOriginalConstructor()
-			->setMethods([ 'respond' ])
+			->setMethods([ 'action' ])
 			->getMockForAbstractClass();
 		$controller
 			->expects($this->once())
-			->method('respond')
+			->method('action')
 			->willReturn($body);
 
 		/* @var $controller Controller */
@@ -172,7 +172,7 @@ use ICanBoogie\Routing\Controller;
 
 class MySampleController extends Controller
 {
-	protected function respond(Request $request)
+	protected function action(Request $request)
 	{
 		$request->test->assertInstanceOf('ICanBoogie\HTTP\Request', $request);
 		$request->test->assertEquals(1, func_num_args());
