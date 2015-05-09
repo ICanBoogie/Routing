@@ -24,6 +24,7 @@ class ActionControllerTest extends \PHPUnit_Framework_TestCase
 				'pattern' => '/blog/<year:\d{4}>-<month:\d{2}>-:slug.html',
 				'controller' => 'ICanBoogie\Routing\ActionControllerTest\A#view'
 			]
+
 		]);
 
 		$dispatcher = new Dispatcher($routes);
@@ -33,6 +34,27 @@ class ActionControllerTest extends \PHPUnit_Framework_TestCase
 		$this->assertInstanceOf('ICanBoogie\HTTP\Response', $response);
 		$this->assertTrue($response->status->is_successful);
 		$this->assertEquals('HERE', $response->body);
+	}
+
+	/**
+	 * @expectedException \ICanBoogie\Routing\ActionNotDefined
+	 */
+	public function test_should_throw_exception_when_action_is_not_defined()
+	{
+		$routes = new Routes([
+
+			'default' => [
+
+				'pattern' => '/blog/<year:\d{4}>-<month:\d{2}>-:slug.html',
+				'controller' => 'ICanBoogie\Routing\ActionControllerTest\A'
+			]
+
+		]);
+
+		$dispatcher = new Dispatcher($routes);
+		$request = Request::from("/blog/2014-12-my-awesome-post.html");
+		$request->test = $this;
+		$dispatcher($request);
 	}
 }
 

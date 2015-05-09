@@ -7,7 +7,7 @@
 [![Code Coverage](https://img.shields.io/coveralls/ICanBoogie/Routing/master.svg)](https://coveralls.io/r/ICanBoogie/Routing)
 [![Packagist](https://img.shields.io/packagist/dt/icanboogie/routing.svg)](https://packagist.org/packages/icanboogie/routing)
 
-The **Routing** package handles URL rewriting in native PHP. A request is mapped
+The **icanboogie/routing** package handles URL rewriting in native PHP. A request is mapped
 to a route, which in turn gets dispatched to a controller, and possibly an action. If the
 process is successful a response is returned. Many events are fired during the process to allow
 event hooks to alter the request, the route, the controller, or the response.
@@ -66,21 +66,21 @@ and thus cancel the dispatching.
 
 
 
-### Rescuing an exception
-
-If an exception is raised during the dispatch, the `ICanBoogie\Routing\Route::rescue` event
-of class [Route\RescueEvent][] is fired. Event hooks may use this event to rescue the route and
-provide a response, or replace the exception that will be thrown if the rescue fails.
-
-
-
-
-
 ### A route is dispatched
 
 The `ICanBoogie\Routing\Dispatcher::dispatch` event of class [Dispatcher\DispatchEvent][] is fired
 if the route has been dispatched successfully. Event hooks may use this event to alter the
 response.
+
+
+
+
+
+### Rescuing an exception
+
+If an exception is raised during the dispatch, the `ICanBoogie\Routing\Route::rescue` event
+of class [Route\RescueEvent][] is fired. Event hooks may use this event to rescue the route and
+provide a response, or replace the exception that will be thrown if the rescue fails.
 
 
 
@@ -106,17 +106,9 @@ The [PatternNotDefined][] exception is thrown if the pattern is not defined, and
 
 
 
-### Defining routes using `routes` configuration fragments
-
-If the package is bound to [ICanBoogie][] using [icanboogie/bind-routing][], routes can be defined using `routes` configuration fragments. Refer to [icanboogie/bind-routing][] documentation to learn more about this feature.
-
-
-
-
-
 ### Defining routes during runtime
 
-Routes can also be defined during runtime using the [Routes][] instance that is provided to the
+Routes can be defined during runtime using the [Routes][] instance that is provided to the
 dispatcher.
 
 ```php
@@ -139,6 +131,14 @@ $dispatcher = new Dispatcher($routes);
 # routes can also be defined afterwards
 $routes->any('/read-write', function(Request $request) { }, [ 'via' => [ 'GET', 'POST' ] ]);
 ```
+
+
+
+
+
+### Defining routes using configuration fragments
+
+If the package is bound to [ICanBoogie][] using [icanboogie/bind-routing][], routes can be defined using `routes` configuration fragments. Refer to [icanboogie/bind-routing][] documentation to learn more about this feature.
 
 
 
@@ -169,8 +169,7 @@ var_dump($captured);   // [ 'nid' => 123 ]
 
 ## Route
 
-Routes are represented by [Route][] instances. They are usually created from route definitions, and
-contains all the properties of their definition.
+A route is represented by a [Route][] instance. It is usually created from an array definition, and contain all the properties of its definition.
 
 ```php
 <?php
@@ -262,10 +261,7 @@ echo $route->format($route->formatting_value);
 
 ## Controllers
 
-Previous examples demonstrated how closures could be used to handle routes. Closures are
-perfectly fine when you start building your application, but as soon as it grows you might want to
-use controller classes instead to better organize your application. For instance, the
-[ActionController][] can group related HTTP request handling logic into a class.
+Previous examples demonstrated how closures could be used to handle routes. Closures are perfectly fine when you start building your application, but as soon as it grows you might want to use controller classes instead to better organize your application. You can map each route to its [Controller][] class, or group related HTTP request handling logic into an [ActionController][] class.
 
 
 
@@ -275,15 +271,17 @@ use controller classes instead to better organize your application. For instance
 
 Basic controllers extend from [Controller][] and must implement the `action` method.
 
-**Note:** The `action` method is invoked _from within_ the controller, by the `__invoke` method, and is better _protected_.
+**Note:** The `action` method is invoked _from within_ the controller, by the `__invoke` method, and should be defined as _protected_.
 
 ```php
 <?php
 
+namespace App\Modules\Articles;
+
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Routing\Controller;
 
-class MyArticlesController extends Controller
+class DeleteController extends Controller
 {
 	protected function action(Request $request)
 	{
@@ -292,10 +290,7 @@ class MyArticlesController extends Controller
 }
 ```
 
-Although any class implementing `__invoke` is suitable as a controller, it is recommended to extend
-[Controller][] because it makes accessing your application features much easier. Also, you might
-benefit from prototype methods and event hooks attached to the [Controller][] class, such as the
-`view` property added by the [icanboogie/view][] package.
+Although any class implementing `__invoke` is suitable as a controller, it is recommended to extend [Controller][] as it makes accessing your application features much easier. Also, you might benefit from prototype methods and event hooks attached to the [Controller][] class, such as the `view` property added by the [icanboogie/view][] package.
 
 The following properties are provided by the class:
 
@@ -312,7 +307,7 @@ Also, undefined properties are forwarded to the application, thus you can use
 
 #### Controller response
 
-When invoked, the controller should return a result or `null` if it can't handle the request. The `__invoke()` method handles the result of the `action()` method. If the result is a [Response][] instance it is returned as is; if the [Response][] instance attached to the controller has been initialized (through the `$this->response` getter, for instance), the result is used as the body of the response; otherwise,  the result is returned as is.
+When invoked, the controller should return a result, or `null` if it can't handle the request. The result of the `action()` method is handled by the `__invoke()` method: if the result is a [Response][] instance it is returned as is; if the [Response][] instance attached to the controller has been initialized (through the `$this->response` getter, for instance), the result is used as the body of the response; otherwise,  the result is returned as is.
 
 
 
@@ -320,8 +315,8 @@ When invoked, the controller should return a result or `null` if it can't handle
 
 #### Before the action is executed
 
-The `ICanBoogie\Routing\Controller::action:before` event of class
-[Controller\BeforeActionEvent][] is fired before invoking `action()`. Event hooks may use this event to provide a response and thus cancelling the action. Event hooks may also use this event to alter the controller before the action is executed.
+The event `ICanBoogie\Routing\Controller::action:before` of class
+[Controller\BeforeActionEvent][] is fired before the `action()` method is invoked. Event hooks may use this event to provide a response and thus cancelling the action. Event hooks may also use this event to alter the controller before the action is executed.
 
 
 
@@ -329,7 +324,7 @@ The `ICanBoogie\Routing\Controller::action:before` event of class
 
 #### After the action is executed
 
-The `ICanBoogie\Routing\Controller::action:before` event of class [Controller\ActionEvent][] is fired after `action()` was invoked. Event hooks may use this event to alter the result of the method.
+The event `ICanBoogie\Routing\Controller::action:before` of class [Controller\ActionEvent][] is fired after the `action()` method was invoked. Event hooks may use this event to alter the result of the method.
 
 
 
@@ -337,12 +332,9 @@ The `ICanBoogie\Routing\Controller::action:before` event of class [Controller\Ac
 
 ### Action controllers
 
-Action controllers can group related HTTP request handling logic into a class and use HTTP methods
-to separate concerns.
+Action controllers are used to group related HTTP request handling logic into a class and use HTTP methods to separate concerns.
 
-The following example demonstrate how an action controller can be used to display a contact form,
-handle its submission, and redirect the user to a _success_ page. The action invoked inside the
-controller is defined after the '#' character.
+The following example demonstrates how an action controller can be used to display a contact form, handle its submission, and redirect the user to a _success_ page. The action invoked inside the controller is defined after the '#' character.
 
 ```php
 <?php
@@ -368,9 +360,7 @@ return [
 ];
 ```
 
-The HTTP method is used as a prefix for the method handling the action. The prefix "any" is used
-for methods that handle any kind of HTTP method, they are a fallback when more accurate methods are
-not available. If you don't care about that, you can omit the HTTP method.
+The HTTP method is used as a prefix for the method handling the action. The prefix "any" is used for methods that handle any kind of HTTP method, they are a fallback when more accurate methods are not available. If you don't care about that, you can omit the HTTP method.
 
 ```php
 <?php
@@ -417,8 +407,7 @@ class AppController extends ActionController
 
 ## Exceptions
 
-The exceptions defined by the package implement the `ICanBoogie\Routing\Exception` interface,
-so that they are easy to recognize:
+The exceptions defined by the package implement the `ICanBoogie\Routing\Exception` interface, so that they are easy to recognize:
 
 ```php
 <?php
@@ -439,8 +428,7 @@ catch (\Exception $e)
 
 The following exceptions are defined:
 
-- [ActionNotDefined][]: Thrown when an action is not defined, for instance when a route using
-an [ActionController][] has an empty `action` property.
+- [ActionNotDefined][]: Thrown when an action is not defined, for instance when a route using an [ActionController][] has an empty `action` property.
 - [ControllerNotDefined][]: Thrown when trying to define a route without a controller nor location.
 - [PatternNotDefined][]: Thrown when trying to define a route without pattern.
 - [RouteNotDefined][]: Thrown when trying to obtain a route that is not defined in a [Routes][] instance.
@@ -515,7 +503,7 @@ The package requires PHP 5.4 or later.
 The recommended way to install this package is through [Composer](http://getcomposer.org/):
 
 ```
-composer require icanboogie/routing
+$ composer require icanboogie/routing
 ```
 
 The following package is required, you might want to check it out:
@@ -528,8 +516,7 @@ The following package is required, you might want to check it out:
 
 ### Cloning the repository
 
-The package is [available on GitHub](https://github.com/ICanBoogie/Routing), its repository can be
-cloned with the following command line:
+The package is [available on GitHub](https://github.com/ICanBoogie/Routing), its repository can be cloned with the following command line:
 
 	$ git clone https://github.com/ICanBoogie/Routing.git
 
@@ -539,11 +526,8 @@ cloned with the following command line:
 
 ## Documentation
 
-The package is documented as part of the [ICanBoogie](http://icanboogie.org/) framework
-[documentation](http://icanboogie.org/docs/). You can generate the documentation for the package
-and its dependencies with the `make doc` command. The documentation is generated in the `docs`
-directory. [ApiGen](http://apigen.org/) is required. You can later clean the directory with
-the `make clean` command.
+The package is documented as part of the [ICanBoogie][] framework
+[documentation](http://icanboogie.org/docs/). You can generate the documentation for the package and its dependencies with the `make doc` command. The documentation is generated in the `build/docs` directory. [ApiGen](http://apigen.org/) is required. The directory can later be cleaned with the `make clean` command.
 
 
 
@@ -551,9 +535,7 @@ the `make clean` command.
 
 ## Testing
 
-The test suite is ran with the `make test` command. [Composer](http://getcomposer.org/) is
-automatically installed as well as all dependencies required to run the suite. You can later
-clean the directory with the `make clean` command.
+The test suite is ran with the `make test` command. [PHPUnit](https://phpunit.de/) and [Composer](http://getcomposer.org/) need to be globally available to run the suite. The command installs dependencies as required. The `make test-coverage` command runs test suite and also creates an HTML coverage report in `build/coverage`. The directory can later be cleaned with the `make clean` command.
 
 The package is continuously tested by [Travis CI](http://about.travis-ci.org/).
 
@@ -566,7 +548,7 @@ The package is continuously tested by [Travis CI](http://about.travis-ci.org/).
 
 ## License
 
-ICanBoogie/Routing is licensed under the New BSD License - See the [LICENSE](LICENSE) file for details.
+**icanBoogie/routing** is licensed under the New BSD License - See the [LICENSE](LICENSE) file for details.
 
 
 
@@ -580,7 +562,7 @@ ICanBoogie/Routing is licensed under the New BSD License - See the [LICENSE](LIC
 [ActionNotDefined]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionNotDefined.html
 [Dispatcher\BeforeDispatchEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Dispatcher.BeforeDispatchEvent.html
 [Dispatcher\DispatchEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Dispatcher.DispatchEvent.html
-[ICanBoogie]: http://icanboogie.org/
+[ICanBoogie]: https://github.com/ICanBoogie/ICanBoogie
 [ICanBoogie\HTTP\Dispatcher]: http://icanboogie.org/docs/namespace-ICanBoogie.HTTP.Dispatcher.html
 [Controller]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Controller.html
 [Controller\BeforeActionEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Controller.BeforeActionEvent.html

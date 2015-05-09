@@ -210,25 +210,11 @@ abstract class Controller extends Object
 	 *
 	 * @return mixed
 	 */
-	protected function forward_to($destination)
+	public function forward_to($destination)
 	{
 		if ($destination instanceof Route)
 		{
-			$route = $destination;
-			$route->pattern->match($this->request->uri, $captured);
-
-			$request = $this->request->change([
-
-				'path_params' => $captured
-
-			]);
-
-			$request->context->route = $route;
-
-			$controller_class = $route->controller;
-			$controller = new $controller_class;
-
-			return $controller($request);
+			return $this->forward_to_route($destination);
 		}
 
 		if (is_object($destination))
@@ -241,5 +227,34 @@ abstract class Controller extends Object
 		}
 
 		throw new \InvalidArgumentException("Don't know how to forward to: $destination.");
+	}
+
+	/**
+	 * Forwards dispatching to another router.
+	 *
+	 * @param Route $route
+	 *
+	 * @return Response|mixed
+	 */
+	protected function forward_to_route(Route $route)
+	{
+		$route->pattern->match($this->request->uri, $captured);
+
+		$request = $this->request->with([
+
+			'path_params' => $captured
+
+		]);
+
+		$request->context->route = $route;
+
+		$controller = $route->controller;
+
+		if (!is_callable($controller))
+		{
+			$controller = new $controller;
+		}
+
+		return $controller($request);
 	}
 }

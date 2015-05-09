@@ -35,13 +35,15 @@ class Dispatcher implements \ICanBoogie\HTTP\DispatcherInterface
 	 */
 	protected $routes;
 
-	public function __construct(Routes $routes=null)
+	public function __construct(Routes $routes = null)
 	{
+		// @codeCoverageIgnoreStart
 		// FIXME-20140912: we should be independent from the core, the way dispatcher are created should be enhanced
 		if (!$routes && class_exists('ICanBoogie\Core'))
 		{
 			$routes = \ICanBoogie\app()->routes;
 		}
+		// @codeCoverageIgnoreEnd
 
 		$this->routes = $routes;
 	}

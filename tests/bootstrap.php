@@ -9,6 +9,11 @@
  * file that was distributed with this source code.
  */
 
-require __DIR__ . '/../vendor/autoload.php';
+namespace ICanBoogie;
+
+/* @var $loader \Composer\Autoload\ClassLoader */
+
+$loader = require __DIR__ . '/../vendor/autoload.php';
+$loader->addPsr4('ICanBoogie\\Routing\\ControllerTest\\', __DIR__ . '/ControllerTest');
 
 $_SERVER['HTTP_HOST'] = 'icanboogie.org';

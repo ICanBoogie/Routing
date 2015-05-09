@@ -13,6 +13,8 @@ namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
+use ICanBoogie\Routing\ControllerTest\App;
+use ICanBoogie\Routing\ControllerTest\ForwardToTestController;
 use ICanBoogie\Routing\ControllerTest\MySampleController;
 
 class ControllerTest extends \PHPUnit_Framework_TestCase
@@ -163,22 +165,171 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
 		$this->assertTrue($response->status->is_successful);
 		$this->assertEquals('HERE', $response->body);
 	}
-}
 
-namespace ICanBoogie\Routing\ControllerTest;
-
-use ICanBoogie\HTTP\Request;
-use ICanBoogie\Routing\Controller;
-
-class MySampleController extends Controller
-{
-	protected function action(Request $request)
+	public function test_last_chance_get_application_get_value()
 	{
-		$request->test->assertInstanceOf('ICanBoogie\HTTP\Request', $request);
-		$request->test->assertEquals(1, func_num_args());
-		$request->test->assertEquals("my_sample", $this->name);
-		$request->test->assertInstanceOf('ICanBoogie\Routing\Route', $this->route);
+		$expected = uniqid();
 
-		return 'HERE';
+		$app = new App($expected);
+
+		$controller = $this
+			->getMockBuilder('ICanBoogie\Routing\Controller')
+			->disableOriginalConstructor()
+			->setMethods([ 'get_app' ])
+			->getMockForAbstractClass();
+		$controller
+			->expects($this->exactly(2))
+			->method('get_app')
+			->willReturn($app);
+
+		$this->assertSame($app, $controller->app);
+		$this->assertSame($expected, $controller->value);
+	}
+
+	public function test_last_chance_get_application_get_undefined()
+	{
+		$app = new App(uniqid());
+		$property = 'undefined' . uniqid();
+
+		$controller = $this
+			->getMockBuilder('ICanBoogie\Routing\Controller')
+			->disableOriginalConstructor()
+			->setMethods([ 'get_app' ])
+			->getMockForAbstractClass();
+		$controller
+			->expects($this->exactly(2))
+			->method('get_app')
+			->willReturn($app);
+
+		$this->assertSame($app, $controller->app);
+
+		try
+		{
+			$controller->$property;
+
+			$this->fail('Expected PropertyNotDefined');
+		}
+		catch (\Exception $e)
+		{
+			$this->assertInstanceOf('ICanBoogie\PropertyNotDefined', $e);
+
+			$message = $e->getMessage();
+
+			$this->assertContains($property, $message);
+			$this->assertContains(get_class($controller), $message);
+		}
+	}
+
+	public function test_redirect_to_path()
+	{
+		$controller = $this
+			->getMockBuilder('ICanBoogie\Routing\Controller')
+			->disableOriginalConstructor()
+			->getMockForAbstractClass();
+
+		$url = '/path/to/' . uniqid();
+
+		/* @var $controller \ICanBoogie\Routing\Controller */
+		/* @var $response \ICanBoogie\HTTP\RedirectResponse */
+
+		$response = $controller->redirect($url);
+
+		$this->assertInstanceOf('ICanBoogie\HTTP\RedirectResponse', $response);
+		$this->assertSame($url, $response->location);
+		$this->assertSame(302, $response->status->code);
+	}
+
+	public function test_redirect_to_route()
+	{
+		$url = '/path/to/' . uniqid();
+
+		$controller = $this
+			->getMockBuilder('ICanBoogie\Routing\Controller')
+			->disableOriginalConstructor()
+			->getMockForAbstractClass();
+
+		$route = $this
+			->getMockBuilder('ICanBoogie\Routing\Route')
+			->disableOriginalConstructor()
+			->setMethods([ 'get_url' ])
+			->getMock();
+		$route
+			->expects($this->once())
+			->method('get_url')
+			->willReturn($url);
+
+		/* @var $controller \ICanBoogie\Routing\Controller */
+		/* @var $response \ICanBoogie\HTTP\RedirectResponse */
+
+		$response = $controller->redirect($route);
+
+		$this->assertInstanceOf('ICanBoogie\HTTP\RedirectResponse', $response);
+		$this->assertSame($url, $response->location);
+		$this->assertSame(302, $response->status->code);
+	}
+
+	/**
+	 * @dataProvider provide_test_forward_to_invalid
+	 * @expectedException \InvalidArgumentException
+	 *
+	 * @param mixed $invalid
+	 */
+	public function test_forward_to_invalid($invalid)
+	{
+		$controller = $this
+			->getMockBuilder('ICanBoogie\Routing\Controller')
+			->disableOriginalConstructor()
+			->getMockForAbstractClass();
+
+		/* @var $controller \ICanBoogie\Routing\Controller */
+
+		$controller->forward_to($invalid);
+	}
+
+	public function provide_test_forward_to_invalid()
+	{
+		return [
+
+			[ uniqid() ],
+			[ (object) [ uniqid() => uniqid()] ],
+			[ [ uniqid() => uniqid()] ]
+
+		];
+	}
+
+	public function test_forward_to_route()
+	{
+		$original_request = Request::from('/articles/123/edit');
+		$response = new Response;
+
+		$controller = $this
+			->getMockBuilder('ICanBoogie\Routing\Controller')
+			->disableOriginalConstructor()
+			->getMockForAbstractClass();
+
+		$routes = $this
+			->getMockBuilder('ICanBoogie\Routing\Routes')
+			->disableOriginalConstructor()
+			->getMock();
+
+		$route = new Route($routes, '/articles/<nid:\d+>/edit', [
+
+			'controller' => function(Request $request) use ($original_request, $response) {
+
+				$this->assertNotSame($original_request, $request);
+				$this->assertEquals(123, $request['nid']);
+
+				return $response;
+
+			}
+
+		]);
+
+		/* @var $response \ICanBoogie\HTTP\RedirectResponse */
+		/* @var $controller \ICanBoogie\Routing\Controller */
+
+		$controller($original_request); // only to set private `request` property
+
+		$this->assertSame($response, $controller->forward_to($route));
 	}
 }
