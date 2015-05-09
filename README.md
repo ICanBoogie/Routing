@@ -441,9 +441,9 @@ The following exceptions are defined:
 
 The following helpers are available:
 
-- [contextualize](http://icanboogie.org/docs/function-ICanBoogie.Routing.contextualize.html): Contextualize a pathname.
-- [decontextualize](http://icanboogie.org/docs/function-ICanBoogie.Routing.decontextualize.html): Decontextualize a pathname.
-- [absolutize_url](http://icanboogie.org/docs/function-ICanBoogie.Routing.absolutize_url.html): Absolutize an URL.
+- [contextualize](http://api.icanboogie.org/routing/function-ICanBoogie.Routing.contextualize.html): Contextualize a pathname.
+- [decontextualize](http://api.icanboogie.org/routing/function-ICanBoogie.Routing.decontextualize.html): Decontextualize a pathname.
+- [absolutize_url](http://api.icanboogie.org/routing/function-ICanBoogie.Routing.absolutize_url.html): Absolutize an URL.
 
 
 
@@ -527,7 +527,7 @@ The package is [available on GitHub](https://github.com/ICanBoogie/Routing), its
 ## Documentation
 
 The package is documented as part of the [ICanBoogie][] framework
-[documentation](http://icanboogie.org/docs/). You can generate the documentation for the package and its dependencies with the `make doc` command. The documentation is generated in the `build/docs` directory. [ApiGen](http://apigen.org/) is required. The directory can later be cleaned with the `make clean` command.
+[documentation](http://api.icanboogie.org/routing/). You can generate the documentation for the package and its dependencies with the `make doc` command. The documentation is generated in the `build/docs` directory. [ApiGen](http://apigen.org/) is required. The directory can later be cleaned with the `make clean` command.
 
 
 
@@ -556,24 +556,24 @@ The package is continuously tested by [Travis CI](http://about.travis-ci.org/).
 
 [icanboogie/bind-routing]: https://github.com/ICanBoogie/bind-routing
 [icanboogie/view]: https://github.com/ICanBoogie/View
-[ActionController]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionController.html
-[ActionController\BeforeActionEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionController.BeforeActionEvent.html
-[ActionController\ActionEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionController.ActionEvent.html
-[ActionNotDefined]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ActionNotDefined.html
-[Dispatcher\BeforeDispatchEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Dispatcher.BeforeDispatchEvent.html
-[Dispatcher\DispatchEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Dispatcher.DispatchEvent.html
+[ActionController]: http://api.icanboogie.org/routing/namespace-ICanBoogie.Routing.ActionController.html
+[ActionController\BeforeActionEvent]: http://api.icanboogie.org/routing/namespace-ICanBoogie.Routing.ActionController.BeforeActionEvent.html
+[ActionController\ActionEvent]: http://api.icanboogie.org/routing/namespace-ICanBoogie.Routing.ActionController.ActionEvent.html
+[ActionNotDefined]: http://api.icanboogie.org/routing/namespace-ICanBoogie.Routing.ActionNotDefined.html
+[Dispatcher\BeforeDispatchEvent]: http://api.icanboogie.org/routing/namespace-ICanBoogie.Routing.Dispatcher.BeforeDispatchEvent.html
+[Dispatcher\DispatchEvent]: http://api.icanboogie.org/routing/namespace-ICanBoogie.Routing.Dispatcher.DispatchEvent.html
 [ICanBoogie]: https://github.com/ICanBoogie/ICanBoogie
-[ICanBoogie\HTTP\Dispatcher]: http://icanboogie.org/docs/namespace-ICanBoogie.HTTP.Dispatcher.html
-[Controller]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Controller.html
-[Controller\BeforeActionEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Controller.BeforeActionEvent.html
-[Controller\ActionEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Controller.ActionEvent.html
-[ControllerNotDefined]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.ControllerNotDefined.html
-[FormattedRoute]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.FormattedRoute.html
-[Pattern]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Pattern.html
-[PatternNotDefined]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.PatternNotDefined.html
-[Request]: http://icanboogie.org/docs/namespace-ICanBoogie.HTTP.Request.html
-[Response]: http://icanboogie.org/docs/namespace-ICanBoogie.HTTP.Response.html
-[Route]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Route.html
-[Route\RescueEvent]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Route.RescueEvent.html
-[RouteNotDefined]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.RouteNotDefined.html
-[Routes]: http://icanboogie.org/docs/namespace-ICanBoogie.Routing.Routes.html
+[ICanBoogie\HTTP\Dispatcher]: http://api.icanboogie.org/http/namespace-ICanBoogie.HTTP.Dispatcher.html
+[Controller]: http://api.icanboogie.org/routing/namespace-ICanBoogie.Routing.Controller.html
+[Controller\BeforeActionEvent]: http://api.icanboogie.org/routing/namespace-ICanBoogie.Routing.Controller.BeforeActionEvent.html
+[Controller\ActionEvent]: http://api.icanboogie.org/routing/namespace-ICanBoogie.Routing.Controller.ActionEvent.html
+[ControllerNotDefined]: http://api.icanboogie.org/routing/namespace-ICanBoogie.Routing.ControllerNotDefined.html
+[FormattedRoute]: http://api.icanboogie.org/routing/namespace-ICanBoogie.Routing.FormattedRoute.html
+[Pattern]: http://api.icanboogie.org/routing/namespace-ICanBoogie.Routing.Pattern.html
+[PatternNotDefined]: http://api.icanboogie.org/routing/namespace-ICanBoogie.Routing.PatternNotDefined.html
+[Request]: http://api.icanboogie.org/http/namespace-ICanBoogie.HTTP.Request.html
+[Response]: http://api.icanboogie.org/http/namespace-ICanBoogie.HTTP.Response.html
+[Route]: http://api.icanboogie.org/routing/namespace-ICanBoogie.Routing.Route.html
+[Route\RescueEvent]: http://api.icanboogie.org/routing/namespace-ICanBoogie.Routing.Route.RescueEvent.html
+[RouteNotDefined]: http://api.icanboogie.org/routing/namespace-ICanBoogie.Routing.RouteNotDefined.html
+[Routes]: http://api.icanboogie.org/routing/namespace-ICanBoogie.Routing.Routes.html
