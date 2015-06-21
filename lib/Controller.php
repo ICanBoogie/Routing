@@ -15,7 +15,6 @@ use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Object;
-use ICanBoogie\PropertyNotDefined;
 use ICanBoogie\Routing\Controller\BeforeActionEvent;
 use ICanBoogie\Routing\Controller\ActionEvent;
 
@@ -154,31 +153,6 @@ abstract class Controller extends Object
 	 * @return \ICanBoogie\HTTP\Response|mixed
 	 */
 	abstract protected function action(Request $request);
-
-	/**
-	 * Tries to get the undefined property from the application.
-	 *
-	 * @param string $property
-	 * @param bool $success
-	 *
-	 * @return mixed
-	 */
-	protected function last_chance_get($property, &$success)
-	{
-		try
-		{
-			$value = $this->app->$property;
-			$success = true;
-
-			return $value;
-		}
-		catch (PropertyNotDefined $e)
-		{
-			// We don't mind that the property is not defined by the app
-		}
-
-		return parent::last_chance_get($property, $success);
-	}
 
 	/**
 	 * Redirects the request.
