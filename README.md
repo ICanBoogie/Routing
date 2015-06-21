@@ -26,9 +26,9 @@ of a [ICanBoogie\HTTP\Dispatcher][] instance.
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Routing\Dispatcher;
-use ICanBoogie\Routing\Routes;
+use ICanBoogie\Routing\RouteCollection;
 
-$routes = new Routes([
+$routes = new RouteCollection([
 
 	'articles/delete' => [
 	
@@ -88,19 +88,32 @@ provide a response, or replace the exception that will be thrown if the rescue f
 
 ## Defining routes
 
-Routes are usually defined in `routes` configuration fragments, but can also be defined during
-runtime. A pattern is required to define a route, and the controller too if no location
-is defined. The following options are available:
+Routes are usually defined in `routes` configuration fragments, but can also be defined during runtime. A pattern is required to define a route, and the controller too if no location is defined. The following options are available:
 
 - `class`: If the route should be instantiated from a class other than [Route][].
 - `location`: To redirect the route to another location.
 - `via`: If the route needs to respond to one or more HTTP methods.
 
-The options used to define a route are copied to its instance, even custom ones, which might be
-useful to provide additional information to a controller.
+The options used to define a route are copied to its instance, even custom ones, which might be useful to provide additional information to a controller.
 
-The [PatternNotDefined][] exception is thrown if the pattern is not defined, and the
-[ControllerNotDefined][] exception is thrown if the controller and the location are not defined.
+The [PatternNotDefined][] exception is thrown if the pattern is not defined, and the [ControllerNotDefined][] exception is thrown if the controller and the location are not defined.
+
+
+
+
+### Route pattern
+
+A pattern is used to map a route to a controller.
+
+Route pattern RegExs are extended with the following:
+
+- `{:uuid:}`: Matches [Universally unique identifiers](https://en.wikipedia.org/wiki/Universally_unique_identifier) (UUID).
+
+```php
+<?php
+
+$routes->any('/articles/<uuid:{:uuid:}>/edit', function() {});
+```
 
 
 
@@ -108,7 +121,7 @@ The [PatternNotDefined][] exception is thrown if the pattern is not defined, and
 
 ### Defining routes during runtime
 
-Routes can be defined during runtime using the [Routes][] instance that is provided to the
+Routes can be defined during runtime using the [RouteCollection][] instance that is provided to the
 dispatcher.
 
 ```php
@@ -116,9 +129,9 @@ dispatcher.
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Routing\Dispatcher;
-use ICanBoogie\Routing\Routes;
+use ICanBoogie\Routing\RouteCollection;
 
-$routes = new Routes;
+$routes = new RouteCollection;
 
 $routes->any('/', function(Request $request) { }, [ 'as' => 'home' ]);
 $routes->any('/articles', function(Request $request) { }, [ 'as' => 'articles' ]);
@@ -146,7 +159,7 @@ If the package is bound to [ICanBoogie][] using [icanboogie/bind-routing][], rou
 
 ## Mapping a path to a route
 
-Routes are mapped using a [Routes][] instance. A HTTP method and a namespace can optionally
+Routes are mapped using a [RouteCollection][] instance. A HTTP method and a namespace can optionally
 be specified to determine the route more accurately. The parameters captured from the routes are
 stored in the `$captured` variable, passed by reference. If the path contains a query string,
 it is parsed and stored under `__query__` in `$captured`.
@@ -215,9 +228,9 @@ value to a route, that can later be used like a URL string:
 ```php
 <?php
 
-use ICanBoogie\Routing\Routes;
+use ICanBoogie\Routing\RouteCollection;
 
-$routes = new Routes([
+$routes = new RouteCollection([
 
 	'article:show' => [
 	
@@ -261,7 +274,7 @@ echo $route->format($route->formatting_value);
 
 ## Controllers
 
-Previous examples demonstrated how closures could be used to handle routes. Closures are perfectly fine when you start building your application, but as soon as it grows you might want to use controller classes instead to better organize your application. You can map each route to its [Controller][] class, or group related HTTP request handling logic into an [ActionController][] class.
+Previous examples demonstrated how closures could be used to handle routes. Closures are perfectly fine when you start building your application, but as soon as it grows you might want to use controller classes instead to better organize your application. You can map each route to its [Controller][] class, or use the [ActionTrait][] or [ResourceTrait][] to group related HTTP request handling logic into a  controller.
 
 
 
@@ -332,7 +345,7 @@ The event `ICanBoogie\Routing\Controller::action:before` of class [Controller\Ac
 
 ### Action controllers
 
-Action controllers are used to group related HTTP request handling logic into a class and use HTTP methods to separate concerns.
+Action controllers are used to group related HTTP request handling logic into a class and use HTTP methods to separate concerns. An action controller is created by extending the [Controller][] class and using [ActionTrait][].
 
 The following example demonstrates how an action controller can be used to display a contact form, handle its submission, and redirect the user to a _success_ page. The action invoked inside the controller is defined after the '#' character.
 
@@ -365,10 +378,12 @@ The HTTP method is used as a prefix for the method handling the action. The pref
 ```php
 <?php
 
-use ICanBoogie\Routing\ActionController
+use ICanBoogie\Routing\Controller;
 
-class AppController extends ActionController
+class AppController extends Controller
 {
+	use Controller\ActionTrait;
+	
 	protected function action_any_contact()
 	{
 		return new ContactForm;
@@ -405,6 +420,140 @@ class AppController extends ActionController
 
 
 
+### Resource controllers
+
+Resource controllers are used to group the actions required to handle a resource in a [RESTful][] fashion. A resource controller is created by extending the [Controller][] class and using [ResourceTrait][].
+
+**Note:** Because [ResourceTrait][] uses [ActionTrait][], _regular_ actions can be mixed with _resource_ actions, although _resource methods_ win over _action methods_.
+
+The following table list the verbs/routes and their corresponding action.
+
+| HTTP verb | Path                  | Action  | Used for                                 |
+| --------- | --------------------- | ------- | ---------------------------------------- |
+| GET       | /{resource}           | index   | A list of {resource}                     |
+| GET       | /{resource}/new       | create  | A form for creating a new {resource}     |
+| POST      | /{resource}           | store   | Create a new {resource}                  |
+| GET       | /{resource}/{id}      | show    | A specific {resource}                    |
+| GET       | /{resource}/{id}/edit | edit    | A form for editing a specific {resource} |
+| PATCH/PUT | /{resource}/{id}      | update  | Update a specific {resource}             |
+| DELETE    | /{resource}/{id}      | destroy | Deletes a specific {resource}            |
+
+The routes listed are more of a guideline than a requirement, still the actions are important. Indeed, contrary to _regular_ actions, the corresponding method have the exact same name.
+
+The following example demonstrates how the resource controller or _photos_ resources could be implemented. The example implements all actions, but you are free to implement only some of them.
+
+```php
+<?php
+
+use ICanBoogie\Routing\Controller;
+use ICanBoogie\Routing\Controller\ResourceTrait;
+
+class PhotosController extends Controller
+{
+	use ResourceTrait;
+
+	protected function index()
+	{
+		// …
+	}
+	
+	protected function create()
+	{
+		// …
+	}
+	
+	protected function store()
+	{
+		// …
+	}
+	
+	protected function show($id)
+	{
+		// …
+	}
+	
+	protected function edit($id)
+	{
+		// …
+	}
+	
+	protected function update($id)
+	{
+		// …
+	}
+
+	protected function destroy($id)
+	{
+		// …
+	}
+}
+```
+
+
+
+
+#### Defining resource routes
+
+Given a resource name and a controller, the `RoutesMaker::resource()` method makes the various routes required to handle a resource. Options can be specified to filter the routes to create, specify the name of the _key_ property and/or it's regex constraint, or name routes.
+
+The following code demonstrates how to create routes for a _photo_ resource:
+
+```php
+<?php
+
+namespace App;
+
+use ICanBoogie\Routing\RoutesMaker as Make;
+
+$definitions = Make::resource('photos', PhotosController::class);
+
+// only create the _index_ route
+$definitions = Make::resource('photos', PhotosController::class, [
+
+	'only' => 'index'
+
+]);
+
+// only create the _index_ and _show_ routes
+$definitions = Make::resource('photos', PhotosController::class, [
+
+	'only' => [ 'index', 'show' ]
+
+]);
+
+// create routes except _destroy_ route
+$definitions = Make::resource('photos', PhotosController::class, [
+
+	'except' => 'destroy'
+
+]);
+
+// create routes except _updated_ and _destroy_ routes
+$definitions = Make::resource('photos', PhotosController::class, [
+
+	'except' => [ 'update', 'destroy' ]
+
+]);
+
+// specify _key_ property name and its regex constraint
+$definitions = Make::resource('photos', PhotosController::class, [
+
+	'id_name' => 'uuid',
+	'id_regex' => '[[:uuid:]]{36}'
+
+]);
+
+// specify the identifier of the _create_ route
+$definitions = Make::resource('photos', PhotosController::class, [
+
+	'as' => [ 'create' => 'photos:build' ]
+
+]);
+```
+
+
+
+
 ## Exceptions
 
 The exceptions defined by the package implement the `ICanBoogie\Routing\Exception` interface, so that they are easy to recognize:
@@ -428,10 +577,10 @@ catch (\Exception $e)
 
 The following exceptions are defined:
 
-- [ActionNotDefined][]: Thrown when an action is not defined, for instance when a route using an [ActionController][] has an empty `action` property.
+- [ActionNotDefined][]: Thrown when an action is not defined, for instance when a route handled by a controller using [ActionTrait][] has an empty `action` property.
 - [ControllerNotDefined][]: Thrown when trying to define a route without a controller nor location.
 - [PatternNotDefined][]: Thrown when trying to define a route without pattern.
-- [RouteNotDefined][]: Thrown when trying to obtain a route that is not defined in a [Routes][] instance.
+- [RouteNotDefined][]: Thrown when trying to obtain a route that is not defined in a [RouteCollection][] instance.
 
 
 
@@ -492,7 +641,7 @@ Routing\Helpers::patch('decontextualize', function ($str) use($path) {
 
 ## Requirements
 
-The package requires PHP 5.4 or later.
+The package requires PHP 5.5 or later.
 
 
 
@@ -560,6 +709,7 @@ The package is continuously tested by [Travis CI](http://about.travis-ci.org/).
 [ActionController\BeforeActionEvent]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.ActionController.BeforeActionEvent.html
 [ActionController\ActionEvent]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.ActionController.ActionEvent.html
 [ActionNotDefined]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.ActionNotDefined.html
+[ActionTrait]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.Controller.ActionTrait.html
 [Dispatcher\BeforeDispatchEvent]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.Dispatcher.BeforeDispatchEvent.html
 [Dispatcher\DispatchEvent]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.Dispatcher.DispatchEvent.html
 [ICanBoogie]: https://github.com/ICanBoogie/ICanBoogie
@@ -572,8 +722,10 @@ The package is continuously tested by [Travis CI](http://about.travis-ci.org/).
 [Pattern]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.Pattern.html
 [PatternNotDefined]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.PatternNotDefined.html
 [Request]: http://api.icanboogie.org/http/class-ICanBoogie.HTTP.Request.html
+[ResourceTrait]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.Controller.ResourceTrait.html
 [Response]: http://api.icanboogie.org/http/class-ICanBoogie.HTTP.Response.html
+[RESTful]: https://en.wikipedia.org/wiki/Representational_state_transfer
 [Route]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.Route.html
 [Route\RescueEvent]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.Route.RescueEvent.html
 [RouteNotDefined]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.RouteNotDefined.html
-[Routes]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.Routes.html
+[RouteCollection]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.RouteCollection.html
