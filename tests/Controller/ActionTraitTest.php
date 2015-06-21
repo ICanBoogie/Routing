@@ -12,6 +12,7 @@
 namespace ICanBoogie\Routing\Controller;
 
 use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Controller\ActionTraitTest\ActionController;
 use ICanBoogie\Routing\Dispatcher;
 use ICanBoogie\Routing\RouteCollection;
@@ -34,7 +35,7 @@ class ActionTraitTestTest extends \PHPUnit_Framework_TestCase
 		$request = Request::from("/blog/2014-12-my-awesome-post.html");
 		$request->test = $this;
 		$response = $dispatcher($request);
-		$this->assertInstanceOf('ICanBoogie\HTTP\Response', $response);
+		$this->assertInstanceOf(Response::class, $response);
 		$this->assertTrue($response->status->is_successful);
 		$this->assertEquals('HERE', $response->body);
 	}

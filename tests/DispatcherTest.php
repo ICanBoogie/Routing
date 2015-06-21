@@ -12,6 +12,7 @@
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\Events;
+use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Dispatcher\BeforeDispatchEvent;
@@ -91,7 +92,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 		$dispatcher = new Dispatcher($routes);
 		$response = $dispatcher($request);
 
-		$this->assertInstanceOf('ICanBoogie\HTTP\RedirectResponse', $response);
+		$this->assertInstanceOf(RedirectResponse::class, $response);
 		$this->assertEquals($location, $response->location);
 	}
 
@@ -128,7 +129,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 		$expected_response = new Response;
 
 		$dispatcher = $this
-			->getMockBuilder('ICanBoogie\Routing\Dispatcher')
+			->getMockBuilder(Dispatcher::class)
 			->setConstructorArgs([ $routes ])
 			->setMethods([ 'respond' ])
 			->getMock();
@@ -159,7 +160,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 		$exception = new \Exception;
 		$request = Request::from('/');
 		$dispatcher = $this
-			->getMockBuilder('ICanBoogie\Routing\Dispatcher')
+			->getMockBuilder(Dispatcher::class)
 			->disableOriginalConstructor()
 			->setMethods(null)
 			->getMock();
@@ -185,13 +186,13 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 		$exception = new \Exception("OLD");
 		$new_exception = new \Exception("NEW");
 		$route = $this
-			->getMockBuilder('ICanBoogie\Routing\Route')
+			->getMockBuilder(Route::class)
 			->disableOriginalConstructor()
 			->getMock();
 		$request = Request::from('/');
 		$request->context->route = $route;
 		$dispatcher = $this
-			->getMockBuilder('ICanBoogie\Routing\Dispatcher')
+			->getMockBuilder(Dispatcher::class)
 			->disableOriginalConstructor()
 			->setMethods(null)
 			->getMock();
@@ -224,13 +225,13 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 		$exception = new \Exception;
 		$new_response = new Response;
 		$route = $this
-			->getMockBuilder('ICanBoogie\Routing\Route')
+			->getMockBuilder(Route::class)
 			->disableOriginalConstructor()
 			->getMock();
 		$request = Request::from('/');
 		$request->context->route = $route;
 		$dispatcher = $this
-			->getMockBuilder('ICanBoogie\Routing\Dispatcher')
+			->getMockBuilder(Dispatcher::class)
 			->disableOriginalConstructor()
 			->setMethods(null)
 			->getMock();

@@ -17,11 +17,11 @@ class FormattedRouteTest extends \PHPUnit_Framework_TestCase
 	{
 		$url = '/' . uniqid();
 		$route = $this
-			->getMockBuilder('ICanBoogie\Routing\Route')
+			->getMockBuilder(Route::class)
 			->disableOriginalConstructor()
 			->getMock();
 
-		/* @var $route Rooute */
+		/* @var $route Route */
 
 		$ft = new FormattedRoute($url, $route);
 		$this->assertSame($url, $ft->url);

@@ -36,9 +36,9 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 	public function testGetPatternInstance()
 	{
 		$s = '/news/:year-:month-:slug.:format';
-		$r = new Route($this->routes, $s, array());
+		$r = new Route($this->routes, $s, []);
 
-		$this->assertInstanceOf('ICanBoogie\Routing\Pattern', $r->pattern);
+		$this->assertInstanceOf(Pattern::class, $r->pattern);
 	}
 
 	public function testRouteCallbackResponse()
@@ -56,7 +56,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 		$dispatcher = new Dispatcher($routes);
 		$response = $dispatcher($request);
 
-		$this->assertInstanceOf('ICanBoogie\HTTP\Response', $response);
+		$this->assertInstanceOf(Response::class, $response);
 		$this->assertEquals('madonna', $response->body);
 	}
 
@@ -74,7 +74,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 
 		$expected_url = '/news/2014-06-madonna-queen-of-pop.html';
 
-		$this->assertInstanceOf('ICanBoogie\Routing\FormattedRoute', $formatted_route);
+		$this->assertInstanceOf(FormattedRoute::class, $formatted_route);
 		$this->assertEquals($expected_url, (string) $formatted_route);
 		$this->assertEquals($expected_url, $formatted_route->url);
 		$this->assertEquals("http://icanboogie.org{$expected_url}", $formatted_route->absolute_url);
@@ -137,7 +137,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 		$this->assertFalse($r1->has_formatting_value);
 
 		$r2 = $r1->assign($formatting_value);
-		$this->assertInstanceOf('ICanBoogie\Routing\Route', $r2);
+		$this->assertInstanceOf(Route::class, $r2);
 		$this->assertNotSame($r1, $r2);
 		$this->assertSame($formatting_value, $r2->formatting_value);
 		$this->assertTrue($r2->has_formatting_value);

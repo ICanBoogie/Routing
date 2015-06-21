@@ -30,7 +30,7 @@ use ICanBoogie\Prototype\MethodNotDefined;
  */
 class RouteCollection implements \IteratorAggregate, \ArrayAccess
 {
-	const DEFAULT_ROUTE_CLASS = 'ICanBoogie\Routing\Route';
+	const DEFAULT_ROUTE_CLASS = Route::class;
 
 	static private $anonymous_id_count;
 

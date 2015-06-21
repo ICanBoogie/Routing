@@ -21,12 +21,12 @@ class BeforeDispatchEventTest extends \PHPUnit_Framework_TestCase
 	public function test_should_throw_exception_if_response_is_invalid()
 	{
 		$dispatcher = $this
-			->getMockBuilder('ICanBoogie\Routing\Dispatcher')
+			->getMockBuilder(Dispatcher::class)
 			->disableOriginalConstructor()
 			->getMock();
 
 		$route = $this
-			->getMockBuilder('ICanBoogie\Routing\Route')
+			->getMockBuilder(Route::class)
 			->disableOriginalConstructor()
 			->getMock();
 

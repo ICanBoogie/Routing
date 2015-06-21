@@ -20,7 +20,7 @@ class RescueEventTest extends \PHPUnit_Framework_TestCase
 	public function test_instance()
 	{
 		$route = $this
-			->getMockBuilder('ICanBoogie\Routing\Route')
+			->getMockBuilder(Route::class)
 			->disableOriginalConstructor()
 			->getMock();
 

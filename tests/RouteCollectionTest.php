@@ -12,6 +12,7 @@
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\Response;
 
 class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 {
@@ -89,18 +90,18 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 		$dispatcher = new Dispatcher($routes);
 		$routes->any('/', function(Request $request) {
 
-			$this->assertInstanceOf('ICanBoogie\HTTP\Request', $request);
+			$this->assertInstanceOf(Request::class, $request);
 
 			return "Hello world";
 
 		});
 
 		$route = $routes->find('/');
-		$this->assertInstanceOf('ICanBoogie\Routing\Route', $route);
+		$this->assertInstanceOf(Route::class, $route);
 		$this->assertStringStartsWith('anonymous_', $route->id);
 
 		$response = $dispatcher(Request::from('/'));
-		$this->assertInstanceOf('ICanBoogie\HTTP\Response', $response);
+		$this->assertInstanceOf(Response::class, $response);
 		$this->assertEquals("Hello world", $response->body);
 	}
 
@@ -121,8 +122,8 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 		]);
 
 		$route = $routes['one'];
-		$this->assertInstanceOf('ICanBoogie\Routing\Route', $route);
-		$this->assertInstanceOf('ICanBoogie\Routing\Pattern', $route->pattern);
+		$this->assertInstanceOf(Route::class, $route);
+		$this->assertInstanceOf(Pattern::class, $route->pattern);
 		$this->assertSame($one_pattern, (string) $route->pattern);
 		$this->assertSame($one_controller, $route->controller);
 	}
@@ -131,7 +132,7 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 	{
 		$one_pattern = '/' . uniqid();
 		$one_controller = function() {};
-		$one_class = __CLASS__ . '\MyRouteClass';
+		$one_class = \ICanBoogie\Routing\RouteCollectionTest\MyRouteClass::class;
 
 		$routes = new RouteCollection([
 
@@ -232,15 +233,15 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 		]);
 
 		$route = $routes->find('/');
-		$this->assertInstanceOf('ICanBoogie\Routing\Route', $route);
+		$this->assertInstanceOf(Route::class, $route);
 		$this->assertEquals('home', $route->id);
 
 		$route = $routes->find('/', $captured, Request::METHOD_PATCH);
-		$this->assertInstanceOf('ICanBoogie\Routing\Route', $route);
+		$this->assertInstanceOf(Route::class, $route);
 		$this->assertEquals('home', $route->id);
 
 		$route = $routes->find('/?madonna', $captured);
-		$this->assertInstanceOf('ICanBoogie\Routing\Route', $route);
+		$this->assertInstanceOf(Route::class, $route);
 		$this->assertEquals('home', $route->id);
 		$this->assertEquals([ '__query__' => [ 'madonna' => "" ] ], $captured);
 
@@ -251,27 +252,27 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 		$this->assertEmpty($route);
 
 		$route = $routes->find('/articles');
-		$this->assertInstanceOf('ICanBoogie\Routing\Route', $route);
+		$this->assertInstanceOf(Route::class, $route);
 		$this->assertEquals('articles', $route->id);
 
 		$route = $routes->find('/articles', $captured, Request::METHOD_POST);
-		$this->assertInstanceOf('ICanBoogie\Routing\Route', $route);
+		$this->assertInstanceOf(Route::class, $route);
 		$this->assertEquals('articles', $route->id);
 
 		$route = $routes->find('/articles', $captured, Request::METHOD_PATCH);
-		$this->assertInstanceOf('ICanBoogie\Routing\Route', $route);
+		$this->assertInstanceOf(Route::class, $route);
 		$this->assertEquals('articles', $route->id);
 
 		$route = $routes->find('/articles', $captured, Request::METHOD_GET);
 		$this->assertEmpty($route);
 
 		$route = $routes->find('/articles/123', $captured, Request::METHOD_DELETE);
-		$this->assertInstanceOf('ICanBoogie\Routing\Route', $route);
+		$this->assertInstanceOf(Route::class, $route);
 		$this->assertEquals('articles:delete', $route->id);
 		$this->assertEquals([ 'nid' => 123 ], $captured);
 
 		$route = $routes->find('/articles/123', $captured, Request::METHOD_DELETE, 'articles');
-		$this->assertInstanceOf('ICanBoogie\Routing\Route', $route);
+		$this->assertInstanceOf(Route::class, $route);
 		$this->assertEquals('articles:delete', $route->id);
 
 		$route = $routes->find('//articles', $captured);
@@ -305,7 +306,7 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 		]);
 
 		$route = $routes->find('/api/articles/123/active', $captured, Request::METHOD_PUT);
-		$this->assertInstanceOf('ICanBoogie\Routing\Route', $route);
+		$this->assertInstanceOf(Route::class, $route);
 		$this->assertEquals('api:articles:activate', $route->id);
 	}
 
@@ -323,7 +324,7 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 		]);
 
 		$route = $routes->find('/admin/articles/123/edit', $captured);
-		$this->assertInstanceOf('ICanBoogie\Routing\Route', $route);
+		$this->assertInstanceOf(Route::class, $route);
 		$this->assertEquals('admin:articles/edit', $route->id);
 	}
 

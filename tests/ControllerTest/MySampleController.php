@@ -18,10 +18,10 @@ class MySampleController extends Controller
 {
 	protected function action(Request $request)
 	{
-		$request->test->assertInstanceOf('ICanBoogie\HTTP\Request', $request);
+		$request->test->assertInstanceOf(Request::class, $request);
 		$request->test->assertEquals(1, func_num_args());
 		$request->test->assertEquals("my_sample", $this->name);
-		$request->test->assertInstanceOf('ICanBoogie\Routing\Route', $this->route);
+		$request->test->assertInstanceOf(Route::class, $this->route);
 
 		return 'HERE';
 	}
