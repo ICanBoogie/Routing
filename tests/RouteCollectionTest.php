@@ -13,11 +13,11 @@ namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\Request;
 
-class RoutesTest extends \PHPUnit_Framework_TestCase
+class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 {
 	public function test_anonymous_routes()
 	{
-		$routes = new Routes([
+		$routes = new RouteCollection([
 
 			[ 'controller' => uniqid(), 'pattern' => uniqid() ],
 			[ 'controller' => uniqid(), 'pattern' => uniqid() ]
@@ -33,7 +33,7 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function test_should_throw_exception_on_invalid_http_method()
 	{
-		$routes = new Routes;
+		$routes = new RouteCollection;
 		$routes->invalid_http_method([ 'controller' => uniqid(), 'pattern'=> uniqid() ]);
 	}
 
@@ -42,7 +42,7 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function test_pattern_not_defined()
 	{
-		new Routes([
+		new RouteCollection([
 
 			'home' => [
 
@@ -58,7 +58,7 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function test_controller_not_defined()
 	{
-		new Routes([
+		new RouteCollection([
 
 			'home' => [
 
@@ -71,7 +71,7 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 
 	public function test_controller_not_defined_but_location()
 	{
-		new Routes([
+		new RouteCollection([
 
 			'home' => [
 
@@ -85,7 +85,7 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 
 	public function test_define_route()
 	{
-		$routes = new Routes;
+		$routes = new RouteCollection;
 		$dispatcher = new Dispatcher($routes);
 		$routes->any('/', function(Request $request) {
 
@@ -109,7 +109,7 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 		$one_pattern = '/' . uniqid();
 		$one_controller = function() {};
 
-		$routes = new Routes([
+		$routes = new RouteCollection([
 
 			'one' => [
 
@@ -133,7 +133,7 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 		$one_controller = function() {};
 		$one_class = __CLASS__ . '\MyRouteClass';
 
-		$routes = new Routes([
+		$routes = new RouteCollection([
 
 			'one' => [
 
@@ -154,13 +154,13 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function test_offsetGet_undefined()
 	{
-		$routes = new Routes;
+		$routes = new RouteCollection;
 		$routes[uniqid()];
 	}
 
 	public function test_iterator()
 	{
-		$routes = new Routes;
+		$routes = new RouteCollection;
 		$routes->get('/' . uniqid(), function() {}, [
 
 			'as' => 'one'
@@ -196,7 +196,7 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 
 	public function test_find()
 	{
-		$routes = new Routes([
+		$routes = new RouteCollection([
 
 			'home' => [
 
@@ -284,7 +284,7 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function test_weigth()
 	{
-		$routes = new Routes([
+		$routes = new RouteCollection([
 
 			'api:nodes:activate' => [
 
@@ -311,7 +311,7 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 
 	public function test_nameless_capture()
 	{
-		$routes = new Routes([
+		$routes = new RouteCollection([
 
 			'admin:articles/edit' => [
 
@@ -332,7 +332,7 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function test_add_with_method($method, $pattern, $controller, $options, $expected)
 	{
-		$routes = new Routes;
+		$routes = new RouteCollection;
 		$routes->$method($pattern, $controller, $options);
 		$route = $routes->find('/');
 
@@ -457,7 +457,7 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 
 	public function test_routes()
 	{
-		$routes = new Routes;
+		$routes = new RouteCollection;
 		$routes->resource('photos', 'PhotoController', [ 'only' => [ 'index', 'show' ] ]);
 		$ids = [];
 
@@ -470,7 +470,7 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 	}
 }
 
-namespace ICanBoogie\Routing\RoutesTest;
+namespace ICanBoogie\Routing\RouteCollectionTest;
 
 use ICanBoogie\Routing\Route;
 

@@ -21,7 +21,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 	protected function setUp()
 	{
 		$this->routes = $this
-			->getMockBuilder('ICanBoogie\Routing\Routes')
+			->getMockBuilder(RouteCollection::class)
 			->disableOriginalConstructor()
 			->getMock();
 	}
@@ -45,7 +45,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 	{
 		$request = Request::from('/');
 
-		$routes = new Routes;
+		$routes = new RouteCollection;
 		$routes->get('/', function(Request $r) use ($request)
 		{
 			$this->assertSame($request, $r);

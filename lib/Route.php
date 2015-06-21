@@ -16,7 +16,7 @@ use ICanBoogie\Object;
 /**
  * A route.
  *
- * @property-read Routes $routes The route collection this route belongs to.
+ * @property-read RouteCollection $routes The route collection this route belongs to.
  * @property-read Pattern $pattern The pattern of the route.
  * @property-read string $controller The class name of the controller.
  * @property-read string|null $action Controller action.
@@ -136,7 +136,7 @@ class Route extends Object
 	/**
 	 * The route collection this route belongs to.
 	 *
-	 * @var Routes
+	 * @var RouteCollection
 	 */
 	private $routes;
 
@@ -168,11 +168,11 @@ class Route extends Object
 	/**
 	 * Initializes the {@link $pattern} property and the properties provided.
 	 *
-	 * @param Routes $routes
+	 * @param RouteCollection $routes
 	 * @param string $pattern
 	 * @param array $properties
 	 */
-	public function __construct(Routes $routes, $pattern, array $properties)
+	public function __construct(RouteCollection $routes, $pattern, array $properties)
 	{
 		$this->routes = $routes;
 		$this->pattern = Pattern::from($pattern);

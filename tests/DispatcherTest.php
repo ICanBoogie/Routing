@@ -44,7 +44,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 	public function test_should_return_null_when_no_route_matches()
 	{
 		$routes = $this
-			->getMockBuilder('ICanBoogie\Routing\Routes')
+			->getMockBuilder(RouteCollection::class)
 			->disableOriginalConstructor()
 			->setMethods([ 'find' ])
 			->getMock();
@@ -53,7 +53,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 			->method('find')
 			->willReturn(null);
 
-		/* @var $routes Routes */
+		/* @var $routes RouteCollection */
 
 		$request = Request::from('/');
 		$dispatcher = new Dispatcher($routes);
@@ -66,7 +66,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 		$location = '/path/to/location/' . uniqid();
 
 		$routes = $this
-			->getMockBuilder('ICanBoogie\Routing\Routes')
+			->getMockBuilder(RouteCollection::class)
 			->disableOriginalConstructor()
 			->setMethods([ 'find' ])
 			->getMock();
@@ -79,7 +79,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 
 			});
 
-		/* @var $routes Routes */
+		/* @var $routes RouteCollection */
 
 		$route = new Route($routes, '/', [
 
@@ -110,7 +110,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 		});
 
 		$routes = $this
-			->getMockBuilder('ICanBoogie\Routing\Routes')
+			->getMockBuilder(RouteCollection::class)
 			->disableOriginalConstructor()
 			->setMethods([ 'find' ])
 			->getMock();
@@ -137,7 +137,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 			->method('respond')
 			->willReturn($expected_response);
 
-		/* @var $routes Routes */
+		/* @var $routes RouteCollection */
 
 		$route = new Route($routes, '/', [
 

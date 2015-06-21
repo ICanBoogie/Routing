@@ -17,18 +17,18 @@ use ICanBoogie\Prototype\MethodNotDefined;
 /**
  * A route collection.
  *
- * @method Routes any() any(string $pattern, $controller, array $options=[]) Add a route for any HTTP method.
- * @method Routes connect() connect(string $pattern, $controller, array $options=[]) Add a route for the HTTP method CONNECT.
- * @method Routes delete() delete(string $pattern, $controller, array $options=[]) Add a route for the HTTP method DELETE.
- * @method Routes get() get(string $pattern, $controller, array $options=[]) Add a route for the HTTP method GET.
- * @method Routes head() head(string $pattern, $controller, array $options=[]) Add a route for the HTTP method HEAD.
- * @method Routes options() options(string $pattern, $controller, array $options=[]) Add a route for the HTTP method OPTIONS.
- * @method Routes post() post(string $pattern, $controller, array $options=[]) Add a route for the HTTP method POST.
- * @method Routes put() put(string $pattern, $controller, array $options=[]) Add a route for the HTTP method PUT.
- * @method Routes patch() patch(string $pattern, $controller, array $options=[]) Add a route for the HTTP method PATCH
- * @method Routes trace() trace(string $pattern, $controller, array $options=[]) Add a route for the HTTP method TRACE.
+ * @method RouteCollection any() any(string $pattern, $controller, array $options=[]) Add a route for any HTTP method.
+ * @method RouteCollection connect() connect(string $pattern, $controller, array $options=[]) Add a route for the HTTP method CONNECT.
+ * @method RouteCollection delete() delete(string $pattern, $controller, array $options=[]) Add a route for the HTTP method DELETE.
+ * @method RouteCollection get() get(string $pattern, $controller, array $options=[]) Add a route for the HTTP method GET.
+ * @method RouteCollection head() head(string $pattern, $controller, array $options=[]) Add a route for the HTTP method HEAD.
+ * @method RouteCollection options() options(string $pattern, $controller, array $options=[]) Add a route for the HTTP method OPTIONS.
+ * @method RouteCollection post() post(string $pattern, $controller, array $options=[]) Add a route for the HTTP method POST.
+ * @method RouteCollection put() put(string $pattern, $controller, array $options=[]) Add a route for the HTTP method PUT.
+ * @method RouteCollection patch() patch(string $pattern, $controller, array $options=[]) Add a route for the HTTP method PATCH
+ * @method RouteCollection trace() trace(string $pattern, $controller, array $options=[]) Add a route for the HTTP method TRACE.
  */
-class Routes implements \IteratorAggregate, \ArrayAccess
+class RouteCollection implements \IteratorAggregate, \ArrayAccess
 {
 	const DEFAULT_ROUTE_CLASS = 'ICanBoogie\Routing\Route';
 

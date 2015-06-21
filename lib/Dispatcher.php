@@ -31,11 +31,11 @@ class Dispatcher implements \ICanBoogie\HTTP\DispatcherInterface
 	/**
 	 * Route collection.
 	 *
-	 * @var Routes
+	 * @var RouteCollection
 	 */
 	protected $routes;
 
-	public function __construct(Routes $routes = null)
+	public function __construct(RouteCollection $routes = null)
 	{
 		// @codeCoverageIgnoreStart
 		// FIXME-20140912: we should be independent from the core, the way dispatcher are created should be enhanced

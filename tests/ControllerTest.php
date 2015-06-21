@@ -120,7 +120,7 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
 
 	public function test_closure()
 	{
-		$routes = new Routes([
+		$routes = new RouteCollection([
 
 			'default' => [
 
@@ -148,7 +148,7 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
 
 	public function test_generic_controller()
 	{
-		$routes = new Routes([
+		$routes = new RouteCollection([
 
 			'default' => [
 
@@ -308,7 +308,7 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
 			->getMockForAbstractClass();
 
 		$routes = $this
-			->getMockBuilder('ICanBoogie\Routing\Routes')
+			->getMockBuilder(RouteCollection::class)
 			->disableOriginalConstructor()
 			->getMock();
 

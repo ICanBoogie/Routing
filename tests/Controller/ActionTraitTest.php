@@ -14,13 +14,13 @@ namespace ICanBoogie\Routing\Controller;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Routing\Controller\ActionTraitTest\ActionController;
 use ICanBoogie\Routing\Dispatcher;
-use ICanBoogie\Routing\Routes;
+use ICanBoogie\Routing\RouteCollection;
 
 class ActionTraitTestTest extends \PHPUnit_Framework_TestCase
 {
 	public function test_action()
 	{
-		$routes = new Routes([
+		$routes = new RouteCollection([
 
 			'default' => [
 
@@ -44,7 +44,7 @@ class ActionTraitTestTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function test_should_throw_exception_when_action_is_not_defined()
 	{
-		$routes = new Routes([
+		$routes = new RouteCollection([
 
 			'default' => [
 
