@@ -50,13 +50,6 @@ use ICanBoogie\Routing\Controller\ActionEvent;
  * @property-read Request $request The request being dispatched.
  * @property-read Route $route The route being dispatched.
  * @property Response $response
- * @property-read \ICanBoogie\Core $app The application.
- *
- * @property-read \ICanBoogie\Module $module The module defining the route. (This getter is
- * provided by the icanboogie/module package)
- * @property-read \ICanBoogie\ActiveRecord\Model $model The primary model of the module. (This
- * getter is provided by the icanboogie/module package)
- * @property-read \ICanBoogie\Events $events Provided through prototype getters or through `$app`.
  */
 abstract class Controller extends Object
 {
