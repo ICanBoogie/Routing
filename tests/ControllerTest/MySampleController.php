@@ -13,6 +13,7 @@ namespace ICanBoogie\Routing\ControllerTest;
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Routing\Controller;
+use ICanBoogie\Routing\Route;
 
 class MySampleController extends Controller
 {

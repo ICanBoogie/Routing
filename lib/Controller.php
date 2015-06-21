@@ -76,6 +76,9 @@ abstract class Controller extends Object
 	 */
 	private $request;
 
+	/**
+	 * @return Request
+	 */
 	protected function get_request()
 	{
 		return $this->request;

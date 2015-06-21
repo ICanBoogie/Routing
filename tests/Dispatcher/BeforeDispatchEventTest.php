@@ -12,6 +12,8 @@
 namespace ICanBoogie\Routing\Dispatcher;
 
 use ICanBoogie\HTTP\Request;
+use ICanBoogie\Routing\Dispatcher;
+use ICanBoogie\Routing\Route;
 
 class BeforeDispatchEventTest extends \PHPUnit_Framework_TestCase
 {
@@ -30,8 +32,8 @@ class BeforeDispatchEventTest extends \PHPUnit_Framework_TestCase
 			->disableOriginalConstructor()
 			->getMock();
 
-		/* @var $dispatcher \ICanBoogie\Routing\Dispatcher */
-		/* @var $route \ICanBoogie\Routing\Route */
+		/* @var $dispatcher Dispatcher */
+		/* @var $route Route */
 
 		$request = Request::from('/');
 
