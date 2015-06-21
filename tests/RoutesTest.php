@@ -454,6 +454,20 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 
 		];
 	}
+
+	public function test_routes()
+	{
+		$routes = new Routes;
+		$routes->resource('photos', 'PhotoController', [ 'only' => [ 'index', 'show' ] ]);
+		$ids = [];
+
+		foreach ($routes as $route)
+		{
+			$ids[] = $route['id'];
+		}
+
+		$this->assertSame([ 'photos:index', 'photos:show' ], $ids);
+	}
 }
 
 namespace ICanBoogie\Routing\RoutesTest;

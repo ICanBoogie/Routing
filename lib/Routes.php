@@ -152,6 +152,30 @@ class Routes implements \IteratorAggregate, \ArrayAccess
 		return $this;
 	}
 
+	/**
+	 * Adds resource routes.
+	 *
+	 * **Note:** The route definitions for the resource are created by
+	 * {@link RoutesMaker::resource}. Both methods accept the same arguments.
+	 *
+	 * @see \ICanBoogie\Routing\RoutesMaker::resource
+	 *
+	 * @param string $name
+	 * @param string $controller
+	 * @param array $options
+	 *
+	 * @return array
+	 */
+	public function resource($name, $controller, array $options = [])
+	{
+		$definitions = RoutesMaker::resource($name,$controller, $options);
+
+		foreach ($definitions as $id => $definition)
+		{
+			$this[$id] = $definition;
+		}
+	}
+
 	public function getIterator()
 	{
 		return new \ArrayIterator($this->routes);
