@@ -191,6 +191,16 @@ class PatternTest extends \PHPUnit_Framework_TestCase
 		$pattern = Pattern::from(":year-:month.html");
 		$pattern->format();
 	}
+
+	public function test_uuid()
+	{
+		$uuid = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
+		$pattern = Pattern::from('/articles/<uuid:{:uuid:}>/edit');
+		$match = $pattern->match("/articles/$uuid/edit", $captured);
+
+		$this->assertTrue($match);
+		$this->assertSame($uuid, $captured['uuid']);
+	}
 }
 
 namespace ICanBoogie\Routing\PatternTest;

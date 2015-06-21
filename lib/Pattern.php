@@ -42,6 +42,12 @@ class Pattern
 {
 	use AccessorTrait;
 
+	static protected $extended_character_classes = [
+
+		'{:uuid:}' => '[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}'
+
+	];
+
 	/**
 	 * Parses a route pattern and returns an array of interleaved paths and parameters, the
 	 * parameter names and the regular expression for the specified pattern.
@@ -60,6 +66,7 @@ class Pattern
 			$pattern = substr($pattern, 0, -1);
 		}
 
+		$pattern = strtr($pattern, self::$extended_character_classes);
 		$parts = preg_split('#(:\w+|<(\w+:)?([^>]+)>)#', $pattern, -1, PREG_SPLIT_DELIM_CAPTURE);
 		list($interleaved, $params, $regex) = self::parse_parts($parts);
 
