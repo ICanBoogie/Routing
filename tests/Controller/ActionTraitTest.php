@@ -12,7 +12,7 @@
 namespace ICanBoogie\Routing\Controller;
 
 use ICanBoogie\HTTP\Request;
-use ICanBoogie\Routing\ActionTraitTest\ActionController;
+use ICanBoogie\Routing\Controller\ActionTraitTest\ActionController;
 use ICanBoogie\Routing\Dispatcher;
 use ICanBoogie\Routing\Routes;
 
@@ -106,26 +106,5 @@ class ActionTraitTestTest extends \PHPUnit_Framework_TestCase
 		/* @var $controller ActionController */
 
 		$this->assertSame($rc, $controller(Request::from([ 'uri' => '/', 'is_post' => true ])));
-	}
-}
-
-namespace ICanBoogie\Routing\ActionTraitTest;
-
-use ICanBoogie\Routing\Controller;
-
-class ActionController extends Controller
-{
-	use Controller\ActionTrait;
-
-	protected function action_view($year, $month, $slug)
-	{
-		$test = $this->request->test;
-		$test->assertEquals('view', $this->action);
-		$test->assertEquals(3, func_num_args());
-		$test->assertEquals(2014, $year);
-		$test->assertEquals(12, $month);
-		$test->assertEquals("my-awesome-post", $slug);
-
-		return 'HERE';
 	}
 }
