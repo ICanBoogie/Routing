@@ -697,7 +697,7 @@ The package is continuously tested by [Travis CI](http://about.travis-ci.org/).
 
 ## License
 
-**icanBoogie/routing** is licensed under the New BSD License - See the [LICENSE](LICENSE) file for details.
+**icanboogie/routing** is licensed under the New BSD License - See the [LICENSE](LICENSE) file for details.
 
 
 

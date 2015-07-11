@@ -12,7 +12,7 @@
 namespace ICanBoogie\Routing;
 
 /**
- * Exception thrown by the {@link ActionController} in attempt to handle a route without action.
+ * Exception thrown in attempt to handle a route without action.
  *
  * @package ICanBoogie\Routing
  */

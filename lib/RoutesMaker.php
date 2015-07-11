@@ -37,13 +37,14 @@ class RoutesMaker
 	{
 		$actions = [
 
-			'index'   => [ Request::METHOD_GET, '/{resource}' ],
-			'create'  => [ Request::METHOD_GET, '/{resource}/new' ],
-			'store'   => [ Request::METHOD_POST, '/{resource}' ],
-			'show'    => [ Request::METHOD_GET, '/{resource}/{id}' ],
-			'edit'    => [ Request::METHOD_GET, '/{resource}/{id}/edit' ],
-			'update'  => [ [ Request::METHOD_PUT, Request::METHOD_PATCH ], '/{resource}/{id}' ],
-			'destroy' => [ Request::METHOD_DELETE, '/{resource}/{id}' ],
+			'index'   => [ '/{resource}',           Request::METHOD_GET ],
+			'create'  => [ '/{resource}/create',    Request::METHOD_GET ],
+			'store'   => [ '/{resource}',           Request::METHOD_POST ],
+			'show'    => [ '/{resource}/{id}',      Request::METHOD_GET ],
+			'edit'    => [ '/{resource}/{id}/edit', Request::METHOD_GET ],
+			'update'  => [ '/{resource}/{id}',      [ Request::METHOD_PUT, Request::METHOD_PATCH ] ],
+			'destroy' => [ '/{resource}/{id}',      Request::METHOD_DELETE ]
+
 		];
 
 		$options += [
@@ -71,7 +72,7 @@ class RoutesMaker
 		$options_as = $options['as'];
 		$routes = [];
 
-		foreach ($actions as $action => list($via, $pattern))
+		foreach ($actions as $action => list($pattern, $via))
 		{
 			$as = empty($options_as[$action]) ? "{$name}:{$action}" : $options_as[$action];
 
