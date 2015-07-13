@@ -17,7 +17,7 @@ use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Dispatcher;
 use ICanBoogie\Routing\Route;
 
-class BeforeDispatchEventTest extends \PHPUnit_Framework_TestCase
+class DispatchEventTest extends \PHPUnit_Framework_TestCase
 {
 	private $dispatcher;
 	private $route;
@@ -48,7 +48,7 @@ class BeforeDispatchEventTest extends \PHPUnit_Framework_TestCase
 		$route = $this->route;
 		$request = Request::from('/');
 
-		EventReflection::from(BeforeDispatchEvent::class)->with([
+		EventReflection::from(DispatchEvent::class)->with([
 
 			'target' => $dispatcher,
 			'route' => $route,
@@ -69,9 +69,9 @@ class BeforeDispatchEventTest extends \PHPUnit_Framework_TestCase
 		$response = null;
 		$expected_response = new Response;
 
-		/* @var $event BeforeDispatchEvent */
+		/* @var $event DispatchEvent */
 
-		$event = EventReflection::from(BeforeDispatchEvent::class)->with([
+		$event = EventReflection::from(DispatchEvent::class)->with([
 
 			'target' => $dispatcher,
 			'route' => $route,

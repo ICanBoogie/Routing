@@ -11,6 +11,7 @@
 
 namespace ICanBoogie\Routing\Dispatcher;
 
+use ICanBoogie\Event;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Dispatcher;
@@ -20,29 +21,53 @@ use ICanBoogie\Routing\Route;
  * Event class for the `ICanBoogie\Routing\Dispatcher::dispatch` event.
  *
  * Third parties may use this event to alter the response before it is returned by the dispatcher.
+ *
+ * @property-read Route $route
+ * @property-read Request $request
+ * @property Response $response
  */
-class DispatchEvent extends \ICanBoogie\Event
+class DispatchEvent extends Event
 {
 	/**
 	 * The route.
 	 *
 	 * @var Route
 	 */
-	public $route;
+	private $route;
+
+	protected function get_route()
+	{
+		return $this->route;
+	}
 
 	/**
-	 * The request.
+	 * The HTTP request.
 	 *
 	 * @var Request
 	 */
-	public $request;
+	private $request;
+
+	protected function get_request()
+	{
+		return $this->request;
+	}
 
 	/**
-	 * Reference to the response.
+	 * Reference to the HTTP response.
 	 *
-	 * @var Response|null
+	 * @var Response
 	 */
-	public $response;
+	private $response;
+
+	protected function get_response()
+	{
+		return $this->response;
+	}
+
+	protected function set_response(Response &$response = null)
+	{
+		$this->response = $response;
+	}
 
 	/**
 	 * The event is constructed with the type `dispatch`.
@@ -50,13 +75,13 @@ class DispatchEvent extends \ICanBoogie\Event
 	 * @param Dispatcher $target
 	 * @param Route $route
 	 * @param Request $request
-	 * @param mixed $response
+	 * @param Response|null $response
 	 */
 	public function __construct(Dispatcher $target, Route $route, Request $request, &$response)
 	{
 		$this->route = $route;
 		$this->request = $request;
-		$this->response = &$response;
+		$this->set_response($response);
 
 		parent::__construct($target, 'dispatch');
 	}

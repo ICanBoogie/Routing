@@ -17,6 +17,9 @@
 		"issues": "https://github.com/ICanBoogie/Routing/issues",
 		"source": "https://github.com/ICanBoogie/Routing"
 	},
+
+	"minimum-stability": "dev",
+
 	"require": {
 		"php": ">=5.5.0",
 		"icanboogie/http": "2.5.x-dev"
