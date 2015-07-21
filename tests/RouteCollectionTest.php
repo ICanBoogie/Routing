@@ -87,7 +87,7 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 	public function test_define_route()
 	{
 		$routes = new RouteCollection;
-		$dispatcher = new Dispatcher($routes);
+		$dispatcher = new RouteDispatcher($routes);
 		$routes->any('/', function(Request $request) {
 
 			$this->assertInstanceOf(Request::class, $request);

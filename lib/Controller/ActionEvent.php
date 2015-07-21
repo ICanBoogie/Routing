@@ -18,8 +18,6 @@ use ICanBoogie\Routing\Controller;
  * Event class for the `ICanBoogie\Routing\Controller::action:before` event.
  *
  * Event hooks may use this event to alter the result returned by the `action()` method.
- *
- * @package ICanBoogie\Routing\Controller
  */
 class ActionEvent extends Event
 {
@@ -30,6 +28,12 @@ class ActionEvent extends Event
 	 */
 	public $result;
 
+	/**
+	 * The event is constructed with the type `action`.
+	 *
+	 * @param Controller $target
+	 * @param string $result
+	 */
 	public function __construct(Controller $target, &$result)
 	{
 		$this->result = &$result;

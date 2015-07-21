@@ -9,12 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing\Dispatcher;
+namespace ICanBoogie\Routing\RouteDispatcher;
 
 use ICanBoogie\EventReflection;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
-use ICanBoogie\Routing\Dispatcher;
+use ICanBoogie\Routing\RouteDispatcher;
 use ICanBoogie\Routing\Route;
 
 class BeforeDispatchEventTest extends \PHPUnit_Framework_TestCase
@@ -25,7 +25,7 @@ class BeforeDispatchEventTest extends \PHPUnit_Framework_TestCase
 	public function setUp()
 	{
 		$this->dispatcher = $this
-			->getMockBuilder(Dispatcher::class)
+			->getMockBuilder(RouteDispatcher::class)
 			->disableOriginalConstructor()
 			->getMock();
 
@@ -41,14 +41,14 @@ class BeforeDispatchEventTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function test_invalid_response_type()
 	{
-		/* @var $dispatcher Dispatcher */
+		/* @var $dispatcher RouteDispatcher */
 		/* @var $route Route */
 
 		$dispatcher = $this->dispatcher;
 		$route = $this->route;
 		$request = Request::from('/');
 
-		EventReflection::from(BeforeDispatchEvent::class)->with([
+		BeforeDispatchEvent::from([
 
 			'target' => $dispatcher,
 			'route' => $route,
@@ -60,7 +60,7 @@ class BeforeDispatchEventTest extends \PHPUnit_Framework_TestCase
 
 	public function test_response_reference()
 	{
-		/* @var $dispatcher Dispatcher */
+		/* @var $dispatcher RouteDispatcher */
 		/* @var $route Route */
 
 		$dispatcher = $this->dispatcher;
@@ -71,7 +71,7 @@ class BeforeDispatchEventTest extends \PHPUnit_Framework_TestCase
 
 		/* @var $event BeforeDispatchEvent */
 
-		$event = EventReflection::from(BeforeDispatchEvent::class)->with([
+		$event = BeforeDispatchEvent::from([
 
 			'target' => $dispatcher,
 			'route' => $route,

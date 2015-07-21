@@ -11,11 +11,12 @@
 
 namespace ICanBoogie\Routing;
 
+use ICanBoogie\HTTP\Dispatcher;
 use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
-use ICanBoogie\Routing\Dispatcher\BeforeDispatchEvent;
-use ICanBoogie\Routing\Dispatcher\DispatchEvent;
+use ICanBoogie\Routing\RouteDispatcher\BeforeDispatchEvent;
+use ICanBoogie\Routing\RouteDispatcher\DispatchEvent;
 use ICanBoogie\Routing\Route\RescueEvent;
 
 /**
@@ -26,7 +27,7 @@ use ICanBoogie\Routing\Route\RescueEvent;
  * `$decontextualized_path` holds the decontextualized path. The path is decontextualized using
  * the {@link decontextualize()} function.
  */
-class Dispatcher implements \ICanBoogie\HTTP\DispatcherInterface
+class RouteDispatcher implements Dispatcher
 {
 	/**
 	 * Route collection.
@@ -35,16 +36,11 @@ class Dispatcher implements \ICanBoogie\HTTP\DispatcherInterface
 	 */
 	protected $routes;
 
+	/**
+	 * @param RouteCollection|null $routes
+	 */
 	public function __construct(RouteCollection $routes = null)
 	{
-		// @codeCoverageIgnoreStart
-		// FIXME-20140912: we should be independent from the core, the way dispatcher are created should be enhanced
-		if (!$routes && class_exists('ICanBoogie\Core'))
-		{
-			$routes = \ICanBoogie\app()->routes;
-		}
-		// @codeCoverageIgnoreEnd
-
 		$this->routes = $routes;
 	}
 
@@ -92,6 +88,8 @@ class Dispatcher implements \ICanBoogie\HTTP\DispatcherInterface
 	 */
 	protected function dispatch(Route $route, Request $request)
 	{
+		$response = null;
+
 		new BeforeDispatchEvent($this, $route, $request, $response);
 
 		if (!$response)
@@ -146,7 +144,7 @@ class Dispatcher implements \ICanBoogie\HTTP\DispatcherInterface
 	}
 
 	/**
-	 * Fires {@link \ICanBoogie\Routing\Dispatcher\RescueEvent} and returns the response provided
+	 * Fires {@link \ICanBoogie\Routing\RouteDispatcher\RescueEvent} and returns the response provided
 	 * by third parties. If no response was provided, the exception (or the exception provided by
 	 * third parties) is re-thrown.
 	 *
@@ -155,12 +153,14 @@ class Dispatcher implements \ICanBoogie\HTTP\DispatcherInterface
 	 *
 	 * @throws \Exception if the exception cannot be rescued.
 	 *
-	 * @return \ICanBoogie\HTTP\Response
+	 * @return Response
 	 */
 	public function rescue(\Exception $exception, Request $request)
 	{
 		if (isset($request->context->route))
 		{
+			$response = null;
+
 			new RescueEvent($request->context->route, $exception, $request, $response);
 
 			if ($response)

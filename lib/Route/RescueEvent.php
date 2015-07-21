@@ -17,7 +17,7 @@ use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Route;
 
 /**
- * Event class for the `ICanBoogie\Routing\Dispatcher::rescue` event.
+ * Event class for the `ICanBoogie\Routing\RouteDispatcher::rescue` event.
  *
  * Event hooks may use this event to _rescue_ a route by providing a suitable response, or
  * replace the exception to throw if the rescue fails.

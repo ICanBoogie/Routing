@@ -13,8 +13,6 @@ namespace ICanBoogie\Routing;
 
 /**
  * Exception thrown in attempt to handle a route without action.
- *
- * @package ICanBoogie\Routing
  */
 class ActionNotDefined extends \LogicException implements Exception
 {

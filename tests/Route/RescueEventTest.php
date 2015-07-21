@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing;
+namespace ICanBoogie\Routing\Route;
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
-use ICanBoogie\Routing\Route\RescueEvent;
+use ICanBoogie\Routing\Route;
 
 class RescueEventTest extends \PHPUnit_Framework_TestCase
 {
@@ -29,8 +29,16 @@ class RescueEventTest extends \PHPUnit_Framework_TestCase
 		$response = null;
 
 		/* @var $route Route */
+		/* @var $event RescueEvent */
 
-		$event = new RescueEvent($route, $exception, $request, $response);
+		$event = RescueEvent::from([
+
+			'target' => $route,
+			'exception' => &$exception,
+			'request' => $request,
+			'response' => &$response
+
+		]);
 
 		$this->assertSame($exception, $event->exception);
 		$this->assertSame($request, $event->request);

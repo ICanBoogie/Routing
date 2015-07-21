@@ -11,35 +11,27 @@
 
 namespace ICanBoogie\Routing;
 
-use ICanBoogie\Events;
+use ICanBoogie\EventCollection;
 use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
-use ICanBoogie\Routing\Dispatcher\BeforeDispatchEvent;
-use ICanBoogie\Routing\Route\RescueEvent;
 
 class DispatcherTest extends \PHPUnit_Framework_TestCase
 {
 	/**
-	 * @var Events
+	 * @var EventCollection
 	 */
 	private $events;
 
-	private $events_callable;
-
 	public function setUp()
 	{
-		$this->events = $events = new Events;
-		$this->events_callable = Events::patch('get', function() use ($events) {
+		$this->events = $events = new EventCollection();
+
+		EventCollection::set_instance_provider(function() use ($events) {
 
 			return $events;
 
 		});
-	}
-
-	public function tearDown()
-	{
-		Events::patch('get', $this->events_callable);
 	}
 
 	public function test_should_return_null_when_no_route_matches()
@@ -57,7 +49,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 		/* @var $routes RouteCollection */
 
 		$request = Request::from('/');
-		$dispatcher = new Dispatcher($routes);
+		$dispatcher = new RouteDispatcher($routes);
 
 		$this->assertNull($dispatcher($request));
 	}
@@ -89,7 +81,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 		]);
 
 		$request = Request::from('/');
-		$dispatcher = new Dispatcher($routes);
+		$dispatcher = new RouteDispatcher($routes);
 		$response = $dispatcher($request);
 
 		$this->assertInstanceOf(RedirectResponse::class, $response);
@@ -101,7 +93,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 		$called_before_dispatch = false;
 
 		$events = $this->events;
-		$events->attach(function(BeforeDispatchEvent $event, Dispatcher $target) use (&$request, &$expected_response, &$called_before_dispatch) {
+		$events->attach(function(RouteDispatcher\BeforeDispatchEvent $event, RouteDispatcher $target) use (&$request, &$expected_response, &$called_before_dispatch) {
 
 			$called_before_dispatch = true;
 
@@ -129,7 +121,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 		$expected_response = new Response;
 
 		$dispatcher = $this
-			->getMockBuilder(Dispatcher::class)
+			->getMockBuilder(RouteDispatcher::class)
 			->setConstructorArgs([ $routes ])
 			->setMethods([ 'respond' ])
 			->getMock();
@@ -147,7 +139,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 
 		]);
 
-		/* @var $dispatcher Dispatcher */
+		/* @var $dispatcher RouteDispatcher */
 
 		$request = Request::from('/');
 		$response = $dispatcher($request);
@@ -160,12 +152,12 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 		$exception = new \Exception;
 		$request = Request::from('/');
 		$dispatcher = $this
-			->getMockBuilder(Dispatcher::class)
+			->getMockBuilder(RouteDispatcher::class)
 			->disableOriginalConstructor()
 			->setMethods(null)
 			->getMock();
 
-		/* @var $dispatcher Dispatcher */
+		/* @var $dispatcher RouteDispatcher */
 
 		try
 		{
@@ -192,14 +184,14 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 		$request = Request::from('/');
 		$request->context->route = $route;
 		$dispatcher = $this
-			->getMockBuilder(Dispatcher::class)
+			->getMockBuilder(RouteDispatcher::class)
 			->disableOriginalConstructor()
 			->setMethods(null)
 			->getMock();
 
-		/* @var $dispatcher Dispatcher */
+		/* @var $dispatcher RouteDispatcher */
 
-		$this->events->once(function(RescueEvent $event, Route $target) use ($route, $new_exception) {
+		$this->events->once(function(Route\RescueEvent $event, Route $target) use ($route, $new_exception) {
 
 			$this->assertSame($route, $target);
 			$event->exception = $new_exception;
@@ -231,14 +223,14 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 		$request = Request::from('/');
 		$request->context->route = $route;
 		$dispatcher = $this
-			->getMockBuilder(Dispatcher::class)
+			->getMockBuilder(RouteDispatcher::class)
 			->disableOriginalConstructor()
 			->setMethods(null)
 			->getMock();
 
-		/* @var $dispatcher Dispatcher */
+		/* @var $dispatcher RouteDispatcher */
 
-		$this->events->once(function(RescueEvent $event, Route $target) use ($route, $new_response) {
+		$this->events->once(function(Route\RescueEvent $event, Route $target) use ($route, $new_response) {
 
 			$this->assertSame($route, $target);
 			$event->response = $new_response;

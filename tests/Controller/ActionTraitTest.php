@@ -14,7 +14,7 @@ namespace ICanBoogie\Routing\Controller;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Controller\ActionTraitTest\ActionController;
-use ICanBoogie\Routing\Dispatcher;
+use ICanBoogie\Routing\RouteDispatcher;
 use ICanBoogie\Routing\RouteCollection;
 
 class ActionTraitTestTest extends \PHPUnit_Framework_TestCase
@@ -31,7 +31,7 @@ class ActionTraitTestTest extends \PHPUnit_Framework_TestCase
 
 		]);
 
-		$dispatcher = new Dispatcher($routes);
+		$dispatcher = new RouteDispatcher($routes);
 		$request = Request::from("/blog/2014-12-my-awesome-post.html");
 		$request->test = $this;
 		$response = $dispatcher($request);
@@ -55,7 +55,7 @@ class ActionTraitTestTest extends \PHPUnit_Framework_TestCase
 
 		]);
 
-		$dispatcher = new Dispatcher($routes);
+		$dispatcher = new RouteDispatcher($routes);
 		$request = Request::from("/blog/2014-12-my-awesome-post.html");
 		$request->test = $this;
 		$dispatcher($request);

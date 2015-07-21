@@ -139,7 +139,7 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
 			]
 		]);
 
-		$dispatcher = new Dispatcher($routes);
+		$dispatcher = new RouteDispatcher($routes);
 		$request = Request::from("/blog/2014-12-my-awesome-post.html");
 		$response = $dispatcher($request);
 		$this->assertInstanceOf(Response::class, $response);
@@ -158,7 +158,7 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
 			]
 		]);
 
-		$dispatcher = new Dispatcher($routes);
+		$dispatcher = new RouteDispatcher($routes);
 		$request = Request::from("/blog/2014-12-my-awesome-post.html");
 		$request->test = $this;
 		$response = $dispatcher($request);

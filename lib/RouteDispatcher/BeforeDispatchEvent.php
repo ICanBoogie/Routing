@@ -9,16 +9,16 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing\Dispatcher;
+namespace ICanBoogie\Routing\RouteDispatcher;
 
 use ICanBoogie\Event;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
-use ICanBoogie\Routing\Dispatcher;
+use ICanBoogie\Routing\RouteDispatcher;
 use ICanBoogie\Routing\Route;
 
 /**
- * Event class for the `ICanBoogie\Routing\Dispatcher::dispatch:before` event.
+ * Event class for the `ICanBoogie\Routing\RouteDispatcher::dispatch:before` event.
  *
  * Third parties may use this event to provide a response to the request before the route is
  * mapped. The event is usually used by third parties to redirect requests or provide cached
@@ -74,12 +74,12 @@ class BeforeDispatchEvent extends Event
 	/**
 	 * The event is constructed with the type `dispatch:before`.
 	 *
-	 * @param Dispatcher $target
+	 * @param RouteDispatcher $target
 	 * @param Route $route
 	 * @param Request $request
 	 * @param mixed $response
 	 */
-	public function __construct(Dispatcher $target, Route $route, Request $request, &$response)
+	public function __construct(RouteDispatcher $target, Route $route, Request $request, &$response)
 	{
 		$this->route = $route;
 		$this->request = $request;
