@@ -36,9 +36,6 @@ class DispatchEventTest extends \PHPUnit_Framework_TestCase
 
 	}
 
-	/**
-	 * @expectedException \PHPUnit_Framework_Error
-	 */
 	public function test_invalid_response_type()
 	{
 		/* @var $dispatcher RouteDispatcher */
@@ -48,14 +45,28 @@ class DispatchEventTest extends \PHPUnit_Framework_TestCase
 		$route = $this->route;
 		$request = Request::from('/');
 
-		DispatchEvent::from([
+		try
+		{
+			DispatchEvent::from([
 
-			'target' => $dispatcher,
-			'route' => $route,
-			'request' => $request,
-			'response' => &$dispatcher
+				'target' => $dispatcher,
+				'route' => $route,
+				'request' => $request,
+				'response' => &$dispatcher
 
-		]);
+			]);
+		}
+		catch (\Exception $e)
+		{
+			if (version_compare(PHP_VERSION, '7', '<'))
+			{
+				$this->assertInstanceOf(\PHPUnit_Framework_Error::class, $e);
+			}
+			else
+			{
+				$this->assertInstanceOf(\TypeError::class, $e);
+			}
+		}
 	}
 
 	public function test_response_reference()

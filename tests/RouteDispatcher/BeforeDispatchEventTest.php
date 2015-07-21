@@ -11,7 +11,6 @@
 
 namespace ICanBoogie\Routing\RouteDispatcher;
 
-use ICanBoogie\EventReflection;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\RouteDispatcher;
@@ -36,9 +35,6 @@ class BeforeDispatchEventTest extends \PHPUnit_Framework_TestCase
 
 	}
 
-	/**
-	 * @expectedException \PHPUnit_Framework_Error
-	 */
 	public function test_invalid_response_type()
 	{
 		/* @var $dispatcher RouteDispatcher */
@@ -48,14 +44,28 @@ class BeforeDispatchEventTest extends \PHPUnit_Framework_TestCase
 		$route = $this->route;
 		$request = Request::from('/');
 
-		BeforeDispatchEvent::from([
+		try
+		{
+			BeforeDispatchEvent::from([
 
-			'target' => $dispatcher,
-			'route' => $route,
-			'request' => $request,
-			'response' => &$dispatcher
+				'target' => $dispatcher,
+				'route' => $route,
+				'request' => $request,
+				'response' => &$dispatcher
 
-		]);
+			]);
+		}
+		catch (\Exception $e)
+		{
+			if (version_compare(PHP_VERSION, '7', '<'))
+			{
+				$this->assertInstanceOf(\PHPUnit_Framework_Error::class, $e);
+			}
+			else
+			{
+				$this->assertInstanceOf(\TypeError::class, $e);
+			}
+		}
 	}
 
 	public function test_response_reference()
