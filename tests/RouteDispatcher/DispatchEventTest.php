@@ -38,6 +38,11 @@ class DispatchEventTest extends \PHPUnit_Framework_TestCase
 
 	public function test_invalid_response_type()
 	{
+		if (version_compare(PHP_VERSION, '7', '>=') && version_compare(\PHPUnit_Runner_Version::id(), '5', '<'))
+		{
+			$this->markTestIncomplete("Need phpunit >= 5 to run this test");
+		}
+
 		/* @var $dispatcher RouteDispatcher */
 		/* @var $route Route */
 
