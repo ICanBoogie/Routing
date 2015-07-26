@@ -163,6 +163,36 @@ learn more about this feature.
 
 
 
+## Filtering a route collection
+
+Sometimes you want to work with a subset of a route collection, for instance only the routes
+for an admin. The `filter()` method filters a route collection
+according to a provided callable filter.
+
+The following example demonstrates how to filter _index_ routes in a "admin" namespace. You can provide a closure, but it's best to create filter classes that you can extend and reuse:
+
+```php
+<?php
+
+class AdminIndexRouteFilter
+{
+	/**
+	 * @param array $definition A route definition.
+	 * @param string $id A route identifier.
+	 */
+	public function __invoke(array $definition, $id)
+	{
+	    return strpos($id, 'admin:') === 0 && !preg_match('/:index$/', $id);
+	}
+}
+
+$filtered_routes = $routes->filter(new AdminIndexRouteFilter);
+```
+
+
+
+
+
 ## Mapping a path to a route
 
 Routes are mapped using a [RouteCollection][] instance. A HTTP method and a namespace can optionally

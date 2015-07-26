@@ -430,4 +430,28 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess
 
 		return [ $static, $dynamic ];
 	}
+
+	/**
+	 * Returns a new collection with filtered routes.
+	 *
+	 * @param callable $filter
+	 *
+	 * @return $this
+	 */
+	public function filter(callable $filter)
+	{
+		$definitions = [];
+
+		foreach ($this as $id => $definition)
+		{
+			if (!$filter($definition, $id))
+			{
+				continue;
+			}
+
+			$definitions[$id] = $definition;
+		}
+
+		return new static($definitions);
+	}
 }

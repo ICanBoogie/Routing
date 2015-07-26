@@ -469,6 +469,37 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertSame([ 'photos:index', 'photos:show' ], $ids);
 	}
+
+	public function test_filter()
+	{
+		$routes = new RouteCollection([
+
+			'admin:articles:index' => [
+
+				'pattern' => '/admin/articles',
+				'controller' => 'dummy'
+
+			],
+
+			'articles:show' => [
+
+				'pattern' => '/articles/<id:\d+>',
+				'controller' => 'dummy'
+
+			]
+
+		]);
+
+		$filtered_routes = $routes->filter(function(array $definition, $id) {
+
+			return strpos($id, 'admin:') === 0 && !preg_match('/:admin$/', $id);
+
+		});
+
+		$this->assertNotSame($routes, $filtered_routes);
+		$this->assertFalse(isset($filtered_routes['articles:show']));
+		$this->assertTrue(isset($filtered_routes['admin:articles:index']));
+	}
 }
 
 namespace ICanBoogie\Routing\RouteCollectionTest;
