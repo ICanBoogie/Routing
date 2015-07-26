@@ -28,7 +28,7 @@ use ICanBoogie\Prototype\MethodNotDefined;
  * @method RouteCollection patch() patch(string $pattern, $controller, array $options=[]) Add a route for the HTTP method PATCH
  * @method RouteCollection trace() trace(string $pattern, $controller, array $options=[]) Add a route for the HTTP method TRACE.
  */
-class RouteCollection implements \IteratorAggregate, \ArrayAccess
+class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 {
 	const DEFAULT_ROUTE_CLASS = Route::class;
 
@@ -231,6 +231,16 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess
 		unset($this->routes[$offset]);
 
 		$this->revoke_cache();
+	}
+
+	/**
+	 * Returns the number of routes in the collection.
+	 *
+	 * @return int
+	 */
+	public function count()
+	{
+		return count($this->routes);
 	}
 
 	/**

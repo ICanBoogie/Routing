@@ -497,6 +497,8 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 		});
 
 		$this->assertNotSame($routes, $filtered_routes);
+		$this->assertEquals(2, count($routes));
+		$this->assertEquals(1, count($filtered_routes));
 		$this->assertFalse(isset($filtered_routes['articles:show']));
 		$this->assertTrue(isset($filtered_routes['admin:articles:index']));
 	}
