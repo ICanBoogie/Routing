@@ -18,28 +18,21 @@ use ICanBoogie\HTTP\Request;
  */
 trait ResourceTrait
 {
-    use ActionTrait
-    {
-        ActionTrait::resolve_action_method as action_resolve_action_method;
-    }
+    use ActionTrait;
 
     static protected $resource_actions = [ 'index', 'create', 'store', 'show', 'edit', 'update', 'destroy' ];
 
     /**
-     * Resolves the method associated with the action.
+     * Whether the action has a direct method match.
      *
-     * @param string $action Action name.
-     * @param Request $request
+     * **Note:** The action is tested against resource actions.
      *
-     * @return string The method name.
+     * @param string $action
+     *
+     * @return bool `true` if the action has a direct method match, `false` otherwise.
      */
-    protected function resolve_action_method($action, Request $request)
+    protected function is_action_method($action)
     {
-        if (in_array($action, self::$resource_actions))
-        {
-            return $action;
-        }
-
-        return $this->action_resolve_action_method($action, $request);
+        return in_array($action, self::$resource_actions);
     }
 }
