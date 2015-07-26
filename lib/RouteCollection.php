@@ -156,7 +156,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	 * Adds resource routes.
 	 *
 	 * **Note:** The route definitions for the resource are created by
-	 * {@link RoutesMaker::resource}. Both methods accept the same arguments.
+	 * {@link RouteMaker::resource}. Both methods accept the same arguments.
 	 *
 	 * @see \ICanBoogie\Routing\RoutesMaker::resource
 	 *
@@ -168,7 +168,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	 */
 	public function resource($name, $controller, array $options = [])
 	{
-		$definitions = RoutesMaker::resource($name,$controller, $options);
+		$definitions = RouteMaker::resource($name,$controller, $options);
 
 		foreach ($definitions as $id => $definition)
 		{

@@ -2,9 +2,9 @@
 
 namespace ICanBoogie\Routing;
 
-use ICanBoogie\Routing\RoutesMaker as Make;
+use ICanBoogie\Routing\RouteMaker as Make;
 
-class RoutesMakeTest extends \PHPUnit_Framework_TestCase
+class RouteMakeTest extends \PHPUnit_Framework_TestCase
 {
 	public function test_resource_only_one()
 	{

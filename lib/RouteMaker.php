@@ -16,7 +16,7 @@ use ICanBoogie\HTTP\Request;
 /**
  * Makes route definitions.
  */
-class RoutesMaker
+class RouteMaker
 {
 	/**
 	 * @param string $name

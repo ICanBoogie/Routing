@@ -558,7 +558,7 @@ class PhotosController extends Controller
 
 #### Defining resource routes
 
-Given a resource name and a controller, the `RoutesMaker::resource()` method makes the various
+Given a resource name and a controller, the `RouteMaker::resource()` method makes the various
 routes required to handle a resource. Options can be specified to filter the routes to create,
 specify the name of the _key_ property and/or it's regex constraint, or name routes.
 
@@ -569,7 +569,7 @@ The following code demonstrates how to create routes for a _photo_ resource:
 
 namespace App;
 
-use ICanBoogie\Routing\RoutesMaker as Make;
+use ICanBoogie\Routing\RouteMaker as Make;
 
 $definitions = Make::resource('photos', PhotosController::class);
 
