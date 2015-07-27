@@ -9,8 +9,8 @@
 
 The **icanboogie/routing** package handles URL rewriting in native PHP. A request is mapped
 to a route, which in turn gets dispatched to a controller, and possibly an action. If the
-process is successful a response is returned. Many events are fired during the process to allow
-event hooks to alter the request, the route, the controller, or the response.
+process is successful a response is returned. Events are fired during the process to allow
+hooks to alter the request, the route, the controller, or the response.
 
 
 
@@ -18,8 +18,8 @@ event hooks to alter the request, the route, the controller, or the response.
 
 ## Dispatching a request
 
-The package provides a request dispatcher that can be used on its own, or as a _domain dispatcher_
-of a [RequestDispatcher][] instance.
+Routes are dispatcher by a [RouteDispatcher][] instance, which can be used on its own or
+as a _domain dispatcher_ by a [RequestDispatcher][] instance.
 
 ```php
 <?php
@@ -27,13 +27,14 @@ of a [RequestDispatcher][] instance.
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Routing\RouteDispatcher;
 use ICanBoogie\Routing\RouteCollection;
+use ICanBoogie\Routing\RouteMaker as Make;
 
 $routes = new RouteCollection([
 
-	'articles/delete' => [
+	'articles:delete' => [
 	
-		'controller' => 'ArticlesController#delete',
 		'pattern' => '/articles/<id:\d+>',
+		'controller' => 'ArticlesController#delete',
 		'via' => Request::METHOD_DELETE
 	
 	]
@@ -58,9 +59,9 @@ $response();
 
 ### Before a route is dispatched
 
-Before a route is dispatched the `ICanBoogie\Routing\RouteDispatcher::dispatch:before` event of class
-[RouteDispatcher\BeforeDispatchEvent][] is fired. Event hooks may use this event to provide a response
-and thus cancel the dispatching.
+Before a route is dispatched the `ICanBoogie\Routing\RouteDispatcher::dispatch:before` event
+of class [RouteDispatcher\BeforeDispatchEvent][] is fired. Event hooks may use this event
+to provide a response and thus cancel the dispatching.
 
 
 
@@ -69,8 +70,8 @@ and thus cancel the dispatching.
 ### A route is dispatched
 
 The `ICanBoogie\Routing\RouteDispatcher::dispatch` event of class [RouteDispatcher\DispatchEvent][]
-is fired if the route has been dispatched successfully. Event hooks may use this event to alter the
-response.
+is fired if the route has been dispatched successfully. Event hooks may use this event to
+alter the response.
 
 
 
@@ -78,7 +79,7 @@ response.
 
 ### Rescuing an exception
 
-If an exception is raised during the dispatch, the `ICanBoogie\Routing\Route::rescue` event
+If an exception is raised during dispatching, the `ICanBoogie\Routing\Route::rescue` event
 of class [Route\RescueEvent][] is fired. Event hooks may use this event to rescue the route and
 provide a response, or replace the exception that will be thrown if the rescue fails.
 
@@ -86,68 +87,84 @@ provide a response, or replace the exception that will be thrown if the rescue f
 
 
 
-## Defining routes
+## Route definitions
 
-Routes are usually defined in `routes` configuration fragments, but can also be defined during
-runtime. A pattern is required to define a route, and the controller too if no location is defined.
-The following options are available:
+A route definition is an array, which may be created with the following keys:
 
-- `class`: If the route should be instantiated from a class other than [Route][].
+- `pattern`: The pattern of the URL.
+- `controller`: The controller class and optional action, or a callable.
+- `as`: The identifier of the route.
+- `via`: If the route needs to respond to one or more HTTP methods, e.g.
+`Request::METHOD_GET` or `[ Request::METHOD_PUT, Request::METHOD_PATCH ]`.
+Defaults: `Request::METHOD_GET`.
 - `location`: To redirect the route to another location.
-- `via`: If the route needs to respond to one or more HTTP methods.
+- `class`: If the route should be instantiated from a class other than [Route][].
 
-The options used to define a route are copied to its instance, even custom ones, which might be
-useful to provide additional information to a controller.
+A route definition is considered valid when the `pattern` parameter is defined along one of
+`controller` or `location`. [PatternNotDefined][] is thrown if `pattern` is missing, and
+[ControllerNotDefined][] is thrown if both `controller` and `location` are missing.
 
-The [PatternNotDefined][] exception is thrown if the pattern is not defined, and the
-[ControllerNotDefined][] exception is thrown if the controller and the location are not defined.
-
-
-
-
-### Route pattern
-
-A pattern is used to map a route to a controller.
-
-Route pattern RegExs are extended with the following:
-
-- `{:uuid:}`: Matches [Universally unique identifiers](https://en.wikipedia.org/wiki/Universally_unique_identifier) (UUID).
-
-```php
-<?php
-
-$routes->any('/articles/<uuid:{:uuid:}>/edit', function() {});
-```
+**Note:** You can add any parameter you want to the route definition, they are used to create
+the route instance, which might be useful to provide additional information to a controller.
+Better use a custom route class though.
 
 
 
 
 
-### Defining routes during runtime
+### Route patterns
 
-Routes can be defined during runtime using the [RouteCollection][] instance that is provided to the
-dispatcher.
+A pattern is used to match a URL with a route. Placeholders may be used to match multiple URL to a
+single route and extract its parameters. Three types of placeholder are available:
 
-```php
-<?php
+- Relaxed placeholder: Only the name of the parameter is specified, it matches anything until
+the following part. e.g. `/articles/:id/edit` where `:id` is the placeholder for
+the `id` parameter.
+ 
+- Constrained placeholder: A regular expression is used to match the parameter value.
+e.g. `/articles/<id:\d+>/edit` where `<id:\d+>` is the placeholder for the `id` parameter
+which value must match `/^\d+$/`.
 
-use ICanBoogie\HTTP\Request;
-use ICanBoogie\Routing\RouteDispatcher;
-use ICanBoogie\Routing\RouteCollection;
+- Anonymous constrained placeholder: Same as the constrained placeholder, except the parameter
+has no name but an index e.g. `/articles/<\d+>/edit` where `<\d+>` in the placeholder
+which index is 0.
 
-$routes = new RouteCollection;
+Additionally, the joker character `*`—which can only be used at the end of a pattern—matches
+anything. e.g. `/articles/123*` matches `/articles/123` and `/articles/123456` as well.
 
-$routes->any('/', function(Request $request) { }, [ 'as' => 'home' ]);
-$routes->any('/articles', function(Request $request) { }, [ 'as' => 'articles' ]);
-$routes->get('/articles/new', function(Request $request) { }, [ 'as' => 'articles:new' ]);
-$routes->post('/articles/new', function(Request $request) { }, [ 'as' => 'articles:create' ]);
-$routes->delete('/articles/<nid:\d+>', function(Request $request) { }, [ 'as' => 'articles:delete' ]);
+Finally, constraints RegEx are extended with the following:
 
-$dispatcher = new RouteDispatcher($routes);
+- `{:uuid:}`: Matches [Universally unique identifiers](https://en.wikipedia.org/wiki/Universally_unique_identifier)
+(UUID). e.g. `/articles/<uuid:{:uuid:}>/edit`.
 
-# routes can also be defined afterwards
-$routes->any('/read-write', function(Request $request) { }, [ 'via' => [ 'GET', 'POST' ] ]);
-```
+
+
+
+
+### Route controller
+
+The `controller` key specifies the callable to invoke, or the class name of a callable.
+The following value types are accepted:
+
+- A controller class: `ArticlesShowController`
+- A controller action: `ArticlesController#show`, where `ArticlesController` is
+the controller class, and `show` is the action.
+- A callable: `function() {}`, `new ArticlesShowController`, `ArticlesController::show`,
+`articles_controller_show`, …
+
+
+
+
+
+## Route collections
+
+A [RouteCollection][] instance holds route definitions and is used to create [Route][] instances.
+A route dispatcher uses an instance to map a request to a route. A route collection is usually
+created with an array of route definitions, which may come from configuration fragments,
+[RouteMaker][], or an expertly crafted array. After the route collection is created it may be
+modified by using the collection as a array, or by adding routes using one of
+the supported HTTP methods. Finally, a collection may be created from another using
+the `filter()` method.
 
 
 
@@ -159,17 +176,79 @@ If the package is bound to [ICanBoogie][] using [icanboogie/bind-routing][], rou
 using `routes` configuration fragments. Refer to [icanboogie/bind-routing][] documentation to
 learn more about this feature.
 
+```php
+<?php
+
+use ICanBoogie\Routing\RouteCollection;
+
+// …
+
+$routes = new RouteCollection($app->configs['routes']);
+#or
+$routes = $app->routes;
+```
 
 
 
 
-## Filtering a route collection
 
-Sometimes you want to work with a subset of a route collection, for instance only the routes
-for an admin. The `filter()` method filters a route collection
-according to a provided callable filter.
+### Defining routes using offsets
 
-The following example demonstrates how to filter _index_ routes in a "admin" namespace. You can provide a closure, but it's best to create filter classes that you can extend and reuse:
+Used as an array, routes can be defined by setting/unsetting the offsets of a [RouteCollection][].
+
+```php
+<?php
+
+use ICanBoogie\HTTP\Request;
+use ICanBoogie\Routing\RouteCollection;
+
+$routes = new RouteCollection;
+
+$routes['articles:index'] = [
+
+	'pattern' => '/articles',
+	'controller' => ArticlesController::class . '#index',
+	'via' => Request::METHOD_GET
+
+];
+
+unset($routes['articles:index']);
+```
+
+
+
+
+
+### Defining routes using HTTP methods
+
+Routes may be defined using HTTP methods, such as `get` or `delete`.
+
+```php
+<?php
+
+use ICanBoogie\HTTP\Request;
+use ICanBoogie\Routing\RouteCollection;
+
+$routes = new RouteCollection;
+$routes->any('/', function(Request $request) { }, [ 'as' => 'home' ]);
+$routes->any('/articles', function(Request $request) { }, [ 'as' => 'articles:index' ]);
+$routes->get('/articles/create', function(Request $request) { }, [ 'as' => 'articles:create' ]);
+$routes->post('/articles', function(Request $request) { }, [ 'as' => 'articles:store' ]);
+$routes->delete('/articles/<nid:\d+>', function(Request $request) { }, [ 'as' => 'articles:delete' ]);
+```
+
+
+
+
+
+### Filtering a routes
+
+Sometimes you want to work with a subset of a route collection, for instance the routes related to
+the admin area. The `filter()` method filters routes using a callable filter and returns
+a new [RouteCollection][].
+
+The following example demonstrates how to filter _index_ routes in a "admin" namespace.
+You can provide a closure, but it's best to create filter classes that you can extend and reuse:
 
 ```php
 <?php
@@ -218,7 +297,7 @@ var_dump($captured);   // [ 'nid' => 123 ]
 
 ## Route
 
-A route is represented by a [Route][] instance. It is usually created from an array definition,
+A route is represented by a [Route][] instance. It is usually created from a definition array,
 and contain all the properties of its definition.
 
 ```php
@@ -297,7 +376,7 @@ route. Also, the formatting value is reset when an _assigned_ route is cloned.
 
 Whether a route has an assigned formatting value or not, the `format()` method still requires
 a formatting value, it does *not* use the assign formatting value. Thus, if you want to format
-a route with its assigned formatting value use the `formatting_value` property:
+a route with its assigned formatting value, use the `formatting_value` property:
 
 ```php
 <?php
@@ -315,7 +394,40 @@ Previous examples demonstrated how closures could be used to handle routes. Clos
 perfectly fine when you start building your application, but as soon as it grows you might want
 to use controller classes instead to better organize your application. You can map each route to
 its [Controller][] class, or use the [ActionTrait][] or [ResourceTrait][] to group related HTTP
-request handling logic into a  controller.
+request handling logic into a single controller.
+
+
+
+
+
+### Controller response
+
+When invoked, the controller should return a result, or `null` if it can't handle the request.
+The result of the `action()` method is handled by the `__invoke()` method: if the result is a
+[Response][] instance it is returned as is; if the [Response][] instance attached to the
+controller has been initialized (through the `$this->response` getter, for instance), the result
+is used as the body of the response; otherwise,  the result is returned as is.
+
+
+
+
+
+### Before the action is executed
+
+The event `ICanBoogie\Routing\Controller::action:before` of class
+[Controller\BeforeActionEvent][] is fired before the `action()` method is invoked. Event hooks may
+use this event to provide a response and thus cancelling the action. Event hooks may also use
+this event to alter the controller before the action is executed.
+
+
+
+
+
+### After the action is executed
+
+The event `ICanBoogie\Routing\Controller::action:before` of class [Controller\ActionEvent][]
+is fired after the `action()` method was invoked. Event hooks may use this event to alter the
+result of the method.
 
 
 
@@ -326,7 +438,7 @@ request handling logic into a  controller.
 Basic controllers extend from [Controller][] and must implement the `action()` method.
 
 **Note:** The `action()` method is invoked _from within_ the controller, by the `__invoke()` method,
-and should be defined as _protected_.
+and should be defined as _protected_. The `__invoke()` method is final, thus cannot be overridden.
 
 ```php
 <?php
@@ -336,7 +448,7 @@ namespace App\Modules\Articles;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Routing\Controller;
 
-class DeleteController extends Controller
+class ArticlesDeleteController extends Controller
 {
 	protected function action(Request $request)
 	{
@@ -352,45 +464,13 @@ benefit from prototype methods and event hooks attached to the [Controller][] cl
 
 The following properties are provided by the class:
 
-- `name`: The name of the controller, extracted from its class name e.g. "my_articles".
+- `name`: The name of the controller, extracted from its class name e.g. "articles_delete".
 - `request`: The request being dispatched.
-- `route`: The route matching the request.
+- `route`: The route being dispatched.
 
-Also, undefined properties are forwarded to the application, thus you can use
-`$this->modules` instead of `$this->app->modules`.
-
-
-
-
-
-#### Controller response
-
-When invoked, the controller should return a result, or `null` if it can't handle the request.
-The result of the `action()` method is handled by the `__invoke()` method: if the result is a
-[Response][] instance it is returned as is; if the [Response][] instance attached to the
-controller has been initialized (through the `$this->response` getter, for instance), the result
-is used as the body of the response; otherwise,  the result is returned as is.
-
-
-
-
-
-#### Before the action is executed
-
-The event `ICanBoogie\Routing\Controller::action:before` of class
-[Controller\BeforeActionEvent][] is fired before the `action()` method is invoked. Event hooks may
-use this event to provide a response and thus cancelling the action. Event hooks may also use
-this event to alter the controller before the action is executed.
-
-
-
-
-
-#### After the action is executed
-
-The event `ICanBoogie\Routing\Controller::action:before` of class [Controller\ActionEvent][]
-is fired after the `action()` method was invoked. Event hooks may use this event to alter the
-result of the method.
+The [ControllerBindings][] trait provided by the [icanboogie/bind-routing][] package may be used
+to forward undefined properties to the application, thus you can use `$this->modules` instead of
+`$this->app->modules`.
 
 
 
@@ -475,36 +555,42 @@ class AppController extends Controller
 }
 ```
 
+**Note:** The `is_action_method()` method is used to determine if an action can be mapped directly
+to a method, you might want to extend it if you wish to directly map some actions to their method.
+
 
 
 
 
 ### Resource controllers
 
-Resource controllers are used to group the actions required to handle a resource in a
-[RESTful][] fashion. A resource controller is created by extending the [Controller][] class and
+A resource controller groups the different actions required to handle a resource in a
+[RESTful][] fashion. It is created by extending the [Controller][] class and
 using [ResourceTrait][].
 
 **Note:** Because [ResourceTrait][] uses [ActionTrait][], _regular_ actions can be mixed with
 _resource_ actions, although _resource methods_ win over _action methods_.
 
-The following table list the verbs/routes and their corresponding action.
+The following table list the verbs/routes and their corresponding action. `{name}` is the
+placeholder for the plural name of the resource, while `{id}` is the placeholder for the
+resource identifier.
 
-| HTTP verb | Path                  | Action  | Used for                                 |
-| --------- | --------------------- | ------- | ---------------------------------------- |
-| GET       | /{resource}           | index   | A list of {resource}                     |
-| GET       | /{resource}/new       | create  | A form for creating a new {resource}     |
-| POST      | /{resource}           | store   | Create a new {resource}                  |
-| GET       | /{resource}/{id}      | show    | A specific {resource}                    |
-| GET       | /{resource}/{id}/edit | edit    | A form for editing a specific {resource} |
-| PATCH/PUT | /{resource}/{id}      | update  | Update a specific {resource}             |
-| DELETE    | /{resource}/{id}      | destroy | Deletes a specific {resource}            |
+| HTTP verb | Path              | Action  | Used for                                 |
+| --------- | ----------------- | ------- | ---------------------------------------- |
+| GET       | /{name}           | index   | A list of {resource}                     |
+| GET       | /{name}/new       | create  | A form for creating a new {resource}     |
+| POST      | /{name}           | store   | Create a new {resource}                  |
+| GET       | /{name}/{id}      | show    | A specific {resource}                    |
+| GET       | /{name}/{id}/edit | edit    | A form for editing a specific {resource} |
+| PATCH/PUT | /{name}/{id}      | update  | Update a specific {resource}             |
+| DELETE    | /{name}/{id}      | destroy | Deletes a specific {resource}            |
 
 The routes listed are more of a guideline than a requirement, still the actions are important.
 Indeed, contrary to _regular_ actions, the corresponding method have the exact same name.
 
-The following example demonstrates how the resource controller or _photos_ resources could be
-implemented. The example implements all actions, but you are free to implement only some of them.
+The following example demonstrates how the resource controller for _articles_ may be
+implemented. The example implements all actions, but you are free to implement only
+some of them.
 
 ```php
 <?php
@@ -556,13 +642,14 @@ class PhotosController extends Controller
 
 
 
-#### Defining resource routes
+
+#### Defining resource routes using `RouteMaker`
 
 Given a resource name and a controller, the `RouteMaker::resource()` method makes the various
 routes required to handle a resource. Options can be specified to filter the routes to create,
 specify the name of the _key_ property and/or it's regex constraint, or name routes.
 
-The following code demonstrates how to create routes for a _photo_ resource:
+The following example demonstrates how to create routes for an _article_ resource:
 
 ```php
 <?php
@@ -571,51 +658,55 @@ namespace App;
 
 use ICanBoogie\Routing\RouteMaker as Make;
 
-$definitions = Make::resource('photos', PhotosController::class);
+// create all resource actions definitions
+$definitions = Make::resource('articles', ArticlesController::class);
 
-// only create the _index_ route
-$definitions = Make::resource('photos', PhotosController::class, [
+// only create the _index_ definition
+$definitions = Make::resource('articles', ArticlesController::class, [
 
 	'only' => 'index'
 
 ]);
 
-// only create the _index_ and _show_ routes
-$definitions = Make::resource('photos', PhotosController::class, [
+// only create the _index_ and _show_ definitions
+$definitions = Make::resource('articles', ArticlesController::class, [
 
 	'only' => [ 'index', 'show' ]
 
 ]);
 
-// create routes except _destroy_ route
-$definitions = Make::resource('photos', PhotosController::class, [
+// create definitions except _destroy_
+$definitions = Make::resource('articles', ArticlesController::class, [
 
 	'except' => 'destroy'
 
 ]);
 
-// create routes except _updated_ and _destroy_ routes
-$definitions = Make::resource('photos', PhotosController::class, [
+// create definitions except _updated_ and _destroy_
+$definitions = Make::resource('articles', PhotosController::class, [
 
 	'except' => [ 'update', 'destroy' ]
 
 ]);
 
 // specify _key_ property name and its regex constraint
-$definitions = Make::resource('photos', PhotosController::class, [
+$definitions = Make::resource('articles', ArticlesController::class, [
 
 	'id_name' => 'uuid',
 	'id_regex' => '[[:uuid:]]{36}'
 
 ]);
 
-// specify the identifier of the _create_ route
-$definitions = Make::resource('photos', PhotosController::class, [
+// specify the identifier of the _create_ definition
+$definitions = Make::resource('articles', ArticlesController::class, [
 
-	'as' => [ 'create' => 'photos:build' ]
+	'as' => [ 'create' => 'articles:build' ]
 
 ]);
 ```
+
+**Note::** Defining all the resource actions is not required, only define the one you actually need.
+
 
 
 
@@ -659,9 +750,9 @@ by a controller using [ActionTrait][] has an empty `action` property.
 
 The following helpers are available:
 
-- [contextualize](http://api.icanboogie.org/routing/function-ICanBoogie.Routing.contextualize.html): Contextualize a pathname.
-- [decontextualize](http://api.icanboogie.org/routing/function-ICanBoogie.Routing.decontextualize.html): Decontextualize a pathname.
-- [absolutize_url](http://api.icanboogie.org/routing/function-ICanBoogie.Routing.absolutize_url.html): Absolutize an URL.
+- [contextualize](http://api.icanboogie.org/routing/latest/function-ICanBoogie.Routing.contextualize.html): Contextualize a pathname.
+- [decontextualize](http://api.icanboogie.org/routing/latest/function-ICanBoogie.Routing.decontextualize.html): Decontextualize a pathname.
+- [absolutize_url](http://api.icanboogie.org/routing/latest/function-ICanBoogie.Routing.absolutize_url.html): Absolutize an URL.
 
 
 
@@ -745,7 +836,7 @@ The package is [available on GitHub](https://github.com/ICanBoogie/Routing), its
 ## Documentation
 
 The package is documented as part of the [ICanBoogie][] framework
-[documentation](http://api.icanboogie.org/routing/). You can generate the documentation for the package and its dependencies with the `make doc` command. The documentation is generated in the `build/docs` directory. [ApiGen](http://apigen.org/) is required. The directory can later be cleaned with the `make clean` command.
+[documentation][]. You can generate the documentation for the package and its dependencies with the `make doc` command. The documentation is generated in the `build/docs` directory. [ApiGen](http://apigen.org/) is required. The directory can later be cleaned with the `make clean` command.
 
 
 
@@ -772,27 +863,30 @@ The package is continuously tested by [Travis CI](http://about.travis-ci.org/).
 
 
 
-[icanboogie/bind-routing]: https://github.com/ICanBoogie/bind-routing
-[icanboogie/view]: https://github.com/ICanBoogie/View
-[ActionNotDefined]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.ActionNotDefined.html
-[ActionTrait]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.Controller.ActionTrait.html
-[Controller]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.Controller.html
-[Controller\BeforeActionEvent]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.Controller.BeforeActionEvent.html
-[Controller\ActionEvent]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.Controller.ActionEvent.html
-[ControllerNotDefined]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.ControllerNotDefined.html
-[FormattedRoute]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.FormattedRoute.html
-[ICanBoogie]: https://github.com/ICanBoogie/ICanBoogie
-[ICanBoogie\HTTP\RouteDispatcher]: http://api.icanboogie.org/http/class-ICanBoogie.HTTP.RouteDispatcher.html
-[Pattern]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.Pattern.html
-[PatternNotDefined]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.PatternNotDefined.html
-[Request]: http://api.icanboogie.org/http/class-ICanBoogie.HTTP.Request.html
-[RequestDispatcher]: http://api.icanboogie.org/http/class-ICanBoogie.HTTP.RequestDispatcher.html
-[ResourceTrait]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.Controller.ResourceTrait.html
-[Response]: http://api.icanboogie.org/http/class-ICanBoogie.HTTP.Response.html
-[RESTful]: https://en.wikipedia.org/wiki/Representational_state_transfer
-[Route]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.Route.html
-[Route\RescueEvent]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.Route.RescueEvent.html
-[RouteDispatcher\BeforeDispatchEvent]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.RouteDispatcher.BeforeDispatchEvent.html
-[RouteDispatcher\DispatchEvent]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.RouteDispatcher.DispatchEvent.html
-[RouteCollection]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.RouteCollection.html
-[RouteNotDefined]: http://api.icanboogie.org/routing/class-ICanBoogie.Routing.RouteNotDefined.html
+[ControllerBindings]:                  http://api.icanboogie.org/bind-routing/0.2/class-ICanBoogie.Binding.Routing.ControllerBindings.html
+[Response]:                            http://api.icanboogie.org/http/2.5/class-ICanBoogie.HTTP.Response.html
+[Request]:                             http://api.icanboogie.org/http/2.5/class-ICanBoogie.HTTP.Request.html
+[RequestDispatcher]:                   http://api.icanboogie.org/http/2.5/class-ICanBoogie.HTTP.RequestDispatcher.html
+[documentation]:                       http://api.icanboogie.org/routing/2.5/
+[ActionNotDefined]:                    http://api.icanboogie.org/routing/2.5/class-ICanBoogie.Routing.ActionNotDefined.html
+[ActionTrait]:                         http://api.icanboogie.org/routing/2.5/class-ICanBoogie.Routing.Controller.ActionTrait.html
+[Controller]:                          http://api.icanboogie.org/routing/2.5/class-ICanBoogie.Routing.Controller.html
+[Controller\BeforeActionEvent]:        http://api.icanboogie.org/routing/2.5/class-ICanBoogie.Routing.Controller.BeforeActionEvent.html
+[Controller\ActionEvent]:              http://api.icanboogie.org/routing/2.5/class-ICanBoogie.Routing.Controller.ActionEvent.html
+[ControllerNotDefined]:                http://api.icanboogie.org/routing/2.5/class-ICanBoogie.Routing.ControllerNotDefined.html
+[FormattedRoute]:                      http://api.icanboogie.org/routing/2.5/class-ICanBoogie.Routing.FormattedRoute.html
+[Pattern]:                             http://api.icanboogie.org/routing/2.5/class-ICanBoogie.Routing.Pattern.html
+[PatternNotDefined]:                   http://api.icanboogie.org/routing/2.5/class-ICanBoogie.Routing.PatternNotDefined.html
+[ResourceTrait]:                       http://api.icanboogie.org/routing/2.5/class-ICanBoogie.Routing.Controller.ResourceTrait.html
+[Route]:                               http://api.icanboogie.org/routing/2.5/class-ICanBoogie.Routing.Route.html
+[Route\RescueEvent]:                   http://api.icanboogie.org/routing/2.5/class-ICanBoogie.Routing.Route.RescueEvent.html
+[RouteCollection]:                     http://api.icanboogie.org/routing/2.5/class-ICanBoogie.Routing.RouteCollection.html
+[RouteDispatcher]:                     http://api.icanboogie.org/routing/2.5/class-ICanBoogie.Routing.RouteDispatcher.html
+[RouteDispatcher\BeforeDispatchEvent]: http://api.icanboogie.org/routing/2.5/class-ICanBoogie.Routing.RouteDispatcher.BeforeDispatchEvent.html
+[RouteDispatcher\DispatchEvent]:       http://api.icanboogie.org/routing/2.5/class-ICanBoogie.Routing.RouteDispatcher.DispatchEvent.html
+[RouteMaker]:                          http://api.icanboogie.org/routing/2.5/class-ICanBoogie.Routing.RouteMaker.html
+[RouteNotDefined]:                     http://api.icanboogie.org/routing/2.5/class-ICanBoogie.Routing.RouteNotDefined.html
+[ICanBoogie]:                          https://github.com/ICanBoogie/ICanBoogie
+[icanboogie/bind-routing]:             https://github.com/ICanBoogie/bind-routing
+[icanboogie/view]:                     https://github.com/ICanBoogie/View
+[RESTful]:                             https://en.wikipedia.org/wiki/Representational_state_transfer
