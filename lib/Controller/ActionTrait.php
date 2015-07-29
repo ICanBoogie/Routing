@@ -74,7 +74,7 @@ trait ActionTrait
 
         if (!$action)
         {
-            throw new ActionNotDefined("Action not defined in route.");
+            throw new ActionNotDefined("Action not defined in route {$this->route->id}.");
         }
 
         $method = $this->resolve_action_method($action, $request);
