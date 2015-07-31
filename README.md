@@ -241,7 +241,7 @@ $routes->delete('/articles/<nid:\d+>', function(Request $request) { }, [ 'as' =>
 
 
 
-### Filtering a routes
+### Filtering a route collection
 
 Sometimes you want to work with a subset of a route collection, for instance the routes related to
 the admin area. The `filter()` method filters routes using a callable filter and returns
