@@ -578,7 +578,7 @@ resource identifier.
 | HTTP verb | Path              | Action  | Used for                                 |
 | --------- | ----------------- | ------- | ---------------------------------------- |
 | GET       | /{name}           | index   | A list of {resource}                     |
-| GET       | /{name}/new       | create  | A form for creating a new {resource}     |
+| GET       | /{name}/create    | create  | A form for creating a new {resource}     |
 | POST      | /{name}           | store   | Create a new {resource}                  |
 | GET       | /{name}/{id}      | show    | A specific {resource}                    |
 | GET       | /{name}/{id}/edit | edit    | A form for editing a specific {resource} |
