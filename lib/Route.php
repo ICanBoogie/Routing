@@ -11,7 +11,7 @@
 
 namespace ICanBoogie\Routing;
 
-use ICanBoogie\Object;
+use ICanBoogie\Prototyped;
 
 /**
  * A route.
@@ -28,7 +28,7 @@ use ICanBoogie\Object;
  * @property-read mixed $formatting_value The value used to format the route.
  * @property-read bool $has_formatting_value `true` if the route has a formatting value, `false` otherwise.
  */
-class Route extends Object
+class Route extends Prototyped
 {
 	static protected $invalid_construct_properties = [ 'formatting_value', 'routes', 'url', 'absolute_url' ];
 

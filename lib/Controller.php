@@ -14,7 +14,7 @@ namespace ICanBoogie\Routing;
 use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
-use ICanBoogie\Object;
+use ICanBoogie\Prototyped;
 use ICanBoogie\Routing\Controller\BeforeActionEvent;
 use ICanBoogie\Routing\Controller\ActionEvent;
 
@@ -50,7 +50,7 @@ use ICanBoogie\Routing\Controller\ActionEvent;
  * @property-read Route $route The route being dispatched.
  * @property Response $response
  */
-abstract class Controller extends Object
+abstract class Controller extends Prototyped
 {
 	/**
 	 * Return the name of the controller, extracted from its class name.
