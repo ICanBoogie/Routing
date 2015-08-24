@@ -35,7 +35,8 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 	public function test_should_throw_exception_on_invalid_http_method()
 	{
 		$routes = new RouteCollection;
-		$routes->invalid_http_method([ 'controller' => uniqid(), 'pattern'=> uniqid() ]);
+		$m = 'invalid_http_method';
+		$routes->$m([ 'controller' => uniqid(), 'pattern'=> uniqid() ]);
 	}
 
 	/**
@@ -330,6 +331,12 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 
 	/**
 	 * @dataProvider provide_test_add_with_method
+	 *
+	 * @param string $method
+	 * @param string $pattern
+	 * @param string $controller
+	 * @param array $options
+	 * @param array $expected
 	 */
 	public function test_add_with_method($method, $pattern, $controller, $options, $expected)
 	{
