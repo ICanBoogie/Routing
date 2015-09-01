@@ -11,14 +11,27 @@
 
 namespace ICanBoogie\Routing\Controller;
 
+use ICanBoogie\EventCollection;
+use ICanBoogie\EventCollectionProvider;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Controller\ActionTraitTest\ActionController;
 use ICanBoogie\Routing\RouteDispatcher;
 use ICanBoogie\Routing\RouteCollection;
 
-class ActionTraitTestTest extends \PHPUnit_Framework_TestCase
+class ActionTraitTest extends \PHPUnit_Framework_TestCase
 {
+	public function setUp()
+	{
+		$events = new EventCollection;
+
+		EventCollectionProvider::using(function() use ($events) {
+
+			return $events;
+
+		});
+	}
+
 	public function test_action()
 	{
 		$routes = new RouteCollection([

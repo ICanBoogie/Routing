@@ -12,6 +12,7 @@
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\EventCollection;
+use ICanBoogie\EventCollectionProvider;
 use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
@@ -25,9 +26,9 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 
 	public function setUp()
 	{
-		$this->events = $events = new EventCollection();
+		$this->events = $events = new EventCollection;
 
-		EventCollection::set_instance_provider(function() use ($events) {
+		EventCollectionProvider::using(function() use ($events) {
 
 			return $events;
 

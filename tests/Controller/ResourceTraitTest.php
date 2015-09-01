@@ -11,11 +11,24 @@
 
 namespace ICanBoogie\Routing\Controller;
 
+use ICanBoogie\EventCollection;
+use ICanBoogie\EventCollectionProvider;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Routing\Controller\ResourceTraitTest\ResourceController;
 
 class ResourceTraitTest extends \PHPUnit_Framework_TestCase
 {
+    public function setUp()
+    {
+        $events = new EventCollection;
+
+        EventCollectionProvider::using(function() use ($events) {
+
+            return $events;
+
+        });
+    }
+
     /**
      * @dataProvider provider_test_action
      *

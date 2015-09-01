@@ -11,6 +11,8 @@
 
 namespace ICanBoogie\Routing;
 
+use ICanBoogie\EventCollection;
+use ICanBoogie\EventCollectionProvider;
 use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
@@ -18,6 +20,17 @@ use ICanBoogie\Routing\ControllerTest\MySampleController;
 
 class ControllerTest extends \PHPUnit_Framework_TestCase
 {
+	public function setUp()
+	{
+		$this->events = $events = new EventCollection;
+
+		EventCollectionProvider::using(function() use ($events) {
+
+			return $events;
+
+		});
+	}
+
 	public function test_should_get_name()
 	{
 		$controller = new MySampleController;
