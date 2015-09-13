@@ -63,7 +63,7 @@ class RouteDispatcher implements Dispatcher
 	{
 		$captured = [];
 		$normalized_path = $this->normalize_path($request->normalized_path);
-		$route = $this->routes->find($normalized_path, $captured, $request->method);
+		$route = $this->resolve_route($request, $normalized_path, $captured);
 
 		if (!$route)
 		{
@@ -103,6 +103,20 @@ class RouteDispatcher implements Dispatcher
 	}
 
 	/**
+	 * Resolves route from request.
+	 *
+	 * @param Request $request
+	 * @param string $normalized_path
+	 * @param array $captured
+	 *
+	 * @return false|Route|null
+	 */
+	protected function resolve_route(Request $request, $normalized_path, array &$captured)
+	{
+		return $this->routes->find($normalized_path, $captured, $request->method);
+	}
+
+	/**
 	 * Alters request parameters.
 	 *
 	 * @param Route $route
@@ -113,6 +127,19 @@ class RouteDispatcher implements Dispatcher
 	{
 		$request->path_params = $captured + $request->path_params;
 		$request->params = $captured + $request->params;
+	}
+
+	/**
+	 * Alters request context with route and controller.
+	 *
+	 * @param Request\Context $context
+	 * @param Route $route
+	 * @param callable $controller
+	 */
+	protected function alter_context(Request\Context $context, Route $route, callable $controller)
+	{
+		$context->route = $route;
+		$context->controller = $controller;
 	}
 
 	/**
@@ -161,14 +188,16 @@ class RouteDispatcher implements Dispatcher
 			$controller = new $controller;
 		}
 
-		if (!($controller instanceof Controller))
+		if (!$controller instanceof Controller)
 		{
 			$controller_args = array_merge($controller_args, array_values($request->path_params));
 		}
 
+		$this->alter_context($request->context, $route, $controller);
+
 		$response = call_user_func_array($controller, $controller_args);
 
-		if ($response !== null && !($response instanceof Response))
+		if ($response !== null && !$response instanceof Response)
 		{
 			$response = new Response($response, 200, [
 
