@@ -11,6 +11,7 @@
 
 namespace ICanBoogie\Routing;
 
+use ICanBoogie\Accessor\AccessorTrait;
 use ICanBoogie\HTTP\Dispatcher;
 use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
@@ -26,15 +27,24 @@ use ICanBoogie\Routing\Route\RescueEvent;
  * properties are added to the {@link Request} instance. `$route` holds the {@link Route} instance,
  * `$decontextualized_path` holds the decontextualized path. The path is decontextualized using
  * the {@link decontextualize()} function.
+ *
+ * @property-read RouteCollection $routes
  */
 class RouteDispatcher implements Dispatcher
 {
+	use AccessorTrait;
+
 	/**
 	 * Route collection.
 	 *
 	 * @var RouteCollection
 	 */
 	protected $routes;
+
+	protected function get_routes()
+	{
+		return $this->routes;
+	}
 
 	/**
 	 * @param RouteCollection|null $routes
@@ -51,14 +61,9 @@ class RouteDispatcher implements Dispatcher
 	 */
 	public function __invoke(Request $request)
 	{
-		$decontextualized_path = decontextualize($request->normalized_path);
-
-		if ($decontextualized_path != '/')
-		{
-			$decontextualized_path = rtrim($decontextualized_path, '/');
-		}
-
-		$route = $this->routes->find($decontextualized_path, $captured, $request->method);
+		$captured = [];
+		$normalized_path = $this->normalize_path($request->normalized_path);
+		$route = $this->routes->find($normalized_path, $captured, $request->method);
 
 		if (!$route)
 		{
@@ -70,12 +75,44 @@ class RouteDispatcher implements Dispatcher
 			return new RedirectResponse(contextualize($route->location), 302);
 		}
 
-		$request->path_params = $captured + $request->path_params;
-		$request->params = $captured + $request->params;
+		$this->alter_params($route, $request, $captured);
+
 		$request->context->route = $route;
-		$request->decontextualized_path = $decontextualized_path;
+		$request->decontextualized_path = $normalized_path;
 
 		return $this->dispatch($route, $request);
+	}
+
+	/**
+	 * Normalizes request path.
+	 *
+	 * @param string $path
+	 *
+	 * @return string Decontextualized path with trimmed ending slash.
+	 */
+	protected function normalize_path($path)
+	{
+		$normalized_path = decontextualize($path);
+
+		if ($normalized_path != '/')
+		{
+			$normalized_path = rtrim($normalized_path, '/');
+		}
+
+		return $normalized_path;
+	}
+
+	/**
+	 * Alters request parameters.
+	 *
+	 * @param Route $route
+	 * @param Request $request
+	 * @param array $captured Parameters captured from the request's path.
+	 */
+	protected function alter_params(Route $route, Request $request, array $captured)
+	{
+		$request->path_params = $captured + $request->path_params;
+		$request->params = $captured + $request->params;
 	}
 
 	/**
