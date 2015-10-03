@@ -33,18 +33,18 @@ class RouteMakeTest extends \PHPUnit_Framework_TestCase
 
 	public function test_resource_except_one()
 	{
-		$routes = Make::resource('photos', 'App\Modules\Photos\Controller', [ 'except' => 'destroy' ]);
+		$routes = Make::resource('photos', 'App\Modules\Photos\Controller', [ 'except' => 'delete' ]);
 
 		$this->assertCount(6, $routes);
-		$this->assertEquals([ 'photos:index', 'photos:create', 'photos:store', 'photos:show', 'photos:edit', 'photos:update' ], array_keys($routes));
+		$this->assertEquals([ 'photos:index', 'photos:new', 'photos:create', 'photos:show', 'photos:edit', 'photos:update' ], array_keys($routes));
 	}
 
 	public function test_resource_except_many()
 	{
-		$routes = Make::resource('photos', 'App\Modules\Photos\Controller', [ 'except' => [ 'store', 'update', 'destroy' ] ]);
+		$routes = Make::resource('photos', 'App\Modules\Photos\Controller', [ 'except' => [ 'create', 'update', 'delete' ] ]);
 
 		$this->assertCount(4, $routes);
-		$this->assertEquals([ 'photos:index', 'photos:create', 'photos:show', 'photos:edit' ], array_keys($routes));
+		$this->assertEquals([ 'photos:index', 'photos:new', 'photos:show', 'photos:edit' ], array_keys($routes));
 	}
 
 	public function test_resource_as()

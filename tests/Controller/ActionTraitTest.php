@@ -121,4 +121,47 @@ class ActionTraitTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertSame($rc, $controller(Request::from([ 'uri' => '/', 'is_post' => true ])));
 	}
+
+	/**
+	 * @dataProvider provider_resource_action
+	 *
+	 * @param string $action
+	 */
+	public function test_resource_action($action)
+	{
+		$rc = uniqid();
+
+		$method = "action_$action";
+
+		$controller = $this
+			->getMockBuilder(ActionController::class)
+			->disableOriginalConstructor()
+			->setMethods([ 'get_action', $method ])
+			->getMockForAbstractClass();
+		$controller
+			->expects($this->once())
+			->method('get_action')
+			->willReturn($action);
+		$controller
+			->expects($this->once())
+			->method($method)
+			->willReturn($rc);
+
+		/* @var $controller ActionController */
+
+		$this->assertSame($rc, $controller(Request::from('/')));
+	}
+
+	public function provider_resource_action()
+	{
+		$methods = 'index new create show edit update delete';
+		$cases = [];
+
+		foreach (explode(' ', $methods) as $method)
+		{
+			$cases[] = [ $method ];
+		}
+
+		return $cases;
+	}
 }

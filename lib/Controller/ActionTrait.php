@@ -49,18 +49,6 @@ trait ActionTrait
         return $callable();
     }
 
-	/**
-	 * Whether the action has a direct method match.
-	 *
-	 * @param string $action
-	 *
-	 * @return bool `true` if the action has a direct method match, `false` otherwise.
-	 */
-	protected function is_action_method($action)
-	{
-		return false;
-	}
-
     /**
      * Resolves the action into a callable.
      *
@@ -80,9 +68,10 @@ trait ActionTrait
         $method = $this->resolve_action_method($action, $request);
         $args = $this->resolve_action_args($action, $request);
 
-        return function() use ($method, $args)
-        {
+        return function() use ($method, $args) {
+
             return call_user_func_array([ $this, $method ], $args);
+
         };
     }
 
@@ -97,12 +86,6 @@ trait ActionTrait
     protected function resolve_action_method($action, Request $request)
     {
         $action = strtr($action, '-', '_');
-
-	    if ($this->is_action_method($action))
-	    {
-		    return $action;
-	    }
-
         $method = 'action_' . strtolower($request->method) . '_' . $action;
 
         if (method_exists($this, $method))

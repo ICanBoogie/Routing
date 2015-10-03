@@ -14,8 +14,6 @@ namespace ICanBoogie;
 /* @var $loader \Composer\Autoload\ClassLoader */
 
 $loader = require __DIR__ . '/../vendor/autoload.php';
-$loader->addPsr4('ICanBoogie\\Routing\\ControllerTest\\', __DIR__ . '/ControllerTest');
-$loader->addPsr4('ICanBoogie\\Routing\\Controller\ResourceTraitTest\\', __DIR__ . '/Controller/ResourceTraitTest');
-$loader->addPsr4('ICanBoogie\\Routing\\Controller\ActionTraitTest\\', __DIR__ . '/Controller/ActionTraitTest');
+$loader->addPsr4('ICanBoogie\\Routing\\', __DIR__);
 
 $_SERVER['HTTP_HOST'] = 'icanboogie.org';

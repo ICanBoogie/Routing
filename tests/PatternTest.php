@@ -201,6 +201,16 @@ class PatternTest extends \PHPUnit_Framework_TestCase
 		$this->assertTrue($match);
 		$this->assertSame($uuid, $captured['uuid']);
 	}
+
+	public function test_sha1()
+	{
+		$hash = sha1(uniqid());
+		$pattern = Pattern::from('/articles/<hash:{:sha1:}>/edit');
+		$match = $pattern->match("/articles/$hash/edit", $captured);
+
+		$this->assertTrue($match);
+		$this->assertSame($hash, $captured['hash']);
+	}
 }
 
 namespace ICanBoogie\Routing\PatternTest;

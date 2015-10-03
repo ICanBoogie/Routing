@@ -27,14 +27,14 @@ as a _domain dispatcher_ by a [RequestDispatcher][] instance.
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Routing\RouteDispatcher;
 use ICanBoogie\Routing\RouteCollection;
-use ICanBoogie\Routing\RouteMaker as Make;
 
 $routes = new RouteCollection([
 
 	'articles:delete' => [
 	
 		'pattern' => '/articles/<id:\d+>',
-		'controller' => 'ArticlesController#delete',
+		'controller' => ArticlesController::class,
+		'action' => 'delete',
 		'via' => Request::METHOD_DELETE
 	
 	]
@@ -104,7 +104,7 @@ A route definition is considered valid when the `pattern` parameter is defined a
 `controller` or `location`. [PatternNotDefined][] is thrown if `pattern` is missing, and
 [ControllerNotDefined][] is thrown if both `controller` and `location` are missing.
 
-**Note:** You can add any parameter you want to the route definition, they are used to create
+> **Note:** You can add any parameter you want to the route definition, they are used to create
 the route instance, which might be useful to provide additional information to a controller.
 Better use a custom route class though.
 
@@ -126,7 +126,7 @@ e.g. `/articles/<id:\d+>/edit` where `<id:\d+>` is the placeholder for the `id` 
 which value must match `/^\d+$/`.
 
 - Anonymous constrained placeholder: Same as the constrained placeholder, except the parameter
-has no name but an index e.g. `/articles/<\d+>/edit` where `<\d+>` in the placeholder
+has no name but an index e.g. `/articles/<\d+>/edit` where `<\d+>` in a placeholder
 which index is 0.
 
 Additionally, the joker character `*`—which can only be used at the end of a pattern—matches
@@ -134,6 +134,7 @@ anything. e.g. `/articles/123*` matches `/articles/123` and `/articles/123456` a
 
 Finally, constraints RegEx are extended with the following:
 
+- `{:sha1:}`: Matches [SHA-1](https://en.wikipedia.org/wiki/SHA-1) hashes. e.g. `/files/<hash:{:sha1:}>`.
 - `{:uuid:}`: Matches [Universally unique identifiers](https://en.wikipedia.org/wiki/Universally_unique_identifier)
 (UUID). e.g. `/articles/<uuid:{:uuid:}>/edit`.
 
@@ -184,7 +185,7 @@ use ICanBoogie\Routing\RouteCollection;
 // …
 
 $routes = new RouteCollection($app->configs['routes']);
-#or
+# or
 $routes = $app->routes;
 ```
 
@@ -232,8 +233,8 @@ use ICanBoogie\Routing\RouteCollection;
 $routes = new RouteCollection;
 $routes->any('/', function(Request $request) { }, [ 'as' => 'home' ]);
 $routes->any('/articles', function(Request $request) { }, [ 'as' => 'articles:index' ]);
-$routes->get('/articles/create', function(Request $request) { }, [ 'as' => 'articles:create' ]);
-$routes->post('/articles', function(Request $request) { }, [ 'as' => 'articles:store' ]);
+$routes->get('/articles/new', function(Request $request) { }, [ 'as' => 'articles:new' ]);
+$routes->post('/articles', function(Request $request) { }, [ 'as' => 'articles:create' ]);
 $routes->delete('/articles/<nid:\d+>', function(Request $request) { }, [ 'as' => 'articles:delete' ]);
 ```
 
@@ -244,10 +245,10 @@ $routes->delete('/articles/<nid:\d+>', function(Request $request) { }, [ 'as' =>
 ### Filtering a route collection
 
 Sometimes you want to work with a subset of a route collection, for instance the routes related to
-the admin area. The `filter()` method filters routes using a callable filter and returns
-a new [RouteCollection][].
+the admin area of a website. The `filter()` method filters routes using a callable filter and
+returns a new [RouteCollection][].
 
-The following example demonstrates how to filter _index_ routes in a "admin" namespace.
+The following example demonstrates how to filter _index_ routes in an "admin" namespace.
 You can provide a closure, but it's best to create filter classes that you can extend and reuse:
 
 ```php
@@ -297,19 +298,19 @@ var_dump($captured);   // [ 'nid' => 123 ]
 
 ## Route
 
-A route is represented by a [Route][] instance. It is usually created from a definition array,
-and contain all the properties of its definition.
+A route is represented by a [Route][] instance. It is usually created from a definition array
+and contains all the properties of its definition.
 
 ```php
 <?php
 
-$route = $routes['articles:view'];
+$route = $routes['articles:show'];
 echo get_class($route); // ICanBoogie\Routing\Route;
 ```
 
-A route can be formatted into a relative URL using its `format()` method and appropriate properties.
-The method returns a [FormattedRoute][] instance, which can be used as a string. The following
-properties are available:
+A route can be formatted into a relative URL using its `format()` method and appropriate
+formatting parameters. The method returns a [FormattedRoute][] instance, which can be used as
+a string. The following properties are available:
 
 - `url`: The URL contextualized with `contextualize()`.
 - `absolute_url`: The contextualized URL _absolutized_ with the `absolute_url()` function.
@@ -317,7 +318,7 @@ properties are available:
 ```php
 <?php
 
-$route = $routes['articles:view'];
+$route = $routes['articles:show'];
 echo $route->pattern;      // /articles/:year-:month-:slug.html
 
 $url = $route->format([ 'year' => '2014', 'month' => '06', 'slug' => 'madonna-queen-of-pop' ]);
@@ -371,7 +372,7 @@ echo $route->format([ 'year' => 2016, 'month' => 10 ]);
 // /articles/2016-10.html
 ```
 
-**Note:** Assigning a formatting value to an _assigned_ route creates another instance of the
+> **Note:** Assigning a formatting value to an _assigned_ route creates another instance of the
 route. Also, the formatting value is reset when an _assigned_ route is cloned.
 
 Whether a route has an assigned formatting value or not, the `format()` method still requires
@@ -393,7 +394,7 @@ echo $route->format($route->formatting_value);
 Previous examples demonstrated how closures could be used to handle routes. Closures are
 perfectly fine when you start building your application, but as soon as it grows you might want
 to use controller classes instead to better organize your application. You can map each route to
-its [Controller][] class, or use the [ActionTrait][] or [ResourceTrait][] to group related HTTP
+its [Controller][] class, or use the [ActionTrait][] to group related HTTP
 request handling logic into a single controller.
 
 
@@ -437,18 +438,18 @@ result of the method.
 
 Basic controllers extend from [Controller][] and must implement the `action()` method.
 
-**Note:** The `action()` method is invoked _from within_ the controller, by the `__invoke()` method,
+> **Note:** The `action()` method is invoked _from within_ the controller, by the `__invoke()` method,
 and should be defined as _protected_. The `__invoke()` method is final, thus cannot be overridden.
 
 ```php
 <?php
 
-namespace App\Modules\Articles;
+namespace App\Modules\Articles\Routing;
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Routing\Controller;
 
-class ArticlesDeleteController extends Controller
+class DeleteController extends Controller
 {
 	protected function action(Request $request)
 	{
@@ -462,15 +463,11 @@ extend [Controller][] as it makes accessing your application features much easie
 benefit from prototype methods and event hooks attached to the [Controller][] class, such as the
 `view` property added by the [icanboogie/view][] package.
 
-The following properties are provided by the class:
+The following properties are provided by the [Controller][] class:
 
 - `name`: The name of the controller, extracted from its class name e.g. "articles_delete".
 - `request`: The request being dispatched.
 - `route`: The route being dispatched.
-
-The [ControllerBindings][] trait provided by the [icanboogie/bind-routing][] package may be used
-to forward undefined properties to the application, thus you can use `$this->modules` instead of
-`$this->app->modules`.
 
 
 
@@ -484,7 +481,8 @@ HTTP methods to separate concerns. An action controller is created by extending 
 
 The following example demonstrates how an action controller can be used to display a contact
 form, handle its submission, and redirect the user to a _success_ page. The action invoked
-inside the controller is defined after the '#' character.
+inside the controller is defined after the "#" character. The action may as well be defined
+using the `action` key.
 
 ```php
 <?php
@@ -496,14 +494,17 @@ return [
 	'contact' => [
 
 		'pattern' => '/contact',
-		'controller' => 'AppController#contact'
+		'controller' => AppController::class . '#contact'
 
-	],
+	]
+	
+	# or
+	
+	'contact' => [
 
-	'contact:ok' => [
-
-		'pattern' => '/contact/success.html'
-		'controller' => 'AppController#contact_ok'
+		'pattern' => '/contact',
+		'controller' => AppController::class,
+		'action' => 'contact'
 
 	]
 
@@ -544,19 +545,9 @@ class AppController extends Controller
 		$message = $request['message'];
 
 		// …
-
-		return $this->redirect($this->routes['contact:ok']);
-	}
-
-	protected function action_contact_success()
-	{
-		return "Your message has been sent.";
 	}
 }
 ```
-
-**Note:** The `is_action_method()` method is used to determine if an action can be mapped directly
-to a method, you might want to extend it if you wish to directly map some actions to their method.
 
 
 
@@ -566,27 +557,23 @@ to a method, you might want to extend it if you wish to directly map some action
 
 A resource controller groups the different actions required to handle a resource in a
 [RESTful][] fashion. It is created by extending the [Controller][] class and
-using [ResourceTrait][].
-
-**Note:** Because [ResourceTrait][] uses [ActionTrait][], _regular_ actions can be mixed with
-_resource_ actions, although _resource methods_ win over _action methods_.
+using [ActionTrait][].
 
 The following table list the verbs/routes and their corresponding action. `{name}` is the
 placeholder for the plural name of the resource, while `{id}` is the placeholder for the
 resource identifier.
 
-| HTTP verb | Path              | Action  | Used for                                 |
-| --------- | ----------------- | ------- | ---------------------------------------- |
-| GET       | /{name}           | index   | A list of {resource}                     |
-| GET       | /{name}/create    | create  | A form for creating a new {resource}     |
-| POST      | /{name}           | store   | Create a new {resource}                  |
-| GET       | /{name}/{id}      | show    | A specific {resource}                    |
-| GET       | /{name}/{id}/edit | edit    | A form for editing a specific {resource} |
-| PATCH/PUT | /{name}/{id}      | update  | Update a specific {resource}             |
-| DELETE    | /{name}/{id}      | destroy | Deletes a specific {resource}            |
+| HTTP verb | Path                | Action  | Used for                                   |
+| --------- | ------------------- | ------- | ------------------------------------------ |
+| GET       | `/{name}`           | index   | A list of `{resource}`                     |
+| GET       | `/{name}/new`       | new     | A form for creating a new `{resource}`     |
+| POST      | `/{name}`           | create  | Create a new `{resource}`                  |
+| GET       | `/{name}/{id}`      | show    | A specific `{resource}`                    |
+| GET       | `/{name}/{id}/edit` | edit    | A form for editing a specific `{resource}` |
+| PATCH/PUT | `/{name}/{id}`      | update  | Update a specific `{resource}`             |
+| DELETE    | `/{name}/{id}`      | delete  | Delete a specific `{resource}`             |
 
 The routes listed are more of a guideline than a requirement, still the actions are important.
-Indeed, contrary to _regular_ actions, the corresponding method have the exact same name.
 
 The following example demonstrates how the resource controller for _articles_ may be
 implemented. The example implements all actions, but you are free to implement only
@@ -596,43 +583,42 @@ some of them.
 <?php
 
 use ICanBoogie\Routing\Controller;
-use ICanBoogie\Routing\Controller\ResourceTrait;
 
 class PhotosController extends Controller
 {
-	use ResourceTrait;
+	use Controller\ActionTrait;
 
-	protected function index()
+	protected function action_index()
 	{
 		// …
 	}
 	
-	protected function create()
+	protected function action_new()
 	{
 		// …
 	}
 	
-	protected function store()
+	protected function action_create()
 	{
 		// …
 	}
 	
-	protected function show($id)
+	protected function action_show($id)
 	{
 		// …
 	}
 	
-	protected function edit($id)
+	protected function action_edit($id)
 	{
 		// …
 	}
 	
-	protected function update($id)
+	protected function action_update($id)
 	{
 		// …
 	}
 
-	protected function destroy($id)
+	protected function action_delete($id)
 	{
 		// …
 	}
@@ -664,28 +650,28 @@ $definitions = Make::resource('articles', ArticlesController::class);
 // only create the _index_ definition
 $definitions = Make::resource('articles', ArticlesController::class, [
 
-	'only' => 'index'
+	'only' => Make::ACTION_INDEX
 
 ]);
 
 // only create the _index_ and _show_ definitions
 $definitions = Make::resource('articles', ArticlesController::class, [
 
-	'only' => [ 'index', 'show' ]
+	'only' => [ Make::ACTION_INDEX, Make::ACTION_SHOW ]
 
 ]);
 
 // create definitions except _destroy_
 $definitions = Make::resource('articles', ArticlesController::class, [
 
-	'except' => 'destroy'
+	'except' => Make::ACTION_DELETE
 
 ]);
 
 // create definitions except _updated_ and _destroy_
 $definitions = Make::resource('articles', PhotosController::class, [
 
-	'except' => [ 'update', 'destroy' ]
+	'except' => [ Make::ACTION_UPDATE, Make::ACTION_DELETE ]
 
 ]);
 
@@ -693,19 +679,19 @@ $definitions = Make::resource('articles', PhotosController::class, [
 $definitions = Make::resource('articles', ArticlesController::class, [
 
 	'id_name' => 'uuid',
-	'id_regex' => '[[:uuid:]]{36}'
+	'id_regex' => '{:uuid:}'
 
 ]);
 
 // specify the identifier of the _create_ definition
 $definitions = Make::resource('articles', ArticlesController::class, [
 
-	'as' => [ 'create' => 'articles:build' ]
+	'as' => [ Make::ACTION_CREATE => 'articles:build' ]
 
 ]);
 ```
 
-**Note::** Defining all the resource actions is not required, only define the one you actually need.
+> **Note:** It is not required to define all the resource actions, only define the one you actually need.
 
 
 
