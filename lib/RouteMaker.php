@@ -18,6 +18,24 @@ use ICanBoogie\HTTP\Request;
  */
 class RouteMaker
 {
+	const ACTION_INDEX = 'index';
+	const ACTION_NEW = 'new';
+	const ACTION_CREATE = 'create';
+	const ACTION_SHOW = 'show';
+	const ACTION_EDIT = 'edit';
+	const ACTION_UPDATE = 'update';
+	const ACTION_DELETE = 'delete';
+
+	const OPTION_ID_NAME = 'id_name';
+	const OPTION_ID_REGEX = 'id_regex';
+	const OPTION_ONLY = 'only';
+	const OPTION_EXCEPT = 'except';
+	const OPTION_AS = 'as';
+	const OPTION_ACTIONS = 'actions';
+
+	const SEPARATOR = ':';
+	const CONTROLLER_ACTION_SEPARATOR = '#';
+
 	/**
 	 * @param string $name
 	 * @param string $controller
@@ -43,12 +61,13 @@ class RouteMaker
 
 		foreach ($actions as $action => list($pattern, $via))
 		{
-			$as = empty($options_as[$action]) ? "{$name}:{$action}" : $options_as[$action];
+			$as = empty($options_as[$action]) ? $name . self::SEPARATOR . $action : $options_as[$action];
 
 			$routes[$as] = [
 
 				'pattern' => $pattern,
-				'controller' => "{$controller}#{$action}",
+				'controller' => $controller,
+				'action' => $action,
 				'via' => $via,
 				'as' => $as
 
@@ -93,12 +112,12 @@ class RouteMaker
 	{
 		return $options + [
 
-			'id_name' => 'id',
-			'id_regex' => '\d+',
-			'only' => [ ],
-			'except' => [ ],
-			'as' => [ ],
-			'actions' => [ ]
+			self::OPTION_ID_NAME => 'id',
+			self::OPTION_ID_REGEX => '\d+',
+			self::OPTION_ONLY => [ ],
+			self::OPTION_EXCEPT => [ ],
+			self::OPTION_AS => [ ],
+			self::OPTION_ACTIONS => [ ]
 
 		];
 	}
@@ -112,13 +131,13 @@ class RouteMaker
 	{
 		return [
 
-			'index'   => [ '/{name}',           Request::METHOD_GET ],
-			'create'  => [ '/{name}/create',    Request::METHOD_GET ],
-			'store'   => [ '/{name}',           Request::METHOD_POST ],
-			'show'    => [ '/{name}/{id}',      Request::METHOD_GET ],
-			'edit'    => [ '/{name}/{id}/edit', Request::METHOD_GET ],
-			'update'  => [ '/{name}/{id}',      [ Request::METHOD_PUT, Request::METHOD_PATCH ] ],
-			'destroy' => [ '/{name}/{id}',      Request::METHOD_DELETE ]
+			self::ACTION_INDEX  => [ '/{name}',           Request::METHOD_GET ],
+			self::ACTION_NEW    => [ '/{name}/new',       Request::METHOD_GET ],
+			self::ACTION_CREATE => [ '/{name}',           Request::METHOD_POST ],
+			self::ACTION_SHOW   => [ '/{name}/{id}',      Request::METHOD_GET ],
+			self::ACTION_EDIT   => [ '/{name}/{id}/edit', Request::METHOD_GET ],
+			self::ACTION_UPDATE => [ '/{name}/{id}',      [ Request::METHOD_PUT, Request::METHOD_PATCH ] ],
+			self::ACTION_DELETE => [ '/{name}/{id}',      Request::METHOD_DELETE ]
 
 		];
 	}
@@ -133,14 +152,14 @@ class RouteMaker
 	 */
 	static protected function filter_actions(array $actions, array $options = [])
 	{
-		if ($options['only'])
+		if ($options[self::OPTION_ONLY])
 		{
-			$actions = array_intersect_key($actions, array_flip((array) $options['only']));
+			$actions = array_intersect_key($actions, array_flip((array) $options[self::OPTION_ONLY]));
 		}
 
-		if ($options['except'])
+		if ($options[self::OPTION_EXCEPT])
 		{
-			$actions = array_diff_key($actions, array_flip((array) $options['except']));
+			$actions = array_diff_key($actions, array_flip((array) $options[self::OPTION_EXCEPT]));
 		}
 
 		return $actions;
@@ -157,7 +176,7 @@ class RouteMaker
 	 */
 	static protected function resolve_patterns($name, array $actions, $options)
 	{
-		$id = "<{$options['id_name']}:{$options['id_regex']}>";
+		$id = "<{$options[self::OPTION_ID_NAME]}:{$options[self::OPTION_ID_REGEX]}>";
 		$replace = [ '{name}' => $name, '{id}' => $id ];
 
 		foreach ($actions as $action => &$template)
