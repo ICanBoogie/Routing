@@ -34,6 +34,25 @@ class Route
 	static protected $invalid_construct_properties = [ 'formatting_value', 'url', 'absolute_url' ];
 
 	/**
+	 * Creates a new {@link Route} instance from a route definition.
+	 *
+	 * @param array $definition
+	 *
+	 * @return static
+	 */
+	static public function from(array $definition)
+	{
+		$class = get_called_class();
+
+		if (isset($definition[RouteDefinition::CONSTRUCTOR]))
+		{
+			$class = $definition[RouteDefinition::CONSTRUCTOR];
+		}
+
+		return new $class($definition[RouteDefinition::PATTERN], $definition);
+	}
+
+	/**
 	 * Pattern of the route.
 	 *
 	 * @var Pattern

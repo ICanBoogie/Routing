@@ -92,15 +92,13 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 
 		list($pattern, $controller, $options) = $arguments + [ 2 => [] ];
 
-		$definition = [
+		$this->revoke_cache();
+		$this->add([
 
 			RouteDefinition::CONTROLLER => $controller,
 			RouteDefinition::PATTERN => $pattern
 
-		] + $options + [ RouteDefinition::VIA => $method ];
-
-		$this->revoke_cache();
-		$this->add($definition);
+		] + $options + [ RouteDefinition::VIA => $method ]);
 
 		return $this;
 	}
@@ -188,16 +186,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 			throw new RouteNotDefined($id);
 		}
 
-		$properties = $this->routes[$id];
-
-		$class = static::DEFAULT_ROUTE_CLASS;
-
-		if (isset($properties[RouteDefinition::CONSTRUCTOR]))
-		{
-			$class = $properties[RouteDefinition::CONSTRUCTOR];
-		}
-
-		return $this->instances[$id] = new $class($properties[RouteDefinition::PATTERN], $properties);
+		return $this->instances[$id] = Route::from($this->routes[$id]);
 	}
 
 	/**
