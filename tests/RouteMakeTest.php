@@ -60,8 +60,8 @@ class RouteMakeTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertCount(2, $routes);
 		$this->assertArrayHasKey($as, $routes);
-		$this->assertEquals($as, $routes[$as]['as']);
+		$this->assertEquals($as, $routes[$as][RouteDefinition::ID]);
 		$this->assertArrayHasKey('photos:show', $routes);
-		$this->assertEquals('photos:show', $routes['photos:show']['as']);
+		$this->assertEquals('photos:show', $routes['photos:show'][RouteDefinition::ID]);
 	}
 }

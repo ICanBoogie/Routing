@@ -65,11 +65,11 @@ class RouteMaker
 
 			$routes[$as] = [
 
-				'pattern' => $pattern,
-				'controller' => $controller,
-				'action' => $action,
-				'via' => $via,
-				'as' => $as
+				RouteDefinition::PATTERN => $pattern,
+				RouteDefinition::CONTROLLER => $controller,
+				RouteDefinition::ACTION => $action,
+				RouteDefinition::VIA => $via,
+				RouteDefinition::ID => $as
 
 			];
 		}

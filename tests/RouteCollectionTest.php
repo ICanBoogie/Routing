@@ -20,8 +20,8 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 	{
 		$routes = new RouteCollection([
 
-			[ 'controller' => uniqid(), 'pattern' => uniqid() ],
-			[ 'controller' => uniqid(), 'pattern' => uniqid() ]
+			[ RouteDefinition::CONTROLLER => uniqid(), RouteDefinition::PATTERN => uniqid() ],
+			[ RouteDefinition::CONTROLLER => uniqid(), RouteDefinition::PATTERN => uniqid() ]
 
 		]);
 
@@ -36,7 +36,7 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 	{
 		$routes = new RouteCollection;
 		$m = 'invalid_http_method';
-		$routes->$m([ 'controller' => uniqid(), 'pattern'=> uniqid() ]);
+		$routes->$m([ RouteDefinition::CONTROLLER => uniqid(), RouteDefinition::PATTERN=> uniqid() ]);
 	}
 
 	/**
@@ -48,7 +48,7 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 
 			'home' => [
 
-				'controller' => 'dummy'
+				RouteDefinition::CONTROLLER => 'dummy'
 
 			]
 
@@ -64,7 +64,7 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 
 			'home' => [
 
-				'pattern' => '/'
+				RouteDefinition::PATTERN => '/'
 
 			]
 
@@ -77,8 +77,8 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 
 			'home' => [
 
-				'pattern' => '/',
-				'location' => '/go/to/madonna'
+				RouteDefinition::PATTERN => '/',
+				RouteDefinition::LOCATION => '/go/to/madonna'
 
 			]
 
@@ -115,8 +115,8 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 
 			'one' => [
 
-				'pattern' => $one_pattern,
-				'controller' => $one_controller
+				RouteDefinition::PATTERN => $one_pattern,
+				RouteDefinition::CONTROLLER => $one_controller
 
 			]
 
@@ -139,9 +139,9 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 
 			'one' => [
 
-				'pattern' => $one_pattern,
-				'controller' => $one_controller,
-				'class' => $one_class
+				RouteDefinition::PATTERN => $one_pattern,
+				RouteDefinition::CONTROLLER => $one_controller,
+				RouteDefinition::CONSTRUCTOR => $one_class
 
 			]
 
@@ -165,21 +165,21 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 		$routes = new RouteCollection;
 		$routes->get('/' . uniqid(), function() {}, [
 
-			'as' => 'one'
+			RouteDefinition::ID => 'one'
 
 		]);
 
 		$routes['two'] = [
 
-			'pattern' => '/' . uniqid(),
-			'controller' => function() {}
+			RouteDefinition::PATTERN => '/' . uniqid(),
+			RouteDefinition::CONTROLLER => function() {}
 
 		];
 
 		$routes['three'] = [
 
-			'pattern' => '/' . uniqid(),
-			'controller' => function() {}
+			RouteDefinition::PATTERN => '/' . uniqid(),
+			RouteDefinition::CONTROLLER => function() {}
 
 		];
 
@@ -202,32 +202,32 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 
 			'home' => [
 
-				'pattern' => '/',
-				'controller' => 'dummy'
+				RouteDefinition::PATTERN => '/',
+				RouteDefinition::CONTROLLER => 'dummy'
 
 			],
 
 			'articles:edit' => [
 
-				'pattern' => '/articles/new',
-				'controller' => 'dummy',
-				'via' => Request::METHOD_GET
+				RouteDefinition::PATTERN => '/articles/new',
+				RouteDefinition::CONTROLLER => 'dummy',
+				RouteDefinition::VIA => Request::METHOD_GET
 
 			],
 
 			'articles' => [
 
-				'pattern' => '/articles',
-				'controller' => 'dummy',
-				'via' => [ Request::METHOD_POST, Request::METHOD_PATCH ]
+				RouteDefinition::PATTERN => '/articles',
+				RouteDefinition::CONTROLLER => 'dummy',
+				RouteDefinition::VIA => [ Request::METHOD_POST, Request::METHOD_PATCH ]
 
 			],
 
 			'articles:delete' => [
 
-				'pattern' => '/articles/<nid:\d+>',
-				'controller' => 'dummy',
-				'via' => Request::METHOD_DELETE
+				RouteDefinition::PATTERN => '/articles/<nid:\d+>',
+				RouteDefinition::CONTROLLER => 'dummy',
+				RouteDefinition::VIA => Request::METHOD_DELETE
 
 			]
 
@@ -290,17 +290,17 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 
 			'api:nodes:activate' => [
 
-				'pattern' => '/api/:constructor/:id/active',
-				'controller' => 'dummy',
-				'via' => 'PUT'
+				RouteDefinition::PATTERN => '/api/:constructor/:id/active',
+				RouteDefinition::CONTROLLER => 'dummy',
+				RouteDefinition::VIA => 'PUT'
 
 			],
 
 			'api:articles:activate' => [
 
-				'pattern' => '/api/articles/:id/active',
-				'controller' => 'dummy',
-				'via' => 'PUT'
+				RouteDefinition::PATTERN => '/api/articles/:id/active',
+				RouteDefinition::CONTROLLER => 'dummy',
+				RouteDefinition::VIA => 'PUT'
 
 			]
 
@@ -317,8 +317,8 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 
 			'admin:articles/edit' => [
 
-				'pattern' => '/admin/articles/<\d+>/edit',
-				'controller' => 'dummy'
+				RouteDefinition::PATTERN => '/admin/articles/<\d+>/edit',
+				RouteDefinition::CONTROLLER => 'dummy'
 
 			]
 
@@ -358,105 +358,105 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 
 			[ 'any', '/', $to , [], [
 
-				'controller' => $to,
-				'via' => 'ANY'
+				RouteDefinition::CONTROLLER => $to,
+				RouteDefinition::VIA => 'ANY'
 
 			] ],
 
 			[ 'connect', '/', $to , [], [
 
-				'controller' => $to,
-				'via' => 'CONNECT'
+				RouteDefinition::CONTROLLER => $to,
+				RouteDefinition::VIA => 'CONNECT'
 
 			] ],
 
 			[ 'delete', '/', $to , [], [
 
-				'controller' => $to,
-				'via' => 'DELETE'
+				RouteDefinition::CONTROLLER => $to,
+				RouteDefinition::VIA => 'DELETE'
 
 			] ],
 
 			[ 'get', '/', $to , [], [
 
-				'controller' => $to,
-				'via' => 'GET'
+				RouteDefinition::CONTROLLER => $to,
+				RouteDefinition::VIA => 'GET'
 
 			] ],
 
 			[ 'head', '/', $to , [], [
 
-				'controller' => $to,
-				'via' => 'HEAD'
+				RouteDefinition::CONTROLLER => $to,
+				RouteDefinition::VIA => 'HEAD'
 
 			] ],
 
 			[ 'options', '/', $to , [], [
 
-				'controller' => $to,
-				'via' => 'OPTIONS'
+				RouteDefinition::CONTROLLER => $to,
+				RouteDefinition::VIA => 'OPTIONS'
 
 			] ],
 
 			[ 'post', '/', $to , [], [
 
-				'controller' => $to,
-				'via' => 'POST'
+				RouteDefinition::CONTROLLER => $to,
+				RouteDefinition::VIA => 'POST'
 
 			] ],
 
 			[ 'put', '/', $to , [], [
 
-				'controller' => $to,
-				'via' => 'PUT'
+				RouteDefinition::CONTROLLER => $to,
+				RouteDefinition::VIA => 'PUT'
 
 			] ],
 
 			[ 'patch', '/', $to , [], [
 
-				'controller' => $to,
-				'via' => 'PATCH'
+				RouteDefinition::CONTROLLER => $to,
+				RouteDefinition::VIA => 'PATCH'
 
 			] ],
 
 			[ 'trace', '/', $to , [], [
 
-				'controller' => $to,
-				'via' => 'TRACE'
+				RouteDefinition::CONTROLLER => $to,
+				RouteDefinition::VIA => 'TRACE'
 
 			] ],
 
 			[ 'get', '/', $to, [
 
-				'controller' => 'INVALID OVERRIDE'
+				RouteDefinition::CONTROLLER => 'INVALID OVERRIDE'
 
 			], [
 
-				'controller' => $to,
-				'via' => 'GET'
+				RouteDefinition::CONTROLLER => $to,
+				RouteDefinition::VIA => 'GET'
 
 			] ],
 
 			[ 'get', '/', $to, [
 
-				'as' => 'article:show'
+				RouteDefinition::ID => 'article:show'
 
 			], [
 
-				'controller' => $to,
-				'id' => 'article:show',
-				'via' => 'GET'
+				RouteDefinition::CONTROLLER => $to,
+				RouteDefinition::ID => 'article:show',
+				RouteDefinition::VIA => 'GET'
 
 			] ],
 
 			[ 'any', '/', $to, [
 
-				'via' => [ 'GET', 'POST' ]
+				RouteDefinition::VIA => [ 'GET', 'POST' ]
 
 			], [
 
-				'controller' => $to,
-				'via' => [ 'GET', 'POST' ]
+				RouteDefinition::CONTROLLER => $to,
+				RouteDefinition::VIA => [ 'GET', 'POST' ]
 
 			] ],
 
@@ -483,15 +483,15 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 
 			'admin:articles:index' => [
 
-				'pattern' => '/admin/articles',
-				'controller' => 'dummy'
+				RouteDefinition::PATTERN => '/admin/articles',
+				RouteDefinition::CONTROLLER => 'dummy'
 
 			],
 
 			'articles:show' => [
 
-				'pattern' => '/articles/<id:\d+>',
-				'controller' => 'dummy'
+				RouteDefinition::PATTERN => '/articles/<id:\d+>',
+				RouteDefinition::CONTROLLER => 'dummy'
 
 			]
 

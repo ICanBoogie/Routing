@@ -32,13 +32,6 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 {
 	const DEFAULT_ROUTE_CLASS = Route::class;
 
-	static private $anonymous_id_count;
-
-	static private function generate_anonymous_id()
-	{
-		return 'anonymous_route_' . ++self::$anonymous_id_count;
-	}
-
 	/**
 	 * Route definitions.
 	 *
@@ -53,101 +46,67 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	 */
 	protected $instances = [];
 
-	public function __construct(array $routes=[])
+	public function __construct(array $definitions = [])
 	{
-		foreach ($routes as $route_id => $route)
+		foreach ($definitions as $id => $definition)
 		{
-			if (is_numeric($route_id))
+			if (is_string($id) && empty($definition[RouteDefinition::ID]))
 			{
-				$route_id = null;
+				$definition[RouteDefinition::ID] = $id;
 			}
 
-			$this[$route_id] = $route;
+			$this->add($definition);
 		}
 	}
 
+	/**
+	 * Adds a route definition using an HTTP method.
+	 *
+	 * @param string $method
+	 * @param array $arguments
+	 *
+	 * @return $this
+	 */
 	public function __call($method, array $arguments)
 	{
 		$method = strtoupper($method);
 
-		if ($method === Request::METHOD_ANY || in_array($method, Request::$methods))
+		if ($method !== Request::METHOD_ANY && !in_array($method, Request::$methods))
 		{
-			list($pattern, $controller, $options) = $arguments + [ 2 => [] ];
-
-			$definition = [
-
-					'controller' => $controller,
-					'pattern' => $pattern
-
-			] + $options + [ 'via' => $method ];
-
-			$this->add($definition);
-
-			return $this;
+			throw new MethodNotDefined($method, $this);
 		}
 
-		throw new MethodNotDefined($method, $this);
-	}
+		list($pattern, $controller, $options) = $arguments + [ 2 => [] ];
 
-	protected function add(array $definition)
-	{
-		if (empty($definition['as']))
-		{
-			$definition['as'] = self::generate_anonymous_id();
-		}
+		$definition = [
 
-		$id = $definition['id'] = $definition['as'];
+			RouteDefinition::CONTROLLER => $controller,
+			RouteDefinition::PATTERN => $pattern
 
-		unset($definition['as']);
-
-		#
-
-		if (empty($definition['pattern']))
-		{
-			throw new PatternNotDefined(\ICanBoogie\format("Route %id has no pattern. !route", [
-
-				'id' => $id,
-				'route' => $definition
-
-			]));
-		}
-
-		if (empty($definition['controller']) && empty($definition['location']))
-		{
-			throw new ControllerNotDefined(\ICanBoogie\format("Route %id has no controller. !route", [
-
-				'id' => $id,
-				'route' => $definition
-
-			]));
-		}
-
-		#
-		# Separate controller class from its action.
-		#
-
-		if (isset($definition['controller']))
-		{
-			$controller = $definition['controller'];
-
-			if (is_string($controller) && strpos($controller, '#'))
-			{
-				list($controller, $action) = explode('#', $controller);
-
-				$definition['controller'] = $controller;
-				$definition['action'] = $action;
-			}
-		}
-
-		#
-
-		$this->routes[$id] = $definition + [
-
-			'via' => Request::METHOD_ANY
-
-		];
+		] + $options + [ RouteDefinition::VIA => $method ];
 
 		$this->revoke_cache();
+		$this->add($definition);
+
+		return $this;
+	}
+
+	/**
+	 * Adds a route definition.
+	 *
+	 * **Note:** The method does *not* revoke cache.
+	 *
+	 * @param array $definition
+	 *
+	 * @return $this
+	 */
+	protected function add(array $definition)
+	{
+		RouteDefinition::assert_is_valid($definition);
+		RouteDefinition::normalize($definition);
+		$id = RouteDefinition::ensure_has_id($definition);
+
+		$this->routes[$id] = $definition;
 
 		return $this;
 	}
@@ -168,11 +127,12 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	 */
 	public function resource($name, $controller, array $options = [])
 	{
-		$definitions = RouteMaker::resource($name,$controller, $options);
+		$definitions = RouteMaker::resource($name, $controller, $options);
+		$this->revoke_cache();
 
 		foreach ($definitions as $id => $definition)
 		{
-			$this[$id] = $definition;
+			$this->add([ RouteDefinition::ID => $id ] + $definition);
 		}
 	}
 
@@ -186,6 +146,15 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 		return isset($this->routes[$offset]);
 	}
 
+	/**
+	 * Returns a {@link Route} instance.
+	 *
+	 * @param string $id Route identifier.
+	 *
+	 * @return Route
+	 *
+	 * @throws RouteNotDefined
+	 */
 	public function offsetGet($id)
 	{
 		if (isset($this->instances[$id]))
@@ -202,23 +171,24 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 
 		$class = static::DEFAULT_ROUTE_CLASS;
 
-		if (isset($properties['class']))
+		if (isset($properties[RouteDefinition::CONSTRUCTOR]))
 		{
-			$class = $properties['class'];
+			$class = $properties[RouteDefinition::CONSTRUCTOR];
 		}
 
-		return $this->instances[$id] = new $class($this, $properties['pattern'], $properties);
+		return $this->instances[$id] = new $class($this, $properties[RouteDefinition::PATTERN], $properties);
 	}
 
 	/**
-	 * Define a route.
+	 * Defines a route.
 	 *
 	 * @param string $id The identifier of the route.
 	 * @param array $route The route definition.
 	 */
 	public function offsetSet($id, $route)
 	{
-		$this->add([ 'as' => $id ] + $route);
+		$this->revoke_cache();
+		$this->add([ RouteDefinition::ID => $id ] + $route);
 	}
 
 	/**
@@ -307,12 +277,12 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 		#
 		# Search for a matching static route.
 		#
-		$map_static = function($routes) use($path, &$matchable) {
+		$map_static = function($definitions) use($path, &$matchable) {
 
-			foreach ($routes as $id => $route)
+			foreach ($definitions as $id => $definition)
 			{
-				$pattern = $route['pattern'];
-				$via = $route['via'];
+				$pattern = $definition[RouteDefinition::PATTERN];
+				$via = $definition[RouteDefinition::VIA];
 
 				if (!$matchable($pattern, $via) || $pattern != $path)
 				{
@@ -328,12 +298,12 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 		#
 		# Search for a matching dynamic route.
 		#
-		$map_dynamic = function($routes) use($path, &$matchable, &$captured) {
+		$map_dynamic = function($definitions) use($path, &$matchable, &$captured) {
 
-			foreach ($routes as $id => $route)
+			foreach ($definitions as $id => $definition)
 			{
-				$pattern = $route['pattern'];
-				$via = $route['via'];
+				$pattern = $definition[RouteDefinition::PATTERN];
+				$via = $definition[RouteDefinition::VIA];
 
 				if (!$matchable($pattern, $via) || !Pattern::from($pattern)->match($path, $captured))
 				{
@@ -381,7 +351,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	private $dynamic;
 
 	/**
-	 * Revoke the cache used by the {@link sort_routes} method.
+	 * Revokes the cache used by the {@link sort_routes} method.
 	 */
 	private function revoke_cache()
 	{
@@ -390,7 +360,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	}
 
 	/**
-	 * Sort routes according to their type and computed weight.
+	 * Sorts routes according to their type and computed weight.
 	 *
 	 * Routes and grouped in two groups: static routes and dynamic routes. The difference between
 	 * static and dynamic routes is that dynamic routes capture parameters from the path and thus
@@ -415,7 +385,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 
 		foreach ($this->routes as $id => $definition)
 		{
-			$pattern = $definition['pattern'];
+			$pattern = $definition[RouteDefinition::PATTERN];
 			$first_capture_position = strpos($pattern, ':') ?: strpos($pattern, '<');
 
 			if ($first_capture_position === false)
@@ -446,7 +416,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	 *
 	 * @param callable $filter
 	 *
-	 * @return $this
+	 * @return RouteCollection
 	 */
 	public function filter(callable $filter)
 	{
