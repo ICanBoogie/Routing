@@ -36,7 +36,7 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 	{
 		$routes = new RouteCollection;
 		$m = 'invalid_http_method';
-		$routes->$m([ RouteDefinition::CONTROLLER => uniqid(), RouteDefinition::PATTERN=> uniqid() ]);
+		$routes->$m([ RouteDefinition::CONTROLLER => uniqid(), RouteDefinition::PATTERN => uniqid() ]);
 	}
 
 	/**

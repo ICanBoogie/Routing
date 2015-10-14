@@ -30,6 +30,14 @@ use ICanBoogie\Prototype\MethodNotDefined;
  */
 class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 {
+	/**
+	 * Specify that the route definitions can be trusted.
+	 */
+	const TRUSTED_DEFINITIONS = true;
+
+	/**
+	 * Class name of the {@link Route} instances.
+	 */
 	const DEFAULT_ROUTE_CLASS = Route::class;
 
 	/**
@@ -46,7 +54,13 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	 */
 	protected $instances = [];
 
-	public function __construct(array $definitions = [])
+	/**
+	 * @param array $definitions
+	 * @param bool $trusted_definitions {@link TRUSTED_DEFINITIONS} if the definition can be
+	 * trusted. This will speed up the construct process but the definitions will not be checked,
+	 * nor will they be normalized.
+	 */
+	public function __construct(array $definitions = [], $trusted_definitions = false)
 	{
 		foreach ($definitions as $id => $definition)
 		{
@@ -55,7 +69,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 				$definition[RouteDefinition::ID] = $id;
 			}
 
-			$this->add($definition);
+			$this->add($definition, $trusted_definitions);
 		}
 	}
 
@@ -97,15 +111,22 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	 * **Note:** The method does *not* revoke cache.
 	 *
 	 * @param array $definition
+	 * @param bool $trusted_definition {@link TRUSTED_DEFINITIONS} if the method should be trusting the
+	 * definition, in which case the method doesn't assert if the definition is valid, nor does
+	 * it normalizes it.
 	 *
 	 * @return $this
 	 */
-	protected function add(array $definition)
+	protected function add(array $definition, $trusted_definition = false)
 	{
-		RouteDefinition::assert_is_valid($definition);
-		RouteDefinition::normalize($definition);
-		$id = RouteDefinition::ensure_has_id($definition);
+		if (!$trusted_definition)
+		{
+			RouteDefinition::assert_is_valid($definition);
+			RouteDefinition::normalize($definition);
+			RouteDefinition::ensure_has_id($definition);
+		}
 
+		$id = $definition[RouteDefinition::ID];
 		$this->routes[$id] = $definition;
 
 		return $this;
