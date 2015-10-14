@@ -26,17 +26,10 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 			->getMock();
 	}
 
-	public function test_get_routes()
-	{
-		$r = new Route($this->routes, '/', []);
-
-		$this->assertSame($this->routes, $r->routes);
-	}
-
 	public function testGetPatternInstance()
 	{
 		$s = '/news/:year-:month-:slug.:format';
-		$r = new Route($this->routes, $s, []);
+		$r = new Route($s, []);
 
 		$this->assertInstanceOf(Pattern::class, $r->pattern);
 	}
@@ -62,7 +55,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 
 	public function test_format()
 	{
-		$route = new Route($this->routes, '/news/:year-:month-:slug.html', []);
+		$route = new Route('/news/:year-:month-:slug.html', []);
 
 		$formatted_route = $route->format([
 
@@ -83,7 +76,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 	public function test_get_url()
 	{
 		$expected = "/my-awesome-url.html";
-		$route = new Route($this->routes, $expected, []);
+		$route = new Route($expected, []);
 		$this->assertEquals($expected, $route->url);
 	}
 
@@ -93,14 +86,14 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 	public function test_get_url_requiring_values()
 	{
 		$expected = "/:year-:month.html";
-		$route = new Route($this->routes, $expected, []);
+		$route = new Route($expected, []);
 		$this->assertEquals($expected, $route->url);
 	}
 
 	public function test_get_absolute_url()
 	{
 		$expected = "/my-awesome-url.html";
-		$route = new Route($this->routes, $expected, []);
+		$route = new Route($expected, []);
 		$this->assertEquals("http://icanboogie.org" . $expected, $route->absolute_url);
 	}
 
@@ -112,7 +105,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function test_should_throw_exception_on_invalid_construct_property($properties)
 	{
-		new Route($this->routes, '/', $properties);
+		new Route('/', $properties);
 	}
 
 	public function provide_invalid_construct_properties()
@@ -120,7 +113,6 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 		return [
 
 			[ [ 'formatting_value' => uniqid() ] ],
-			[ [ 'routes' => uniqid() ] ],
 			[ [ 'url' => uniqid() ] ],
 			[ [ 'absolute_url' => uniqid() ] ]
 
@@ -132,7 +124,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 		$year = uniqid();
 		$month = uniqid();
 		$formatting_value = [ 'year' => $year, 'month' => $month ];
-		$r1 = new Route($this->routes, '/:year-:month.html', []);
+		$r1 = new Route('/:year-:month.html', []);
 		$this->assertNull($r1->formatting_value);
 		$this->assertFalse($r1->has_formatting_value);
 
@@ -151,7 +143,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 	public function test_should_reset_formatting_value_on_clone()
 	{
 		$formatting_value = [ 'a' => uniqid() ];
-		$route = (new Route($this->routes, '/', []))->assign($formatting_value);
+		$route = (new Route('/', []))->assign($formatting_value);
 
 		$route2 = clone $route;
 		$this->assertNull($route2->formatting_value);

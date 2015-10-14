@@ -16,7 +16,6 @@ use ICanBoogie\Accessor\AccessorTrait;
 /**
  * A route.
  *
- * @property-read RouteCollection $routes The route collection this route belongs to.
  * @property-read Pattern $pattern The pattern of the route.
  * @property-read string $controller The class name of the controller.
  * @property-read string|null $action Controller action.
@@ -32,7 +31,7 @@ class Route
 {
 	use AccessorTrait;
 
-	static protected $invalid_construct_properties = [ 'formatting_value', 'routes', 'url', 'absolute_url' ];
+	static protected $invalid_construct_properties = [ 'formatting_value', 'url', 'absolute_url' ];
 
 	/**
 	 * Pattern of the route.
@@ -136,18 +135,6 @@ class Route
 	}
 
 	/**
-	 * The route collection this route belongs to.
-	 *
-	 * @var RouteCollection
-	 */
-	private $routes;
-
-	protected function get_routes()
-	{
-		return $this->routes;
-	}
-
-	/**
 	 * Returns relative URL.
 	 *
 	 * @return string
@@ -170,13 +157,11 @@ class Route
 	/**
 	 * Initializes the {@link $pattern} property and the properties provided.
 	 *
-	 * @param RouteCollection $routes
 	 * @param string $pattern
 	 * @param array $properties
 	 */
-	public function __construct(RouteCollection $routes, $pattern, array $properties)
+	public function __construct($pattern, array $properties)
 	{
-		$this->routes = $routes;
 		$this->pattern = Pattern::from($pattern);
 
 		unset($properties['pattern']);

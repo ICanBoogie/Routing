@@ -176,7 +176,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 			$class = $properties[RouteDefinition::CONSTRUCTOR];
 		}
 
-		return $this->instances[$id] = new $class($this, $properties[RouteDefinition::PATTERN], $properties);
+		return $this->instances[$id] = new $class($properties[RouteDefinition::PATTERN], $properties);
 	}
 
 	/**

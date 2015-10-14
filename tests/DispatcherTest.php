@@ -75,7 +75,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 
 		/* @var $routes RouteCollection */
 
-		$route = new Route($routes, '/', [
+		$route = new Route('/', [
 
 			'location' => $location
 
@@ -133,7 +133,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 
 		/* @var $routes RouteCollection */
 
-		$route = new Route($routes, '/', [
+		$route = new Route('/', [
 
 			'pattern' => '/',
 			'controller' => function() {}

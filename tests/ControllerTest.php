@@ -267,16 +267,10 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
 			->disableOriginalConstructor()
 			->getMockForAbstractClass();
 
-		$routes = $this
-			->getMockBuilder(RouteCollection::class)
-			->disableOriginalConstructor()
-			->getMock();
-
-		/* @var $routes RouteCollection */
 		/* @var $response RedirectResponse */
 		/* @var $controller Controller */
 
-		$route = new Route($routes, '/articles/<nid:\d+>/edit', [
+		$route = new Route('/articles/<nid:\d+>/edit', [
 
 			'controller' => function(Request $request) use ($original_request, $response) {
 
