@@ -50,28 +50,18 @@ class DispatchEventTest extends \PHPUnit_Framework_TestCase
 		$route = $this->route;
 		$request = Request::from('/');
 
-		try
-		{
-			DispatchEvent::from([
+		$this->setExpectedException(version_compare(PHP_VERSION, '7', '<')
+			? \PHPUnit_Framework_Error::class
+			: \TypeError::class);
 
-				'target' => $dispatcher,
-				'route' => $route,
-				'request' => $request,
-				'response' => &$dispatcher
+		DispatchEvent::from([
 
-			]);
-		}
-		catch (\Exception $e)
-		{
-			if (version_compare(PHP_VERSION, '7', '<'))
-			{
-				$this->assertInstanceOf(\PHPUnit_Framework_Error::class, $e);
-			}
-			else
-			{
-				$this->assertInstanceOf(\TypeError::class, $e);
-			}
-		}
+			'target' => $dispatcher,
+			'route' => $route,
+			'request' => $request,
+			'response' => &$dispatcher
+
+		]);
 	}
 
 	public function test_response_reference()
