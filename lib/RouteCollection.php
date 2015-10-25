@@ -231,18 +231,12 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	 * @param array|null $captured The parameters captured from the URI. If the URI included a
 	 * query string, its parsed params are stored under the `__query__` key.
 	 * @param string $method One of HTTP\Request::METHOD_* methods.
-	 * @param string $namespace Namespace restriction.
 	 *
 	 * @return Route|false|null
 	 */
-	public function find($uri, &$captured = null, $method = Request::METHOD_ANY, $namespace = null)
+	public function find($uri, &$captured = null, $method = Request::METHOD_ANY)
 	{
 		$captured = [];
-
-		if ($namespace)
-		{
-			$namespace = '/' . $namespace . '/';
-		}
 
 		$parsed = (array) parse_url($uri) + [ 'path' => null, 'query' => null ];
 		$path = $parsed['path'];
@@ -255,16 +249,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 		#
 		# Determine if a route matches prerequisites.
 		#
-		$matchable = function($pattern, $via) use($method, $namespace) {
-
-			# namespace
-
-			if ($namespace && strpos($pattern, $namespace) !== 0)
-			{
-				return false;
-			}
-
-			# via
+		$matchable = function($via) use($method) {
 
 			if ($method != Request::METHOD_ANY)
 			{
@@ -294,7 +279,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 				$pattern = $definition[RouteDefinition::PATTERN];
 				$via = $definition[RouteDefinition::VIA];
 
-				if (!$matchable($pattern, $via) || $pattern != $path)
+				if (!$matchable($via) || $pattern != $path)
 				{
 					continue;
 				}
@@ -315,7 +300,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 				$pattern = $definition[RouteDefinition::PATTERN];
 				$via = $definition[RouteDefinition::VIA];
 
-				if (!$matchable($pattern, $via) || !Pattern::from($pattern)->match($path, $captured))
+				if (!$matchable($via) || !Pattern::from($pattern)->match($path, $captured))
 				{
 					continue;
 				}

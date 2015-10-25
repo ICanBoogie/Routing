@@ -272,7 +272,7 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals('articles:delete', $route->id);
 		$this->assertEquals([ 'nid' => 123 ], $captured);
 
-		$route = $routes->find('/articles/123', $captured, Request::METHOD_DELETE, 'articles');
+		$route = $routes->find('/articles/123', $captured, Request::METHOD_DELETE);
 		$this->assertInstanceOf(Route::class, $route);
 		$this->assertEquals('articles:delete', $route->id);
 
