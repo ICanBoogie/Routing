@@ -155,7 +155,7 @@ class Pattern
 	 */
 	static public function is_pattern($pattern)
 	{
-		return (strpos($pattern, '<') !== false) || (strpos($pattern, ':') !== false);
+		return (strpos($pattern, '<') !== false) || (strpos($pattern, ':') !== false) || (strpos($pattern, '*') !== false);
 	}
 
 	static private $instances;

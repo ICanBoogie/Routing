@@ -19,6 +19,7 @@ class PatternTest extends \PHPUnit_Framework_TestCase
 	{
 		$this->assertTrue(Pattern::is_pattern('/<year:\d{4}>'));
 		$this->assertTrue(Pattern::is_pattern('/articles/:slug'));
+		$this->assertTrue(Pattern::is_pattern('/articles/*'));
 		$this->assertFalse(Pattern::is_pattern('/path/to/somewhere.html'));
 	}
 
