@@ -97,7 +97,11 @@ abstract class Controller extends Prototyped
 	 */
 	protected function lazy_get_response()
 	{
-		return new Response;
+		return new Response(null, Status::OK, [
+
+			'Content-Type' => 'text/html; charset=utf-8'
+
+		]);
 	}
 
 	/**
