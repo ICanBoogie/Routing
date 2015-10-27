@@ -56,7 +56,7 @@ class RouteMaker
 		$actions = static::filter_actions($actions, $options);
 		$actions = static::resolve_patterns($name, $actions, $options);
 
-		$options_as = $options['as'];
+		$options_as = $options[self::OPTION_AS];
 		$routes = [];
 
 		foreach ($actions as $action => list($pattern, $via))
@@ -96,7 +96,7 @@ class RouteMaker
 	static public function resource($name, $controller, array $options = [])
 	{
 		$options = static::normalize_options($options);
-		$actions = array_merge(static::get_resource_actions(), $options['actions']);
+		$actions = array_merge(static::get_resource_actions(), $options[self::OPTION_ACTIONS]);
 
 		return static::actions($name, $controller, $actions, $options);
 	}

@@ -253,7 +253,14 @@ class Route
 	public function assign($formatting_value)
 	{
 		$clone = clone $this;
-		$clone->formatting_value = $formatting_value;
+
+		#
+		# We could write directly to `formatting_value`, but since it is marked _read-only_
+		# we resort to shenanigans to keep the IDE happy :)
+		#
+
+		$ref = &$clone->formatting_value;
+		$ref = $formatting_value;
 
 		return $clone;
 	}

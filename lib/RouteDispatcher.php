@@ -16,6 +16,7 @@ use ICanBoogie\HTTP\Dispatcher;
 use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
+use ICanBoogie\HTTP\Status;
 use ICanBoogie\Routing\RouteDispatcher\BeforeDispatchEvent;
 use ICanBoogie\Routing\RouteDispatcher\DispatchEvent;
 use ICanBoogie\Routing\Route\RescueEvent;
@@ -72,7 +73,7 @@ class RouteDispatcher implements Dispatcher
 
 		if ($route->location)
 		{
-			return new RedirectResponse(contextualize($route->location), 302);
+			return new RedirectResponse(contextualize($route->location), Status::FOUND);
 		}
 
 		$this->alter_params($route, $request, $captured);
@@ -199,7 +200,7 @@ class RouteDispatcher implements Dispatcher
 
 		if ($response !== null && !$response instanceof Response)
 		{
-			$response = new Response($response, 200, [
+			$response = new Response($response, Status::OK, [
 
 				'Content-Type' => 'text/html; charset=utf-8'
 

@@ -28,6 +28,8 @@ use ICanBoogie\Routing\Route;
  */
 class RescueEvent extends Event
 {
+	const TYPE = 'rescue';
+
 	/**
 	 * Reference to the exception to throw if the rescue fails.
 	 *
@@ -88,6 +90,6 @@ class RescueEvent extends Event
 		$this->request = $request;
 		$this->response = &$response;
 
-		parent::__construct($target, 'rescue');
+		parent::__construct($target, self::TYPE);
 	}
 }

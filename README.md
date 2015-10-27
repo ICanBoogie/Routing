@@ -25,6 +25,7 @@ as a _domain dispatcher_ by a [RequestDispatcher][] instance.
 <?php
 
 use ICanBoogie\HTTP\Request;
+use ICanBoogie\Routing\RouteDefinition;
 use ICanBoogie\Routing\RouteDispatcher;
 use ICanBoogie\Routing\RouteCollection;
 
@@ -32,10 +33,10 @@ $routes = new RouteCollection([
 
 	'articles:delete' => [
 	
-		'pattern' => '/articles/<id:\d+>',
-		'controller' => ArticlesController::class,
-		'action' => 'delete',
-		'via' => Request::METHOD_DELETE
+		RouteDefinition::PATTERN => '/articles/<id:\d+>',
+		RouteDefinition::CONTROLLER => ArticlesController::class,
+		RouteDefinition::ACTION => 'delete',
+		RouteDefinition::VIA => Request::METHOD_DELETE
 	
 	]
 
@@ -91,18 +92,18 @@ provide a response, or replace the exception that will be thrown if the rescue f
 
 A route definition is an array, which may be created with the following keys:
 
-- `pattern`: The pattern of the URL.
-- `controller`: The controller class and optional action, or a callable.
-- `as`: The identifier of the route.
-- `via`: If the route needs to respond to one or more HTTP methods, e.g.
+- `RouteDefinition::PATTERN`: The pattern of the URL.
+- `RouteDefinition::CONTROLLER`: The controller class and optional action, or a callable.
+- `RouteDefinition::ID`: The identifier of the route.
+- `RouteDefinition::VIA`: If the route needs to respond to one or more HTTP methods, e.g.
 `Request::METHOD_GET` or `[ Request::METHOD_PUT, Request::METHOD_PATCH ]`.
 Defaults: `Request::METHOD_GET`.
-- `location`: To redirect the route to another location.
-- `class`: If the route should be instantiated from a class other than [Route][].
+- `RouteDefinition::LOCATION`: To redirect the route to another location.
+- `RouteDefinition::CONSTRUCTOR`: If the route should be instantiated from a class other than [Route][].
 
-A route definition is considered valid when the `pattern` parameter is defined along one of
-`controller` or `location`. [PatternNotDefined][] is thrown if `pattern` is missing, and
-[ControllerNotDefined][] is thrown if both `controller` and `location` are missing.
+A route definition is considered valid when the `RouteDefinition::PATTERN` parameter is defined along one of
+`RouteDefinition::CONTROLLER` or `RouteDefinition::LOCATION`. [PatternNotDefined][] is thrown if `RouteDefinition::PATTERN` is missing, and
+[ControllerNotDefined][] is thrown if both `RouteDefinition::CONTROLLER` and `RouteDefinition::LOCATION` are missing.
 
 > **Note:** You can add any parameter you want to the route definition, they are used to create
 the route instance, which might be useful to provide additional information to a controller.
@@ -137,6 +138,12 @@ Finally, constraints RegEx are extended with the following:
 - `{:sha1:}`: Matches [SHA-1](https://en.wikipedia.org/wiki/SHA-1) hashes. e.g. `/files/<hash:{:sha1:}>`.
 - `{:uuid:}`: Matches [Universally unique identifiers](https://en.wikipedia.org/wiki/Universally_unique_identifier)
 (UUID). e.g. `/articles/<uuid:{:uuid:}>/edit`.
+
+You can use them in any combination:
+
+- `/blog/:year-:month-:slug`
+- `/blog/<year:\d{4}>-<month:\d{2}>-:slug`
+- `/images/<uuid:{:uuid:}>/<size:\d+x|x\d+|\d+x\d+>*`
 
 
 
@@ -202,14 +209,16 @@ Used as an array, routes can be defined by setting/unsetting the offsets of a [R
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Routing\RouteCollection;
+use ICanBoogie\Routing\RouteDefinition;
 
 $routes = new RouteCollection;
 
 $routes['articles:index'] = [
 
-	'pattern' => '/articles',
-	'controller' => ArticlesController::class . '#index',
-	'via' => Request::METHOD_GET
+	RouteDefinition::PATTERN => '/articles',
+	RouteDefinition::CONTROLLER => ArticlesController::class,
+	RouteDefinition::ACTION => 'index',
+	RouteDefinition::VIA => Request::METHOD_GET
 
 ];
 
@@ -229,13 +238,14 @@ Routes may be defined using HTTP methods, such as `get` or `delete`.
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Routing\RouteCollection;
+use ICanBoogie\Routing\RouteDefinition;
 
 $routes = new RouteCollection;
-$routes->any('/', function(Request $request) { }, [ 'as' => 'home' ]);
-$routes->any('/articles', function(Request $request) { }, [ 'as' => 'articles:index' ]);
-$routes->get('/articles/new', function(Request $request) { }, [ 'as' => 'articles:new' ]);
-$routes->post('/articles', function(Request $request) { }, [ 'as' => 'articles:create' ]);
-$routes->delete('/articles/<nid:\d+>', function(Request $request) { }, [ 'as' => 'articles:delete' ]);
+$routes->any('/', function(Request $request) { }, [ RouteDefinition::ID => 'home' ]);
+$routes->any('/articles', function(Request $request) { }, [ RouteDefinition::ID => 'articles:index' ]);
+$routes->get('/articles/new', function(Request $request) { }, [ RouteDefinition::ID => 'articles:new' ]);
+$routes->post('/articles', function(Request $request) { }, [ RouteDefinition::ID => 'articles:create' ]);
+$routes->delete('/articles/<nid:\d+>', function(Request $request) { }, [ RouteDefinition::ID => 'articles:delete' ]);
 ```
 
 
@@ -329,6 +339,15 @@ echo $url->absolute_url;   // http://icanboogie.org/articles/2014-06-madonna-que
 $url->route === $route;    // true
 ```
 
+You can format a route using a record, or any other object, as well:
+
+```php
+<?php
+
+$record = $app->models['articles']->one;
+$url = $routes['articles:show']->format($record);
+```
+
 
 
 
@@ -346,13 +365,15 @@ value to a route, that can later be used like a URL string:
 <?php
 
 use ICanBoogie\Routing\RouteCollection;
+use ICanBoogie\Routing\RouteDefinition;
 
 $routes = new RouteCollection([
 
 	'article:show' => [
 	
-		'pattern' => '/articles/<year:\d{4}>-<month:\d{2}>.html',
-		'controller' => 'ArticlesController#show'
+		RouteDefinition::PATTERN => '/articles/<year:\d{4}>-<month:\d{2}>.html',
+		RouteDefinition::CONTROLLER => ArticlesController::class,
+		RouteDefinition::ACTION => 'show'
 	
 	]
 
@@ -489,12 +510,14 @@ using the `action` key.
 
 // routes.php
 
+use ICanBoogie\Routing\RouteDefinition;
+
 return [
 
 	'contact' => [
 
-		'pattern' => '/contact',
-		'controller' => AppController::class . '#contact'
+		RouteDefinition::PATTERN => '/contact',
+		RouteDefinition::CONTROLLER => AppController::class . '#contact'
 
 	]
 	
@@ -502,9 +525,9 @@ return [
 	
 	'contact' => [
 
-		'pattern' => '/contact',
-		'controller' => AppController::class,
-		'action' => 'contact'
+		RouteDefinition::PATTERN => '/contact',
+		RouteDefinition::CONTROLLER => AppController::class,
+		RouteDefinition::ACTION => 'contact'
 
 	]
 
@@ -650,43 +673,43 @@ $definitions = Make::resource('articles', ArticlesController::class);
 // only create the _index_ definition
 $definitions = Make::resource('articles', ArticlesController::class, [
 
-	'only' => Make::ACTION_INDEX
+	Make::OPTION_ONLY => Make::ACTION_INDEX
 
 ]);
 
 // only create the _index_ and _show_ definitions
 $definitions = Make::resource('articles', ArticlesController::class, [
 
-	'only' => [ Make::ACTION_INDEX, Make::ACTION_SHOW ]
+	Make::OPTION_ONLY => [ Make::ACTION_INDEX, Make::ACTION_SHOW ]
 
 ]);
 
 // create definitions except _destroy_
 $definitions = Make::resource('articles', ArticlesController::class, [
 
-	'except' => Make::ACTION_DELETE
+	Make::OPTION_EXCEPT => Make::ACTION_DELETE
 
 ]);
 
 // create definitions except _updated_ and _destroy_
 $definitions = Make::resource('articles', PhotosController::class, [
 
-	'except' => [ Make::ACTION_UPDATE, Make::ACTION_DELETE ]
+	Make::OPTION_EXCEPT => [ Make::ACTION_UPDATE, Make::ACTION_DELETE ]
 
 ]);
 
 // specify _key_ property name and its regex constraint
 $definitions = Make::resource('articles', ArticlesController::class, [
 
-	'id_name' => 'uuid',
-	'id_regex' => '{:uuid:}'
+	Make::OPTION_ID_NAME => 'uuid',
+	Make::OPTION_ID_REGEX => '{:uuid:}'
 
 ]);
 
 // specify the identifier of the _create_ definition
 $definitions = Make::resource('articles', ArticlesController::class, [
 
-	'as' => [ Make::ACTION_CREATE => 'articles:build' ]
+	Make::OPTION_ID => [ Make::ACTION_CREATE => 'articles:build' ]
 
 ]);
 ```
@@ -748,22 +771,22 @@ The following helpers are available:
 
 Helpers can be patched using the `Helpers::patch()` method.
 
-The following code demonstrates how routes can _start_ with the custom path "my/application":
+The following code demonstrates how routes can _start_ with the custom path "/my/application":
 
 ```php
 <?php
 
 use ICanBoogie\Routing;
 
-$path = "my/application";
+$path = "/my/application";
 
-Routing\Helpers::patch('contextualize', function ($str) use($path) {
+Routing\Helpers::patch('contextualize', function($str) use($path) {
 
 	return $path . $str;
 
 });
 
-Routing\Helpers::patch('decontextualize', function ($str) use($path) {
+Routing\Helpers::patch('decontextualize', function($str) use($path) {
 
 	if (strpos($str, $path . '/') === 0)
 	{

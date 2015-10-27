@@ -21,6 +21,8 @@ use ICanBoogie\Routing\Controller;
  */
 class ActionEvent extends Event
 {
+	const TYPE = 'action';
+
 	/**
 	 * Reference to the result.
 	 *
@@ -38,6 +40,6 @@ class ActionEvent extends Event
 	{
 		$this->result = &$result;
 
-		parent::__construct($target, 'action');
+		parent::__construct($target, self::TYPE);
 	}
 }

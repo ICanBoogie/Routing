@@ -65,9 +65,9 @@ class RouteDefinition
 		{
 			$controller = $definition[self::CONTROLLER];
 
-			if (is_string($controller) && strpos($controller, '#'))
+			if (is_string($controller) && strpos($controller, RouteMaker::CONTROLLER_ACTION_SEPARATOR))
 			{
-				list($controller, $action) = explode('#', $controller);
+				list($controller, $action) = explode(RouteMaker::CONTROLLER_ACTION_SEPARATOR, $controller);
 
 				$definition[self::CONTROLLER] = $controller;
 				$definition[self::ACTION] = $action;
@@ -119,7 +119,7 @@ class RouteDefinition
 	 */
 	static public function assert_is_valid(array $definition)
 	{
-		if (empty($definition['pattern']))
+		if (empty($definition[self::PATTERN]))
 		{
 			throw new PatternNotDefined(\ICanBoogie\format("Pattern is not defined: !route", [
 
@@ -128,7 +128,7 @@ class RouteDefinition
 			]));
 		}
 
-		if (empty($definition['controller']) && empty($definition['location']))
+		if (empty($definition[self::CONTROLLER]) && empty($definition[self::LOCATION]))
 		{
 			throw new ControllerNotDefined(\ICanBoogie\format("Controller is not defined: !route", [
 

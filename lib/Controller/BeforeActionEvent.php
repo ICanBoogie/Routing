@@ -22,6 +22,8 @@ use ICanBoogie\Routing\Controller;
  */
 class BeforeActionEvent extends Event
 {
+	const TYPE = 'action:before';
+
 	/**
 	 * Reference to the result.
 	 *
@@ -39,6 +41,6 @@ class BeforeActionEvent extends Event
 	{
 		$this->result = &$result;
 
-		parent::__construct($target, 'action:before');
+		parent::__construct($target, self::TYPE);
 	}
 }

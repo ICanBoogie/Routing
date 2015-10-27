@@ -30,6 +30,8 @@ use ICanBoogie\Routing\Route;
  */
 class BeforeDispatchEvent extends Event
 {
+	const TYPE = 'dispatch:before';
+
 	/**
 	 * The route.
 	 *
@@ -85,6 +87,6 @@ class BeforeDispatchEvent extends Event
 		$this->request = $request;
 		$this->set_response($response);
 
-		parent::__construct($target, 'dispatch:before');
+		parent::__construct($target, self::TYPE);
 	}
 }

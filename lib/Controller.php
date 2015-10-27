@@ -14,6 +14,7 @@ namespace ICanBoogie\Routing;
 use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
+use ICanBoogie\HTTP\Status;
 use ICanBoogie\Prototyped;
 use ICanBoogie\Routing\Controller\BeforeActionEvent;
 use ICanBoogie\Routing\Controller\ActionEvent;
@@ -158,12 +159,12 @@ abstract class Controller extends Prototyped
 	 * Redirects the request.
 	 *
 	 * @param Route|string $url The URL to redirect the request to.
-	 * @param int $status Status code (defaults to 302).
+	 * @param int $status Status code (defaults to {@link Status::FOUND}, 302).
 	 * @param array $headers Additional headers.
 	 *
 	 * @return RedirectResponse
 	 */
-	public function redirect($url, $status = 302, array $headers = [])
+	public function redirect($url, $status = Status::FOUND, array $headers = [])
 	{
 		if ($url instanceof Route)
 		{

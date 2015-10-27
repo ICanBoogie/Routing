@@ -36,9 +36,11 @@ function decontextualize($pathname)
 }
 
 /**
- * Absolutize a RUL.
+ * Absolutize a URL.
  *
  * @param string $url
+ *
+ * @return string
  */
 function absolutize_url($url)
 {
