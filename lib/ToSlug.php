@@ -19,7 +19,7 @@ namespace ICanBoogie\Routing;
 interface ToSlug
 {
 	/**
-	 * Return a slug representation of the instance.
+	 * Returns a slug representation of the instance.
 	 *
 	 * @return string
 	 */

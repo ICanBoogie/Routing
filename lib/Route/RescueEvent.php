@@ -37,11 +37,19 @@ class RescueEvent extends Event
 	 */
 	private $exception;
 
+	/**
+	 * @return \Exception
+	 */
 	protected function get_exception()
 	{
 		return $this->exception;
 	}
 
+	/**
+	 * @param \Exception $exception
+	 *
+	 * @return \Exception
+	 */
 	protected function set_exception(\Exception $exception)
 	{
 		return $this->exception = $exception;
@@ -54,6 +62,9 @@ class RescueEvent extends Event
 	 */
 	private $request;
 
+	/**
+	 * @return Request
+	 */
 	protected function get_request()
 	{
 		return $this->request;
@@ -66,25 +77,31 @@ class RescueEvent extends Event
 	 */
 	private $response;
 
+	/**
+	 * @return Response|null
+	 */
 	protected function get_response()
 	{
 		return $this->response;
 	}
 
+	/**
+	 * @param Response|null $response
+	 */
 	protected function set_response(Response $response = null)
 	{
 		$this->response = $response;
 	}
 
 	/**
-	 * The event is constructed with the type `rescue`.
+	 * The event is constructed with the type {@link self::TYPE}.
 	 *
 	 * @param Route $target
 	 * @param \Exception $exception Reference to the exception thrown while dispatching the route.
 	 * @param Request $request
 	 * @param Response|null $response
 	 */
-	public function __construct(Route $target, \Exception &$exception, Request $request, &$response)
+	public function __construct(Route $target, \Exception &$exception, Request $request, Response &$response = null)
 	{
 		$this->exception = &$exception;
 		$this->request = $request;

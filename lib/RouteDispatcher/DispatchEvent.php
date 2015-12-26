@@ -66,7 +66,7 @@ class DispatchEvent extends Event
 		return $this->response;
 	}
 
-	protected function set_response(Response &$response = null)
+	protected function set_response(Response $response = null)
 	{
 		$this->response = $response;
 	}
@@ -79,11 +79,11 @@ class DispatchEvent extends Event
 	 * @param Request $request
 	 * @param Response|null $response
 	 */
-	public function __construct(RouteDispatcher $target, Route $route, Request $request, &$response)
+	public function __construct(RouteDispatcher $target, Route $route, Request $request, Response &$response = null)
 	{
 		$this->route = $route;
 		$this->request = $request;
-		$this->set_response($response);
+		$this->response = &$response;
 
 		parent::__construct($target, self::TYPE);
 	}

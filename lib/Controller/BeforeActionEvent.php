@@ -32,7 +32,7 @@ class BeforeActionEvent extends Event
 	public $result;
 
 	/**
-	 * The event is constructed with the type `action:before`.
+	 * The event is constructed with the type {@link self::TYPE}.
 	 *
 	 * @param Controller $target
 	 * @param string $result

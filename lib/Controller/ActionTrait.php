@@ -12,6 +12,7 @@
 namespace ICanBoogie\Routing\Controller;
 
 use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\ActionNotDefined;
 use ICanBoogie\Routing\Route;
 
@@ -40,7 +41,7 @@ trait ActionTrait
      *
      * @param Request $request
      *
-     * @return \ICanBoogie\HTTP\Response|mixed
+     * @return Response|mixed
      */
     protected function action(Request $request)
     {
@@ -113,6 +114,6 @@ trait ActionTrait
      */
     protected function resolve_action_args($action, Request $request)
     {
-        return $request->path_params;
+        return array_values($request->path_params);
     }
 }

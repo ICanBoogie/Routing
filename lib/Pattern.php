@@ -136,11 +136,27 @@ class Pattern
 		return [ $interleaved, $params, $regex ];
 	}
 
-	static protected function read_value_from_array($container, $key)
+	/**
+	 * Reads an offset from an array.
+	 *
+	 * @param array $container
+	 * @param string $key
+	 *
+	 * @return mixed
+	 */
+	static protected function read_value_from_array(array $container, $key)
 	{
 		return $container[$key];
 	}
 
+	/**
+	 * Reads a property from an object.
+	 *
+	 * @param object $container
+	 * @param string $key
+	 *
+	 * @return mixed
+	 */
 	static protected function read_value_from_object($container, $key)
 	{
 		return $container->$key;

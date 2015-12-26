@@ -1,7 +1,7 @@
 # customization
 
-PACKAGE_NAME = ICanBoogie/Routing
-PACKAGE_VERSION = 2.4.0
+PACKAGE_NAME = icanboogie/routing
+PACKAGE_VERSION = 3.0.0
 
 # do not edit the following lines
 

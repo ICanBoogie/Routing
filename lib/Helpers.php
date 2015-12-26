@@ -20,7 +20,7 @@ namespace ICanBoogie\Routing;
  */
 class Helpers
 {
-	static private $jumptable = [
+	static private $mapping = [
 
 		'contextualize'   => [ __CLASS__, 'default_contextualize' ],
 		'decontextualize' => [ __CLASS__, 'default_decontextualize' ],
@@ -38,7 +38,7 @@ class Helpers
 	 */
 	static public function __callStatic($name, array $arguments)
 	{
-		return call_user_func_array(self::$jumptable[$name], $arguments);
+		return call_user_func_array(self::$mapping[$name], $arguments);
 	}
 
 	/**
@@ -52,12 +52,12 @@ class Helpers
 	// @codeCoverageIgnoreStart
 	static public function patch($name, $callback)
 	{
-		if (empty(self::$jumptable[$name]))
+		if (empty(self::$mapping[$name]))
 		{
 			throw new \RuntimeException("Undefined patchable: $name.");
 		}
 
-		self::$jumptable[$name] = $callback;
+		self::$mapping[$name] = $callback;
 	}
 	// @codeCoverageIgnoreEnd
 

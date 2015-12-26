@@ -23,6 +23,9 @@ class RouteNotDefined extends \Exception implements Exception
 {
 	use AccessorTrait;
 
+	/**
+	 * @var string
+	 */
 	private $id;
 
 	protected function get_id()
@@ -39,6 +42,18 @@ class RouteNotDefined extends \Exception implements Exception
 	{
 		$this->id = $id;
 
-		parent::__construct("The route <q>$id</q> is not defined.", $code, $previous);
+		parent::__construct($this->format_message($id), $code, $previous);
+	}
+
+	/**
+	 * Formats exception message.
+	 *
+	 * @param string $id
+	 *
+	 * @return string
+	 */
+	protected function format_message($id)
+	{
+		return "The route `$id` is not defined.";
 	}
 }

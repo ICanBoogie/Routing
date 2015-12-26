@@ -39,6 +39,9 @@ class BeforeDispatchEvent extends Event
 	 */
 	private $route;
 
+	/**
+	 * @return Route
+	 */
 	protected function get_route()
 	{
 		return $this->route;
@@ -51,6 +54,9 @@ class BeforeDispatchEvent extends Event
 	 */
 	private $request;
 
+	/**
+	 * @return Request
+	 */
 	protected function get_request()
 	{
 		return $this->request;
@@ -59,33 +65,39 @@ class BeforeDispatchEvent extends Event
 	/**
 	 * Reference to the HTTP response.
 	 *
-	 * @var Response
+	 * @var Response|null
 	 */
 	private $response;
 
+	/**
+	 * @return Response|null
+	 */
 	protected function get_response()
 	{
 		return $this->response;
 	}
 
+	/**
+	 * @param Response|null $response
+	 */
 	protected function set_response(Response &$response = null)
 	{
 		$this->response = $response;
 	}
 
 	/**
-	 * The event is constructed with the type `dispatch:before`.
+	 * The event is constructed with the type {@link self::TYPE}.
 	 *
 	 * @param RouteDispatcher $target
 	 * @param Route $route
 	 * @param Request $request
-	 * @param mixed $response
+	 * @param Response|null $response
 	 */
-	public function __construct(RouteDispatcher $target, Route $route, Request $request, &$response)
+	public function __construct(RouteDispatcher $target, Route $route, Request $request, Response &$response = null)
 	{
 		$this->route = $route;
 		$this->request = $request;
-		$this->set_response($response);
+		$this->response = &$response;
 
 		parent::__construct($target, self::TYPE);
 	}
