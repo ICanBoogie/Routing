@@ -18,7 +18,7 @@ hooks to alter the request, the route, the controller, or the response.
 
 ## Dispatching a request
 
-Routes are dispatcher by a [RouteDispatcher][] instance, which can be used on its own or
+Routes are dispatched by a [RouteDispatcher][] instance, which may be used on its own or
 as a _domain dispatcher_ by a [RequestDispatcher][] instance.
 
 ```php
@@ -44,8 +44,8 @@ $routes = new RouteCollection([
 
 $request = Request::from([
 
-	'url' => "/articles/123",
-	'is_delete' => true
+	Request::OPTION_URL => "/articles/123",
+	Request::OPTION_IS_DELETE => true
 
 ]);
 
@@ -78,7 +78,7 @@ alter the response.
 
 
 
-### Rescuing an exception
+### Rescuing a route
 
 If an exception is raised during dispatching, the `ICanBoogie\Routing\Route::rescue` event
 of class [Route\RescueEvent][] is fired. Event hooks may use this event to rescue the route and
