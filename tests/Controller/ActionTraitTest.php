@@ -19,13 +19,13 @@ use ICanBoogie\Routing\Controller\ActionTraitTest\ActionController;
 use ICanBoogie\Routing\RouteDispatcher;
 use ICanBoogie\Routing\RouteCollection;
 
-class ActionTraitTest extends \PHPUnit_Framework_TestCase
+class ActionTraitTest extends \PHPUnit\Framework\TestCase
 {
 	public function setUp()
 	{
 		$events = new EventCollection;
 
-		EventCollectionProvider::using(function() use ($events) {
+		EventCollectionProvider::define(function() use ($events) {
 
 			return $events;
 

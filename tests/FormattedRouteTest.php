@@ -11,7 +11,7 @@
 
 namespace ICanBoogie\Routing;
 
-class FormattedRouteTest extends \PHPUnit_Framework_TestCase
+class FormattedRouteTest extends \PHPUnit\Framework\TestCase
 {
 	public function test_get_url()
 	{

@@ -1,10 +1,9 @@
 # Routing
 
 [![Release](https://img.shields.io/packagist/v/icanboogie/routing.svg)](https://packagist.org/packages/icanboogie/routing)
-[![Build Status](https://img.shields.io/travis/ICanBoogie/Routing/master.svg)](http://travis-ci.org/ICanBoogie/Routing)
-[![HHVM](https://img.shields.io/hhvm/icanboogie/routing.svg)](http://hhvm.h4cc.de/package/icanboogie/routing)
-[![Code Quality](https://img.shields.io/scrutinizer/g/ICanBoogie/Routing/master.svg)](https://scrutinizer-ci.com/g/ICanBoogie/Routing)
-[![Code Coverage](https://img.shields.io/coveralls/ICanBoogie/Routing/master.svg)](https://coveralls.io/r/ICanBoogie/Routing)
+[![Build Status](https://img.shields.io/travis/ICanBoogie/Routing.svg)](http://travis-ci.org/ICanBoogie/Routing)
+[![Code Quality](https://img.shields.io/scrutinizer/g/ICanBoogie/Routing.svg)](https://scrutinizer-ci.com/g/ICanBoogie/Routing)
+[![Code Coverage](https://img.shields.io/coveralls/ICanBoogie/Routing.svg)](https://coveralls.io/r/ICanBoogie/Routing)
 [![Packagist](https://img.shields.io/packagist/dt/icanboogie/routing.svg)](https://packagist.org/packages/icanboogie/routing)
 
 The **icanboogie/routing** package handles URL rewriting in native PHP. A request is mapped
@@ -32,7 +31,7 @@ use ICanBoogie\Routing\RouteCollection;
 $routes = new RouteCollection([
 
 	'articles:delete' => [
-	
+
 		RouteDefinition::PATTERN => '/articles/<id:\d+>',
 		RouteDefinition::CONTROLLER => ArticlesController::class,
 		RouteDefinition::ACTION => 'delete',
@@ -44,7 +43,7 @@ $routes = new RouteCollection([
 
 $request = Request::from([
 
-	Request::OPTION_URL => "/articles/123",
+	Request::OPTION_URI => "/articles/123",
 	Request::OPTION_IS_DELETE => true
 
 ]);
@@ -99,11 +98,13 @@ A route definition is an array, which may be created with the following keys:
 `Request::METHOD_GET` or `[ Request::METHOD_PUT, Request::METHOD_PATCH ]`.
 Defaults: `Request::METHOD_GET`.
 - `RouteDefinition::LOCATION`: To redirect the route to another location.
-- `RouteDefinition::CONSTRUCTOR`: If the route should be instantiated from a class other than [Route][].
+- `RouteDefinition::CONSTRUCTOR`: If the route should be instantiated from a class other than
+[Route][].
 
-A route definition is considered valid when the `RouteDefinition::PATTERN` parameter is defined along one of
-`RouteDefinition::CONTROLLER` or `RouteDefinition::LOCATION`. [PatternNotDefined][] is thrown if `RouteDefinition::PATTERN` is missing, and
-[ControllerNotDefined][] is thrown if both `RouteDefinition::CONTROLLER` and `RouteDefinition::LOCATION` are missing.
+A route definition is considered valid when the `RouteDefinition::PATTERN` parameter is defined
+along one of `RouteDefinition::CONTROLLER` or `RouteDefinition::LOCATION`. [PatternNotDefined][] is
+thrown if `RouteDefinition::PATTERN` is missing, and [ControllerNotDefined][] is thrown if both
+`RouteDefinition::CONTROLLER` and `RouteDefinition::LOCATION` are missing.
 
 > **Note:** You can add any parameter you want to the route definition, they are used to create
 the route instance, which might be useful to provide additional information to a controller.
@@ -120,7 +121,7 @@ single route and extract its parameters. Three types of placeholder are availabl
 
 - Relaxed placeholder: Only the name of the parameter is specified, it matches anything until
 the following part. e.g. `/articles/:id/edit` where `:id` is the placeholder for
-the `id` parameter.
+the `RouteDefinition::ID` parameter.
  
 - Constrained placeholder: A regular expression is used to match the parameter value.
 e.g. `/articles/<id:\d+>/edit` where `<id:\d+>` is the placeholder for the `id` parameter
@@ -269,6 +270,8 @@ class AdminIndexRouteFilter
 	/**
 	 * @param array $definition A route definition.
 	 * @param string $id A route identifier.
+	 * 
+	 * @return bool
 	 */
 	public function __invoke(array $definition, $id)
 	{
@@ -334,7 +337,7 @@ echo $route->pattern;      // /articles/:year-:month-:slug.html
 $url = $route->format([ 'year' => '2014', 'month' => '06', 'slug' => 'madonna-queen-of-pop' ]);
 echo $url;                 // /articles/2014-06-madonna-queen-of-pop.html
 echo get_class($url);      // ICanBoogie\Routing\FormattedRoute
-echo $url->absolute_url;   // http://icanboogie.org/articles/2014-06-madonna-queen-of-pop.html
+echo $url->absolute_url;   // https://icanboogie.org/articles/2014-06-madonna-queen-of-pop.html
 
 $url->route === $route;    // true
 ```
@@ -370,11 +373,11 @@ use ICanBoogie\Routing\RouteDefinition;
 $routes = new RouteCollection([
 
 	'article:show' => [
-	
+
 		RouteDefinition::PATTERN => '/articles/<year:\d{4}>-<month:\d{2}>.html',
 		RouteDefinition::CONTROLLER => ArticlesController::class,
 		RouteDefinition::ACTION => 'show'
-	
+
 	]
 
 ]);
@@ -388,7 +391,7 @@ $route->has_formatting_value;                          // true
 echo $route;
 // /articles/2015-02.html
 echo $route->absolute_url;
-// http://icanboogie.org/articles/2015-02.html
+// https://icanboogie.org/articles/2015-02.html
 echo $route->format([ 'year' => 2016, 'month' => 10 ]);
 // /articles/2016-10.html
 ```
@@ -519,7 +522,7 @@ return [
 		RouteDefinition::PATTERN => '/contact',
 		RouteDefinition::CONTROLLER => AppController::class . '#contact'
 
-	]
+	],
 	
 	# or
 	
@@ -709,7 +712,11 @@ $definitions = Make::resource('articles', ArticlesController::class, [
 // specify the identifier of the _create_ definition
 $definitions = Make::resource('articles', ArticlesController::class, [
 
-	Make::OPTION_ID => [ Make::ACTION_CREATE => 'articles:build' ]
+	Make::OPTION_AS => [ 
+
+		Make::ACTION_CREATE => 'articles:build' 
+
+	]
 
 ]);
 ```
@@ -759,9 +766,9 @@ by a controller using [ActionTrait][] has an empty `action` property.
 
 The following helpers are available:
 
-- [contextualize](http://api.icanboogie.org/routing/latest/function-ICanBoogie.Routing.contextualize.html): Contextualize a pathname.
-- [decontextualize](http://api.icanboogie.org/routing/latest/function-ICanBoogie.Routing.decontextualize.html): Decontextualize a pathname.
-- [absolutize_url](http://api.icanboogie.org/routing/latest/function-ICanBoogie.Routing.absolutize_url.html): Absolutize an URL.
+- [contextualize](https://icanboogie.org/api/routing/master/function-ICanBoogie.Routing.contextualize.html): Contextualize a pathname.
+- [decontextualize](https://icanboogie.org/api/routing/master/function-ICanBoogie.Routing.decontextualize.html): Decontextualize a pathname.
+- [absolutize_url](https://icanboogie.org/api/routing/master/function-ICanBoogie.Routing.absolutize_url.html): Absolutize an URL.
 
 
 
@@ -810,7 +817,7 @@ Routing\Helpers::patch('decontextualize', function($str) use($path) {
 
 ## Requirements
 
-The package requires PHP 5.5 or later.
+The package requires PHP 5.6 or later.
 
 
 
@@ -857,8 +864,8 @@ The test suite is ran with the `make test` command. [PHPUnit](https://phpunit.de
 
 The package is continuously tested by [Travis CI](http://about.travis-ci.org/).
 
-[![Build Status](https://img.shields.io/travis/ICanBoogie/Routing/master.svg)](http://travis-ci.org/ICanBoogie/Routing)
-[![Code Coverage](https://img.shields.io/coveralls/ICanBoogie/Routing/master.svg)](https://coveralls.io/r/ICanBoogie/Routing)
+[![Build Status](https://img.shields.io/travis/ICanBoogie/Routing.svg)](http://travis-ci.org/ICanBoogie/Routing)
+[![Code Coverage](https://img.shields.io/coveralls/ICanBoogie/Routing.svg)](https://coveralls.io/r/ICanBoogie/Routing)
 
 
 
@@ -872,30 +879,31 @@ The package is continuously tested by [Travis CI](http://about.travis-ci.org/).
 
 
 
-[ControllerBindings]:                  http://api.icanboogie.org/bind-routing/0.2/class-ICanBoogie.Binding.Routing.ControllerBindings.html
-[Response]:                            http://api.icanboogie.org/http/2.5/class-ICanBoogie.HTTP.Response.html
-[Request]:                             http://api.icanboogie.org/http/2.5/class-ICanBoogie.HTTP.Request.html
-[RequestDispatcher]:                   http://api.icanboogie.org/http/2.5/class-ICanBoogie.HTTP.RequestDispatcher.html
-[documentation]:                       http://api.icanboogie.org/routing/3.0/
-[ActionNotDefined]:                    http://api.icanboogie.org/routing/3.0/class-ICanBoogie.Routing.ActionNotDefined.html
-[ActionTrait]:                         http://api.icanboogie.org/routing/3.0/class-ICanBoogie.Routing.Controller.ActionTrait.html
-[Controller]:                          http://api.icanboogie.org/routing/3.0/class-ICanBoogie.Routing.Controller.html
-[Controller\BeforeActionEvent]:        http://api.icanboogie.org/routing/3.0/class-ICanBoogie.Routing.Controller.BeforeActionEvent.html
-[Controller\ActionEvent]:              http://api.icanboogie.org/routing/3.0/class-ICanBoogie.Routing.Controller.ActionEvent.html
-[ControllerNotDefined]:                http://api.icanboogie.org/routing/3.0/class-ICanBoogie.Routing.ControllerNotDefined.html
-[FormattedRoute]:                      http://api.icanboogie.org/routing/3.0/class-ICanBoogie.Routing.FormattedRoute.html
-[Pattern]:                             http://api.icanboogie.org/routing/3.0/class-ICanBoogie.Routing.Pattern.html
-[PatternNotDefined]:                   http://api.icanboogie.org/routing/3.0/class-ICanBoogie.Routing.PatternNotDefined.html
-[ResourceTrait]:                       http://api.icanboogie.org/routing/3.0/class-ICanBoogie.Routing.Controller.ResourceTrait.html
-[Route]:                               http://api.icanboogie.org/routing/3.0/class-ICanBoogie.Routing.Route.html
-[Route\RescueEvent]:                   http://api.icanboogie.org/routing/3.0/class-ICanBoogie.Routing.Route.RescueEvent.html
-[RouteCollection]:                     http://api.icanboogie.org/routing/3.0/class-ICanBoogie.Routing.RouteCollection.html
-[RouteDispatcher]:                     http://api.icanboogie.org/routing/3.0/class-ICanBoogie.Routing.RouteDispatcher.html
-[RouteDispatcher\BeforeDispatchEvent]: http://api.icanboogie.org/routing/3.0/class-ICanBoogie.Routing.RouteDispatcher.BeforeDispatchEvent.html
-[RouteDispatcher\DispatchEvent]:       http://api.icanboogie.org/routing/3.0/class-ICanBoogie.Routing.RouteDispatcher.DispatchEvent.html
-[RouteMaker]:                          http://api.icanboogie.org/routing/3.0/class-ICanBoogie.Routing.RouteMaker.html
-[RouteNotDefined]:                     http://api.icanboogie.org/routing/3.0/class-ICanBoogie.Routing.RouteNotDefined.html
+[ControllerBindings]:                  https://icanboogie.org/api/bind-routing/0.2/class-ICanBoogie.Binding.Routing.ControllerBindings.html
+[Response]:                            https://icanboogie.org/api/http/3.0/class-ICanBoogie.HTTP.Response.html
+[Request]:                             https://icanboogie.org/api/http/3.0/class-ICanBoogie.HTTP.Request.html
+[RequestDispatcher]:                   https://icanboogie.org/api/http/3.0/class-ICanBoogie.HTTP.RequestDispatcher.html
+[documentation]:                       https://icanboogie.org/api/routing/4.0/
+[ActionNotDefined]:                    https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.ActionNotDefined.html
+[ActionTrait]:                         https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.Controller.ActionTrait.html
+[Controller]:                          https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.Controller.html
+[Controller\BeforeActionEvent]:        https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.Controller.BeforeActionEvent.html
+[Controller\ActionEvent]:              https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.Controller.ActionEvent.html
+[ControllerNotDefined]:                https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.ControllerNotDefined.html
+[FormattedRoute]:                      https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.FormattedRoute.html
+[Pattern]:                             https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.Pattern.html
+[PatternNotDefined]:                   https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.PatternNotDefined.html
+[ResourceTrait]:                       https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.Controller.ResourceTrait.html
+[Route]:                               https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.Route.html
+[Route\RescueEvent]:                   https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.Route.RescueEvent.html
+[RouteCollection]:                     https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.RouteCollection.html
+[RouteDispatcher]:                     https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.RouteDispatcher.html
+[RouteDispatcher\BeforeDispatchEvent]: https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.RouteDispatcher.BeforeDispatchEvent.html
+[RouteDispatcher\DispatchEvent]:       https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.RouteDispatcher.DispatchEvent.html
+[RouteMaker]:                          https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.RouteMaker.html
+[RouteNotDefined]:                     https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.RouteNotDefined.html
 [ICanBoogie]:                          https://github.com/ICanBoogie/ICanBoogie
 [icanboogie/bind-routing]:             https://github.com/ICanBoogie/bind-routing
+[icanboogie/service]:                  https://github.com/ICanBoogie/service
 [icanboogie/view]:                     https://github.com/ICanBoogie/View
 [RESTful]:                             https://en.wikipedia.org/wiki/Representational_state_transfer

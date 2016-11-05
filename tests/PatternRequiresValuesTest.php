@@ -11,7 +11,7 @@
 
 namespace ICanBoogie\Routing;
 
-class PatternRequiresValuesTest extends \PHPUnit_Framework_TestCase
+class PatternRequiresValuesTest extends \PHPUnit\Framework\TestCase
 {
 	public function test_instance()
 	{

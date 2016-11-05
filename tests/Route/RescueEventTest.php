@@ -15,7 +15,7 @@ use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Route;
 
-class RescueEventTest extends \PHPUnit_Framework_TestCase
+class RescueEventTest extends \PHPUnit\Framework\TestCase
 {
 	public function test_instance()
 	{

@@ -14,7 +14,7 @@ namespace ICanBoogie\Routing;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 
-class RouteCollectionTest extends \PHPUnit_Framework_TestCase
+class RouteCollectionTest extends \PHPUnit\Framework\TestCase
 {
 	public function test_anonymous_routes()
 	{

@@ -11,7 +11,7 @@
 
 namespace ICanBoogie\Routing;
 
-class RouteDispatcherTest extends \PHPUnit_Framework_TestCase
+class RouteDispatcherTest extends \PHPUnit\Framework\TestCase
 {
 	public function test_get_routes()
 	{

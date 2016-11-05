@@ -13,6 +13,8 @@ namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\Request;
 
+use function ICanBoogie\format;
+
 /**
  * The class defines options that can be used to define a route as well as means to normalize and
  * validate this definition.
@@ -121,7 +123,7 @@ class RouteDefinition
 	{
 		if (empty($definition[self::PATTERN]))
 		{
-			throw new PatternNotDefined(\ICanBoogie\format("Pattern is not defined: !route", [
+			throw new PatternNotDefined(format("Pattern is not defined: !route", [
 
 				'route' => $definition
 
@@ -130,7 +132,7 @@ class RouteDefinition
 
 		if (empty($definition[self::CONTROLLER]) && empty($definition[self::LOCATION]))
 		{
-			throw new ControllerNotDefined(\ICanBoogie\format("Controller is not defined: !route", [
+			throw new ControllerNotDefined(format("Controller is not defined: !route", [
 
 				'route' => $definition
 

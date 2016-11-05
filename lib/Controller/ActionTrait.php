@@ -71,7 +71,7 @@ trait ActionTrait
 
         return function() use ($method, $args) {
 
-            return call_user_func_array([ $this, $method ], $args);
+            return $this->$method(...$args);
 
         };
     }

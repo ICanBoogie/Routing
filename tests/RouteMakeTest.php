@@ -13,7 +13,7 @@ namespace ICanBoogie\Routing;
 
 use ICanBoogie\Routing\RouteMaker as Make;
 
-class RouteMakeTest extends \PHPUnit_Framework_TestCase
+class RouteMakeTest extends \PHPUnit\Framework\TestCase
 {
 	public function test_resource_only_one()
 	{

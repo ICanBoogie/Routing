@@ -13,7 +13,7 @@ namespace ICanBoogie\Routing;
 
 use ICanBoogie\Routing\PatternTest\WithToSlug;
 
-class PatternTest extends \PHPUnit_Framework_TestCase
+class PatternTest extends \PHPUnit\Framework\TestCase
 {
 	public function test_is_pattern()
 	{

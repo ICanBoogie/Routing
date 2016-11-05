@@ -16,7 +16,7 @@ use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\RouteDispatcher;
 use ICanBoogie\Routing\Route;
 
-class BeforeDispatchEventTest extends \PHPUnit_Framework_TestCase
+class BeforeDispatchEventTest extends \PHPUnit\Framework\TestCase
 {
 	private $dispatcher;
 	private $route;

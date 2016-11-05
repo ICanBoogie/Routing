@@ -11,7 +11,7 @@
 
 namespace ICanBoogie\Routing;
 
-class RouteNotDefinedTest extends \PHPUnit_Framework_TestCase
+class RouteNotDefinedTest extends \PHPUnit\Framework\TestCase
 {
 	public function test_instance()
 	{

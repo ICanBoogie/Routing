@@ -14,6 +14,8 @@ namespace ICanBoogie\Routing;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Prototype\MethodNotDefined;
 
+use function ICanBoogie\stable_sort;
+
 /**
  * A route collection.
  *
@@ -85,7 +87,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	{
 		$method = strtoupper($method);
 
-		if ($method !== Request::METHOD_ANY && !in_array($method, Request::$methods))
+		if ($method !== Request::METHOD_ANY && !in_array($method, Request::METHODS))
 		{
 			throw new MethodNotDefined($method, $this);
 		}
@@ -394,7 +396,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 			}
 		}
 
-		\ICanBoogie\stable_sort($dynamic, function($v, $k) use($weights) {
+		stable_sort($dynamic, function($v, $k) use($weights) {
 
 			return -$weights[$k];
 

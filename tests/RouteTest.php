@@ -14,7 +14,7 @@ namespace ICanBoogie\Routing;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\HTTP\Request;
 
-class RouteTest extends \PHPUnit_Framework_TestCase
+class RouteTest extends \PHPUnit\Framework\TestCase
 {
 	private $routes;
 

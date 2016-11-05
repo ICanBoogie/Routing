@@ -196,7 +196,7 @@ class RouteDispatcher implements Dispatcher
 
 		$this->alter_context($request->context, $route, $controller);
 
-		$response = call_user_func_array($controller, $controller_args);
+		$response = $controller(...$controller_args);
 
 		if ($response !== null && !$response instanceof Response)
 		{

@@ -18,13 +18,15 @@ use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\ControllerTest\MySampleController;
 
-class ControllerTest extends \PHPUnit_Framework_TestCase
+class ControllerTest extends \PHPUnit\Framework\TestCase
 {
+	private $events;
+
 	public function setUp()
 	{
 		$this->events = $events = new EventCollection;
 
-		EventCollectionProvider::using(function() use ($events) {
+		EventCollectionProvider::define(function() use ($events) {
 
 			return $events;
 

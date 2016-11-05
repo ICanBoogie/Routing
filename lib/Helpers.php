@@ -38,7 +38,9 @@ class Helpers
 	 */
 	static public function __callStatic($name, array $arguments)
 	{
-		return call_user_func_array(self::$mapping[$name], $arguments);
+		$method = self::$mapping[$name];
+
+		return $method(...$arguments);
 	}
 
 	/**

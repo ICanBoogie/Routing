@@ -19,6 +19,8 @@ use ICanBoogie\Prototyped;
 use ICanBoogie\Routing\Controller\BeforeActionEvent;
 use ICanBoogie\Routing\Controller\ActionEvent;
 
+use function ICanBoogie\underscore;
+
 /**
  * A route controller.
  *
@@ -65,7 +67,7 @@ abstract class Controller extends Prototyped
 
 		if (preg_match('/(\w+)Controller$/', $controller_class, $matches))
 		{
-			return \ICanBoogie\underscore($matches[1]);
+			return underscore($matches[1]);
 		}
 
 		return null;
