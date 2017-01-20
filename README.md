@@ -727,6 +727,30 @@ $definitions = Make::resource('articles', ArticlesController::class, [
 
 
 
+### Closure based routes
+
+A simple closure can be used to handle to a route. A [Controller][] instance is created to wrap and
+bound the closure, thus you can write your closure like you would a regular controller action
+method.
+
+```php
+<?php
+
+/* @var $routes \ICanBoogie\Routing\RouteCollection */
+
+$routes->get('/hello/:name', function ($name) {
+
+	/* @var $this \ICanBoogie\Routing\Controller */
+
+	return "$name === {$this->request['name']}";
+
+});
+```
+
+
+
+
+
 ## Exceptions
 
 The exceptions defined by the package implement the `ICanBoogie\Routing\Exception` interface,

@@ -181,18 +181,8 @@ class RouteDispatcher implements Dispatcher
 	 */
 	protected function respond(Route $route, Request $request)
 	{
-		$controller = $route->controller;
+		$controller = $this->resolve_controller($route->controller);
 		$controller_args = [ $request ];
-
-		if (!is_callable($controller))
-		{
-			$controller = new $controller;
-		}
-
-		if (!$controller instanceof Controller)
-		{
-			$controller_args = array_merge($controller_args, array_values($request->path_params));
-		}
 
 		$this->alter_context($request->context, $route, $controller);
 
@@ -237,5 +227,31 @@ class RouteDispatcher implements Dispatcher
 		}
 
 		throw $exception;
+	}
+
+	/**
+	 * @param callable|string $controller
+	 *
+	 * @return Controller
+	 */
+	protected function resolve_controller($controller)
+	{
+		if ($controller instanceof \Closure)
+		{
+			return new ClosureController($controller);
+		}
+
+		if (is_callable($controller))
+		{
+			return new ClosureController(function () use ($controller) {
+
+				/* @var $this ClosureController */
+
+				return $controller($this->request);
+
+			});
+		}
+
+		return new $controller;
 	}
 }

@@ -34,16 +34,29 @@ class RouteTest extends \PHPUnit\Framework\TestCase
 		$this->assertInstanceOf(Pattern::class, $r->pattern);
 	}
 
-	public function testRouteCallbackResponse()
+	public function test_closure_controller()
 	{
-		$request = Request::from('/');
+		$params = [ 'one' => uniqid(), 'two' => uniqid() ];
+		$request = Request::from([
+
+			Request::OPTION_URI => '/',
+			Request::OPTION_PATH_PARAMS => $params,
+
+		]);
+
+		$test = $this;
 
 		$routes = new RouteCollection;
-		$routes->get('/', function(Request $r) use ($request)
-		{
-			$this->assertSame($request, $r);
+		$routes->get('/', function(...$args) use ($request, $params, $test) {
+
+			/* @var $this ClosureController */
+
+			$test->assertInstanceOf(ClosureController::class, $this);
+			$test->assertSame($request, $this->request);
+			$test->assertSame(array_values($params), $args);
 
 			return 'madonna';
+
 		});
 
 		$dispatcher = new RouteDispatcher($routes);
