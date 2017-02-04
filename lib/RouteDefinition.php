@@ -63,19 +63,6 @@ class RouteDefinition
 	 */
 	static public function normalize(array &$definition)
 	{
-		if (isset($definition[self::CONTROLLER]))
-		{
-			$controller = $definition[self::CONTROLLER];
-
-			if (is_string($controller) && strpos($controller, RouteMaker::CONTROLLER_ACTION_SEPARATOR))
-			{
-				list($controller, $action) = explode(RouteMaker::CONTROLLER_ACTION_SEPARATOR, $controller);
-
-				$definition[self::CONTROLLER] = $controller;
-				$definition[self::ACTION] = $action;
-			}
-		}
-
 		if (empty($definition[self::VIA]))
 		{
 			$definition[self::VIA] = Request::METHOD_ANY;

@@ -16,6 +16,7 @@ use ICanBoogie\EventCollectionProvider;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Controller\ActionTraitTest\ActionController;
+use ICanBoogie\Routing\RouteDefinition;
 use ICanBoogie\Routing\RouteDispatcher;
 use ICanBoogie\Routing\RouteCollection;
 
@@ -38,8 +39,9 @@ class ActionTraitTest extends \PHPUnit\Framework\TestCase
 
 			'default' => [
 
-				'pattern' => '/blog/<year:\d{4}>-<month:\d{2}>-:slug.html',
-				'controller' => ActionController::class . '#view'
+				RouteDefinition::PATTERN => '/blog/<year:\d{4}>-<month:\d{2}>-:slug.html',
+				RouteDefinition::CONTROLLER => ActionController::class,
+				RouteDefinition::ACTION => 'view'
 			]
 
 		]);

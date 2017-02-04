@@ -34,7 +34,6 @@ class RouteMaker
 	const OPTION_ACTIONS = 'actions';
 
 	const SEPARATOR = ':';
-	const CONTROLLER_ACTION_SEPARATOR = '#';
 
 	/**
 	 * @param string $name

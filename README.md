@@ -92,7 +92,8 @@ provide a response, or replace the exception that will be thrown if the rescue f
 A route definition is an array, which may be created with the following keys:
 
 - `RouteDefinition::PATTERN`: The pattern of the URL.
-- `RouteDefinition::CONTROLLER`: The controller class and optional action, or a callable.
+- `RouteDefinition::CONTROLLER`: The controller class or a callable.
+- `RouteDefinition::ACTION`: An optional action of the controller. 
 - `RouteDefinition::ID`: The identifier of the route.
 - `RouteDefinition::VIA`: If the route needs to respond to one or more HTTP methods, e.g.
 `Request::METHOD_GET` or `[ Request::METHOD_PUT, Request::METHOD_PATCH ]`.
@@ -152,14 +153,12 @@ You can use them in any combination:
 
 ### Route controller
 
-The `controller` key specifies the callable to invoke, or the class name of a callable.
-The following value types are accepted:
+The `RouteDefinition::CONTROLLER` key specifies the callable to invoke, or the class name of a
+callable. An action can be specified with `RouteDefinition::ACTION` and if the callable uses
+[ActionTrait][] the call will be mapped automatically to the appropriate method.
 
-- A controller class: `ArticlesShowController`
-- A controller action: `ArticlesController#show`, where `ArticlesController` is
-the controller class, and `show` is the action.
-- A callable: `function() {}`, `new ArticlesShowController`, `ArticlesController::show`,
-`articles_controller_show`, …
+Controllers can also be defined as service references when the [icanboogie/service] package
+is used.
 
 
 
@@ -517,15 +516,6 @@ use ICanBoogie\Routing\RouteDefinition;
 
 return [
 
-	'contact' => [
-
-		RouteDefinition::PATTERN => '/contact',
-		RouteDefinition::CONTROLLER => AppController::class . '#contact'
-
-	],
-	
-	# or
-	
 	'contact' => [
 
 		RouteDefinition::PATTERN => '/contact',
