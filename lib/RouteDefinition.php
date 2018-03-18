@@ -61,7 +61,7 @@ class RouteDefinition
 	 *
 	 * @param array $definition
 	 */
-	static public function normalize(array &$definition)
+	static public function normalize(array &$definition): void
 	{
 		if (empty($definition[self::VIA]))
 		{
@@ -76,7 +76,7 @@ class RouteDefinition
 	 *
 	 * @return string The route identifier.
 	 */
-	static public function ensure_has_id(array &$definition)
+	static public function ensure_has_id(array &$definition): string
 	{
 		if (empty($definition[self::ID]))
 		{
@@ -93,7 +93,7 @@ class RouteDefinition
 	 *
 	 * @return string
 	 */
-	static private function generate_anonymous_id()
+	static private function generate_anonymous_id(): string
 	{
 		return 'anonymous_route_' . ++self::$anonymous_id_count;
 	}
@@ -106,7 +106,7 @@ class RouteDefinition
 	 * @throws PatternNotDefined when the pattern is not defined
 	 * @throws ControllerNotDefined when both controller and location are not defined.
 	 */
-	static public function assert_is_valid(array $definition)
+	static public function assert_is_valid(array $definition): void
 	{
 		if (empty($definition[self::PATTERN]))
 		{

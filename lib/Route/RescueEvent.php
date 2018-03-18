@@ -22,7 +22,7 @@ use ICanBoogie\Routing\Route;
  * Event hooks may use this event to _rescue_ a route by providing a suitable response, or
  * replace the exception to throw if the rescue fails.
  *
- * @property \Exception $exception
+ * @property \Throwable $exception
  * @property-read Request $request
  * @property Response|null $response
  */
@@ -33,26 +33,18 @@ class RescueEvent extends Event
 	/**
 	 * Reference to the exception to throw if the rescue fails.
 	 *
-	 * @var \Exception
+	 * @var \Throwable
 	 */
 	private $exception;
 
-	/**
-	 * @return \Exception
-	 */
-	protected function get_exception()
+	protected function get_exception(): \Throwable
 	{
 		return $this->exception;
 	}
 
-	/**
-	 * @param \Exception $exception
-	 *
-	 * @return \Exception
-	 */
-	protected function set_exception(\Exception $exception)
+	protected function set_exception(\Throwable $exception): void
 	{
-		return $this->exception = $exception;
+		$this->exception = $exception;
 	}
 
 	/**
@@ -62,10 +54,7 @@ class RescueEvent extends Event
 	 */
 	private $request;
 
-	/**
-	 * @return Request
-	 */
-	protected function get_request()
+	protected function get_request(): Request
 	{
 		return $this->request;
 	}
@@ -73,35 +62,21 @@ class RescueEvent extends Event
 	/**
 	 * Reference to the response that rescue the route.
 	 *
-	 * @var Response
+	 * @var Response|null
 	 */
 	private $response;
 
-	/**
-	 * @return Response|null
-	 */
-	protected function get_response()
+	protected function get_response(): ?Response
 	{
 		return $this->response;
 	}
 
-	/**
-	 * @param Response|null $response
-	 */
-	protected function set_response(Response $response = null)
+	protected function set_response(?Response $response): void
 	{
 		$this->response = $response;
 	}
 
-	/**
-	 * The event is constructed with the type {@link self::TYPE}.
-	 *
-	 * @param Route $target
-	 * @param \Exception $exception Reference to the exception thrown while dispatching the route.
-	 * @param Request $request
-	 * @param Response|null $response
-	 */
-	public function __construct(Route $target, \Exception &$exception, Request $request, Response &$response = null)
+	public function __construct(Route $target, \Throwable &$exception, Request $request, ?Response &$response)
 	{
 		$this->exception = &$exception;
 		$this->request = $request;

@@ -38,9 +38,7 @@ class Helpers
 	 */
 	static public function __callStatic($name, array $arguments)
 	{
-		$method = self::$mapping[$name];
-
-		return $method(...$arguments);
+		return (self::$mapping[$name])(...$arguments);
 	}
 
 	/**
@@ -52,7 +50,7 @@ class Helpers
 	 * @throws \RuntimeException is attempt to patch an undefined function.
 	 */
 	// @codeCoverageIgnoreStart
-	static public function patch($name, $callback)
+	static public function patch(string $name, callable $callback)
 	{
 		if (empty(self::$mapping[$name]))
 		{

@@ -33,66 +33,40 @@ class BeforeDispatchEvent extends Event
 	const TYPE = 'dispatch:before';
 
 	/**
-	 * The route.
-	 *
 	 * @var Route
 	 */
 	private $route;
 
-	/**
-	 * @return Route
-	 */
-	protected function get_route()
+	protected function get_route(): Route
 	{
 		return $this->route;
 	}
 
 	/**
-	 * The HTTP request.
-	 *
 	 * @var Request
 	 */
 	private $request;
 
-	/**
-	 * @return Request
-	 */
-	protected function get_request()
+	protected function get_request(): Request
 	{
 		return $this->request;
 	}
 
 	/**
-	 * Reference to the HTTP response.
-	 *
 	 * @var Response|null
 	 */
 	private $response;
 
-	/**
-	 * @return Response|null
-	 */
-	protected function get_response()
+	protected function get_response(): ?Response
 	{
 		return $this->response;
 	}
 
-	/**
-	 * @param Response|null $response
-	 */
-	protected function set_response(Response &$response = null)
+	protected function set_response(?Response $response)
 	{
 		$this->response = $response;
 	}
 
-	/**
-	 * The event is constructed with the type {@link self::TYPE}.
-	 *
-	 * @param RouteDispatcher $target
-	 * @param Route $route
-	 * @param Request $request
-	 * @param Response|null $response
-	 */
 	public function __construct(RouteDispatcher $target, Route $route, Request $request, Response &$response = null)
 	{
 		$this->route = $route;

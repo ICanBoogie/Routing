@@ -23,9 +23,6 @@ final class ClosureController extends Controller
 	 */
 	private $closure;
 
-	/**
-	 * @param \Closure $closure
-	 */
 	public function __construct(\Closure $closure)
 	{
 		$this->closure = \Closure::bind($closure, $this);
@@ -36,6 +33,6 @@ final class ClosureController extends Controller
 	 */
 	protected function action(Request $request)
 	{
-		return $this->closure->__invoke(...array_values($request->path_params));
+		return ($this->closure)(...array_values($request->path_params));
 	}
 }

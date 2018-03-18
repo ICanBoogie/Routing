@@ -831,7 +831,7 @@ Routing\Helpers::patch('decontextualize', function($str) use($path) {
 
 ## Requirements
 
-The package requires PHP 5.6 or later.
+The package requires PHP 7.2 or later.
 
 
 
@@ -893,29 +893,29 @@ The package is continuously tested by [Travis CI](http://about.travis-ci.org/).
 
 
 
-[ControllerBindings]:                  https://icanboogie.org/api/bind-routing/0.2/class-ICanBoogie.Binding.Routing.ControllerBindings.html
-[Response]:                            https://icanboogie.org/api/http/3.0/class-ICanBoogie.HTTP.Response.html
-[Request]:                             https://icanboogie.org/api/http/3.0/class-ICanBoogie.HTTP.Request.html
-[RequestDispatcher]:                   https://icanboogie.org/api/http/3.0/class-ICanBoogie.HTTP.RequestDispatcher.html
-[documentation]:                       https://icanboogie.org/api/routing/4.0/
-[ActionNotDefined]:                    https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.ActionNotDefined.html
-[ActionTrait]:                         https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.Controller.ActionTrait.html
-[Controller]:                          https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.Controller.html
-[Controller\BeforeActionEvent]:        https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.Controller.BeforeActionEvent.html
-[Controller\ActionEvent]:              https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.Controller.ActionEvent.html
-[ControllerNotDefined]:                https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.ControllerNotDefined.html
-[FormattedRoute]:                      https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.FormattedRoute.html
-[Pattern]:                             https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.Pattern.html
-[PatternNotDefined]:                   https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.PatternNotDefined.html
-[ResourceTrait]:                       https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.Controller.ResourceTrait.html
-[Route]:                               https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.Route.html
-[Route\RescueEvent]:                   https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.Route.RescueEvent.html
-[RouteCollection]:                     https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.RouteCollection.html
-[RouteDispatcher]:                     https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.RouteDispatcher.html
-[RouteDispatcher\BeforeDispatchEvent]: https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.RouteDispatcher.BeforeDispatchEvent.html
-[RouteDispatcher\DispatchEvent]:       https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.RouteDispatcher.DispatchEvent.html
-[RouteMaker]:                          https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.RouteMaker.html
-[RouteNotDefined]:                     https://icanboogie.org/api/routing/4.0/class-ICanBoogie.Routing.RouteNotDefined.html
+[ControllerBindings]:                  https://icanboogie.org/api/bind-routing/5.0/class-ICanBoogie.Binding.Routing.ControllerBindings.html
+[Response]:                            https://icanboogie.org/api/http/4.0/class-ICanBoogie.HTTP.Response.html
+[Request]:                             https://icanboogie.org/api/http/4.0/class-ICanBoogie.HTTP.Request.html
+[RequestDispatcher]:                   https://icanboogie.org/api/http/4.0/class-ICanBoogie.HTTP.RequestDispatcher.html
+[documentation]:                       https://icanboogie.org/api/routing/5.0/
+[ActionNotDefined]:                    https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.ActionNotDefined.html
+[ActionTrait]:                         https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.Controller.ActionTrait.html
+[Controller]:                          https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.Controller.html
+[Controller\BeforeActionEvent]:        https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.Controller.BeforeActionEvent.html
+[Controller\ActionEvent]:              https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.Controller.ActionEvent.html
+[ControllerNotDefined]:                https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.ControllerNotDefined.html
+[FormattedRoute]:                      https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.FormattedRoute.html
+[Pattern]:                             https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.Pattern.html
+[PatternNotDefined]:                   https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.PatternNotDefined.html
+[ResourceTrait]:                       https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.Controller.ResourceTrait.html
+[Route]:                               https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.Route.html
+[Route\RescueEvent]:                   https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.Route.RescueEvent.html
+[RouteCollection]:                     https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.RouteCollection.html
+[RouteDispatcher]:                     https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.RouteDispatcher.html
+[RouteDispatcher\BeforeDispatchEvent]: https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.RouteDispatcher.BeforeDispatchEvent.html
+[RouteDispatcher\DispatchEvent]:       https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.RouteDispatcher.DispatchEvent.html
+[RouteMaker]:                          https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.RouteMaker.html
+[RouteNotDefined]:                     https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.RouteNotDefined.html
 [ICanBoogie]:                          https://github.com/ICanBoogie/ICanBoogie
 [icanboogie/bind-routing]:             https://github.com/ICanBoogie/bind-routing
 [icanboogie/service]:                  https://github.com/ICanBoogie/service

@@ -1,14 +1,12 @@
 # customization
 
 PACKAGE_NAME = icanboogie/routing
-PACKAGE_VERSION = 4.0
-PHPUNIT_VERSION = phpunit-5.phar
+PACKAGE_VERSION = 5.0
+PHPUNIT_VERSION = phpunit-7.phar
 PHPUNIT_FILENAME = build/$(PHPUNIT_VERSION)
 PHPUNIT = php $(PHPUNIT_FILENAME)
 
 # do not edit the following lines
-
-all: $(PHPUNIT_FILENAME) vendor
 
 usage:
 	@echo "test:  Runs the test suite.\ndoc:   Creates the documentation.\nclean: Removes the documentation, the dependencies and the Composer files."
@@ -22,18 +20,20 @@ update:
 autoload: vendor
 	@composer dump-autoload
 
+test-dependencies: vendor $(PHPUNIT_FILENAME)
+
 $(PHPUNIT_FILENAME):
 	mkdir -p build
 	wget https://phar.phpunit.de/$(PHPUNIT_VERSION) -O $(PHPUNIT_FILENAME)
 
-test: all
+test: test-dependencies
 	@$(PHPUNIT)
 
-test-coverage: all
+test-coverage: test-dependencies
 	@mkdir -p build/coverage
 	@$(PHPUNIT) --coverage-html build/coverage
 
-test-coveralls: all
+test-coveralls: test-dependencies
 	@mkdir -p build/logs
 	COMPOSER_ROOT_VERSION=$(PACKAGE_VERSION) composer require satooshi/php-coveralls
 	@$(PHPUNIT) --coverage-clover build/logs/clover.xml

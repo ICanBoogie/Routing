@@ -31,10 +31,8 @@ class ActionEvent extends Event
 	public $result;
 
 	/**
-	 * The event is constructed with the type {@link self::TYPE}.
-	 *
 	 * @param Controller $target
-	 * @param string $result
+	 * @param mixed $result
 	 */
 	public function __construct(Controller $target, &$result)
 	{

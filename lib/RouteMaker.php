@@ -49,7 +49,7 @@ class RouteMaker
 	 *
 	 * @return array
 	 */
-	static public function actions($name, $controller, $actions, array $options = [])
+	static public function actions(string $name, string $controller, array $actions, array $options = []): array
 	{
 		$options = self::normalize_options($options);
 		$actions = static::filter_actions($actions, $options);
@@ -92,10 +92,10 @@ class RouteMaker
 	 *
 	 * @return array
 	 */
-	static public function resource($name, $controller, array $options = [])
+	static public function resource(string $name, string $controller, array $options = []): array
 	{
 		$options = static::normalize_options($options);
-		$actions = array_merge(static::get_resource_actions(), $options[self::OPTION_ACTIONS]);
+		$actions = \array_merge(static::get_resource_actions(), $options[self::OPTION_ACTIONS]);
 
 		return static::actions($name, $controller, $actions, $options);
 	}
@@ -107,7 +107,7 @@ class RouteMaker
 	 *
 	 * @return array
 	 */
-	static protected function normalize_options(array $options)
+	static protected function normalize_options(array $options): array
 	{
 		return $options + [
 
@@ -126,7 +126,7 @@ class RouteMaker
 	 *
 	 * @return array
 	 */
-	static protected function get_resource_actions()
+	static protected function get_resource_actions(): array
 	{
 		return [
 
@@ -149,16 +149,16 @@ class RouteMaker
 	 *
 	 * @return array
 	 */
-	static protected function filter_actions(array $actions, array $options = [])
+	static protected function filter_actions(array $actions, array $options = []): array
 	{
 		if ($options[self::OPTION_ONLY])
 		{
-			$actions = array_intersect_key($actions, array_flip((array) $options[self::OPTION_ONLY]));
+			$actions = \array_intersect_key($actions, \array_flip((array) $options[self::OPTION_ONLY]));
 		}
 
 		if ($options[self::OPTION_EXCEPT])
 		{
-			$actions = array_diff_key($actions, array_flip((array) $options[self::OPTION_EXCEPT]));
+			$actions = \array_diff_key($actions, \array_flip((array) $options[self::OPTION_EXCEPT]));
 		}
 
 		return $actions;
@@ -173,14 +173,14 @@ class RouteMaker
 	 *
 	 * @return array
 	 */
-	static protected function resolve_patterns($name, array $actions, $options)
+	static protected function resolve_patterns(string $name, array $actions, array $options): array
 	{
 		$id = "<{$options[self::OPTION_ID_NAME]}:{$options[self::OPTION_ID_REGEX]}>";
 		$replace = [ '{name}' => $name, '{id}' => $id ];
 
 		foreach ($actions as $action => &$template)
 		{
-			$template[0] = strtr($template[0], $replace);
+			$template[0] = \strtr($template[0], $replace);
 		}
 
 		return $actions;

@@ -73,16 +73,22 @@ class RouteCollectionTest extends \PHPUnit\Framework\TestCase
 
 	public function test_controller_not_defined_but_location()
 	{
-		new RouteCollection([
+		$routes = new RouteCollection([
 
 			'home' => [
 
-				RouteDefinition::PATTERN => '/',
-				RouteDefinition::LOCATION => '/go/to/madonna'
+				RouteDefinition::PATTERN => $pattern = '/',
+				RouteDefinition::LOCATION => $location = '/go/to/madonna'
 
 			]
 
 		]);
+
+		$route = $routes->find($pattern);
+
+		$this->assertInstanceOf(Route::class, $route);
+		$this->assertSame($pattern, (string) $route->pattern);
+		$this->assertSame($location, $route->location);
 	}
 
 	public function test_define_route()

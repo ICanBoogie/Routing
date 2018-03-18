@@ -38,11 +38,11 @@ class RouteDispatcher implements Dispatcher
 	/**
 	 * Route collection.
 	 *
-	 * @var RouteCollection
+	 * @var RouteCollection|null
 	 */
 	protected $routes;
 
-	protected function get_routes()
+	protected function get_routes(): ?RouteCollection
 	{
 		return $this->routes;
 	}
@@ -60,7 +60,7 @@ class RouteDispatcher implements Dispatcher
 	 *
 	 * @return Response|null
 	 */
-	public function __invoke(Request $request)
+	public function __invoke(Request $request): ?Response
 	{
 		$captured = [];
 		$normalized_path = $this->normalize_path($request->normalized_path);
@@ -91,7 +91,7 @@ class RouteDispatcher implements Dispatcher
 	 *
 	 * @return string Decontextualized path with trimmed ending slash.
 	 */
-	protected function normalize_path($path)
+	protected function normalize_path(string $path): string
 	{
 		$normalized_path = decontextualize($path);
 
@@ -112,7 +112,7 @@ class RouteDispatcher implements Dispatcher
 	 *
 	 * @return false|Route|null
 	 */
-	protected function resolve_route(Request $request, $normalized_path, array &$captured)
+	protected function resolve_route(Request $request, string $normalized_path, array &$captured)
 	{
 		return $this->routes->find($normalized_path, $captured, $request->method);
 	}
@@ -124,7 +124,7 @@ class RouteDispatcher implements Dispatcher
 	 * @param Request $request
 	 * @param array $captured Parameters captured from the request's path.
 	 */
-	protected function alter_params(Route $route, Request $request, array $captured)
+	protected function alter_params(Route $route, Request $request, array $captured): void
 	{
 		$request->path_params = $captured + $request->path_params;
 		$request->params = $captured + $request->params;
@@ -137,7 +137,7 @@ class RouteDispatcher implements Dispatcher
 	 * @param Route $route
 	 * @param callable $controller
 	 */
-	protected function alter_context(Request\Context $context, Route $route, callable $controller)
+	protected function alter_context(Request\Context $context, Route $route, callable $controller): void
 	{
 		$context->route = $route;
 		$context->controller = $controller;
@@ -151,7 +151,7 @@ class RouteDispatcher implements Dispatcher
 	 *
 	 * @return Response|null
 	 */
-	protected function dispatch(Route $route, Request $request)
+	protected function dispatch(Route $route, Request $request): ?Response
 	{
 		$response = null;
 
@@ -205,14 +205,14 @@ class RouteDispatcher implements Dispatcher
 	 * by third parties. If no response was provided, the exception (or the exception provided by
 	 * third parties) is re-thrown.
 	 *
-	 * @param \Exception $exception The exception to rescue.
+	 * @param \Throwable $exception The exception to rescue.
 	 * @param Request $request The request being dispatched.
 	 *
-	 * @throws \Exception if the exception cannot be rescued.
+	 * @throws \Throwable if the exception cannot be rescued.
 	 *
 	 * @return Response
 	 */
-	public function rescue(\Exception $exception, Request $request)
+	public function rescue(\Throwable $exception, Request $request): Response
 	{
 		if (isset($request->context->route))
 		{
@@ -234,7 +234,7 @@ class RouteDispatcher implements Dispatcher
 	 *
 	 * @return Controller
 	 */
-	protected function resolve_controller($controller)
+	private function resolve_controller($controller): Controller
 	{
 		if ($controller instanceof \Closure)
 		{

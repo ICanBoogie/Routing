@@ -24,14 +24,16 @@ use ICanBoogie\Routing\Route;
  */
 trait ActionTrait
 {
-    /**
-     * Returns the action being executed.
-     *
-     * @return string
-     */
-    protected function get_action()
+    protected function get_action(): string
     {
-        return $this->route->action;
+        $action = $this->route->action;
+
+	    if (empty($action))
+	    {
+		    throw new ActionNotDefined("Action not defined for route {$this->route->id}.");
+	    }
+
+	    return $action;
     }
 
     /**
@@ -45,9 +47,7 @@ trait ActionTrait
      */
     protected function action(Request $request)
     {
-        $callable = $this->resolve_action($request);
-
-        return $callable();
+        return $this->resolve_action($request)();
     }
 
     /**
@@ -57,63 +57,41 @@ trait ActionTrait
      *
      * @return callable
      */
-    protected function resolve_action(Request $request)
+    protected function resolve_action(Request $request): callable
     {
         $action = $this->action;
-
-        if (!$action)
-        {
-            throw new ActionNotDefined("Action not defined in route {$this->route->id}.");
-        }
-
         $method = $this->resolve_action_method($action, $request);
         $args = $this->resolve_action_args($action, $request);
 
-        return function() use ($method, $args) {
+        return function () use ($method, $args) {
 
             return $this->$method(...$args);
 
         };
     }
 
-    /**
-     * Resolves the method associated with the action.
-     *
-     * @param string $action Action name.
-     * @param Request $request
-     *
-     * @return string The method name.
-     */
-    protected function resolve_action_method($action, Request $request)
+    protected function resolve_action_method(string $action, Request $request): string
     {
-        $action = strtr($action, '-', '_');
-        $method = 'action_' . strtolower($request->method) . '_' . $action;
+        $action = \strtr($action, '-', '_');
+        $method = 'action_' . \strtolower($request->method) . '_' . $action;
 
-        if (method_exists($this, $method))
+        if (\method_exists($this, $method))
         {
             return $method;
         }
 
         $method = 'action_any_' . $action;
 
-        if (method_exists($this, $method))
+        if (\method_exists($this, $method))
         {
             return $method;
         }
 
-        return $method = 'action_' . $action;
+        return 'action_' . $action;
     }
 
-    /**
-     * Resolves the arguments associated with the action.
-     *
-     * @param string $action Action name.
-     * @param Request $request
-     *
-     * @return array The arguments for the action.
-     */
-    protected function resolve_action_args($action, Request $request)
+    protected function resolve_action_args(string $action, Request $request): array
     {
-        return array_values($request->path_params);
+        return \array_values($request->path_params);
     }
 }

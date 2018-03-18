@@ -23,7 +23,7 @@ namespace ICanBoogie\Routing;
  * {
  *     // a routing exception
  * }
- * catch (\Exception $e
+ * catch (\Throwable $e
  * {
  *     // another type of exception
  * }

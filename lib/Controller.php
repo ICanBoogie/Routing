@@ -61,11 +61,11 @@ abstract class Controller extends Prototyped
 	 * @return string|null The underscored name of the controller, or `null` if it cannot be
 	 * extracted.
 	 */
-	protected function get_name()
+	protected function get_name(): ?string
 	{
-		$controller_class = get_class($this);
+		$controller_class = \get_class($this);
 
-		if (preg_match('/(\w+)Controller$/', $controller_class, $matches))
+		if (\preg_match('/(\w+)Controller$/', $controller_class, $matches))
 		{
 			return underscore($matches[1]);
 		}
@@ -78,26 +78,17 @@ abstract class Controller extends Prototyped
 	 */
 	private $request;
 
-	/**
-	 * @return Request
-	 */
-	protected function get_request()
+	protected function get_request(): Request
 	{
 		return $this->request;
 	}
 
-	/**
-	 * @return Route
-	 */
-	protected function get_route()
+	protected function get_route(): Route
 	{
 		return $this->request->context->route;
 	}
 
-	/**
-	 * @return Response
-	 */
-	protected function lazy_get_response()
+	protected function lazy_get_response(): Response
 	{
 		return new Response(null, Status::OK, [
 
@@ -173,7 +164,7 @@ abstract class Controller extends Prototyped
 	 *
 	 * @return RedirectResponse
 	 */
-	public function redirect($url, $status = Status::FOUND, array $headers = [])
+	public function redirect($url, int $status = Status::FOUND, array $headers = []): Response
 	{
 		if ($url instanceof Route)
 		{
@@ -197,13 +188,13 @@ abstract class Controller extends Prototyped
 			return $this->forward_to_route($destination);
 		}
 
-		if (is_object($destination))
+		if (\is_object($destination))
 		{
-			$destination = "instance of " . get_class($destination);
+			$destination = "instance of " . \get_class($destination);
 		}
-		else if (is_array($destination))
+		else if (\is_array($destination))
 		{
-			$destination = json_encode($destination);
+			$destination = \json_encode($destination);
 		}
 
 		throw new \InvalidArgumentException("Don't know how to forward to: $destination.");
@@ -230,7 +221,7 @@ abstract class Controller extends Prototyped
 
 		$controller = $route->controller;
 
-		if (!is_callable($controller))
+		if (!\is_callable($controller))
 		{
 			$controller = new $controller;
 		}

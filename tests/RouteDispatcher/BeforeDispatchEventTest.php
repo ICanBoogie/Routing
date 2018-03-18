@@ -37,11 +37,6 @@ class BeforeDispatchEventTest extends \PHPUnit\Framework\TestCase
 
 	public function test_invalid_response_type()
 	{
-		if (version_compare(PHP_VERSION, '7', '>=') && version_compare(\PHPUnit_Runner_Version::id(), '5', '<'))
-		{
-			$this->markTestIncomplete("Need phpunit >= 5 to run this test");
-		}
-
 		/* @var $dispatcher RouteDispatcher */
 		/* @var $route Route */
 
@@ -49,9 +44,7 @@ class BeforeDispatchEventTest extends \PHPUnit\Framework\TestCase
 		$route = $this->route;
 		$request = Request::from('/');
 
-		$this->setExpectedException(version_compare(PHP_VERSION, '7', '<')
-			? \PHPUnit_Framework_Error::class
-			: \TypeError::class);
+		$this->expectException(\TypeError::class);
 
 		BeforeDispatchEvent::from([
 

@@ -35,26 +35,26 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	/**
 	 * Specify that the route definitions can be trusted.
 	 */
-	const TRUSTED_DEFINITIONS = true;
+	public const TRUSTED_DEFINITIONS = true;
 
 	/**
 	 * Class name of the {@link Route} instances.
 	 */
-	const DEFAULT_ROUTE_CLASS = Route::class;
+	public const DEFAULT_ROUTE_CLASS = Route::class;
 
 	/**
 	 * Route definitions.
 	 *
 	 * @var array
 	 */
-	protected $routes = [];
+	private $routes = [];
 
 	/**
 	 * Route instances.
 	 *
 	 * @var Route[]
 	 */
-	protected $instances = [];
+	private $instances = [];
 
 	/**
 	 * @param array $definitions
@@ -62,11 +62,11 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	 * trusted. This will speed up the construct process but the definitions will not be checked,
 	 * nor will they be normalized.
 	 */
-	public function __construct(array $definitions = [], $trusted_definitions = false)
+	public function __construct(array $definitions = [], bool $trusted_definitions = false)
 	{
 		foreach ($definitions as $id => $definition)
 		{
-			if (is_string($id) && empty($definition[RouteDefinition::ID]))
+			if (\is_string($id) && empty($definition[RouteDefinition::ID]))
 			{
 				$definition[RouteDefinition::ID] = $id;
 			}
@@ -83,16 +83,16 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	 *
 	 * @return $this
 	 */
-	public function __call($method, array $arguments)
+	public function __call(string $method, array $arguments): self
 	{
-		$method = strtoupper($method);
+		$method = \strtoupper($method);
 
-		if ($method !== Request::METHOD_ANY && !in_array($method, Request::METHODS))
+		if ($method !== Request::METHOD_ANY && !\in_array($method, Request::METHODS))
 		{
 			throw new MethodNotDefined($method, $this);
 		}
 
-		list($pattern, $controller, $options) = $arguments + [ 2 => [] ];
+		[ $pattern, $controller, $options ] = $arguments + [ 2 => [] ];
 
 		$this->revoke_cache();
 		$this->add([
@@ -117,7 +117,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	 *
 	 * @return $this
 	 */
-	protected function add(array $definition, $trusted_definition = false)
+	protected function add(array $definition, bool $trusted_definition = false): RouteCollection
 	{
 		if (!$trusted_definition)
 		{
@@ -143,10 +143,8 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	 * @param string $name
 	 * @param string $controller
 	 * @param array $options
-	 *
-	 * @return array
 	 */
-	public function resource($name, $controller, array $options = [])
+	public function resource(string $name, string $controller, array $options = []): void
 	{
 		$definitions = RouteMaker::resource($name, $controller, $options);
 		$this->revoke_cache();
@@ -218,7 +216,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	/**
 	 * Returns the number of routes in the collection.
 	 *
-	 * @return int
+	 * @inheritdoc
 	 */
 	public function count()
 	{
@@ -236,11 +234,11 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	 *
 	 * @return Route|false|null
 	 */
-	public function find($uri, &$captured = null, $method = Request::METHOD_ANY)
+	public function find(string $uri, array &$captured = null, string $method = Request::METHOD_ANY)
 	{
 		$captured = [];
 
-		$parsed = (array) parse_url($uri) + [ 'path' => null, 'query' => null ];
+		$parsed = (array) \parse_url($uri) + [ 'path' => null, 'query' => null ];
 		$path = $parsed['path'];
 
 		if (!$path)
@@ -255,9 +253,9 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 
 			if ($method != Request::METHOD_ANY)
 			{
-				if (is_array($via))
+				if (\is_array($via))
 				{
-					if (!in_array($method, $via))
+					if (!\in_array($method, $via))
 					{
 						return false;
 					}
@@ -313,7 +311,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 			return null;
 		};
 
-		list($static, $dynamic) = $this->sort_routes();
+		[ $static, $dynamic ] = $this->sort_routes();
 
 		$id = null;
 
@@ -336,7 +334,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 
 		if ($query)
 		{
-			parse_str($query, $parsed_query_string);
+			\parse_str($query, $parsed_query_string);
 
 			$captured['__query__'] = $parsed_query_string;
 		}
@@ -350,7 +348,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	/**
 	 * Revokes the cache used by the {@link sort_routes} method.
 	 */
-	private function revoke_cache()
+	private function revoke_cache(): void
 	{
 		$this->static = null;
 		$this->dynamic = null;
@@ -369,7 +367,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	 *
 	 * @return array An array with the static routes and dynamic routes.
 	 */
-	private function sort_routes()
+	private function sort_routes(): array
 	{
 		if ($this->static !== null)
 		{
@@ -383,7 +381,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 		foreach ($this->routes as $id => $definition)
 		{
 			$pattern = $definition[RouteDefinition::PATTERN];
-			$first_capture_position = strpos($pattern, ':') ?: strpos($pattern, '<');
+			$first_capture_position = \strpos($pattern, ':') ?: \strpos($pattern, '<');
 
 			if ($first_capture_position === false)
 			{
@@ -392,7 +390,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 			else
 			{
 				$dynamic[$id] = $definition;
-				$weights[$id] = substr_count($pattern, '/', 0, $first_capture_position);
+				$weights[$id] = \substr_count($pattern, '/', 0, $first_capture_position);
 			}
 		}
 
@@ -415,7 +413,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	 *
 	 * @return RouteCollection
 	 */
-	public function filter(callable $filter)
+	public function filter(callable $filter): RouteCollection
 	{
 		$definitions = [];
 

@@ -25,34 +25,23 @@ class RouteNotDefined extends \Exception implements Exception
 
 	/**
 	 * @var string
+	 * @uses get_id
 	 */
 	private $id;
 
-	protected function get_id()
+	private function get_id(): string
 	{
 		return $this->id;
 	}
 
-	/**
-	 * @param string $id Identifier of the route.
-	 * @param int $code
-	 * @param \Exception $previous
-	 */
-	public function __construct($id, $code = Status::NOT_FOUND, \Exception $previous = null)
+	public function __construct(string $id, int $code = Status::NOT_FOUND, \Throwable $previous = null)
 	{
 		$this->id = $id;
 
 		parent::__construct($this->format_message($id), $code, $previous);
 	}
 
-	/**
-	 * Formats exception message.
-	 *
-	 * @param string $id
-	 *
-	 * @return string
-	 */
-	protected function format_message($id)
+	private function format_message(string $id): string
 	{
 		return "The route `$id` is not defined.";
 	}

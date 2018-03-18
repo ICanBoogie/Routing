@@ -23,5 +23,5 @@ interface ToSlug
 	 *
 	 * @return string
 	 */
-	public function to_slug();
+	public function to_slug(): string;
 }

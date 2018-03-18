@@ -31,54 +31,40 @@ class DispatchEvent extends Event
 	const TYPE = 'dispatch';
 
 	/**
-	 * The route.
-	 *
 	 * @var Route
 	 */
 	private $route;
 
-	protected function get_route()
+	protected function get_route(): Route
 	{
 		return $this->route;
 	}
 
 	/**
-	 * The HTTP request.
-	 *
 	 * @var Request
 	 */
 	private $request;
 
-	protected function get_request()
+	protected function get_request(): Request
 	{
 		return $this->request;
 	}
 
 	/**
-	 * Reference to the HTTP response.
-	 *
-	 * @var Response
+	 * @var Response|null
 	 */
 	private $response;
 
-	protected function get_response()
+	protected function get_response(): ?Response
 	{
 		return $this->response;
 	}
 
-	protected function set_response(Response $response = null)
+	protected function set_response(?Response $response): void
 	{
 		$this->response = $response;
 	}
 
-	/**
-	 * The event is constructed with the type `dispatch`.
-	 *
-	 * @param RouteDispatcher $target
-	 * @param Route $route
-	 * @param Request $request
-	 * @param Response|null $response
-	 */
 	public function __construct(RouteDispatcher $target, Route $route, Request $request, Response &$response = null)
 	{
 		$this->route = $route;

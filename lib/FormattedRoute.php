@@ -25,47 +25,44 @@ class FormattedRoute
 	use AccessorTrait;
 
 	/**
-	 * The relative URL created by {@link Route::format()}.
-	 *
 	 * @var string
+	 * @uses get_url
+	 * @uses get_absolute_url
 	 */
-	protected $url;
+	private $url;
 
-	protected function get_url()
+	private function get_url(): string
 	{
 		return contextualize((string) $this);
 	}
 
-	protected function get_absolute_url()
+	private function get_absolute_url(): string
 	{
 		return absolutize_url($this->get_url());
 	}
 
 	/**
-	 * The {@link Route} instance that created this instance.
-	 *
 	 * @var Route
+	 * @uses get_route
 	 */
-	protected $route;
+	private $route;
 
-	protected function get_route()
+	private function get_route(): Route
 	{
 		return $this->route;
 	}
 
 	/**
-	 * Initialize the {@link $url} and {@link $route} properties.
-	 *
-	 * @param string $url
+	 * @param string $url A relative URL created by {@link Route::format()}.
 	 * @param Route $route
 	 */
-	public function __construct($url, Route $route)
+	public function __construct(string $url, Route $route)
 	{
 		$this->url = $url;
 		$this->route = $route;
 	}
 
-	public function __toString()
+	public function __toString(): string
 	{
 		return $this->url;
 	}

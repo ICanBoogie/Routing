@@ -42,7 +42,7 @@ class Pattern
 {
 	use AccessorTrait;
 
-	static protected $extended_character_classes = [
+	private const EXTENDED_CHARACTER_CLASSES = [
 
 		'{:uuid:}' => '[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}',
 		'{:sha1:}' => '[a-f0-9]{40}'
@@ -57,19 +57,20 @@ class Pattern
 	 *
 	 * @return array
 	 */
-	static private function parse($pattern)
+	static private function parse(string $pattern): array
 	{
 		$catchall = false;
 
-		if ($pattern{strlen($pattern) - 1} == '*')
+		if ($pattern{-1} == '*')
 		{
 			$catchall = true;
-			$pattern = substr($pattern, 0, -1);
+			$pattern = \substr($pattern, 0, -1);
 		}
 
-		$pattern = strtr($pattern, self::$extended_character_classes);
-		$parts = preg_split('#(:\w+|<(\w+:)?([^>]+)>)#', $pattern, -1, PREG_SPLIT_DELIM_CAPTURE);
-		list($interleaved, $params, $regex) = self::parse_parts($parts);
+		$pattern = \strtr($pattern, self::EXTENDED_CHARACTER_CLASSES);
+		$parts = \preg_split('#(:\w+|<(\w+:)?([^>]+)>)#', $pattern, -1, PREG_SPLIT_DELIM_CAPTURE);
+
+		[ $interleaved, $params, $regex ] = self::parse_parts($parts);
 
 		if ($catchall)
 		{
@@ -89,18 +90,18 @@ class Pattern
 	 *
 	 * @return array
 	 */
-	static private function parse_parts(array $parts)
+	static private function parse_parts(array $parts): array
 	{
 		$regex = '#^';
 		$interleaved = [];
 		$params = [];
 		$n = 0;
 
-		for ($i = 0, $j = count($parts); $i < $j ;)
+		for ($i = 0, $j = \count($parts); $i < $j ;)
 		{
 			$part = $parts[$i++];
 
-			$regex .= preg_quote($part, '#');
+			$regex .= \preg_quote($part, '#');
 			$interleaved[] = $part;
 
 			if ($i == $j)
@@ -112,13 +113,13 @@ class Pattern
 
 			if ($part{0} == ':')
 			{
-				$identifier = substr($part, 1);
+				$identifier = \substr($part, 1);
 				$separator = $parts[$i];
 				$selector = $separator ? '[^/\\' . $separator{0} . ']+' : '[^/]+';
 			}
 			else
 			{
-				$identifier = substr($parts[$i++], 0, -1);
+				$identifier = \substr($parts[$i++], 0, -1);
 
 				if (!$identifier)
 				{
@@ -144,7 +145,7 @@ class Pattern
 	 *
 	 * @return mixed
 	 */
-	static protected function read_value_from_array(array $container, $key)
+	static private function read_value_from_array(array $container, string $key)
 	{
 		return $container[$key];
 	}
@@ -157,7 +158,7 @@ class Pattern
 	 *
 	 * @return mixed
 	 */
-	static protected function read_value_from_object($container, $key)
+	static private function read_value_from_object(object $container, string $key)
 	{
 		return $container->$key;
 	}
@@ -169,7 +170,7 @@ class Pattern
 	 *
 	 * @return bool `true` if the given pattern is a route pattern, `false` otherwise.
 	 */
-	static public function is_pattern($pattern)
+	static public function is_pattern(string $pattern): bool
 	{
 		return (strpos($pattern, '<') !== false) || (strpos($pattern, ':') !== false) || (strpos($pattern, '*') !== false);
 	}
@@ -183,7 +184,7 @@ class Pattern
 	 *
 	 * @return Pattern
 	 */
-	static public function from($pattern)
+	static public function from($pattern): self
 	{
 		if ($pattern instanceof static)
 		{
@@ -205,7 +206,7 @@ class Pattern
 	 */
 	private $pattern;
 
-	protected function get_pattern()
+	protected function get_pattern(): string
 	{
 		return $this->pattern;
 	}
@@ -217,7 +218,7 @@ class Pattern
 	 */
 	private $interleaved;
 
-	protected function get_interleaved()
+	protected function get_interleaved(): array
 	{
 		return $this->interleaved;
 	}
@@ -229,7 +230,7 @@ class Pattern
 	 */
 	private $params;
 
-	protected function get_params()
+	protected function get_params(): array
 	{
 		return $this->params;
 	}
@@ -241,7 +242,7 @@ class Pattern
 	 */
 	private $regex;
 
-	protected function get_regex()
+	protected function get_regex(): string
 	{
 		return $this->regex;
 	}
@@ -252,9 +253,9 @@ class Pattern
 	 *
 	 * @param string $pattern A route pattern.
 	 */
-	protected function __construct($pattern)
+	protected function __construct(string $pattern)
 	{
-		list($interleaved, $params, $regex) = self::parse($pattern);
+		[ $interleaved, $params, $regex ] = self::parse($pattern);
 
 		$this->pattern = $pattern;
 		$this->interleaved = $interleaved;
@@ -267,7 +268,7 @@ class Pattern
 	 *
 	 * @return string
 	 */
-	public function __toString()
+	public function __toString(): string
 	{
 		return $this->pattern;
 	}
@@ -284,7 +285,7 @@ class Pattern
 	 * @throws PatternRequiresValues in attempt to format a pattern requiring values without
 	 * providing any.
 	 */
-	public function format($values = null)
+	public function format($values = null): string
 	{
 		if (!$this->params)
 		{
@@ -305,11 +306,14 @@ class Pattern
 	 * @param array|object $container
 	 *
 	 * @return string
+	 *
+	 * @uses read_value_from_array
+	 * @uses read_value_from_object
 	 */
-	private function format_parts($container)
+	private function format_parts($container): string
 	{
 		$url = '';
-		$method = 'read_value_from_' . (is_array($container) ? 'array' : 'object');
+		$method = 'read_value_from_' . (\is_array($container) ? 'array' : 'object');
 
 		foreach ($this->interleaved as $i => $value)
 		{
@@ -326,14 +330,14 @@ class Pattern
 	 *
 	 * @return string
 	 */
-	private function format_part($value)
+	private function format_part($value): string
 	{
 		if ($value instanceof ToSlug)
 		{
 			$value = $value->to_slug();
 		}
 
-		return urlencode($value);
+		return \urlencode($value);
 	}
 
 	/**
@@ -344,7 +348,7 @@ class Pattern
 	 *
 	 * @return bool `true` if the pathname matches the pattern, `false` otherwise.
 	 */
-	public function match($pathname, &$captured = null)
+	public function match(string $pathname, array &$captured = null): bool
 	{
 		$captured = [];
 
@@ -358,14 +362,14 @@ class Pattern
 			return $pathname === $this->pattern;
 		}
 
-		if (!preg_match($this->regex, $pathname, $matches))
+		if (!\preg_match($this->regex, $pathname, $matches))
 		{
 			return false;
 		}
 
-		array_shift($matches);
+		\array_shift($matches);
 
-		$captured = array_combine($this->params, $matches);
+		$captured = \array_combine($this->params, $matches);
 
 		return true;
 	}

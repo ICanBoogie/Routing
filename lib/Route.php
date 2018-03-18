@@ -31,7 +31,7 @@ class Route
 {
 	use AccessorTrait;
 
-	static protected $invalid_construct_properties = [ 'formatting_value', 'url', 'absolute_url' ];
+	private const INVALID_CONSTRUCT_PROPERTIES = [ 'formatting_value', 'url', 'absolute_url' ];
 
 	/**
 	 * Creates a new {@link Route} instance from a route definition.
@@ -40,9 +40,9 @@ class Route
 	 *
 	 * @return static
 	 */
-	static public function from(array $definition)
+	static public function from(array $definition): self
 	{
-		$class = get_called_class();
+		$class = \get_called_class();
 
 		if (isset($definition[RouteDefinition::CONSTRUCTOR]))
 		{
@@ -56,10 +56,11 @@ class Route
 	 * Pattern of the route.
 	 *
 	 * @var Pattern
+	 * @uses get_pattern
 	 */
 	private $pattern;
 
-	protected function get_pattern()
+	private function get_pattern(): Pattern
 	{
 		return $this->pattern;
 	}
@@ -67,11 +68,12 @@ class Route
 	/**
 	 * Controller's class name or function.
 	 *
-	 * @var string
+	 * @var mixed @todo Should be string|null
+	 * @uses get_controller
 	 */
 	private $controller;
 
-	protected function get_controller()
+	private function get_controller()
 	{
 		return $this->controller;
 	}
@@ -79,11 +81,12 @@ class Route
 	/**
 	 * Controller action.
 	 *
-	 * @var string
+	 * @var string|null
+	 * @uses get_action
 	 */
 	private $action;
 
-	protected function get_action()
+	private function get_action(): ?string
 	{
 		return $this->action;
 	}
@@ -91,11 +94,12 @@ class Route
 	/**
 	 * Identifier of the route.
 	 *
-	 * @var string
+	 * @var string|null
+	 * @uses get_id
 	 */
 	private $id;
 
-	protected function get_id()
+	private function get_id(): ?string
 	{
 		return $this->id;
 	}
@@ -105,11 +109,12 @@ class Route
 	 *
 	 * If the property is defined the route is considered an alias.
 	 *
-	 * @var string
+	 * @var string|null
+	 * @uses get_location
 	 */
 	private $location;
 
-	protected function get_location()
+	private function get_location(): ?string
 	{
 		return $this->location;
 	}
@@ -117,11 +122,12 @@ class Route
 	/**
 	 * Request methods accepted by the route.
 	 *
-	 * @var string
+	 * @var string|array|null
+	 * @uses get_via
 	 */
 	private $via;
 
-	protected function get_via()
+	private function get_via()
 	{
 		return $this->via;
 	}
@@ -130,25 +136,17 @@ class Route
 	 * Formatting value.
 	 *
 	 * @var mixed
+	 * @uses get_formatting_value
+	 * @uses get_has_formatting_value
 	 */
 	private $formatting_value;
 
-	/**
-	 * Returns the formatting value.
-	 *
-	 * @return mixed
-	 */
-	protected function get_formatting_value()
+	private function get_formatting_value()
 	{
 		return $this->formatting_value;
 	}
 
-	/**
-	 * Whether the route has a formatting value.
-	 *
-	 * @return bool `true` if the route has a formatting value, `false` otherwise.
-	 */
-	protected function get_has_formatting_value()
+	private function get_has_formatting_value(): bool
 	{
 		return $this->formatting_value !== null;
 	}
@@ -158,7 +156,7 @@ class Route
 	 *
 	 * @return string
 	 */
-	protected function get_url()
+	protected function get_url(): string
 	{
 		return $this->format($this->formatting_value)->url;
 	}
@@ -168,24 +166,18 @@ class Route
 	 *
 	 * @return string
 	 */
-	protected function get_absolute_url()
+	protected function get_absolute_url(): string
 	{
 		return $this->format($this->formatting_value)->absolute_url;
 	}
 
-	/**
-	 * Initializes the {@link $pattern} property and the properties provided.
-	 *
-	 * @param string $pattern
-	 * @param array $properties
-	 */
-	public function __construct($pattern, array $properties)
+	public function __construct(string $pattern, array $properties)
 	{
 		$this->pattern = Pattern::from($pattern);
 
 		unset($properties['pattern']);
 
-		$this->assert_properties_are_valid($properties, self::$invalid_construct_properties);
+		$this->assert_properties_are_valid($properties, self::INVALID_CONSTRUCT_PROPERTIES);
 
 		foreach ($properties as $property => $value)
 		{
@@ -216,17 +208,17 @@ class Route
 	 *
 	 * @throws \InvalidArgumentException if a property is not valid.
 	 */
-	protected function assert_properties_are_valid(array $properties, array $invalid)
+	protected function assert_properties_are_valid(array $properties, array $invalid): void
 	{
-		$invalid = array_combine($invalid, $invalid);
-		$invalid = array_intersect_key($properties, $invalid);
+		$invalid = \array_combine($invalid, $invalid);
+		$invalid = \array_intersect_key($properties, $invalid);
 
 		if (!$invalid)
 		{
 			return;
 		}
 
-		throw new \InvalidArgumentException("Invalid construct property: " . implode(', ', $invalid));
+		throw new \InvalidArgumentException("Invalid construct property: " . \implode(', ', $invalid));
 	}
 
 	/**
@@ -238,7 +230,7 @@ class Route
 	 *
 	 * @return FormattedRoute
 	 */
-	public function format($values = null)
+	public function format($values = null): FormattedRoute
 	{
 		return new FormattedRoute($this->pattern->format($values), $this);
 	}
@@ -250,7 +242,7 @@ class Route
 	 *
 	 * @return Route A new route bound to a formatting value.
 	 */
-	public function assign($formatting_value)
+	public function assign($formatting_value): self
 	{
 		$clone = clone $this;
 

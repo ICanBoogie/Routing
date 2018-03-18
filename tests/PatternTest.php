@@ -227,7 +227,7 @@ class WithToSlug implements ToSlug
 		$this->title = $title;
 	}
 
-	public function to_slug()
+	public function to_slug(): string
 	{
 		return \ICanBoogie\normalize($this->title);
 	}
