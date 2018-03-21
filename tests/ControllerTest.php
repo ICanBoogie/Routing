@@ -17,6 +17,7 @@ use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\ControllerTest\MySampleController;
+use function var_dump;
 
 class ControllerTest extends \PHPUnit\Framework\TestCase
 {
@@ -135,6 +136,31 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 		$response2 = $controller($request);
 		$this->assertSame($response, $response2);
 		$this->assertSame($body, $response2->body);
+	}
+
+	public function test_should_return_response_if_instantiated()
+	{
+		$request = Request::from('/');
+		$status = Response::STATUS_NO_CONTENT;
+
+		$controller = $this
+			->getMockBuilder(Controller::class)
+			->disableOriginalConstructor()
+			->setMethods([ 'action' ])
+			->getMockForAbstractClass();
+		$controller
+			->expects($this->once())
+			->method('action')
+			->willReturnCallback(\Closure::bind(function () use ($status) {
+				/* @var Controller $this */
+				$this->response->status = $status;
+			}, $controller));
+
+		/* @var $controller Controller */
+
+		$response = $controller($request);
+		$this->assertInstanceOf(Response::class, $response);
+		$this->assertSame($status, $response->status->code);
 	}
 
 	public function test_closure()

@@ -142,9 +142,12 @@ abstract class Controller extends Prototyped
 			return $result;
 		}
 
-		if ($result && isset($this->response))
+		if (isset($this->response))
 		{
-			$this->response->body = $result;
+			if ($result !== null)
+			{
+				$this->response->body = $result;
+			}
 
 			return $this->response;
 		}
