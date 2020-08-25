@@ -21,7 +21,7 @@ use ICanBoogie\Routing\Controller;
  */
 class ActionEvent extends Event
 {
-	const TYPE = 'action';
+	public const TYPE = 'action';
 
 	/**
 	 * Reference to the result.
@@ -31,7 +31,6 @@ class ActionEvent extends Event
 	public $result;
 
 	/**
-	 * @param Controller $target
 	 * @param mixed $result
 	 */
 	public function __construct(Controller $target, &$result)

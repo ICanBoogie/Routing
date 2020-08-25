@@ -11,6 +11,8 @@
 
 namespace ICanBoogie\Routing;
 
+use RuntimeException;
+
 /**
  * Patchable helpers.
  *
@@ -18,7 +20,7 @@ namespace ICanBoogie\Routing;
  * @method static string decontextualize() decontextualize($pathname)
  * @method static string absolutize_url() absolutize_url($url)
  */
-class Helpers
+final class Helpers
 {
 	static private $mapping = [
 
@@ -35,6 +37,10 @@ class Helpers
 	 * @param array $arguments Arguments.
 	 *
 	 * @return mixed
+	 *
+	 * @uses default_contextualize
+	 * @uses default_decontextualize
+	 * @uses default_absolutize_url
 	 */
 	static public function __callStatic($name, array $arguments)
 	{
@@ -47,14 +53,14 @@ class Helpers
 	 * @param string $name Name of the function.
 	 * @param callable $callback Callback.
 	 *
-	 * @throws \RuntimeException is attempt to patch an undefined function.
+	 * @throws RuntimeException is attempt to patch an undefined function.
 	 */
 	// @codeCoverageIgnoreStart
 	static public function patch(string $name, callable $callback)
 	{
 		if (empty(self::$mapping[$name]))
 		{
-			throw new \RuntimeException("Undefined patchable: $name.");
+			throw new RuntimeException("Undefined patchable: $name.");
 		}
 
 		self::$mapping[$name] = $callback;
@@ -65,17 +71,17 @@ class Helpers
 	 * Default implementations
 	 */
 
-	static protected function default_contextualize($pathname)
+	static private function default_contextualize($pathname)
 	{
 		return $pathname;
 	}
 
-	static protected function default_decontextualize($pathname)
+	static private function default_decontextualize($pathname)
 	{
 		return $pathname;
 	}
 
-	static protected function default_absolutize_url($url)
+	static private function default_absolutize_url($url)
 	{
 		return 'http://' . $_SERVER['HTTP_HOST'] . $url;
 	}

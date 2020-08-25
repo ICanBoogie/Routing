@@ -12,6 +12,17 @@
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\Accessor\AccessorTrait;
+use function array_combine;
+use function array_shift;
+use function count;
+use function preg_match;
+use function preg_quote;
+use function preg_split;
+use function strpos;
+use function strtr;
+use function substr;
+use function urlencode;
+use const PREG_SPLIT_DELIM_CAPTURE;
 
 /**
  * Representation of a route pattern.
@@ -40,6 +51,12 @@ use ICanBoogie\Accessor\AccessorTrait;
  */
 class Pattern
 {
+	/**
+	 * @uses get_interleaved
+	 * @uses get_params
+	 * @uses get_pattern
+	 * @uses get_regex
+	 */
 	use AccessorTrait;
 
 	private const EXTENDED_CHARACTER_CLASSES = [
@@ -52,23 +69,19 @@ class Pattern
 	/**
 	 * Parses a route pattern and returns an array of interleaved paths and parameters, the
 	 * parameter names and the regular expression for the specified pattern.
-	 *
-	 * @param string $pattern A pattern.
-	 *
-	 * @return array
 	 */
 	static private function parse(string $pattern): array
 	{
 		$catchall = false;
 
-		if ($pattern{-1} == '*')
+		if ($pattern[-1] == '*')
 		{
 			$catchall = true;
-			$pattern = \substr($pattern, 0, -1);
+			$pattern = substr($pattern, 0, -1);
 		}
 
-		$pattern = \strtr($pattern, self::EXTENDED_CHARACTER_CLASSES);
-		$parts = \preg_split('#(:\w+|<(\w+:)?([^>]+)>)#', $pattern, -1, PREG_SPLIT_DELIM_CAPTURE);
+		$pattern = strtr($pattern, self::EXTENDED_CHARACTER_CLASSES);
+		$parts = preg_split('#(:\w+|<(\w+:)?([^>]+)>)#', $pattern, -1, PREG_SPLIT_DELIM_CAPTURE);
 
 		[ $interleaved, $params, $regex ] = self::parse_parts($parts);
 
@@ -85,10 +98,6 @@ class Pattern
 
 	/**
 	 * Parses pattern parts.
-	 *
-	 * @param array $parts
-	 *
-	 * @return array
 	 */
 	static private function parse_parts(array $parts): array
 	{
@@ -97,11 +106,11 @@ class Pattern
 		$params = [];
 		$n = 0;
 
-		for ($i = 0, $j = \count($parts); $i < $j ;)
+		for ($i = 0, $j = count($parts); $i < $j ;)
 		{
 			$part = $parts[$i++];
 
-			$regex .= \preg_quote($part, '#');
+			$regex .= preg_quote($part, '#');
 			$interleaved[] = $part;
 
 			if ($i == $j)
@@ -111,15 +120,15 @@ class Pattern
 
 			$part = $parts[$i++];
 
-			if ($part{0} == ':')
+			if ($part[0] == ':')
 			{
-				$identifier = \substr($part, 1);
+				$identifier = substr($part, 1);
 				$separator = $parts[$i];
-				$selector = $separator ? '[^/\\' . $separator{0} . ']+' : '[^/]+';
+				$selector = $separator ? '[^/\\' . $separator[0] . ']+' : '[^/]+';
 			}
 			else
 			{
-				$identifier = \substr($parts[$i++], 0, -1);
+				$identifier = substr($parts[$i++], 0, -1);
 
 				if (!$identifier)
 				{
@@ -140,9 +149,6 @@ class Pattern
 	/**
 	 * Reads an offset from an array.
 	 *
-	 * @param array $container
-	 * @param string $key
-	 *
 	 * @return mixed
 	 */
 	static private function read_value_from_array(array $container, string $key)
@@ -153,9 +159,6 @@ class Pattern
 	/**
 	 * Reads a property from an object.
 	 *
-	 * @param object $container
-	 * @param string $key
-	 *
 	 * @return mixed
 	 */
 	static private function read_value_from_object(object $container, string $key)
@@ -165,10 +168,6 @@ class Pattern
 
 	/**
 	 * Checks if the given string is a route pattern.
-	 *
-	 * @param string $pattern
-	 *
-	 * @return bool `true` if the given pattern is a route pattern, `false` otherwise.
 	 */
 	static public function is_pattern(string $pattern): bool
 	{
@@ -181,8 +180,6 @@ class Pattern
 	 * Creates a {@link Pattern} instance from the specified pattern.
 	 *
 	 * @param mixed $pattern
-	 *
-	 * @return Pattern
 	 */
 	static public function from($pattern): self
 	{
@@ -265,8 +262,6 @@ class Pattern
 
 	/**
 	 * Returns the route pattern specified during construct.
-	 *
-	 * @return string
 	 */
 	public function __toString(): string
 	{
@@ -276,11 +271,9 @@ class Pattern
 	/**
 	 * Formats a pattern with the specified values.
 	 *
-	 * @param array|object $values The values to format the pattern, either as an array or an
+	 * @param array|object|null $values The values to format the pattern, either as an array or an
 	 * object. If value is an instance of {@link ToSlug} the `to_slug()` method is used to
 	 * transform the instance into a URL component.
-	 *
-	 * @return string
 	 *
 	 * @throws PatternRequiresValues in attempt to format a pattern requiring values without
 	 * providing any.
@@ -305,8 +298,6 @@ class Pattern
 	 *
 	 * @param array|object $container
 	 *
-	 * @return string
-	 *
 	 * @uses read_value_from_array
 	 * @uses read_value_from_object
 	 */
@@ -327,8 +318,6 @@ class Pattern
 	 * Formats pattern part.
 	 *
 	 * @param mixed $value
-	 *
-	 * @return string
 	 */
 	private function format_part($value): string
 	{
@@ -337,16 +326,13 @@ class Pattern
 			$value = $value->to_slug();
 		}
 
-		return \urlencode($value);
+		return urlencode($value);
 	}
 
 	/**
 	 * Checks if a pathname matches the pattern.
 	 *
-	 * @param string $pathname The pathname.
-	 * @param array $captured The parameters captured from the pathname.
-	 *
-	 * @return bool `true` if the pathname matches the pattern, `false` otherwise.
+	 * @param array|null $captured The parameters captured from the pathname.
 	 */
 	public function match(string $pathname, array &$captured = null): bool
 	{
@@ -362,14 +348,14 @@ class Pattern
 			return $pathname === $this->pattern;
 		}
 
-		if (!\preg_match($this->regex, $pathname, $matches))
+		if (!preg_match($this->regex, $pathname, $matches))
 		{
 			return false;
 		}
 
-		\array_shift($matches);
+		array_shift($matches);
 
-		$captured = \array_combine($this->params, $matches);
+		$captured = array_combine($this->params, $matches);
 
 		return true;
 	}

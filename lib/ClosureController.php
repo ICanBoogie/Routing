@@ -11,6 +11,7 @@
 
 namespace ICanBoogie\Routing;
 
+use Closure;
 use ICanBoogie\HTTP\Request;
 
 /**
@@ -19,13 +20,13 @@ use ICanBoogie\HTTP\Request;
 final class ClosureController extends Controller
 {
 	/**
-	 * @var \Closure
+	 * @var Closure
 	 */
 	private $closure;
 
-	public function __construct(\Closure $closure)
+	public function __construct(Closure $closure)
 	{
-		$this->closure = \Closure::bind($closure, $this);
+		$this->closure = Closure::bind($closure, $this);
 	}
 
 	/**

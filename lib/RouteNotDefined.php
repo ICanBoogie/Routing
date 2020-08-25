@@ -13,6 +13,7 @@ namespace ICanBoogie\Routing;
 
 use ICanBoogie\Accessor\AccessorTrait;
 use ICanBoogie\HTTP\Status;
+use Throwable;
 
 /**
  * Exception thrown when a route does not exists.
@@ -34,7 +35,7 @@ class RouteNotDefined extends \Exception implements Exception
 		return $this->id;
 	}
 
-	public function __construct(string $id, int $code = Status::NOT_FOUND, \Throwable $previous = null)
+	public function __construct(string $id, int $code = Status::NOT_FOUND, Throwable $previous = null)
 	{
 		$this->id = $id;
 

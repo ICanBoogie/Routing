@@ -11,10 +11,12 @@
 
 namespace ICanBoogie\Routing;
 
+use InvalidArgumentException;
+
 /**
  * Exception thrown when the pattern of a route is not defined.
  */
-class PatternNotDefined extends \InvalidArgumentException implements Exception
+class PatternNotDefined extends InvalidArgumentException implements Exception
 {
 
 }

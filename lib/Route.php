@@ -12,6 +12,11 @@
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\Accessor\AccessorTrait;
+use InvalidArgumentException;
+use function array_combine;
+use function array_intersect_key;
+use function get_called_class;
+use function implode;
 
 /**
  * A route.
@@ -42,7 +47,7 @@ class Route
 	 */
 	static public function from(array $definition): self
 	{
-		$class = \get_called_class();
+		$class = get_called_class();
 
 		if (isset($definition[RouteDefinition::CONSTRUCTOR]))
 		{
@@ -153,8 +158,6 @@ class Route
 
 	/**
 	 * Returns relative URL.
-	 *
-	 * @return string
 	 */
 	protected function get_url(): string
 	{
@@ -163,8 +166,6 @@ class Route
 
 	/**
 	 * Returns absolute URL.
-	 *
-	 * @return string
 	 */
 	protected function get_absolute_url(): string
 	{
@@ -206,19 +207,19 @@ class Route
 	 * @param array $properties
 	 * @param array $invalid
 	 *
-	 * @throws \InvalidArgumentException if a property is not valid.
+	 * @throws InvalidArgumentException if a property is not valid.
 	 */
 	protected function assert_properties_are_valid(array $properties, array $invalid): void
 	{
-		$invalid = \array_combine($invalid, $invalid);
-		$invalid = \array_intersect_key($properties, $invalid);
+		$invalid = array_combine($invalid, $invalid);
+		$invalid = array_intersect_key($properties, $invalid);
 
 		if (!$invalid)
 		{
 			return;
 		}
 
-		throw new \InvalidArgumentException("Invalid construct property: " . \implode(', ', $invalid));
+		throw new InvalidArgumentException("Invalid construct property: " . implode(', ', $invalid));
 	}
 
 	/**
@@ -227,8 +228,6 @@ class Route
 	 * Note: The formatting of the route is deferred to its {@link Pattern} instance.
 	 *
 	 * @param object|array|null $values
-	 *
-	 * @return FormattedRoute
 	 */
 	public function format($values = null): FormattedRoute
 	{

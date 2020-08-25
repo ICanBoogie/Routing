@@ -15,6 +15,7 @@ use ICanBoogie\Event;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Route;
+use Throwable;
 
 /**
  * Event class for the `ICanBoogie\Routing\RouteDispatcher::rescue` event.
@@ -22,27 +23,30 @@ use ICanBoogie\Routing\Route;
  * Event hooks may use this event to _rescue_ a route by providing a suitable response, or
  * replace the exception to throw if the rescue fails.
  *
- * @property \Throwable $exception
+ * @property Throwable $exception
  * @property-read Request $request
  * @property Response|null $response
  */
 class RescueEvent extends Event
 {
-	const TYPE = 'rescue';
+	public const TYPE = 'rescue';
 
 	/**
 	 * Reference to the exception to throw if the rescue fails.
 	 *
-	 * @var \Throwable
+	 * @var Throwable
+	 *
+	 * @uses get_exception
+	 * @uses set_exception
 	 */
 	private $exception;
 
-	protected function get_exception(): \Throwable
+	protected function get_exception(): Throwable
 	{
 		return $this->exception;
 	}
 
-	protected function set_exception(\Throwable $exception): void
+	protected function set_exception(Throwable $exception): void
 	{
 		$this->exception = $exception;
 	}
@@ -76,7 +80,7 @@ class RescueEvent extends Event
 		$this->response = $response;
 	}
 
-	public function __construct(Route $target, \Throwable &$exception, Request $request, ?Response &$response)
+	public function __construct(Route $target, Throwable &$exception, Request $request, ?Response &$response)
 	{
 		$this->exception = &$exception;
 		$this->request = $request;

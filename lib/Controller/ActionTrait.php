@@ -15,6 +15,10 @@ use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\ActionNotDefined;
 use ICanBoogie\Routing\Route;
+use function array_values;
+use function method_exists;
+use function strtolower;
+use function strtr;
 
 /**
  * Action controller implementation.
@@ -28,7 +32,7 @@ trait ActionTrait
     {
         $action = $this->route->action;
 
-	    if (empty($action))
+	    if (!$action)
 	    {
 		    throw new ActionNotDefined("Action not defined for route {$this->route->id}.");
 	    }
@@ -41,8 +45,6 @@ trait ActionTrait
      *
      * The {@link $request} property is initialized.
      *
-     * @param Request $request
-     *
      * @return Response|mixed
      */
     protected function action(Request $request)
@@ -52,10 +54,6 @@ trait ActionTrait
 
     /**
      * Resolves the action into a callable.
-     *
-     * @param Request $request
-     *
-     * @return callable
      */
     protected function resolve_action(Request $request): callable
     {
@@ -72,17 +70,17 @@ trait ActionTrait
 
     protected function resolve_action_method(string $action, Request $request): string
     {
-        $action = \strtr($action, '-', '_');
-        $method = 'action_' . \strtolower($request->method) . '_' . $action;
+        $action = strtr($action, '-', '_');
+        $method = 'action_' . strtolower($request->method) . '_' . $action;
 
-        if (\method_exists($this, $method))
+        if (method_exists($this, $method))
         {
             return $method;
         }
 
         $method = 'action_any_' . $action;
 
-        if (\method_exists($this, $method))
+        if (method_exists($this, $method))
         {
             return $method;
         }
@@ -92,6 +90,6 @@ trait ActionTrait
 
     protected function resolve_action_args(string $action, Request $request): array
     {
-        return \array_values($request->path_params);
+        return array_values($request->path_params);
     }
 }

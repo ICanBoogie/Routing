@@ -11,6 +11,7 @@
 
 namespace ICanBoogie\Routing;
 
+use Closure;
 use ICanBoogie\Accessor\AccessorTrait;
 use ICanBoogie\HTTP\Dispatcher;
 use ICanBoogie\HTTP\RedirectResponse;
@@ -20,6 +21,7 @@ use ICanBoogie\HTTP\Status;
 use ICanBoogie\Routing\RouteDispatcher\BeforeDispatchEvent;
 use ICanBoogie\Routing\RouteDispatcher\DispatchEvent;
 use ICanBoogie\Routing\Route\RescueEvent;
+use Throwable;
 
 /**
  * Dispatch requests among the defined routes.
@@ -120,8 +122,6 @@ class RouteDispatcher implements Dispatcher
 	/**
 	 * Alters request parameters.
 	 *
-	 * @param Route $route
-	 * @param Request $request
 	 * @param array $captured Parameters captured from the request's path.
 	 */
 	protected function alter_params(Route $route, Request $request, array $captured): void
@@ -132,10 +132,6 @@ class RouteDispatcher implements Dispatcher
 
 	/**
 	 * Alters request context with route and controller.
-	 *
-	 * @param Request\Context $context
-	 * @param Route $route
-	 * @param callable $controller
 	 */
 	protected function alter_context(Request\Context $context, Route $route, callable $controller): void
 	{
@@ -145,11 +141,6 @@ class RouteDispatcher implements Dispatcher
 
 	/**
 	 * Dispatches the route.
-	 *
-	 * @param Route $route
-	 * @param Request $request
-	 *
-	 * @return Response|null
 	 */
 	protected function dispatch(Route $route, Request $request): ?Response
 	{
@@ -173,9 +164,6 @@ class RouteDispatcher implements Dispatcher
 	 * If the controller's result is not `null` but is not in instance of {@link Response}, its
 	 * result is wrapped in a {@link response} instance with the status code 200 and the
 	 * `Content-Type` "text/html; charset=utf-8".
-	 *
-	 * @param Route $route
-	 * @param Request $request
 	 *
 	 * @return Response|mixed
 	 */
@@ -205,14 +193,9 @@ class RouteDispatcher implements Dispatcher
 	 * by third parties. If no response was provided, the exception (or the exception provided by
 	 * third parties) is re-thrown.
 	 *
-	 * @param \Throwable $exception The exception to rescue.
-	 * @param Request $request The request being dispatched.
-	 *
-	 * @throws \Throwable if the exception cannot be rescued.
-	 *
-	 * @return Response
+	 * @throws Throwable if the exception cannot be rescued.
 	 */
-	public function rescue(\Throwable $exception, Request $request): Response
+	public function rescue(Throwable $exception, Request $request): Response
 	{
 		if (isset($request->context->route))
 		{
@@ -231,12 +214,10 @@ class RouteDispatcher implements Dispatcher
 
 	/**
 	 * @param callable|string $controller
-	 *
-	 * @return Controller
 	 */
 	private function resolve_controller($controller): Controller
 	{
-		if ($controller instanceof \Closure)
+		if ($controller instanceof Closure)
 		{
 			return new ClosureController($controller);
 		}

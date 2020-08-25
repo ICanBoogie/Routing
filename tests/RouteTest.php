@@ -11,20 +11,22 @@
 
 namespace ICanBoogie\Routing;
 
-use ICanBoogie\HTTP\Response;
 use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\Response;
+use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
 
-class RouteTest extends \PHPUnit\Framework\TestCase
+class RouteTest extends TestCase
 {
-	private $routes;
-
-	protected function setUp()
-	{
-		$this->routes = $this
-			->getMockBuilder(RouteCollection::class)
-			->disableOriginalConstructor()
-			->getMock();
-	}
+//	private $routes;
+//
+//	protected function setUp(): void
+//	{
+//		$this->routes = $this
+//			->getMockBuilder(RouteCollection::class)
+//			->disableOriginalConstructor()
+//			->getMock();
+//	}
 
 	public function testGetPatternInstance()
 	{
@@ -93,13 +95,11 @@ class RouteTest extends \PHPUnit\Framework\TestCase
 		$this->assertEquals($expected, $route->url);
 	}
 
-	/**
-	 * @expectedException \ICanBoogie\Routing\PatternRequiresValues
-	 */
 	public function test_get_url_requiring_values()
 	{
 		$expected = "/:year-:month.html";
 		$route = new Route($expected, []);
+		$this->expectException(PatternRequiresValues::class);
 		$this->assertEquals($expected, $route->url);
 	}
 
@@ -112,12 +112,13 @@ class RouteTest extends \PHPUnit\Framework\TestCase
 
 	/**
 	 * @dataProvider provide_invalid_construct_properties
-	 * @expectedException \InvalidArgumentException
+	 *
 	 *
 	 * @param $properties
 	 */
 	public function test_should_throw_exception_on_invalid_construct_property($properties)
 	{
+		$this->expectException(InvalidArgumentException::class);
 		new Route('/', $properties);
 	}
 

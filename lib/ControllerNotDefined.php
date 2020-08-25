@@ -11,10 +11,12 @@
 
 namespace ICanBoogie\Routing;
 
+use InvalidArgumentException;
+
 /**
  * Exception thrown when the controller of a route is not defined.
  */
-class ControllerNotDefined extends \InvalidArgumentException implements Exception
+class ControllerNotDefined extends InvalidArgumentException implements Exception
 {
 
 }

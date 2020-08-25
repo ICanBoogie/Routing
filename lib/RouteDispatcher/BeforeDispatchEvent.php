@@ -30,7 +30,7 @@ use ICanBoogie\Routing\Route;
  */
 class BeforeDispatchEvent extends Event
 {
-	const TYPE = 'dispatch:before';
+	public const TYPE = 'dispatch:before';
 
 	/**
 	 * @var Route

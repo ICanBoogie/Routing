@@ -184,12 +184,10 @@ class PatternTest extends \PHPUnit\Framework\TestCase
 		$this->assertEquals($expected, $pattern->format());
 	}
 
-	/**
-	 * @expectedException \ICanBoogie\Routing\PatternRequiresValues
-	 */
 	public function test_formatting_without_values_when_they_are_required()
 	{
 		$pattern = Pattern::from(":year-:month.html");
+		$this->expectException(PatternRequiresValues::class);
 		$pattern->format();
 	}
 

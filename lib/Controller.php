@@ -16,10 +16,16 @@ use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\HTTP\Status;
 use ICanBoogie\Prototyped;
-use ICanBoogie\Routing\Controller\BeforeActionEvent;
 use ICanBoogie\Routing\Controller\ActionEvent;
-
+use ICanBoogie\Routing\Controller\BeforeActionEvent;
+use InvalidArgumentException;
+use function get_class;
 use function ICanBoogie\underscore;
+use function is_array;
+use function is_callable;
+use function is_object;
+use function json_encode;
+use function preg_match;
 
 /**
  * A route controller.
@@ -63,9 +69,9 @@ abstract class Controller extends Prototyped
 	 */
 	protected function get_name(): ?string
 	{
-		$controller_class = \get_class($this);
+		$controller_class = get_class($this);
 
-		if (\preg_match('/(\w+)Controller$/', $controller_class, $matches))
+		if (preg_match('/(\w+)Controller$/', $controller_class, $matches))
 		{
 			return underscore($matches[1]);
 		}
@@ -111,7 +117,7 @@ abstract class Controller extends Prototyped
 	 *
 	 * @param Request $request
 	 *
-	 * @return \ICanBoogie\HTTP\Response|mixed
+	 * @return Response|mixed
 	 */
 	final public function __invoke(Request $request)
 	{
@@ -149,9 +155,7 @@ abstract class Controller extends Prototyped
 	/**
 	 * Performs the proper action for the request.
 	 *
-	 * @param Request $request
-	 *
-	 * @return \ICanBoogie\HTTP\Response|mixed
+	 * @return Response|mixed
 	 */
 	abstract protected function action(Request $request);
 
@@ -188,22 +192,20 @@ abstract class Controller extends Prototyped
 			return $this->forward_to_route($destination);
 		}
 
-		if (\is_object($destination))
+		if (is_object($destination))
 		{
-			$destination = "instance of " . \get_class($destination);
+			$destination = "instance of " . get_class($destination);
 		}
-		else if (\is_array($destination))
+		else if (is_array($destination))
 		{
-			$destination = \json_encode($destination);
+			$destination = json_encode($destination);
 		}
 
-		throw new \InvalidArgumentException("Don't know how to forward to: $destination.");
+		throw new InvalidArgumentException("Don't know how to forward to: $destination.");
 	}
 
 	/**
 	 * Forwards dispatching to another router.
-	 *
-	 * @param Route $route
 	 *
 	 * @return Response|mixed
 	 */
@@ -221,7 +223,7 @@ abstract class Controller extends Prototyped
 
 		$controller = $route->controller;
 
-		if (!\is_callable($controller))
+		if (!is_callable($controller))
 		{
 			$controller = new $controller;
 		}

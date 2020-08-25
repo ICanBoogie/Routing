@@ -26,7 +26,7 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 	 */
 	private $events;
 
-	public function setUp()
+	protected function setUp(): void
 	{
 		$this->events = $events = new EventCollection;
 
@@ -265,7 +265,7 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 
 	/**
 	 * @dataProvider provide_test_forward_to_invalid
-	 * @expectedException \InvalidArgumentException
+	 *
 	 *
 	 * @param mixed $invalid
 	 */
@@ -278,6 +278,7 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 
 		/* @var $controller Controller */
 
+		$this->expectException(\InvalidArgumentException::class);
 		$controller->forward_to($invalid);
 	}
 

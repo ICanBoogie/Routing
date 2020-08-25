@@ -22,7 +22,7 @@ use ICanBoogie\Routing\Controller;
  */
 class BeforeActionEvent extends Event
 {
-	const TYPE = 'action:before';
+	public const TYPE = 'action:before';
 
 	/**
 	 * Reference to the result.
@@ -32,7 +32,6 @@ class BeforeActionEvent extends Event
 	public $result;
 
 	/**
-	 * @param Controller $target
 	 * @param mixed $result
 	 */
 	public function __construct(Controller $target, &$result)

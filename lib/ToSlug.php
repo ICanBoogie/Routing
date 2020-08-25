@@ -20,8 +20,6 @@ interface ToSlug
 {
 	/**
 	 * Returns a slug representation of the instance.
-	 *
-	 * @return string
 	 */
 	public function to_slug(): string;
 }

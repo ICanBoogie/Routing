@@ -13,15 +13,17 @@ namespace ICanBoogie\Routing\RouteDispatcher;
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
-use ICanBoogie\Routing\RouteDispatcher;
 use ICanBoogie\Routing\Route;
+use ICanBoogie\Routing\RouteDispatcher;
+use PHPUnit\Framework\TestCase;
+use TypeError;
 
-class BeforeDispatchEventTest extends \PHPUnit\Framework\TestCase
+class BeforeDispatchEventTest extends TestCase
 {
 	private $dispatcher;
 	private $route;
 
-	public function setUp()
+	protected function setUp(): void
 	{
 		$this->dispatcher = $this
 			->getMockBuilder(RouteDispatcher::class)
@@ -44,7 +46,7 @@ class BeforeDispatchEventTest extends \PHPUnit\Framework\TestCase
 		$route = $this->route;
 		$request = Request::from('/');
 
-		$this->expectException(\TypeError::class);
+		$this->expectException(TypeError::class);
 
 		BeforeDispatchEvent::from([
 

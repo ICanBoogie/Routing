@@ -28,7 +28,7 @@ use ICanBoogie\Routing\Route;
  */
 class DispatchEvent extends Event
 {
-	const TYPE = 'dispatch';
+	public const TYPE = 'dispatch';
 
 	/**
 	 * @var Route

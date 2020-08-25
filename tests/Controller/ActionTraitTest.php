@@ -15,14 +15,16 @@ use ICanBoogie\EventCollection;
 use ICanBoogie\EventCollectionProvider;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
+use ICanBoogie\Routing\ActionNotDefined;
 use ICanBoogie\Routing\Controller\ActionTraitTest\ActionController;
+use ICanBoogie\Routing\RouteCollection;
 use ICanBoogie\Routing\RouteDefinition;
 use ICanBoogie\Routing\RouteDispatcher;
-use ICanBoogie\Routing\RouteCollection;
+use PHPUnit\Framework\TestCase;
 
-class ActionTraitTest extends \PHPUnit\Framework\TestCase
+class ActionTraitTest extends TestCase
 {
-	public function setUp()
+	protected function setUp(): void
 	{
 		$events = new EventCollection;
 
@@ -55,9 +57,6 @@ class ActionTraitTest extends \PHPUnit\Framework\TestCase
 		$this->assertEquals('HERE', $response->body);
 	}
 
-	/**
-	 * @expectedException \ICanBoogie\Routing\ActionNotDefined
-	 */
 	public function test_should_throw_exception_when_action_is_not_defined()
 	{
 		$routes = new RouteCollection([
@@ -73,6 +72,7 @@ class ActionTraitTest extends \PHPUnit\Framework\TestCase
 		$dispatcher = new RouteDispatcher($routes);
 		$request = Request::from("/blog/2014-12-my-awesome-post.html");
 		$request->test = $this;
+		$this->expectException(ActionNotDefined::class);
 		$dispatcher($request);
 	}
 
@@ -84,7 +84,8 @@ class ActionTraitTest extends \PHPUnit\Framework\TestCase
 		$controller = $this
 			->getMockBuilder(ActionController::class)
 			->disableOriginalConstructor()
-			->setMethods([ 'get_action', 'action_post_' . $action ])
+			->onlyMethods([ 'get_action' ])
+			->addMethods([ 'action_post_' . $action ])
 			->getMockForAbstractClass();
 		$controller
 			->expects($this->once())
@@ -108,7 +109,8 @@ class ActionTraitTest extends \PHPUnit\Framework\TestCase
 		$controller = $this
 			->getMockBuilder(ActionController::class)
 			->disableOriginalConstructor()
-			->setMethods([ 'get_action', 'action_any_' . $action ])
+			->onlyMethods([ 'get_action' ])
+			->addMethods([ 'action_any_' . $action ])
 			->getMockForAbstractClass();
 		$controller
 			->expects($this->once())
@@ -126,10 +128,8 @@ class ActionTraitTest extends \PHPUnit\Framework\TestCase
 
 	/**
 	 * @dataProvider provider_resource_action
-	 *
-	 * @param string $action
 	 */
-	public function test_resource_action($action)
+	public function test_resource_action(string $action)
 	{
 		$rc = uniqid();
 
@@ -138,7 +138,8 @@ class ActionTraitTest extends \PHPUnit\Framework\TestCase
 		$controller = $this
 			->getMockBuilder(ActionController::class)
 			->disableOriginalConstructor()
-			->setMethods([ 'get_action', $method ])
+			->onlyMethods([ 'get_action' ])
+			->addMethods([ $method ])
 			->getMockForAbstractClass();
 		$controller
 			->expects($this->once())
@@ -154,7 +155,7 @@ class ActionTraitTest extends \PHPUnit\Framework\TestCase
 		$this->assertSame($rc, $controller(Request::from('/')));
 	}
 
-	public function provider_resource_action()
+	public function provider_resource_action(): array
 	{
 		$methods = 'index new create show edit update delete';
 		$cases = [];

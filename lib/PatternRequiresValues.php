@@ -12,13 +12,15 @@
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\Accessor\AccessorTrait;
+use InvalidArgumentException;
+use Throwable;
 
 /**
  * Exception thrown in attempt to format a pattern requiring values without providing any.
  *
  * @property-read Pattern $pattern
  */
-class PatternRequiresValues extends \InvalidArgumentException implements Exception
+class PatternRequiresValues extends InvalidArgumentException implements Exception
 {
 	use AccessorTrait;
 
@@ -33,7 +35,7 @@ class PatternRequiresValues extends \InvalidArgumentException implements Excepti
 		return $this->pattern;
 	}
 
-	public function __construct(Pattern $pattern, string $message = "The pattern requires values to be formatted.", int $code = 500, \Throwable $previous = null)
+	public function __construct(Pattern $pattern, string $message = "The pattern requires values to be formatted.", int $code = 500, Throwable $previous = null)
 	{
 		$this->pattern = $pattern;
 

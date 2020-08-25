@@ -24,7 +24,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase
 	 */
 	private $events;
 
-	public function setUp()
+	protected function setUp(): void
 	{
 		$this->events = $events = new EventCollection;
 

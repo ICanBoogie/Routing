@@ -20,12 +20,18 @@
 		"issues": "https://github.com/ICanBoogie/Routing/issues",
 		"source": "https://github.com/ICanBoogie/Routing"
 	},
+	"config": {
+		"sort-packages": false
+	},
 	"minimum-stability": "dev",
 	"prefer-stable": true,
-	"prefer-dist": true,
 	"require": {
-		"php": "^7.2",
+		"php": ">=7.2",
+		"ext-json": "*",
 		"icanboogie/http": "^4.0"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^8.5"
 	},
 	"autoload": {
 		"psr-4": {

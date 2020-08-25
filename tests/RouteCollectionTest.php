@@ -13,6 +13,7 @@ namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
+use ICanBoogie\Prototype\MethodNotDefined;
 
 class RouteCollectionTest extends \PHPUnit\Framework\TestCase
 {
@@ -29,21 +30,17 @@ class RouteCollectionTest extends \PHPUnit\Framework\TestCase
 		$this->assertFalse(isset($routes[1]));
 	}
 
-	/**
-	 * @expectedException \ICanBoogie\Prototype\MethodNotDefined
-	 */
 	public function test_should_throw_exception_on_invalid_http_method()
 	{
 		$routes = new RouteCollection;
 		$m = 'invalid_http_method';
+		$this->expectException(MethodNotDefined::class);
 		$routes->$m([ RouteDefinition::CONTROLLER => uniqid(), RouteDefinition::PATTERN => uniqid() ]);
 	}
 
-	/**
-	 * @expectedException \ICanBoogie\Routing\PatternNotDefined
-	 */
 	public function test_pattern_not_defined()
 	{
+		$this->expectException(PatternNotDefined::class);
 		new RouteCollection([
 
 			'home' => [
@@ -55,11 +52,9 @@ class RouteCollectionTest extends \PHPUnit\Framework\TestCase
 		]);
 	}
 
-	/**
-	 * @expectedException \ICanBoogie\Routing\ControllerNotDefined
-	 */
 	public function test_controller_not_defined()
 	{
+		$this->expectException(ControllerNotDefined::class);
 		new RouteCollection([
 
 			'home' => [
@@ -160,12 +155,10 @@ class RouteCollectionTest extends \PHPUnit\Framework\TestCase
 		$this->assertInstanceOf($one_class, $one);
 	}
 
-	/**
-	 * @expectedException \ICanBoogie\Routing\RouteNotDefined
-	 */
 	public function test_offsetGet_undefined()
 	{
 		$routes = new RouteCollection;
+		$this->expectException(RouteNotDefined::class);
 		$routes[uniqid()];
 	}
 
@@ -199,7 +192,7 @@ class RouteCollectionTest extends \PHPUnit\Framework\TestCase
 		foreach ($routes as $id => $definition)
 		{
 			$names[] = $id;
-			$this->assertInternalType('array', $definition);
+			$this->assertIsArray($definition);
 		}
 
 		$this->assertEquals([ 'one', 'three' ], $names);

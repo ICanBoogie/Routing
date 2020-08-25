@@ -11,10 +11,22 @@
 
 namespace ICanBoogie\Routing;
 
+use ArrayAccess;
+use ArrayIterator;
+use Countable;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Prototype\MethodNotDefined;
-
+use IteratorAggregate;
+use function count;
 use function ICanBoogie\stable_sort;
+use function in_array;
+use function is_array;
+use function is_string;
+use function parse_str;
+use function parse_url;
+use function strpos;
+use function strtoupper;
+use function substr_count;
 
 /**
  * A route collection.
@@ -30,7 +42,7 @@ use function ICanBoogie\stable_sort;
  * @method RouteCollection patch() patch(string $pattern, $controller, array $options=[]) Add a route for the HTTP method PATCH
  * @method RouteCollection trace() trace(string $pattern, $controller, array $options=[]) Add a route for the HTTP method TRACE.
  */
-class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
+class RouteCollection implements IteratorAggregate, ArrayAccess, Countable
 {
 	/**
 	 * Specify that the route definitions can be trusted.
@@ -66,7 +78,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	{
 		foreach ($definitions as $id => $definition)
 		{
-			if (\is_string($id) && empty($definition[RouteDefinition::ID]))
+			if (is_string($id) && empty($definition[RouteDefinition::ID]))
 			{
 				$definition[RouteDefinition::ID] = $id;
 			}
@@ -77,17 +89,12 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 
 	/**
 	 * Adds a route definition using an HTTP method.
-	 *
-	 * @param string $method
-	 * @param array $arguments
-	 *
-	 * @return $this
 	 */
 	public function __call(string $method, array $arguments): self
 	{
-		$method = \strtoupper($method);
+		$method = strtoupper($method);
 
-		if ($method !== Request::METHOD_ANY && !\in_array($method, Request::METHODS))
+		if ($method !== Request::METHOD_ANY && !in_array($method, Request::METHODS))
 		{
 			throw new MethodNotDefined($method, $this);
 		}
@@ -97,10 +104,10 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 		$this->revoke_cache();
 		$this->add([
 
-			RouteDefinition::CONTROLLER => $controller,
-			RouteDefinition::PATTERN => $pattern
+				RouteDefinition::CONTROLLER => $controller,
+				RouteDefinition::PATTERN => $pattern
 
-		] + $options + [ RouteDefinition::VIA => $method ]);
+			] + $options + [ RouteDefinition::VIA => $method ]);
 
 		return $this;
 	}
@@ -110,12 +117,9 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	 *
 	 * **Note:** The method does *not* revoke cache.
 	 *
-	 * @param array $definition
 	 * @param bool $trusted_definition {@link TRUSTED_DEFINITIONS} if the method should be trusting the
 	 * definition, in which case the method doesn't assert if the definition is valid, nor does
 	 * it normalizes it.
-	 *
-	 * @return $this
 	 */
 	protected function add(array $definition, bool $trusted_definition = false): RouteCollection
 	{
@@ -139,10 +143,6 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	 * {@link RouteMaker::resource}. Both methods accept the same arguments.
 	 *
 	 * @see \ICanBoogie\Routing\RoutesMaker::resource
-	 *
-	 * @param string $name
-	 * @param string $controller
-	 * @param array $options
 	 */
 	public function resource(string $name, string $controller, array $options = []): void
 	{
@@ -157,7 +157,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 
 	public function getIterator()
 	{
-		return new \ArrayIterator($this->routes);
+		return new ArrayIterator($this->routes);
 	}
 
 	public function offsetExists($offset)
@@ -238,7 +238,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 	{
 		$captured = [];
 
-		$parsed = (array) \parse_url($uri) + [ 'path' => null, 'query' => null ];
+		$parsed = (array) parse_url($uri) + [ 'path' => null, 'query' => null ];
 		$path = $parsed['path'];
 
 		if (!$path)
@@ -253,9 +253,9 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 
 			if ($method != Request::METHOD_ANY)
 			{
-				if (\is_array($via))
+				if (is_array($via))
 				{
-					if (!\in_array($method, $via))
+					if (!in_array($method, $via))
 					{
 						return false;
 					}
@@ -334,7 +334,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 
 		if ($query)
 		{
-			\parse_str($query, $parsed_query_string);
+			parse_str($query, $parsed_query_string);
 
 			$captured['__query__'] = $parsed_query_string;
 		}
@@ -381,7 +381,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 		foreach ($this->routes as $id => $definition)
 		{
 			$pattern = $definition[RouteDefinition::PATTERN];
-			$first_capture_position = \strpos($pattern, ':') ?: \strpos($pattern, '<');
+			$first_capture_position = strpos($pattern, ':') ?: strpos($pattern, '<');
 
 			if ($first_capture_position === false)
 			{
@@ -390,7 +390,7 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 			else
 			{
 				$dynamic[$id] = $definition;
-				$weights[$id] = \substr_count($pattern, '/', 0, $first_capture_position);
+				$weights[$id] = substr_count($pattern, '/', 0, $first_capture_position);
 			}
 		}
 
@@ -408,10 +408,6 @@ class RouteCollection implements \IteratorAggregate, \ArrayAccess, \Countable
 
 	/**
 	 * Returns a new collection with filtered routes.
-	 *
-	 * @param callable $filter
-	 *
-	 * @return RouteCollection
 	 */
 	public function filter(callable $filter): RouteCollection
 	{
