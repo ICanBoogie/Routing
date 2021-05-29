@@ -17,6 +17,7 @@ use Countable;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Prototype\MethodNotDefined;
 use IteratorAggregate;
+
 use function count;
 use function ICanBoogie\stable_sort;
 use function in_array;
@@ -41,6 +42,8 @@ use function substr_count;
  * @method RouteCollection put() put(string $pattern, $controller, array $options=[]) Add a route for the HTTP method PUT.
  * @method RouteCollection patch() patch(string $pattern, $controller, array $options=[]) Add a route for the HTTP method PATCH
  * @method RouteCollection trace() trace(string $pattern, $controller, array $options=[]) Add a route for the HTTP method TRACE.
+ *
+ * @template-implements IteratorAggregate<string, Route>
  */
 class RouteCollection implements IteratorAggregate, ArrayAccess, Countable
 {
@@ -57,19 +60,19 @@ class RouteCollection implements IteratorAggregate, ArrayAccess, Countable
 	/**
 	 * Route definitions.
 	 *
-	 * @var array
+	 * @var array<string, array>
 	 */
 	private $routes = [];
 
 	/**
 	 * Route instances.
 	 *
-	 * @var Route[]
+	 * @var array<string, Route>
 	 */
 	private $instances = [];
 
 	/**
-	 * @param array $definitions
+	 * @param array<string, array> $definitions
 	 * @param bool $trusted_definitions {@link TRUSTED_DEFINITIONS} if the definition can be
 	 * trusted. This will speed up the construct process but the definitions will not be checked,
 	 * nor will they be normalized.
@@ -104,10 +107,10 @@ class RouteCollection implements IteratorAggregate, ArrayAccess, Countable
 		$this->revoke_cache();
 		$this->add([
 
-				RouteDefinition::CONTROLLER => $controller,
-				RouteDefinition::PATTERN => $pattern
+			RouteDefinition::CONTROLLER => $controller,
+			RouteDefinition::PATTERN => $pattern
 
-			] + $options + [ RouteDefinition::VIA => $method ]);
+		] + $options + [ RouteDefinition::VIA => $method ]);
 
 		return $this;
 	}
@@ -155,12 +158,15 @@ class RouteCollection implements IteratorAggregate, ArrayAccess, Countable
 		}
 	}
 
-	public function getIterator()
+	public function getIterator(): ArrayIterator
 	{
 		return new ArrayIterator($this->routes);
 	}
 
-	public function offsetExists($offset)
+	/**
+	 * @param string $offset Route identifier.
+	 */
+	public function offsetExists($offset): bool
 	{
 		return isset($this->routes[$offset]);
 	}
@@ -168,37 +174,35 @@ class RouteCollection implements IteratorAggregate, ArrayAccess, Countable
 	/**
 	 * Returns a {@link Route} instance.
 	 *
-	 * @param string $id Route identifier.
-	 *
-	 * @return Route
+	 * @param string $offset Route identifier.
 	 *
 	 * @throws RouteNotDefined
 	 */
-	public function offsetGet($id)
+	public function offsetGet($offset): Route
 	{
-		if (isset($this->instances[$id]))
+		if (isset($this->instances[$offset]))
 		{
-			return $this->instances[$id];
+			return $this->instances[$offset];
 		}
 
-		if (!$this->offsetExists($id))
+		if (!$this->offsetExists($offset))
 		{
-			throw new RouteNotDefined($id);
+			throw new RouteNotDefined($offset);
 		}
 
-		return $this->instances[$id] = Route::from($this->routes[$id]);
+		return $this->instances[$offset] = Route::from($this->routes[$offset]);
 	}
 
 	/**
 	 * Defines a route.
 	 *
-	 * @param string $id The identifier of the route.
-	 * @param array $route The route definition.
+	 * @param string $offset The identifier of the route.
+	 * @param array $value The route definition.
 	 */
-	public function offsetSet($id, $route)
+	public function offsetSet($offset, $value): void
 	{
 		$this->revoke_cache();
-		$this->add([ RouteDefinition::ID => $id ] + $route);
+		$this->add([ RouteDefinition::ID => $offset ] + $value);
 	}
 
 	/**
@@ -206,7 +210,7 @@ class RouteCollection implements IteratorAggregate, ArrayAccess, Countable
 	 *
 	 * @param string $offset The identifier of the route.
 	 */
-	public function offsetUnset($offset)
+	public function offsetUnset($offset): void
 	{
 		unset($this->routes[$offset]);
 
@@ -218,7 +222,7 @@ class RouteCollection implements IteratorAggregate, ArrayAccess, Countable
 	 *
 	 * @inheritdoc
 	 */
-	public function count()
+	public function count(): int
 	{
 		return count($this->routes);
 	}

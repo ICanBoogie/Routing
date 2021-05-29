@@ -22,12 +22,15 @@ use ICanBoogie\Accessor\AccessorTrait;
  */
 class FormattedRoute
 {
+	/**
+	 * @uses get_url
+	 * @uses get_absolute_url
+	 * @uses get_route
+	 */
 	use AccessorTrait;
 
 	/**
 	 * @var string
-	 * @uses get_url
-	 * @uses get_absolute_url
 	 */
 	private $url;
 
@@ -43,7 +46,6 @@ class FormattedRoute
 
 	/**
 	 * @var Route
-	 * @uses get_route
 	 */
 	private $route;
 
@@ -54,7 +56,6 @@ class FormattedRoute
 
 	/**
 	 * @param string $url A relative URL created by {@link Route::format()}.
-	 * @param Route $route
 	 */
 	public function __construct(string $url, Route $route)
 	{

@@ -18,10 +18,13 @@ use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\HTTP\Status;
+use ICanBoogie\Routing\Route\RescueEvent;
 use ICanBoogie\Routing\RouteDispatcher\BeforeDispatchEvent;
 use ICanBoogie\Routing\RouteDispatcher\DispatchEvent;
-use ICanBoogie\Routing\Route\RescueEvent;
 use Throwable;
+
+use function is_callable;
+use function rtrim;
 
 /**
  * Dispatch requests among the defined routes.
@@ -35,6 +38,9 @@ use Throwable;
  */
 class RouteDispatcher implements Dispatcher
 {
+	/**
+	 * @uses get_routes
+	 */
 	use AccessorTrait;
 
 	/**
@@ -57,11 +63,6 @@ class RouteDispatcher implements Dispatcher
 		$this->routes = $routes;
 	}
 
-	/**
-	 * @param Request $request
-	 *
-	 * @return Response|null
-	 */
 	public function __invoke(Request $request): ?Response
 	{
 		$captured = [];
@@ -89,8 +90,6 @@ class RouteDispatcher implements Dispatcher
 	/**
 	 * Normalizes request path.
 	 *
-	 * @param string $path
-	 *
 	 * @return string Decontextualized path with trimmed ending slash.
 	 */
 	protected function normalize_path(string $path): string
@@ -107,10 +106,6 @@ class RouteDispatcher implements Dispatcher
 
 	/**
 	 * Resolves route from request.
-	 *
-	 * @param Request $request
-	 * @param string $normalized_path
-	 * @param array $captured
 	 *
 	 * @return false|Route|null
 	 */

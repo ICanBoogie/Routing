@@ -13,6 +13,7 @@ namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\Request;
 use function array_diff_key;
+use function array_flip;
 use function array_intersect_key;
 use function array_merge;
 use function strtr;
@@ -49,7 +50,7 @@ class RouteMaker
 	 * - `id_regex`: Regex of the identifier value. Defaults to `\d+`.
 	 * - `as`: Specifies the `as` option of the routes created.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	static public function actions(string $name, string $controller, array $actions, array $options = []): array
 	{
@@ -81,7 +82,7 @@ class RouteMaker
 	/**
 	 * Makes route definitions for a resource.
 	 *
-	 * @param array $options The following options are available:
+	 * @param array<string, mixed> $options The following options are available:
 	 *
 	 * - `only`: Only the routes specified are made.
 	 * - `except`: The routes specified are excluded.
@@ -100,6 +101,8 @@ class RouteMaker
 
 	/**
 	 * Normalizes options.
+	 *
+	 * @return array<string, mixed>
 	 */
 	static protected function normalize_options(array $options): array
 	{
@@ -117,6 +120,8 @@ class RouteMaker
 
 	/**
 	 * Returns default resource actions.
+	 *
+	 * @return array<string, mixed>
 	 */
 	static protected function get_resource_actions(): array
 	{
@@ -140,12 +145,12 @@ class RouteMaker
 	{
 		if ($options[self::OPTION_ONLY])
 		{
-			$actions = array_intersect_key($actions, \array_flip((array) $options[self::OPTION_ONLY]));
+			$actions = array_intersect_key($actions, array_flip((array) $options[self::OPTION_ONLY]));
 		}
 
 		if ($options[self::OPTION_EXCEPT])
 		{
-			$actions = array_diff_key($actions, \array_flip((array) $options[self::OPTION_EXCEPT]));
+			$actions = array_diff_key($actions, array_flip((array) $options[self::OPTION_EXCEPT]));
 		}
 
 		return $actions;
@@ -159,7 +164,7 @@ class RouteMaker
 		$id = "<{$options[self::OPTION_ID_NAME]}:{$options[self::OPTION_ID_REGEX]}>";
 		$replace = [ '{name}' => $name, '{id}' => $id ];
 
-		foreach ($actions as $action => &$template)
+		foreach ($actions as &$template)
 		{
 			$template[0] = strtr($template[0], $replace);
 		}

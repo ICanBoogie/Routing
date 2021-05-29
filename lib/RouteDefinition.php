@@ -24,42 +24,42 @@ class RouteDefinition
 	/**
 	 * Pattern of the route.
 	 */
-	const PATTERN = 'pattern';
+	public const PATTERN = 'pattern';
 
 	/**
 	 * A controller class name (with an optional action) or a callable.
 	 */
-	const CONTROLLER = 'controller';
+	public const CONTROLLER = 'controller';
 
 	/**
 	 * The controller action.
 	 */
-	const ACTION = 'action';
+	public const ACTION = 'action';
 
 	/**
 	 * An identifier.
 	 */
-	const ID = 'id';
+	public const ID = 'id';
 
 	/**
 	 * A redirection target.
 	 */
-	const LOCATION = 'location';
+	public const LOCATION = 'location';
 
 	/**
 	 * Request method(s) accepted by the route.
 	 */
-	const VIA = 'via';
+	public const VIA = 'via';
 
 	/**
 	 * Route constructor, a class name for now.
 	 */
-	const CONSTRUCTOR = 'class';
+	public const CONSTRUCTOR = 'class';
 
 	/**
 	 * Normalizes a route definition.
 	 *
-	 * @param array $definition
+	 * @param array<string, mixed> $definition
 	 */
 	static public function normalize(array &$definition): void
 	{
@@ -72,7 +72,7 @@ class RouteDefinition
 	/**
 	 * Ensures that a route definition has an identifier and generates one if required.
 	 *
-	 * @param array $definition
+	 * @param array<string, mixed> $definition
 	 *
 	 * @return string The route identifier.
 	 */
@@ -101,7 +101,7 @@ class RouteDefinition
 	/**
 	 * Asserts that a route definition is valid.
 	 *
-	 * @param array $definition
+	 * @param array<string, mixed> $definition
 	 *
 	 * @throws PatternNotDefined when the pattern is not defined
 	 * @throws ControllerNotDefined when both controller and location are not defined.

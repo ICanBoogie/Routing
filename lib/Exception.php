@@ -11,6 +11,8 @@
 
 namespace ICanBoogie\Routing;
 
+use Throwable;
+
 /**
  * Routing exceptions implement this interface so that they can be easily recognized.
  *
@@ -29,7 +31,7 @@ namespace ICanBoogie\Routing;
  * }
  * </pre>
  */
-interface Exception
+interface Exception extends Throwable
 {
 
 }

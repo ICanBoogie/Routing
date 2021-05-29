@@ -22,11 +22,13 @@ use Throwable;
  */
 class RouteNotDefined extends \Exception implements Exception
 {
+	/**
+	 * @uses get_id
+	 */
 	use AccessorTrait;
 
 	/**
 	 * @var string
-	 * @uses get_id
 	 */
 	private $id;
 

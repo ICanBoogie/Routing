@@ -22,11 +22,13 @@ use Throwable;
  */
 class PatternRequiresValues extends InvalidArgumentException implements Exception
 {
+	/**
+	 * @uses get_pattern
+	 */
 	use AccessorTrait;
 
 	/**
 	 * @var Pattern
-	 * @uses get_pattern
 	 */
 	private $pattern;
 

@@ -13,6 +13,7 @@ namespace ICanBoogie\Routing;
 
 use ICanBoogie\Accessor\AccessorTrait;
 use InvalidArgumentException;
+
 use function array_combine;
 use function array_intersect_key;
 use function get_called_class;
@@ -22,7 +23,7 @@ use function implode;
  * A route.
  *
  * @property-read Pattern $pattern The pattern of the route.
- * @property-read string $controller The class name of the controller.
+ * @property-read callable|string $controller The class name of the controller.
  * @property-read string|null $action Controller action.
  * @property-read string $id Route identifier.
  * @property-read string|null $location Redirection destination.
@@ -34,6 +35,18 @@ use function implode;
  */
 class Route
 {
+	/**
+	 * @uses get_id
+	 * @uses get_location
+	 * @uses get_pattern
+	 * @uses get_controller
+	 * @uses get_action
+	 * @uses get_via
+	 * @uses get_formatting_value
+	 * @uses get_has_formatting_value
+	 * @uses get_url
+	 * @uses get_absolute_url
+	 */
 	use AccessorTrait;
 
 	private const INVALID_CONSTRUCT_PROPERTIES = [ 'formatting_value', 'url', 'absolute_url' ];
@@ -41,7 +54,7 @@ class Route
 	/**
 	 * Creates a new {@link Route} instance from a route definition.
 	 *
-	 * @param array $definition
+	 * @param array<string, mixed> $definition
 	 *
 	 * @return static
 	 */
@@ -61,7 +74,6 @@ class Route
 	 * Pattern of the route.
 	 *
 	 * @var Pattern
-	 * @uses get_pattern
 	 */
 	private $pattern;
 
@@ -73,11 +85,13 @@ class Route
 	/**
 	 * Controller's class name or function.
 	 *
-	 * @var mixed @todo Should be string|null
-	 * @uses get_controller
+	 * @var string|callable
 	 */
 	private $controller;
 
+	/**
+	 * @return string|callable
+	 */
 	private function get_controller()
 	{
 		return $this->controller;
@@ -87,7 +101,6 @@ class Route
 	 * Controller action.
 	 *
 	 * @var string|null
-	 * @uses get_action
 	 */
 	private $action;
 
@@ -100,7 +113,6 @@ class Route
 	 * Identifier of the route.
 	 *
 	 * @var string|null
-	 * @uses get_id
 	 */
 	private $id;
 
@@ -115,7 +127,6 @@ class Route
 	 * If the property is defined the route is considered an alias.
 	 *
 	 * @var string|null
-	 * @uses get_location
 	 */
 	private $location;
 
@@ -128,7 +139,6 @@ class Route
 	 * Request methods accepted by the route.
 	 *
 	 * @var string|array|null
-	 * @uses get_via
 	 */
 	private $via;
 
@@ -141,8 +151,6 @@ class Route
 	 * Formatting value.
 	 *
 	 * @var mixed
-	 * @uses get_formatting_value
-	 * @uses get_has_formatting_value
 	 */
 	private $formatting_value;
 
@@ -193,19 +201,14 @@ class Route
 
 	/**
 	 * Formats a route into a relative URL using its formatting value.
-	 *
-	 * @return string
 	 */
-	public function __toString()
+	public function __toString(): string
 	{
-		return (string) $this->url;
+		return $this->url;
 	}
 
 	/**
 	 * Asserts that properties are valid.
-	 *
-	 * @param array $properties
-	 * @param array $invalid
 	 *
 	 * @throws InvalidArgumentException if a property is not valid.
 	 */
