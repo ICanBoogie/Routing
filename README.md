@@ -1,7 +1,7 @@
 # Routing
 
 [![Release](https://img.shields.io/packagist/v/icanboogie/routing.svg)](https://packagist.org/packages/icanboogie/routing)
-[![Build Status](https://img.shields.io/travis/ICanBoogie/Routing.svg)](http://travis-ci.org/ICanBoogie/Routing)
+[![Build Status](https://img.shields.io/github/workflow/status/ICanBoogie/Routing/test)](https://github.com/ICanBoogie/Routing/actions?query=workflow%3Atest)
 [![Code Quality](https://img.shields.io/scrutinizer/g/ICanBoogie/Routing.svg)](https://scrutinizer-ci.com/g/ICanBoogie/Routing)
 [![Code Coverage](https://img.shields.io/coveralls/ICanBoogie/Routing.svg)](https://coveralls.io/r/ICanBoogie/Routing)
 [![Packagist](https://img.shields.io/packagist/dt/icanboogie/routing.svg)](https://packagist.org/packages/icanboogie/routing)
@@ -30,21 +30,21 @@ use ICanBoogie\Routing\RouteCollection;
 
 $routes = new RouteCollection([
 
-	'articles:delete' => [
+    'articles:delete' => [
 
-		RouteDefinition::PATTERN => '/articles/<id:\d+>',
-		RouteDefinition::CONTROLLER => ArticlesController::class,
-		RouteDefinition::ACTION => 'delete',
-		RouteDefinition::VIA => Request::METHOD_DELETE
-	
-	]
+        RouteDefinition::PATTERN => '/articles/<id:\d+>',
+        RouteDefinition::CONTROLLER => ArticlesController::class,
+        RouteDefinition::ACTION => 'delete',
+        RouteDefinition::VIA => Request::METHOD_DELETE
+
+    ]
 
 ]);
 
 $request = Request::from([
 
-	Request::OPTION_URI => "/articles/123",
-	Request::OPTION_IS_DELETE => true
+    Request::OPTION_URI => "/articles/123",
+    Request::OPTION_IS_DELETE => true
 
 ]);
 
@@ -93,7 +93,7 @@ A route definition is an array, which may be created with the following keys:
 
 - `RouteDefinition::PATTERN`: The pattern of the URL.
 - `RouteDefinition::CONTROLLER`: The controller class or a callable.
-- `RouteDefinition::ACTION`: An optional action of the controller. 
+- `RouteDefinition::ACTION`: An optional action of the controller.
 - `RouteDefinition::ID`: The identifier of the route.
 - `RouteDefinition::VIA`: If the route needs to respond to one or more HTTP methods, e.g.
 `Request::METHOD_GET` or `[ Request::METHOD_PUT, Request::METHOD_PATCH ]`.
@@ -123,7 +123,7 @@ single route and extract its parameters. Three types of placeholder are availabl
 - Relaxed placeholder: Only the name of the parameter is specified, it matches anything until
 the following part. e.g. `/articles/:id/edit` where `:id` is the placeholder for
 the `RouteDefinition::ID` parameter.
- 
+
 - Constrained placeholder: A regular expression is used to match the parameter value.
 e.g. `/articles/<id:\d+>/edit` where `<id:\d+>` is the placeholder for the `id` parameter
 which value must match `/^\d+$/`.
@@ -215,10 +215,10 @@ $routes = new RouteCollection;
 
 $routes['articles:index'] = [
 
-	RouteDefinition::PATTERN => '/articles',
-	RouteDefinition::CONTROLLER => ArticlesController::class,
-	RouteDefinition::ACTION => 'index',
-	RouteDefinition::VIA => Request::METHOD_GET
+    RouteDefinition::PATTERN => '/articles',
+    RouteDefinition::CONTROLLER => ArticlesController::class,
+    RouteDefinition::ACTION => 'index',
+    RouteDefinition::VIA => Request::METHOD_GET
 
 ];
 
@@ -266,16 +266,16 @@ You can provide a closure, but it's best to create filter classes that you can e
 
 class AdminIndexRouteFilter
 {
-	/**
-	 * @param array $definition A route definition.
-	 * @param string $id A route identifier.
-	 * 
-	 * @return bool
-	 */
-	public function __invoke(array $definition, $id)
-	{
-	    return strpos($id, 'admin:') === 0 && !preg_match('/:index$/', $id);
-	}
+    /**
+     * @param array $definition A route definition.
+     * @param string $id A route identifier.
+     *
+     * @return bool
+     */
+    public function __invoke(array $definition, $id)
+    {
+        return strpos($id, 'admin:') === 0 && !preg_match('/:index$/', $id);
+    }
 }
 
 $filtered_routes = $routes->filter(new AdminIndexRouteFilter);
@@ -371,13 +371,13 @@ use ICanBoogie\Routing\RouteDefinition;
 
 $routes = new RouteCollection([
 
-	'article:show' => [
+    'article:show' => [
 
-		RouteDefinition::PATTERN => '/articles/<year:\d{4}>-<month:\d{2}>.html',
-		RouteDefinition::CONTROLLER => ArticlesController::class,
-		RouteDefinition::ACTION => 'show'
+        RouteDefinition::PATTERN => '/articles/<year:\d{4}>-<month:\d{2}>.html',
+        RouteDefinition::CONTROLLER => ArticlesController::class,
+        RouteDefinition::ACTION => 'show'
 
-	]
+    ]
 
 ]);
 
@@ -474,10 +474,10 @@ use ICanBoogie\Routing\Controller;
 
 class DeleteController extends Controller
 {
-	protected function action(Request $request)
-	{
-		// Your code goes here, and should return a string or a Response instance
-	}
+    protected function action(Request $request)
+    {
+        // Your code goes here, and should return a string or a Response instance
+    }
 }
 ```
 
@@ -516,13 +516,13 @@ use ICanBoogie\Routing\RouteDefinition;
 
 return [
 
-	'contact' => [
+    'contact' => [
 
-		RouteDefinition::PATTERN => '/contact',
-		RouteDefinition::CONTROLLER => AppController::class,
-		RouteDefinition::ACTION => 'contact'
+        RouteDefinition::PATTERN => '/contact',
+        RouteDefinition::CONTROLLER => AppController::class,
+        RouteDefinition::ACTION => 'contact'
 
-	]
+    ]
 
 ];
 ```
@@ -538,30 +538,30 @@ use ICanBoogie\Routing\Controller;
 
 class AppController extends Controller
 {
-	use Controller\ActionTrait;
-	
-	protected function action_any_contact()
-	{
-		return new ContactForm;
-	}
+    use Controller\ActionTrait;
 
-	protected function action_post_contact()
-	{
-		$form = new ContactForm;
-		$request = $this->request;
+    protected function action_any_contact()
+    {
+        return new ContactForm;
+    }
 
-		if (!$form->validate($request->params, $errors))
-		{
-			return $this->redirect($this->routes['contact']);
-		}
+    protected function action_post_contact()
+    {
+        $form = new ContactForm;
+        $request = $this->request;
 
-		// …
+        if (!$form->validate($request->params, $errors))
+        {
+            return $this->redirect($this->routes['contact']);
+        }
 
-		$email = $request['email'];
-		$message = $request['message'];
+        // …
 
-		// …
-	}
+        $email = $request['email'];
+        $message = $request['message'];
+
+        // …
+    }
 }
 ```
 
@@ -602,42 +602,42 @@ use ICanBoogie\Routing\Controller;
 
 class PhotosController extends Controller
 {
-	use Controller\ActionTrait;
+    use Controller\ActionTrait;
 
-	protected function action_index()
-	{
-		// …
-	}
-	
-	protected function action_new()
-	{
-		// …
-	}
-	
-	protected function action_create()
-	{
-		// …
-	}
-	
-	protected function action_show($id)
-	{
-		// …
-	}
-	
-	protected function action_edit($id)
-	{
-		// …
-	}
-	
-	protected function action_update($id)
-	{
-		// …
-	}
+    protected function action_index()
+    {
+        // …
+    }
 
-	protected function action_delete($id)
-	{
-		// …
-	}
+    protected function action_new()
+    {
+        // …
+    }
+
+    protected function action_create()
+    {
+        // …
+    }
+
+    protected function action_show($id)
+    {
+        // …
+    }
+
+    protected function action_edit($id)
+    {
+        // …
+    }
+
+    protected function action_update($id)
+    {
+        // …
+    }
+
+    protected function action_delete($id)
+    {
+        // …
+    }
 }
 ```
 
@@ -666,47 +666,47 @@ $definitions = Make::resource('articles', ArticlesController::class);
 // only create the _index_ definition
 $definitions = Make::resource('articles', ArticlesController::class, [
 
-	Make::OPTION_ONLY => Make::ACTION_INDEX
+    Make::OPTION_ONLY => Make::ACTION_INDEX
 
 ]);
 
 // only create the _index_ and _show_ definitions
 $definitions = Make::resource('articles', ArticlesController::class, [
 
-	Make::OPTION_ONLY => [ Make::ACTION_INDEX, Make::ACTION_SHOW ]
+    Make::OPTION_ONLY => [ Make::ACTION_INDEX, Make::ACTION_SHOW ]
 
 ]);
 
 // create definitions except _destroy_
 $definitions = Make::resource('articles', ArticlesController::class, [
 
-	Make::OPTION_EXCEPT => Make::ACTION_DELETE
+    Make::OPTION_EXCEPT => Make::ACTION_DELETE
 
 ]);
 
 // create definitions except _updated_ and _destroy_
 $definitions = Make::resource('articles', PhotosController::class, [
 
-	Make::OPTION_EXCEPT => [ Make::ACTION_UPDATE, Make::ACTION_DELETE ]
+    Make::OPTION_EXCEPT => [ Make::ACTION_UPDATE, Make::ACTION_DELETE ]
 
 ]);
 
 // specify _key_ property name and its regex constraint
 $definitions = Make::resource('articles', ArticlesController::class, [
 
-	Make::OPTION_ID_NAME => 'uuid',
-	Make::OPTION_ID_REGEX => '{:uuid:}'
+    Make::OPTION_ID_NAME => 'uuid',
+    Make::OPTION_ID_REGEX => '{:uuid:}'
 
 ]);
 
 // specify the identifier of the _create_ definition
 $definitions = Make::resource('articles', ArticlesController::class, [
 
-	Make::OPTION_AS => [ 
+    Make::OPTION_AS => [
 
-		Make::ACTION_CREATE => 'articles:build' 
+        Make::ACTION_CREATE => 'articles:build'
 
-	]
+    ]
 
 ]);
 ```
@@ -730,9 +730,9 @@ method.
 
 $routes->get('/hello/:name', function ($name) {
 
-	/* @var $this \ICanBoogie\Routing\Controller */
+    /* @var $this \ICanBoogie\Routing\Controller */
 
-	return "$name === {$this->request['name']}";
+    return "$name === {$this->request['name']}";
 
 });
 ```
@@ -751,15 +751,15 @@ so that they are easy to recognize:
 
 try
 {
-	// …
+    // …
 }
 catch (\ICanBoogie\Routing\Exception $e)
 {
-	// a routing exception
+    // a routing exception
 }
 catch (\Exception $e)
 {
-	// another type of exception
+    // another type of exception
 }
 ```
 
@@ -803,18 +803,18 @@ $path = "/my/application";
 
 Routing\Helpers::patch('contextualize', function($str) use($path) {
 
-	return $path . $str;
+    return $path . $str;
 
 });
 
 Routing\Helpers::patch('decontextualize', function($str) use($path) {
 
-	if (strpos($str, $path . '/') === 0)
-	{
-		$str = substr($str, strlen($path));
-	}
+    if (strpos($str, $path . '/') === 0)
+    {
+        $str = substr($str, strlen($path));
+    }
 
-	return $str;
+    return $str;
 
 });
 ```
@@ -839,25 +839,9 @@ The package requires PHP 7.2 or later.
 
 ## Installation
 
-The recommended way to install this package is through [Composer](http://getcomposer.org/):
-
+```bash
+composer require icanboogie/routing
 ```
-$ composer require icanboogie/routing
-```
-
-The following package is required, you might want to check it out:
-
-* [icanboogie/http](https://packagist.org/packages/icanboogie/http)
-
-
-
-
-
-### Cloning the repository
-
-The package is [available on GitHub](https://github.com/ICanBoogie/Routing), its repository can be cloned with the following command line:
-
-	$ git clone https://github.com/ICanBoogie/Routing.git
 
 
 
@@ -874,12 +858,9 @@ The package is documented as part of the [ICanBoogie][] framework
 
 ## Testing
 
-The test suite is ran with the `make test` command. [PHPUnit](https://phpunit.de/) and [Composer](http://getcomposer.org/) need to be globally available to run the suite. The command installs dependencies as required. The `make test-coverage` command runs test suite and also creates an HTML coverage report in `build/coverage`. The directory can later be cleaned with the `make clean` command.
-
-The package is continuously tested by [Travis CI](http://about.travis-ci.org/).
-
-[![Build Status](https://img.shields.io/travis/ICanBoogie/Routing.svg)](http://travis-ci.org/ICanBoogie/Routing)
-[![Code Coverage](https://img.shields.io/coveralls/ICanBoogie/Routing.svg)](https://coveralls.io/r/ICanBoogie/Routing)
+Run `make test-container` to create and log into the test container, then run `make test` to run the
+test suite. Alternatively, run `make test-coverage` to run the test suite with test coverage. Open
+`build/coverage/index.html` to see the breakdown of the code coverage.
 
 
 
@@ -887,7 +868,7 @@ The package is continuously tested by [Travis CI](http://about.travis-ci.org/).
 
 ## License
 
-**icanboogie/routing** is licensed under the New BSD License - See the [LICENSE](LICENSE) file for details.
+**icanboogie/routing** is released under the [New BSD License](LICENSE).
 
 
 
