@@ -34,6 +34,12 @@ test-coveralls: test-dependencies
 	@mkdir -p build/logs
 	@$(PHPUNIT) --coverage-clover build/logs/clover.xml
 
+.PHONY: test-container
+test-container:
+	@-docker-compose -f ./docker-compose.yml run --rm app bash
+	@docker-compose -f ./docker-compose.yml down -v
+
+.PHONY: doc
 doc: vendor
 	@mkdir -p build/docs
 	@apigen generate \
