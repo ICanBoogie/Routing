@@ -19,14 +19,11 @@ use ICanBoogie\HTTP\Request;
  */
 final class ClosureController extends Controller
 {
-	/**
-	 * @var Closure
-	 */
-	private $closure;
+	private Closure $closure;
 
 	public function __construct(Closure $closure)
 	{
-		$this->closure = Closure::bind($closure, $this);
+		$this->closure = Closure::bind($closure, $this); //TODO-202105: Shouldn't change closure binding.
 	}
 
 	/**

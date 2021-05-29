@@ -19,6 +19,7 @@ use ICanBoogie\Prototyped;
 use ICanBoogie\Routing\Controller\ActionEvent;
 use ICanBoogie\Routing\Controller\BeforeActionEvent;
 use InvalidArgumentException;
+
 use function get_class;
 use function ICanBoogie\underscore;
 use function is_array;
@@ -79,10 +80,7 @@ abstract class Controller extends Prototyped
 		return null;
 	}
 
-	/**
-	 * @var Request
-	 */
-	private $request;
+	private Request $request;
 
 	protected function get_request(): Request
 	{
@@ -115,11 +113,9 @@ abstract class Controller extends Prototyped
 	 * `ICanBoogie\Routing\Controller::action:before` event of class
 	 * {@link Controller\ActionEvent} is fired after.
 	 *
-	 * @param Request $request
-	 *
 	 * @return Response|mixed
 	 */
-	final public function __invoke(Request $request)
+	final public function __invoke(Request $request) //TODO-202105: Only return Response
 	{
 		$this->request = $request;
 
@@ -168,7 +164,7 @@ abstract class Controller extends Prototyped
 	 *
 	 * @return RedirectResponse
 	 */
-	public function redirect($url, int $status = Status::FOUND, array $headers = []): Response
+	public function redirect(Route|string $url, int $status = Status::FOUND, array $headers = []): Response
 	{
 		if ($url instanceof Route)
 		{
@@ -185,7 +181,7 @@ abstract class Controller extends Prototyped
 	 *
 	 * @return mixed
 	 */
-	public function forward_to($destination)
+	public function forward_to(mixed $destination) //TODO-202105: Only support Route?
 	{
 		if ($destination instanceof Route)
 		{
@@ -209,7 +205,7 @@ abstract class Controller extends Prototyped
 	 *
 	 * @return Response|mixed
 	 */
-	protected function forward_to_route(Route $route)
+	protected function forward_to_route(Route $route) //TODO-202105: Return only Response
 	{
 		$route->pattern->match($this->request->uri, $captured);
 

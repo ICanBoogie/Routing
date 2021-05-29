@@ -1,7 +1,7 @@
 #
 # Shared stages for ICanBoogie packages
 #
-FROM php:7.2-cli-buster
+FROM php:8.0-cli-buster
 
 RUN apt-get update && \
 	apt-get install -y autoconf pkg-config && \

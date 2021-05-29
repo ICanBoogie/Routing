@@ -88,6 +88,9 @@ trait ActionTrait
         return 'action_' . $action;
     }
 
+	/**
+	 * @return array<string, string>
+	 */
     protected function resolve_action_args(string $action, Request $request): array
     {
         return array_values($request->path_params);

@@ -13,36 +13,24 @@ namespace ICanBoogie\Routing;
 
 /**
  * Contextualize a pathname.
- *
- * @param string $pathname
- *
- * @return string
  */
-function contextualize($pathname)
+function contextualize(string $pathname): string
 {
 	return Helpers::contextualize($pathname);
 }
 
 /**
  * Decontextualize a pathname.
- *
- * @param string $pathname
- *
- * @return string
  */
-function decontextualize($pathname)
+function decontextualize(string $pathname): string
 {
 	return Helpers::decontextualize($pathname);
 }
 
 /**
  * Absolutize a URL.
- *
- * @param string $url
- *
- * @return string
  */
-function absolutize_url($url)
+function absolutize_url(string $url): string
 {
 	return Helpers::absolutize_url($url);
 }

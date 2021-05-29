@@ -30,30 +30,21 @@ class DispatchEvent extends Event
 {
 	public const TYPE = 'dispatch';
 
-	/**
-	 * @var Route
-	 */
-	private $route;
+	private Route $route;
 
 	protected function get_route(): Route
 	{
 		return $this->route;
 	}
 
-	/**
-	 * @var Request
-	 */
-	private $request;
+	private Request $request;
 
 	protected function get_request(): Request
 	{
 		return $this->request;
 	}
 
-	/**
-	 * @var Response|null
-	 */
-	private $response;
+	private ?Response $response;
 
 	protected function get_response(): ?Response
 	{
@@ -65,6 +56,12 @@ class DispatchEvent extends Event
 		$this->response = $response;
 	}
 
+	/**
+	 * @uses get_route
+	 * @uses get_request
+	 * @uses get_response
+	 * @uses set_response
+	 */
 	public function __construct(RouteDispatcher $target, Route $route, Request $request, Response &$response = null)
 	{
 		$this->route = $route;

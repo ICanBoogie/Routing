@@ -26,15 +26,10 @@ class BeforeActionEvent extends Event
 
 	/**
 	 * Reference to the result.
-	 *
-	 * @var mixed
 	 */
-	public $result;
+	public mixed $result;
 
-	/**
-	 * @param mixed $result
-	 */
-	public function __construct(Controller $target, &$result)
+	public function __construct(Controller $target, mixed &$result)
 	{
 		$this->result = &$result;
 

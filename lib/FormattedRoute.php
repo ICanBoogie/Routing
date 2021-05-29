@@ -29,14 +29,11 @@ class FormattedRoute
 	 */
 	use AccessorTrait;
 
-	/**
-	 * @var string
-	 */
-	private $url;
+	private string $url;
 
 	private function get_url(): string
 	{
-		return contextualize((string) $this);
+		return contextualize($this->url);
 	}
 
 	private function get_absolute_url(): string
@@ -44,10 +41,7 @@ class FormattedRoute
 		return absolutize_url($this->get_url());
 	}
 
-	/**
-	 * @var Route
-	 */
-	private $route;
+	private Route $route;
 
 	private function get_route(): Route
 	{

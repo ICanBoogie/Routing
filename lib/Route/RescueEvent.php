@@ -54,9 +54,10 @@ class RescueEvent extends Event
 	/**
 	 * The request.
 	 *
-	 * @var Request
+	 * @uses get_request
+	 * @uses set_request
 	 */
-	private $request;
+	private Request $request;
 
 	protected function get_request(): Request
 	{
@@ -66,9 +67,10 @@ class RescueEvent extends Event
 	/**
 	 * Reference to the response that rescue the route.
 	 *
-	 * @var Response|null
+	 * @uses get_response
+	 * @uses set_response
 	 */
-	private $response;
+	private ?Response $response;
 
 	protected function get_response(): ?Response
 	{

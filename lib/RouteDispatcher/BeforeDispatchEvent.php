@@ -32,19 +32,13 @@ class BeforeDispatchEvent extends Event
 {
 	public const TYPE = 'dispatch:before';
 
-	/**
-	 * @var Route
-	 */
-	private $route;
+	private Route $route;
 
 	protected function get_route(): Route
 	{
 		return $this->route;
 	}
 
-	/**
-	 * @var Request
-	 */
 	private $request;
 
 	protected function get_request(): Request
@@ -52,10 +46,7 @@ class BeforeDispatchEvent extends Event
 		return $this->request;
 	}
 
-	/**
-	 * @var Response|null
-	 */
-	private $response;
+	private ?Response $response;
 
 	protected function get_response(): ?Response
 	{
@@ -67,6 +58,13 @@ class BeforeDispatchEvent extends Event
 		$this->response = $response;
 	}
 
+	/**
+	 * @uses get_route
+	 * @uses set_route
+	 * @uses get_request
+	 * @uses set_response
+	 * @uses get_response
+	 */
 	public function __construct(RouteDispatcher $target, Route $route, Request $request, Response &$response = null)
 	{
 		$this->route = $route;
