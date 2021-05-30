@@ -9,35 +9,25 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing\RouteDispatcher;
+namespace ICanBoogie\Routing\Route;
 
 use ICanBoogie\Event;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
-use ICanBoogie\Routing\RouteDispatcher;
 use ICanBoogie\Routing\Route;
 
 /**
- * Event class for the `ICanBoogie\Routing\RouteDispatcher::dispatch` event.
+ * Event class for the `ICanBoogie\Routing\Route::respond` event.
  *
  * Third parties may use this event to alter the response before it is returned by the dispatcher.
  *
- * @property-read Route $route
+ * @property-read Route $respond
  * @property-read Request $request
  * @property Response $response
  */
-class DispatchEvent extends Event
+final class RespondEvent extends Event
 {
-	public const TYPE = 'dispatch';
-
-	private Route $route;
-
-	protected function get_route(): Route
-	{
-		return $this->route;
-	}
-
-	private Request $request;
+	public const TYPE = 'respond';
 
 	protected function get_request(): Request
 	{
@@ -57,15 +47,15 @@ class DispatchEvent extends Event
 	}
 
 	/**
-	 * @uses get_route
 	 * @uses get_request
 	 * @uses get_response
 	 * @uses set_response
 	 */
-	public function __construct(RouteDispatcher $target, Route $route, Request $request, Response &$response = null)
-	{
-		$this->route = $route;
-		$this->request = $request;
+	public function __construct(
+		Route $target,
+		private Request $request,
+		Response &$response = null
+	) {
 		$this->response = &$response;
 
 		parent::__construct($target, self::TYPE);

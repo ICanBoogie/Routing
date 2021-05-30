@@ -25,6 +25,8 @@ class DispatchEventTest extends TestCase
 
 	protected function setUp(): void
 	{
+		$this->markTestIncomplete();
+
 		$this->dispatcher = $this
 			->getMockBuilder(RouteDispatcher::class)
 			->disableOriginalConstructor()

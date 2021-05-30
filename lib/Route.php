@@ -12,36 +12,31 @@
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\Accessor\AccessorTrait;
+use ICanBoogie\HTTP\Request;
 use InvalidArgumentException;
 
-use function array_combine;
-use function array_intersect_key;
-use function get_called_class;
-use function implode;
+use function in_array;
+use function is_array;
 
 /**
- * A route.
+ * A respond.
  *
- * @property-read Pattern $pattern The pattern of the route.
- * @property-read callable|string $controller The class name of the controller.
- * @property-read string|null $action Controller action.
- * @property-read string $id Route identifier.
- * @property-read string|null $location Redirection destination.
- * @property-read string|array|null $via The supported HTTP methods.
- * @property-read string $url The contextualized URL of the route.
- * @property-read string $absolute_url The contextualized absolute URL of the route.
- * @property-read mixed $formatting_value The value used to format the route.
- * @property-read bool $has_formatting_value `true` if the route has a formatting value, `false` otherwise.
+ * @property-read Pattern $pattern The pattern of the respond.
+ * @property-read string $action Controller action.
+ * @property-read string|string[] $methods The supported HTTP methods.
+ * @property-read string|null $id Route identifier.
+ * @property-read string $url The contextualized URL of the respond.
+ * @property-read string $absolute_url The contextualized absolute URL of the respond.
+ * @property-read mixed $formatting_value The value used to format the respond.
+ * @property-read bool $has_formatting_value `true` if the respond has a formatting value, `false` otherwise.
  */
-class Route
+final class Route
 {
 	/**
-	 * @uses get_id
-	 * @uses get_location
 	 * @uses get_pattern
-	 * @uses get_controller
 	 * @uses get_action
-	 * @uses get_via
+	 * @uses get_methods
+	 * @uses get_id
 	 * @uses get_formatting_value
 	 * @uses get_has_formatting_value
 	 * @uses get_url
@@ -49,112 +44,37 @@ class Route
 	 */
 	use AccessorTrait;
 
-	private const INVALID_CONSTRUCT_PROPERTIES = [ 'formatting_value', 'url', 'absolute_url' ];
-
 	/**
-	 * Creates a new {@link Route} instance from a route definition.
-	 *
-	 * @param array<string, mixed> $definition
-	 *
-	 * @return static
+	 * Pattern of the respond.
 	 */
-	static public function from(array $definition): self
-	{
-		$class = get_called_class();
-
-		if (isset($definition[RouteDefinition::CONSTRUCTOR]))
-		{
-			$class = $definition[RouteDefinition::CONSTRUCTOR];
-		}
-
-		return new $class($definition[RouteDefinition::PATTERN], $definition);
-	}
-
-	/**
-	 * Pattern of the route.
-	 *
-	 * @var Pattern
-	 */
-	private $pattern;
+	private Pattern $pattern;
 
 	private function get_pattern(): Pattern
 	{
 		return $this->pattern;
 	}
 
-	/**
-	 * Controller's class name or function.
-	 *
-	 * @var string|callable
-	 */
-	private $controller;
-
-	/**
-	 * @return string|callable
-	 */
-	private function get_controller()
-	{
-		return $this->controller;
-	}
-
-	/**
-	 * Controller action.
-	 *
-	 * @var string|null
-	 */
-	private $action;
-
-	private function get_action(): ?string
+	private function get_action(): string
 	{
 		return $this->action;
 	}
 
 	/**
-	 * Identifier of the route.
-	 *
-	 * @var string|null
+	 * @return string|string[]
 	 */
-	private $id;
+	private function get_methods(): string|array
+	{
+		return $this->methods;
+	}
 
 	private function get_id(): ?string
 	{
 		return $this->id;
 	}
 
-	/**
-	 * Redirect location.
-	 *
-	 * If the property is defined the route is considered an alias.
-	 *
-	 * @var string|null
-	 */
-	private $location;
+	private mixed $formatting_value = null; //TODO-202105: Remove state
 
-	private function get_location(): ?string
-	{
-		return $this->location;
-	}
-
-	/**
-	 * Request methods accepted by the route.
-	 *
-	 * @var string|array|null
-	 */
-	private $via;
-
-	private function get_via()
-	{
-		return $this->via;
-	}
-
-	/**
-	 * Formatting value.
-	 *
-	 * @var mixed
-	 */
-	private $formatting_value;
-
-	private function get_formatting_value()
+	private function get_formatting_value(): mixed
 	{
 		return $this->formatting_value;
 	}
@@ -164,33 +84,33 @@ class Route
 		return $this->formatting_value !== null;
 	}
 
-	/**
-	 * Returns relative URL.
-	 */
-	protected function get_url(): string
+	private function get_url(): string
 	{
 		return $this->format($this->formatting_value)->url;
 	}
 
-	/**
-	 * Returns absolute URL.
-	 */
-	protected function get_absolute_url(): string
+	private function get_absolute_url(): string
 	{
 		return $this->format($this->formatting_value)->absolute_url;
 	}
 
-	public function __construct(string $pattern, array $properties)
-	{
+	/**
+	 * @param string $pattern Pattern of the respond.
+	 * @param string $action Identifier of a qualified action. e.g. 'articles:show'.
+	 * @param string|string[] $methods Request method(s) accepted by the respond.
+	 * @param object[] $extensions
+	 */
+	public function __construct(
+		string $pattern,
+		private string $action,
+		private string|array $methods = Request::METHOD_ANY,
+		private string|null $id = null,
+		private array $extensions = [],
+	) {
 		$this->pattern = Pattern::from($pattern);
 
-		unset($properties['pattern']);
-
-		$this->assert_properties_are_valid($properties, self::INVALID_CONSTRUCT_PROPERTIES);
-
-		foreach ($properties as $property => $value)
-		{
-			$this->$property = $value;
+		if (!$this->action) {
+			throw new InvalidArgumentException("Action cannot be empty.");
 		}
 	}
 
@@ -200,7 +120,7 @@ class Route
 	}
 
 	/**
-	 * Formats a route into a relative URL using its formatting value.
+	 * Formats a respond into a relative URL using its formatting value.
 	 */
 	public function __toString(): string
 	{
@@ -208,43 +128,41 @@ class Route
 	}
 
 	/**
-	 * Asserts that properties are valid.
-	 *
-	 * @throws InvalidArgumentException if a property is not valid.
+	 * Whether the specified method matches with the methods supported by the respond.
 	 */
-	protected function assert_properties_are_valid(array $properties, array $invalid): void
+	public function method_matches(string $method): bool
 	{
-		$invalid = array_combine($invalid, $invalid);
-		$invalid = array_intersect_key($properties, $invalid);
+		$methods = $this->methods;
 
-		if (!$invalid)
+		if ($method === Request::METHOD_ANY || $method === $methods || $methods === Request::METHOD_ANY)
 		{
-			return;
+			return true;
 		}
 
-		throw new InvalidArgumentException("Invalid construct property: " . implode(', ', $invalid));
+		if (is_array($methods) && in_array($method, $methods))
+		{
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
-	 * Formats the route with the specified values.
+	 * Formats the respond with the specified values.
 	 *
-	 * Note: The formatting of the route is deferred to its {@link Pattern} instance.
-	 *
-	 * @param object|array|null $values
+	 * Note: The formatting of the respond is deferred to its {@link Pattern} instance.
 	 */
-	public function format($values = null): FormattedRoute
+	public function format(object|array $values = null): FormattedRoute
 	{
 		return new FormattedRoute($this->pattern->format($values), $this);
 	}
 
 	/**
-	 * Assigns a formatting value to a route.
+	 * Assigns a formatting value to a respond.
 	 *
-	 * @param mixed $formatting_value A formatting value.
-	 *
-	 * @return Route A new route bound to a formatting value.
+	 * @return Route A new respond bound to a formatting value.
 	 */
-	public function assign($formatting_value): self
+	public function assign(mixed $formatting_value): self //TODO-202105: Return another type of object, or better, replace by a formatter.
 	{
 		$clone = clone $this;
 

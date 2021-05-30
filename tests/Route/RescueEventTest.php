@@ -11,48 +11,68 @@
 
 namespace ICanBoogie\Routing\Route;
 
+use Exception;
+use ICanBoogie\EventCollection;
+use ICanBoogie\EventCollectionProvider;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Route;
+use PHPUnit\Framework\TestCase;
 
-class RescueEventTest extends \PHPUnit\Framework\TestCase
+use function ICanBoogie\get_events;
+
+final class RescueEventTest extends TestCase
 {
-	public function test_instance()
+	private Route $route;
+	private Request $request;
+	private Response $response;
+	private Exception $exception;
+
+	protected function setUp(): void
 	{
-		$route = $this
-			->getMockBuilder(Route::class)
-			->disableOriginalConstructor()
-			->getMock();
+		parent::setUp();
 
-		$exception = new \Exception;
-		$request = Request::from('/');
-		$response = null;
+		$this->route = new Route('/', '/');
+		$this->request = Request::from();
+		$this->response = new Response();
+		$this->exception = new Exception();
 
-		/* @var $route Route */
-		/* @var $event RescueEvent */
+		EventCollectionProvider::define(function () {
+			static $events;
 
-		$event = RescueEvent::from([
+			return $events ??= new EventCollection();
+		});
+	}
 
-			'target' => $route,
-			'exception' => &$exception,
-			'request' => $request,
-			'response' => &$response
+	public function test_event(): void
+	{
+		$event = new RescueEvent(
+			$this->route,
+			$this->request,
+			$this->exception,
+			$response
+		);
 
-		]);
+		$this->assertSame($this->route, $event->target);
+		$this->assertSame($this->request, $event->request);
+		$this->assertSame($this->exception, $event->exception);
+		$this->assertNull($response);
+		$this->assertNull($event->response);
 
-		$this->assertSame($exception, $event->exception);
-		$this->assertSame($request, $event->request);
-		$this->assertSame($response, $event->response);
+		$event->response = $this->response;
 
-		$exception2 = new \Exception;
-		$response2 = new Response;
+		$this->assertSame($this->response, $response);
+		$this->assertSame($this->response, $event->response);
+	}
 
-		$event->exception = $exception2;
-		$event->response = $response2;
+	public function test_listen(): void
+	{
+		get_events()->attach(function (RescueEvent $event, Route $target) use(&$used): void {
+			$event->response = $this->response;
+		});
 
-		$this->assertSame($exception2, $event->exception);
-		$this->assertSame($response2, $event->response);
-		$this->assertSame($exception2, $exception);
-		$this->assertSame($response2, $response);
+		new RescueEvent($this->route, $this->request, $this->exception, $response);
+
+		$this->assertSame($this->response, $response);
 	}
 }

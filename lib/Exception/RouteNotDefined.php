@@ -9,10 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing;
+namespace ICanBoogie\Routing\Exception;
 
 use ICanBoogie\Accessor\AccessorTrait;
 use ICanBoogie\HTTP\Status;
+use ICanBoogie\Routing\Exception;
 use Throwable;
 
 /**

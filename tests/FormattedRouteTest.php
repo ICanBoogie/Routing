@@ -13,6 +13,11 @@ namespace ICanBoogie\Routing;
 
 class FormattedRouteTest extends \PHPUnit\Framework\TestCase
 {
+	protected function setUp(): void
+	{
+		$this->markTestIncomplete();
+	}
+
 	public function test_get_url()
 	{
 		$url = '/' . uniqid();

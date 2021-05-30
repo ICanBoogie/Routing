@@ -13,7 +13,7 @@ namespace ICanBoogie\Routing\Controller;
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
-use ICanBoogie\Routing\ActionNotDefined;
+use ICanBoogie\Routing\Exception\ActionNotDefined;
 use ICanBoogie\Routing\Route;
 use function array_values;
 use function method_exists;

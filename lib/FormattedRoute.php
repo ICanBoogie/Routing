@@ -14,11 +14,11 @@ namespace ICanBoogie\Routing;
 use ICanBoogie\Accessor\AccessorTrait;
 
 /**
- * Representation of a formatted route.
+ * Representation of a formatted respond.
  *
  * @property-read string $url Relative URL.
  * @property-read string $absolute_url Absolute URL, absolutized with {@link absolutize_url()}.
- * @property-read Route $route The route that was used to format the URL.
+ * @property-read Route $respond The respond that was used to format the URL.
  */
 class FormattedRoute
 {

@@ -11,130 +11,57 @@
 
 namespace ICanBoogie\Routing;
 
-use ArrayAccess;
 use ArrayIterator;
 use Countable;
-use ICanBoogie\HTTP\Request;
-use ICanBoogie\Prototype\MethodNotDefined;
+use ICanBoogie\Routing\RouteMaker\Options;
 use IteratorAggregate;
 
+use function array_diff_key;
 use function count;
 use function ICanBoogie\stable_sort;
-use function in_array;
-use function is_array;
-use function is_string;
 use function parse_str;
 use function parse_url;
-use function strpos;
-use function strtoupper;
 use function substr_count;
 
 /**
- * A route collection.
+ * A respond collection.
  *
- * @method RouteCollection any() any(string $pattern, $controller, array $options=[]) Add a route for any HTTP method.
- * @method RouteCollection connect() connect(string $pattern, $controller, array $options=[]) Add a route for the HTTP method CONNECT.
- * @method RouteCollection delete() delete(string $pattern, $controller, array $options=[]) Add a route for the HTTP method DELETE.
- * @method RouteCollection get() get(string $pattern, $controller, array $options=[]) Add a route for the HTTP method GET.
- * @method RouteCollection head() head(string $pattern, $controller, array $options=[]) Add a route for the HTTP method HEAD.
- * @method RouteCollection options() options(string $pattern, $controller, array $options=[]) Add a route for the HTTP method OPTIONS.
- * @method RouteCollection post() post(string $pattern, $controller, array $options=[]) Add a route for the HTTP method POST.
- * @method RouteCollection put() put(string $pattern, $controller, array $options=[]) Add a route for the HTTP method PUT.
- * @method RouteCollection patch() patch(string $pattern, $controller, array $options=[]) Add a route for the HTTP method PATCH
- * @method RouteCollection trace() trace(string $pattern, $controller, array $options=[]) Add a route for the HTTP method TRACE.
- *
- * @template-implements IteratorAggregate<string, Route>
+ * @implements IteratorAggregate<mixed, Route>
  */
-class RouteCollection implements IteratorAggregate, ArrayAccess, Countable
+final class RouteCollection implements IteratorAggregate, Countable, MutableRouteProvider
 {
 	/**
-	 * Specify that the route definitions can be trusted.
+	 * @var Route[]
 	 */
-	public const TRUSTED_DEFINITIONS = true;
+	private array $routes = [];
 
 	/**
-	 * Class name of the {@link Route} instances.
+	 * @param Route[] $routes
 	 */
-	public const DEFAULT_ROUTE_CLASS = Route::class;
-
-	/**
-	 * Route definitions.
-	 *
-	 * @var array<string, array>
-	 */
-	private $routes = [];
-
-	/**
-	 * Route instances.
-	 *
-	 * @var array<string, Route>
-	 */
-	private $instances = [];
-
-	/**
-	 * @param array<string, array> $definitions
-	 * @param bool $trusted_definitions {@link TRUSTED_DEFINITIONS} if the definition can be
-	 * trusted. This will speed up the construct process but the definitions will not be checked,
-	 * nor will they be normalized.
-	 */
-	public function __construct(array $definitions = [], bool $trusted_definitions = false)
+	public function __construct(iterable $routes = [])
 	{
-		foreach ($definitions as $id => $definition)
+		foreach ($routes as $route)
 		{
-			if (is_string($id) && empty($definition[RouteDefinition::ID]))
-			{
-				$definition[RouteDefinition::ID] = $id;
-			}
-
-			$this->add($definition, $trusted_definitions);
+			$this->add_route($route);
 		}
 	}
 
 	/**
-	 * Adds a route definition using an HTTP method.
-	 */
-	public function __call(string $method, array $arguments): self
-	{
-		$method = strtoupper($method);
-
-		if ($method !== Request::METHOD_ANY && !in_array($method, Request::METHODS))
-		{
-			throw new MethodNotDefined($method, $this);
-		}
-
-		[ $pattern, $controller, $options ] = $arguments + [ 2 => [] ];
-
-		$this->revoke_cache();
-		$this->add([
-
-			RouteDefinition::CONTROLLER => $controller,
-			RouteDefinition::PATTERN => $pattern
-
-		] + $options + [ RouteDefinition::VIA => $method ]);
-
-		return $this;
-	}
-
-	/**
-	 * Adds a route definition.
+	 * Adds a respond definition.
 	 *
 	 * **Note:** The method does *not* revoke cache.
-	 *
-	 * @param bool $trusted_definition {@link TRUSTED_DEFINITIONS} if the method should be trusting the
-	 * definition, in which case the method doesn't assert if the definition is valid, nor does
-	 * it normalizes it.
 	 */
-	protected function add(array $definition, bool $trusted_definition = false): RouteCollection
+	public function add_route(Route $route): self
 	{
-		if (!$trusted_definition)
-		{
-			RouteDefinition::assert_is_valid($definition);
-			RouteDefinition::normalize($definition);
-			RouteDefinition::ensure_has_id($definition);
+		$id = $route->id;
+
+		if ($id) {
+			$this->routes[$id] = $route;
+		} else {
+			$this->routes[] = $route;
 		}
 
-		$id = $definition[RouteDefinition::ID];
-		$this->routes[$id] = $definition;
+		$this->revoke_cache();
 
 		return $this;
 	}
@@ -142,174 +69,88 @@ class RouteCollection implements IteratorAggregate, ArrayAccess, Countable
 	/**
 	 * Adds resource routes.
 	 *
-	 * **Note:** The route definitions for the resource are created by
+	 * **Note:** The respond definitions for the resource are created by
 	 * {@link RouteMaker::resource}. Both methods accept the same arguments.
 	 *
-	 * @see \ICanBoogie\Routing\RoutesMaker::resource
+	 * @see RouteMaker::resource
 	 */
-	public function resource(string $name, string $controller, array $options = []): void
+	public function resource(string $name, Options $options = null): self
 	{
-		$definitions = RouteMaker::resource($name, $controller, $options);
-		$this->revoke_cache();
-
-		foreach ($definitions as $id => $definition)
+		foreach (RouteMaker::resource($name, $options) as $route)
 		{
-			$this->add([ RouteDefinition::ID => $id ] + $definition);
+			$this->add_route($route);
 		}
+
+		return $this;
 	}
 
+	/**
+	 * @return ArrayIterator<mixed, Route>|Route[]
+	 */
 	public function getIterator(): ArrayIterator
 	{
-		return new ArrayIterator($this->routes);
-	}
-
-	/**
-	 * @param string $offset Route identifier.
-	 */
-	public function offsetExists($offset): bool
-	{
-		return isset($this->routes[$offset]);
-	}
-
-	/**
-	 * Returns a {@link Route} instance.
-	 *
-	 * @param string $offset Route identifier.
-	 *
-	 * @throws RouteNotDefined
-	 */
-	public function offsetGet($offset): Route
-	{
-		if (isset($this->instances[$offset]))
-		{
-			return $this->instances[$offset];
-		}
-
-		if (!$this->offsetExists($offset))
-		{
-			throw new RouteNotDefined($offset);
-		}
-
-		return $this->instances[$offset] = Route::from($this->routes[$offset]);
-	}
-
-	/**
-	 * Defines a route.
-	 *
-	 * @param string $offset The identifier of the route.
-	 * @param array $value The route definition.
-	 */
-	public function offsetSet($offset, $value): void
-	{
-		$this->revoke_cache();
-		$this->add([ RouteDefinition::ID => $offset ] + $value);
-	}
-
-	/**
-	 * Removes a route.
-	 *
-	 * @param string $offset The identifier of the route.
-	 */
-	public function offsetUnset($offset): void
-	{
-		unset($this->routes[$offset]);
-
-		$this->revoke_cache();
+		return new ArrayIterator(array_values($this->routes));
 	}
 
 	/**
 	 * Returns the number of routes in the collection.
-	 *
-	 * @inheritdoc
 	 */
 	public function count(): int
 	{
 		return count($this->routes);
 	}
 
-	/**
-	 * Search for a route matching the specified pathname and method.
-	 *
-	 * @param string $uri The URI to match. If the URI includes a query string it is removed
-	 * before searching for a matching route.
-	 * @param array|null $captured The parameters captured from the URI. If the URI included a
-	 * query string, its parsed params are stored under the `__query__` key.
-	 * @param string $method One of HTTP\Request::METHOD_* methods.
-	 *
-	 * @return Route|false|null
-	 */
-	public function find(string $uri, array &$captured = null, string $method = Request::METHOD_ANY)
+	public function route_for_uri(string $method, string $uri, array &$path_params = null, array &$query_params = null): ?Route
 	{
-		$captured = [];
+		$path_params = [];
+		$query_params = [];
 
 		$parsed = (array) parse_url($uri) + [ 'path' => null, 'query' => null ];
 		$path = $parsed['path'];
 
 		if (!$path)
 		{
-			return false;
+			return null;
 		}
 
-		#
-		# Determine if a route matches prerequisites.
-		#
-		$matchable = function($via) use($method) {
-
-			if ($method != Request::METHOD_ANY)
+		/**
+		 * Search for a matching static respond.
+		 *
+		 * @param Route[] $routes
+		 */
+		$map_static = function(iterable $routes) use($path, $method): ?Route
+		{
+			foreach ($routes as $route)
 			{
-				if (is_array($via))
+				$pattern = (string) $route->pattern;
+
+				if ($route->method_matches($method) && $pattern === $path)
 				{
-					if (!in_array($method, $via))
-					{
-						return false;
-					}
+					return $route;
 				}
-				else if ($via !== Request::METHOD_ANY && $via !== $method)
-				{
-					return false;
-				}
-			}
-
-			return true;
-		};
-
-		#
-		# Search for a matching static route.
-		#
-		$map_static = function($definitions) use($path, &$matchable) {
-
-			foreach ($definitions as $id => $definition)
-			{
-				$pattern = $definition[RouteDefinition::PATTERN];
-				$via = $definition[RouteDefinition::VIA];
-
-				if (!$matchable($via) || $pattern != $path)
-				{
-					continue;
-				}
-
-				return $id;
 			}
 
 			return null;
 		};
 
-		#
-		# Search for a matching dynamic route.
-		#
-		$map_dynamic = function($definitions) use($path, &$matchable, &$captured) {
-
-			foreach ($definitions as $id => $definition)
+		/**
+		 * Search for a matching dynamic respond.
+		 *
+		 * @param Route[] $routes
+		 */
+		$map_dynamic = function(iterable $routes) use($path, &$path_params): ?Route
+		{
+			foreach ($routes as $route)
 			{
-				$pattern = $definition[RouteDefinition::PATTERN];
-				$via = $definition[RouteDefinition::VIA];
+				$pattern = $route->pattern;
+				$via = $route->methods;
 
-				if (!$matchable($via) || !Pattern::from($pattern)->match($path, $captured))
+				if (!$route->method_matches($via) || !$pattern->matches($path, $path_params))
 				{
 					continue;
 				}
 
-				return $id;
+				return $route;
 			}
 
 			return null;
@@ -317,19 +158,19 @@ class RouteCollection implements IteratorAggregate, ArrayAccess, Countable
 
 		[ $static, $dynamic ] = $this->sort_routes();
 
-		$id = null;
+		$route = null;
 
 		if ($static)
 		{
-			$id = $map_static($static);
+			$route = $map_static($static);
 		}
 
-		if (!$id && $dynamic)
+		if (!$route && $dynamic)
 		{
-			$id = $map_dynamic($dynamic);
+			$route = $map_dynamic($dynamic);
 		}
 
-		if (!$id)
+		if (!$route)
 		{
 			return null;
 		}
@@ -338,16 +179,23 @@ class RouteCollection implements IteratorAggregate, ArrayAccess, Countable
 
 		if ($query)
 		{
-			parse_str($query, $parsed_query_string);
+			parse_str($query, $query_params);
 
-			$captured['__query__'] = $parsed_query_string;
+			$query_params = array_diff_key($query_params, $path_params);
 		}
 
-		return $this[$id];
+		return $route;
 	}
 
-	private $static;
-	private $dynamic;
+	/**
+	 * @var Route[]|null
+	 */
+	private ?array $static = null;
+
+	/**
+	 * @var Route[]|null
+	 */
+	private ?array $dynamic = null;
 
 	/**
 	 * Revokes the cache used by the {@link sort_routes} method.
@@ -363,70 +211,67 @@ class RouteCollection implements IteratorAggregate, ArrayAccess, Countable
 	 *
 	 * Routes and grouped in two groups: static routes and dynamic routes. The difference between
 	 * static and dynamic routes is that dynamic routes capture parameters from the path and thus
-	 * require a regex to compute the match, whereas static routes only require is simple string
+	 * require a regex to compute the matches, whereas static routes only require is simple string
 	 * comparison.
 	 *
 	 * Dynamic routes are ordered according to their weight, which is computed from the number
-	 * of static parts before the first capture. The more static parts, the lighter the route is.
+	 * of static parts before the first capture. The more static parts, the lighter the respond is.
 	 *
-	 * @return array An array with the static routes and dynamic routes.
+	 * @return array{0: Route[], 1: Route[]} An array with the static routes and dynamic routes.
 	 */
 	private function sort_routes(): array
 	{
-		if ($this->static !== null)
+		$static = $this->static;
+		$dynamic = $this->dynamic;
+
+		if ($static !== null && $dynamic !== null)
 		{
-			return [ $this->static, $this->dynamic ];
+			return [ $static, $dynamic ];
 		}
 
 		$static = [];
 		$dynamic = [];
 		$weights = [];
 
-		foreach ($this->routes as $id => $definition)
+		foreach ($this->routes as $route)
 		{
-			$pattern = $definition[RouteDefinition::PATTERN];
-			$first_capture_position = strpos($pattern, ':') ?: strpos($pattern, '<');
+			$pattern = $route->pattern;
 
-			if ($first_capture_position === false)
+			if (!count($pattern->params))
 			{
-				$static[$id] = $definition;
+				$static[] = $route;
 			}
 			else
 			{
-				$dynamic[$id] = $definition;
-				$weights[$id] = substr_count($pattern, '/', 0, $first_capture_position);
+				$dynamic[] = $route;
+				$weights[] = substr_count($pattern->interleaved[0], '/');
 			}
 		}
 
-		stable_sort($dynamic, function($v, $k) use($weights) {
+		stable_sort($dynamic, fn($v, $k) => -$weights[$k]);
 
-			return -$weights[$k];
-
-		});
-
-		$this->static = $static;
-		$this->dynamic = $dynamic;
-
-		return [ $static, $dynamic ];
+		return [ $this->static = $static, $this->dynamic = $dynamic ];
 	}
 
 	/**
-	 * Returns a new collection with filtered routes.
+	 * Creates a collection with filtered routes.
+	 *
+	 * @param callable(Route):bool $filter
 	 */
-	public function filter(callable $filter): RouteCollection
+	public function filter(callable $filter): self
 	{
-		$definitions = [];
+		$routes = [];
 
-		foreach ($this as $id => $definition)
+		foreach ($this->routes as $route)
 		{
-			if (!$filter($definition, $id))
+			if (!$filter($route))
 			{
 				continue;
 			}
 
-			$definitions[$id] = $definition;
+			$routes[] = $route;
 		}
 
-		return new static($definitions);
+		return new self($routes);
 	}
 }

@@ -29,7 +29,7 @@ use function json_encode;
 use function preg_match;
 
 /**
- * A route controller.
+ * A respond controller.
  *
  * # Accessing the application's properties
  *
@@ -57,10 +57,10 @@ use function preg_match;
  *
  * @property-read string $name The name of the controller.
  * @property-read Request $request The request being dispatched.
- * @property-read Route $route The route being dispatched.
+ * @property-read Route $respond The respond being dispatched.
  * @property Response $response
  */
-abstract class Controller extends Prototyped
+abstract class ControllerAbstract extends Prototyped implements Controller
 {
 	/**
 	 * Return the name of the controller, extracted from its class name.
@@ -102,7 +102,7 @@ abstract class Controller extends Prototyped
 	}
 
 	/**
-	 * Controls the route and returns a response.
+	 * Controls the respond and returns a response.
 	 *
 	 * The response is obtained by invoking `action()`. When the result is a {@link Response}
 	 * instance it is returned as is, when the `$response` property has been initialized the result
@@ -207,7 +207,7 @@ abstract class Controller extends Prototyped
 	 */
 	protected function forward_to_route(Route $route) //TODO-202105: Return only Response
 	{
-		$route->pattern->match($this->request->uri, $captured);
+		$route->pattern->matches($this->request->uri, $captured);
 
 		$request = $this->request->with([
 

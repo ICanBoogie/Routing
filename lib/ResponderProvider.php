@@ -11,12 +11,12 @@
 
 namespace ICanBoogie\Routing;
 
-use LogicException;
+use ICanBoogie\HTTP\Responder;
 
 /**
- * Exception thrown in attempt to handle a route without action.
+ * Mapper from an action to the controller that is application for that action.
  */
-class ActionNotDefined extends LogicException implements Exception
+interface ResponderProvider
 {
-
+	public function responder_for_action(string $action): ?Responder;
 }

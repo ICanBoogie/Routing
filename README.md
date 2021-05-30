@@ -103,7 +103,7 @@ Defaults: `Request::METHOD_GET`.
 [Route][].
 
 A route definition is considered valid when the `RouteDefinition::PATTERN` parameter is defined
-along one of `RouteDefinition::CONTROLLER` or `RouteDefinition::LOCATION`. [PatternNotDefined][] is
+along one of `RouteDefinition::CONTROLLER` or `RouteDefinition::LOCATION`. [InvalidPattern][] is
 thrown if `RouteDefinition::PATTERN` is missing, and [ControllerNotDefined][] is thrown if both
 `RouteDefinition::CONTROLLER` and `RouteDefinition::LOCATION` are missing.
 
@@ -117,16 +117,16 @@ Better use a custom route class though.
 
 ### Route patterns
 
-A pattern is used to match a URL with a route. Placeholders may be used to match multiple URL to a
+A pattern is used to matches a URL with a route. Placeholders may be used to matches multiple URL to a
 single route and extract its parameters. Three types of placeholder are available:
 
 - Relaxed placeholder: Only the name of the parameter is specified, it matches anything until
 the following part. e.g. `/articles/:id/edit` where `:id` is the placeholder for
 the `RouteDefinition::ID` parameter.
 
-- Constrained placeholder: A regular expression is used to match the parameter value.
+- Constrained placeholder: A regular expression is used to matches the parameter value.
 e.g. `/articles/<id:\d+>/edit` where `<id:\d+>` is the placeholder for the `id` parameter
-which value must match `/^\d+$/`.
+which value must matches `/^\d+$/`.
 
 - Anonymous constrained placeholder: Same as the constrained placeholder, except the parameter
 has no name but an index e.g. `/articles/<\d+>/edit` where `<\d+>` in a placeholder
@@ -209,7 +209,6 @@ Used as an array, routes can be defined by setting/unsetting the offsets of a [R
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\Routing\RouteCollection;
-use ICanBoogie\Routing\RouteDefinition;
 
 $routes = new RouteCollection;
 
@@ -237,7 +236,6 @@ Routes may be defined using HTTP methods, such as `get` or `delete`.
 <?php
 
 use ICanBoogie\HTTP\Request;
-use ICanBoogie\Routing\RouteCollection;
 use ICanBoogie\Routing\RouteDefinition;
 
 $routes = new RouteCollection;
@@ -768,7 +766,7 @@ The following exceptions are defined:
 - [ActionNotDefined][]: Thrown when an action is not defined, for instance when a route handled
 by a controller using [ActionTrait][] has an empty `action` property.
 - [ControllerNotDefined][]: Thrown when trying to define a route without a controller nor location.
-- [PatternNotDefined][]: Thrown when trying to define a route without pattern.
+- [InvalidPattern][]: Thrown when trying to define a route without pattern.
 - [RouteNotDefined][]: Thrown when trying to obtain a route that is not defined in a
 [RouteCollection][] instance.
 
@@ -887,7 +885,7 @@ test suite. Alternatively, run `make test-coverage` to run the test suite with t
 [ControllerNotDefined]:                https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.ControllerNotDefined.html
 [FormattedRoute]:                      https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.FormattedRoute.html
 [Pattern]:                             https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.Pattern.html
-[PatternNotDefined]:                   https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.PatternNotDefined.html
+[InvalidPattern]:                   https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.PatternNotDefined.html
 [ResourceTrait]:                       https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.Controller.ResourceTrait.html
 [Route]:                               https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.Route.html
 [Route\RescueEvent]:                   https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.Route.RescueEvent.html

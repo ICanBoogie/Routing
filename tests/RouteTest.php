@@ -11,66 +11,32 @@
 
 namespace ICanBoogie\Routing;
 
-use ICanBoogie\HTTP\Request;
-use ICanBoogie\HTTP\Response;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
-class RouteTest extends TestCase
+final class RouteTest extends TestCase
 {
-//	private $routes;
-//
-//	protected function setUp(): void
-//	{
-//		$this->routes = $this
-//			->getMockBuilder(RouteCollection::class)
-//			->disableOriginalConstructor()
-//			->getMock();
-//	}
+	private const DUMMY_ACTION = 'article:show';
 
-	public function testGetPatternInstance()
+	public function test_failure_on_empty_action(): void
+	{
+		$this->expectException(InvalidArgumentException::class);
+		$this->expectExceptionMessage("Action cannot be empty.");
+
+		new Route("/", "");
+	}
+
+	public function test_get_pattern(): void
 	{
 		$s = '/news/:year-:month-:slug.:format';
-		$r = new Route($s, []);
+		$r = new Route($s, self::DUMMY_ACTION);
 
 		$this->assertInstanceOf(Pattern::class, $r->pattern);
 	}
 
-	public function test_closure_controller()
+	public function test_format(): void
 	{
-		$params = [ 'one' => uniqid(), 'two' => uniqid() ];
-		$request = Request::from([
-
-			Request::OPTION_URI => '/',
-			Request::OPTION_PATH_PARAMS => $params,
-
-		]);
-
-		$test = $this;
-
-		$routes = new RouteCollection;
-		$routes->get('/', function(...$args) use ($request, $params, $test) {
-
-			/* @var $this ClosureController */
-
-			$test->assertInstanceOf(ClosureController::class, $this);
-			$test->assertSame($request, $this->request);
-			$test->assertSame(array_values($params), $args);
-
-			return 'madonna';
-
-		});
-
-		$dispatcher = new RouteDispatcher($routes);
-		$response = $dispatcher($request);
-
-		$this->assertInstanceOf(Response::class, $response);
-		$this->assertEquals('madonna', $response->body);
-	}
-
-	public function test_format()
-	{
-		$route = new Route('/news/:year-:month-:slug.html', []);
+		$route = new Route('/news/:year-:month-:slug.html', self::DUMMY_ACTION);
 
 		$formatted_route = $route->format([
 
@@ -85,60 +51,36 @@ class RouteTest extends TestCase
 		$this->assertInstanceOf(FormattedRoute::class, $formatted_route);
 		$this->assertEquals($expected_url, (string) $formatted_route);
 		$this->assertEquals($expected_url, $formatted_route->url);
-		$this->assertEquals("http://icanboogie.org{$expected_url}", $formatted_route->absolute_url);
+		$this->assertEquals("http://icanboogie.org$expected_url", $formatted_route->absolute_url);
 	}
 
-	public function test_get_url()
+	public function test_get_url(): void
 	{
 		$expected = "/my-awesome-url.html";
-		$route = new Route($expected, []);
+		$route = new Route($expected, self::DUMMY_ACTION);
 		$this->assertEquals($expected, $route->url);
 	}
 
-	public function test_get_url_requiring_values()
+	public function test_get_url_requiring_values(): void
 	{
 		$expected = "/:year-:month.html";
-		$route = new Route($expected, []);
+		$route = new Route($expected, self::DUMMY_ACTION);
 		$this->expectException(PatternRequiresValues::class);
 		$this->assertEquals($expected, $route->url);
 	}
 
-	public function test_get_absolute_url()
+	public function test_get_absolute_url(): void
 	{
-		$expected = "/my-awesome-url.html";
-		$route = new Route($expected, []);
-		$this->assertEquals("http://icanboogie.org" . $expected, $route->absolute_url);
+		$route = new Route("/my-awesome-url.html", self::DUMMY_ACTION);
+		$this->assertEquals("http://icanboogie.org/my-awesome-url.html", $route->absolute_url);
 	}
 
-	/**
-	 * @dataProvider provide_invalid_construct_properties
-	 *
-	 *
-	 * @param $properties
-	 */
-	public function test_should_throw_exception_on_invalid_construct_property($properties)
-	{
-		$this->expectException(InvalidArgumentException::class);
-		new Route('/', $properties);
-	}
-
-	public function provide_invalid_construct_properties()
-	{
-		return [
-
-			[ [ 'formatting_value' => uniqid() ] ],
-			[ [ 'url' => uniqid() ] ],
-			[ [ 'absolute_url' => uniqid() ] ]
-
-		];
-	}
-
-	public function test_with()
+	public function test_with(): void
 	{
 		$year = uniqid();
 		$month = uniqid();
 		$formatting_value = [ 'year' => $year, 'month' => $month ];
-		$r1 = new Route('/:year-:month.html', []);
+		$r1 = new Route('/:year-:month.html', self::DUMMY_ACTION);
 		$this->assertNull($r1->formatting_value);
 		$this->assertFalse($r1->has_formatting_value);
 
@@ -148,16 +90,16 @@ class RouteTest extends TestCase
 		$this->assertSame($formatting_value, $r2->formatting_value);
 		$this->assertTrue($r2->has_formatting_value);
 
-		$expected_url = "/{$year}-{$month}.html";
+		$expected_url = "/$year-$month.html";
 
 		$this->assertSame($expected_url, $r2->url);
 		$this->assertSame($expected_url, (string) $r2);
 	}
 
-	public function test_should_reset_formatting_value_on_clone()
+	public function test_should_reset_formatting_value_on_clone(): void
 	{
 		$formatting_value = [ 'a' => uniqid() ];
-		$route = (new Route('/', []))->assign($formatting_value);
+		$route = (new Route('/', self::DUMMY_ACTION))->assign($formatting_value);
 
 		$route2 = clone $route;
 		$this->assertNull($route2->formatting_value);

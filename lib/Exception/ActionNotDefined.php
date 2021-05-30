@@ -9,14 +9,15 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing;
+namespace ICanBoogie\Routing\Exception;
 
-use InvalidArgumentException;
+use ICanBoogie\Routing\Exception;
+use LogicException;
 
 /**
- * Exception thrown when the controller of a route is not defined.
+ * Exception thrown in attempt to handle a route without action.
  */
-class ControllerNotDefined extends InvalidArgumentException implements Exception
+class ActionNotDefined extends LogicException implements Exception
 {
 
 }

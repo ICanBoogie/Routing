@@ -11,7 +11,9 @@
 
 namespace ICanBoogie\Routing;
 
-use ICanBoogie\HTTP\Request;
+use ICanBoogie\Routing\RouteMaker\Basics;
+use ICanBoogie\Routing\RouteMaker\Options;
+
 use function array_diff_key;
 use function array_flip;
 use function array_intersect_key;
@@ -21,8 +23,11 @@ use function strtr;
 /**
  * Makes route definitions.
  */
-class RouteMaker
+final class RouteMaker
 {
+	/*
+	 * Unqualified actions.
+	 */
 	public const ACTION_INDEX = 'index';
 	public const ACTION_NEW = 'new';
 	public const ACTION_CREATE = 'create';
@@ -31,49 +36,37 @@ class RouteMaker
 	public const ACTION_UPDATE = 'update';
 	public const ACTION_DELETE = 'delete';
 
-	public const OPTION_ID_NAME = 'id_name';
-	public const OPTION_ID_REGEX = 'id_regex';
-	public const OPTION_ONLY = 'only';
-	public const OPTION_EXCEPT = 'except';
-	public const OPTION_AS = 'as';
-	public const OPTION_ACTIONS = 'actions';
-
+	/*
+	 * Separator for a [qualified] action e.g. 'articles:index'.
+	 */
 	public const SEPARATOR = ':';
 
 	/**
-	 * @param array $actions Action templates.
-	 * @param array $options The following options are available:
+	 * @param array<string, Basics> $basics Action templates.
 	 *
-	 * - `only`: Only the routes specified are made.
-	 * - `except`: The routes specified are excluded.
-	 * - `id_name`: Name of the identifier property. Defaults to `id`.
-	 * - `id_regex`: Regex of the identifier value. Defaults to `\d+`.
-	 * - `as`: Specifies the `as` option of the routes created.
-	 *
-	 * @return array<string, mixed>
+	 * @return Route[]
 	 */
-	static public function actions(string $name, string $controller, array $actions, array $options = []): array
+	static public function actions(string $name, array $basics, Options $options = null): array
 	{
-		$options = self::normalize_options($options);
-		$actions = static::filter_actions($actions, $options);
-		$actions = static::resolve_patterns($name, $actions, $options);
+		$options ??= new Options();
+		$basics = array_merge($basics, $options->basics);
+		$basics = self::filter($basics, $options);
+		$basics = self::resolve_patterns($name, $basics, $options);
 
-		$options_as = $options[self::OPTION_AS];
+		$as = $options->as;
+		$ids = $options->ids;
 		$routes = [];
 
-		foreach ($actions as $action => list($pattern, $via))
+		foreach ($basics as $action => $basic)
 		{
-			$as = empty($options_as[$action]) ? $name . self::SEPARATOR . $action : $options_as[$action];
+			$qualified_action = $as[$action] ?? $name . self::SEPARATOR . $action;
 
-			$routes[$as] = [
-
-				RouteDefinition::PATTERN => $pattern,
-				RouteDefinition::CONTROLLER => $controller,
-				RouteDefinition::ACTION => $action,
-				RouteDefinition::VIA => $via,
-				RouteDefinition::ID => $as
-
-			];
+			$routes[] = new Route(
+				pattern: $basic->pattern,
+				action: $qualified_action,
+				methods: $basic->methods,
+				id: $ids[$action] ?? null,
+			);
 		}
 
 		return $routes;
@@ -82,93 +75,72 @@ class RouteMaker
 	/**
 	 * Makes route definitions for a resource.
 	 *
-	 * @param array<string, mixed> $options The following options are available:
-	 *
-	 * - `only`: Only the routes specified are made.
-	 * - `except`: The routes specified are excluded.
-	 * - `id_name`: Name of the identifier property. Defaults to `id`.
-	 * - `id_regex`: Regex of the identifier value. Defaults to `\d+`.
-	 * - `as`: Specifies the `as` option of the routes created.
-	 * - `actions`: Additional actions templates.
+	 * @return Route[]
 	 */
-	static public function resource(string $name, string $controller, array $options = []): array
+	public static function resource(string $name, Options $options = null): array
 	{
-		$options = static::normalize_options($options);
-		$actions = array_merge(static::get_resource_actions(), $options[self::OPTION_ACTIONS]);
-
-		return static::actions($name, $controller, $actions, $options);
-	}
-
-	/**
-	 * Normalizes options.
-	 *
-	 * @return array<string, mixed>
-	 */
-	static protected function normalize_options(array $options): array
-	{
-		return $options + [
-
-			self::OPTION_ID_NAME => 'id',
-			self::OPTION_ID_REGEX => '\d+',
-			self::OPTION_ONLY => [ ],
-			self::OPTION_EXCEPT => [ ],
-			self::OPTION_AS => [ ],
-			self::OPTION_ACTIONS => [ ]
-
-		];
+		return self::actions($name, self::default_resource_actions(), $options);
 	}
 
 	/**
 	 * Returns default resource actions.
 	 *
-	 * @return array<string, mixed>
+	 * @return array<string, Basics>
 	 */
-	static protected function get_resource_actions(): array
+	private static function default_resource_actions(): array
 	{
 		return [
 
-			self::ACTION_INDEX  => [ '/{name}',           Request::METHOD_GET ],
-			self::ACTION_NEW    => [ '/{name}/new',       Request::METHOD_GET ],
-			self::ACTION_CREATE => [ '/{name}',           Request::METHOD_POST ],
-			self::ACTION_SHOW   => [ '/{name}/{id}',      Request::METHOD_GET ],
-			self::ACTION_EDIT   => [ '/{name}/{id}/edit', Request::METHOD_GET ],
-			self::ACTION_UPDATE => [ '/{name}/{id}',      [ Request::METHOD_PUT, Request::METHOD_PATCH ] ],
-			self::ACTION_DELETE => [ '/{name}/{id}',      Request::METHOD_DELETE ]
+			self::ACTION_INDEX  => new Basics(Basics::PATTERN_INDEX,  Basics::METHODS_INDEX),
+			self::ACTION_NEW    => new Basics(Basics::PATTERN_NEW,    Basics::METHODS_NEW),
+			self::ACTION_CREATE => new Basics(Basics::PATTERN_CREATE, Basics::METHODS_CREATE),
+			self::ACTION_SHOW   => new Basics(Basics::PATTERN_SHOW,   Basics::METHODS_SHOW),
+			self::ACTION_EDIT   => new Basics(Basics::PATTERN_EDIT,   Basics::METHODS_EDIT),
+			self::ACTION_UPDATE => new Basics(Basics::PATTERN_UPDATE, Basics::METHODS_UPDATE),
+			self::ACTION_DELETE => new Basics(Basics::PATTERN_DELETE, Basics::METHODS_DELETE),
 
 		];
 	}
 
 	/**
 	 * Filters actions according to only/except options.
+	 *
+	 * @param array<string, Basics> $basics
+	 *
+	 * @return array<string, Basics>
 	 */
-	static protected function filter_actions(array $actions, array $options = []): array
+	private static function filter(array $basics, Options $options): array
 	{
-		if ($options[self::OPTION_ONLY])
+		if ($options->only)
 		{
-			$actions = array_intersect_key($actions, array_flip((array) $options[self::OPTION_ONLY]));
+			$basics = array_intersect_key($basics, array_flip($options->only));
 		}
 
-		if ($options[self::OPTION_EXCEPT])
+		if ($options->except)
 		{
-			$actions = array_diff_key($actions, array_flip((array) $options[self::OPTION_EXCEPT]));
+			$basics = array_diff_key($basics, array_flip($options->except));
 		}
 
-		return $actions;
+		return $basics;
 	}
 
 	/**
 	 * Replaces pattern placeholders.
+	 *
+	 * @param array<string, Basics> $basics
+	 *
+	 * @return array<string, Basics>
 	 */
-	static protected function resolve_patterns(string $name, array $actions, array $options): array
+	private static function resolve_patterns(string $name, array $basics, Options $options): array
 	{
-		$id = "<{$options[self::OPTION_ID_NAME]}:{$options[self::OPTION_ID_REGEX]}>";
-		$replace = [ '{name}' => $name, '{id}' => $id ];
+		$id = "<$options->id_name:$options->id_regex>";
+		$replace = [ Basics::PLACEHOLDER_NAME => $name, Basics::PLACEHOLDER_ID => $id ];
 
-		foreach ($actions as &$template)
+		foreach ($basics as $basic)
 		{
-			$template[0] = strtr($template[0], $replace);
+			$basic->pattern = strtr($basic->pattern, $replace);
 		}
 
-		return $actions;
+		return $basics;
 	}
 }

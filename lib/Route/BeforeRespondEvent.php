@@ -9,37 +9,26 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing\RouteDispatcher;
+namespace ICanBoogie\Routing\Route;
 
 use ICanBoogie\Event;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
-use ICanBoogie\Routing\RouteDispatcher;
 use ICanBoogie\Routing\Route;
 
 /**
- * Event class for the `ICanBoogie\Routing\RouteDispatcher::dispatch:before` event.
+ * Event class for the `ICanBoogie\Routing\Route::respond:before` event.
  *
  * Third parties may use this event to provide a response to the request before the route is
  * mapped. The event is usually used by third parties to redirect requests or provide cached
  * responses.
  *
- * @property-read Route $route
  * @property-read Request $request
  * @property Response $response
  */
-class BeforeDispatchEvent extends Event
+final class BeforeRespondEvent extends Event
 {
-	public const TYPE = 'dispatch:before';
-
-	private Route $route;
-
-	protected function get_route(): Route
-	{
-		return $this->route;
-	}
-
-	private $request;
+	public const TYPE = 'respond:before';
 
 	protected function get_request(): Request
 	{
@@ -53,22 +42,21 @@ class BeforeDispatchEvent extends Event
 		return $this->response;
 	}
 
-	protected function set_response(?Response $response)
+	protected function set_response(?Response $response): void
 	{
 		$this->response = $response;
 	}
 
 	/**
-	 * @uses get_route
-	 * @uses set_route
 	 * @uses get_request
 	 * @uses set_response
 	 * @uses get_response
 	 */
-	public function __construct(RouteDispatcher $target, Route $route, Request $request, Response &$response = null)
-	{
-		$this->route = $route;
-		$this->request = $request;
+	public function __construct(
+		Route $target,
+		private Request $request,
+		Response &$response = null
+	) {
 		$this->response = &$response;
 
 		parent::__construct($target, self::TYPE);

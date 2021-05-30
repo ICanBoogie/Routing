@@ -11,12 +11,15 @@
 
 namespace ICanBoogie\Routing;
 
-use InvalidArgumentException;
-
 /**
- * Exception thrown when the pattern of a route is not defined.
+ * A route provider that supports mutations.
  */
-class PatternNotDefined extends InvalidArgumentException implements Exception
+interface MutableRouteProvider extends RouteProvider
 {
-
+	/**
+	 * Add a route to the provider.
+	 *
+	 * @return $this
+	 */
+	public function add_route(Route $route): self;
 }

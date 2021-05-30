@@ -18,9 +18,9 @@ use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\HTTP\Status;
+use ICanBoogie\Routing\Route\BeforeRespondEvent;
+use ICanBoogie\Routing\Route\RespondEvent;
 use ICanBoogie\Routing\Route\RescueEvent;
-use ICanBoogie\Routing\RouteDispatcher\BeforeDispatchEvent;
-use ICanBoogie\Routing\RouteDispatcher\DispatchEvent;
 use Throwable;
 
 use function is_callable;
@@ -35,6 +35,8 @@ use function rtrim;
  * the {@link decontextualize()} function.
  *
  * @property-read RouteCollection $routes
+ *
+ * @deprecated
  */
 class RouteDispatcher implements Dispatcher
 {
@@ -141,14 +143,14 @@ class RouteDispatcher implements Dispatcher
 	{
 		$response = null;
 
-		new BeforeDispatchEvent($this, $route, $request, $response);
+		new BeforeRespondEvent($route, $request, $response);
 
 		if (!$response)
 		{
 			$response = $this->respond($route, $request);
 		}
 
-		new DispatchEvent($this, $route, $request, $response);
+		new RespondEvent($route, $request, $response);
 
 		return $response;
 	}
@@ -196,7 +198,7 @@ class RouteDispatcher implements Dispatcher
 		{
 			$response = null;
 
-			new RescueEvent($request->context->route, $exception, $request, $response);
+			new RescueEvent($request->context->route, $request, $exception, $response);
 
 			if ($response)
 			{
@@ -214,14 +216,14 @@ class RouteDispatcher implements Dispatcher
 	{
 		if ($controller instanceof Closure)
 		{
-			return new ClosureController($controller);
+			return new ResponderFunc($controller);
 		}
 
 		if (is_callable($controller))
 		{
-			return new ClosureController(function () use ($controller) {
+			return new ResponderFunc(function () use ($controller) {
 
-				/* @var $this ClosureController */
+				/* @var $this ResponderFunc */
 
 				return $controller($this->request);
 
