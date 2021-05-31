@@ -48,10 +48,10 @@ final class RouteResponder implements Responder
 	public function respond(Request $request): Response
 	{
 		$method = $request->method;
-		$route = $this->routes->route_for_uri($method, $request->uri, $path_params);
+		$route = $this->routes->route_for_uri($request->uri, $method, $path_params);
 
 		if (!$route) {
-			$this->routes->route_for_uri(Request::METHOD_ANY, $request->uri)
+			$this->routes->route_for_uri($request->uri)
 				? throw new MethodNotSupported($method)
 				: throw new NotFound();
 		}

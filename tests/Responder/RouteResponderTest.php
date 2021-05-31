@@ -53,9 +53,9 @@ final class RouteResponderTest extends TestCase
 	{
 		$path_params = null;
 
-		$this->routes->route_for_uri(Request::METHOD_DELETE, '/articles/123', $path_params)
+		$this->routes->route_for_uri('/articles/123', Request::METHOD_DELETE, $path_params)
 			->willReturn(null);
-		$this->routes->route_for_uri(Request::METHOD_ANY, '/articles/123')
+		$this->routes->route_for_uri('/articles/123')
 			->willReturn(null);
 
 		$this->expectException(NotFound::class);
@@ -67,9 +67,9 @@ final class RouteResponderTest extends TestCase
 	{
 		$path_params = null;
 
-		$this->routes->route_for_uri(Request::METHOD_DELETE, '/articles/123', $path_params)
+		$this->routes->route_for_uri('/articles/123', Request::METHOD_DELETE, $path_params)
 			->willReturn(null);
-		$this->routes->route_for_uri(Request::METHOD_ANY, '/articles/123')
+		$this->routes->route_for_uri('/articles/123')
 			->willReturn($this->route);
 
 		$this->expectException(MethodNotSupported::class);
@@ -81,7 +81,7 @@ final class RouteResponderTest extends TestCase
 	{
 		$path_params = null;
 
-		$this->routes->route_for_uri(Request::METHOD_DELETE, '/articles/123', $path_params)
+		$this->routes->route_for_uri('/articles/123', Request::METHOD_DELETE, $path_params)
 			->willReturn($this->route);
 		$this->responders->responder_for_action('article:delete')
 			->willReturn(null);
@@ -105,8 +105,8 @@ final class RouteResponderTest extends TestCase
 			}
 
 			public function route_for_uri(
-				string $method,
 				string $uri,
+				string $method = Request::METHOD_ANY,
 				array &$path_params = null,
 				array &$query_params = null
 			): ?Route {

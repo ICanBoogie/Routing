@@ -6,7 +6,6 @@ use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Responder\RouteResponder;
-use ICanBoogie\Routing\RouteCollection;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 
@@ -19,7 +18,6 @@ final class RouterTest extends TestCase
 	 */
 	public function test_method(string $method, string $http_method): void
 	{
-		$request = Request::from();
 		$response = new Response();
 		$pattern = '/articles/<\d+>';
 		$closure = function (Request $request) use ($response): Response {
@@ -32,7 +30,10 @@ final class RouterTest extends TestCase
 		$router = new Router($routes, $responders);
 		$router->$method($pattern, $closure);
 
-		$this->assertInstanceOf(Route::class, $route = $routes->route_for_uri($http_method, "/articles/123"));
+		$this->assertInstanceOf(Route::class, $route = $routes->route_for_uri(
+			"/articles/123",
+			$http_method
+		));
 		$this->assertInstanceOf(Responder::class, $responder = $responders->responder_for_action($route->action));
 		$this->assertSame($response, $responder->respond(Request::from()));
 	}

@@ -65,29 +65,55 @@ final class MutableTest extends TestCase
 
 		]);
 
-		$this->assertSame($home, $routes->route_for_uri(Request::METHOD_ANY, '/'));
-		$this->assertSame($home, $routes->route_for_uri(Request::METHOD_PATCH, '/', $path_params));
-		$this->assertSame($home, $routes->route_for_uri(Request::METHOD_ANY, '/?singer=madonna', $path_params, $query_params));
+		$this->assertSame($home, $routes->route_for_uri('/'));
+		$this->assertSame($home, $routes->route_for_uri('/', Request::METHOD_PATCH, $path_params));
+		$this->assertSame($home, $routes->route_for_uri(
+			'/?singer=madonna',
+			Request::METHOD_ANY,
+			$path_params,
+			$query_params
+		));
 		$this->assertEmpty($path_params);
 		$this->assertEquals([ 'singer' => 'madonna' ], $query_params);
 
-		$this->assertNull($routes->route_for_uri(Request::METHOD_ANY, '/undefined'));
-		$this->assertNull($routes->route_for_uri(Request::METHOD_ANY, '/undefined?madonna', $path_params));
+		$this->assertNull($routes->route_for_uri('/undefined'));
+		$this->assertNull($routes->route_for_uri(
+			'/undefined?madonna',
+			Request::METHOD_ANY,
+			$path_params
+		));
 		$this->assertEmpty($path_params);
 
-		$this->assertSame($index, $routes->route_for_uri(Request::METHOD_ANY, '/articles'));
-		$this->assertSame($index, $routes->route_for_uri(Request::METHOD_POST, '/articles', $path_params));
-		$this->assertSame($index, $routes->route_for_uri(Request::METHOD_PATCH, '/articles', $path_params));
-		$this->assertNull($routes->route_for_uri(Request::METHOD_GET, '/articles', $path_params));
+		$this->assertSame($index, $routes->route_for_uri('/articles'));
+		$this->assertSame($index, $routes->route_for_uri(
+			'/articles',
+			Request::METHOD_POST,
+			$path_params
+		));
+		$this->assertSame($index, $routes->route_for_uri(
+			'/articles',
+			Request::METHOD_PATCH,
+			$path_params
+		));
+		$this->assertNull($routes->route_for_uri('/articles', Request::METHOD_GET, $path_params));
 
-		$this->assertSame($delete, $routes->route_for_uri(Request::METHOD_DELETE, '/articles/123', $path_params));
+		$this->assertSame($delete, $routes->route_for_uri(
+			'/articles/123',
+			Request::METHOD_DELETE,
+			$path_params
+		));
 		$this->assertEquals([ 'nid' => 123 ], $path_params);
 		// Parameters already captured from the path are discarded from the query.
-		$this->assertSame($delete, $routes->route_for_uri(Request::METHOD_DELETE, '/articles/123?nid=456&singer=madonna', $path_params, $query_params));
+		$this->assertSame($delete, $routes->route_for_uri(
+			'/articles/123?nid=456&singer=madonna',
+			Request::METHOD_DELETE,
+			$path_params,
+			$query_params
+		));
 		$this->assertEquals([ 'nid' => 123 ], $path_params);
 		$this->assertEquals([ 'singer' => 'madonna' ], $query_params);
 
-		$this->assertNull($routes->route_for_uri(Request::METHOD_ANY, '//articles'));
+		$this->assertNull($routes->route_for_uri('//articles'));
 	}
 
 	/**
@@ -103,7 +129,10 @@ final class MutableTest extends TestCase
 
 		]);
 
-		$this->assertSame($ok, $routes->route_for_uri(Request::METHOD_PUT, '/api/articles/123/active'));
+		$this->assertSame($ok, $routes->route_for_uri(
+			'/api/articles/123/active',
+			Request::METHOD_PUT
+		));
 	}
 
 	public function test_nameless_capture(): void
@@ -114,8 +143,12 @@ final class MutableTest extends TestCase
 
 		]);
 
-		$this->assertSame($ok, $routes->route_for_uri(Request::METHOD_ANY, '/admin/articles/123/edit', $path_parans));
-		$this->assertEquals([ 123 ], $path_parans);
+		$this->assertSame($ok, $routes->route_for_uri(
+			'/admin/articles/123/edit',
+			Request::METHOD_ANY,
+			$path_params
+		));
+		$this->assertEquals([ 123 ], $path_params);
 	}
 
 	public function test_resources(): void

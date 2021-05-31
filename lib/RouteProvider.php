@@ -25,8 +25,8 @@ interface RouteProvider
 	 * Parameters already captured from the path are discarded.
 	 */
 	public function route_for_uri(
-		string $method,
 		string $uri,
+		string $method = Request::METHOD_ANY,
 		array &$path_params = null,
 		array &$query_params = null
 	): ?Route;
