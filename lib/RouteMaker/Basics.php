@@ -10,7 +10,7 @@ use ICanBoogie\HTTP\Request;
 final class Basics
 {
 	public const PLACEHOLDER_NAME = '{name}';
-	public const PLACEHOLDER_ID = '{id}';
+	public const PLACEHOLDER_ID   = '{id}';
 
 	public const PATTERN_INDEX  = '/{name}';
 	public const PATTERN_NEW    = '/{name}/new';

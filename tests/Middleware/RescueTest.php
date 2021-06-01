@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing\Responder;
+namespace ICanBoogie\Routing\Middleware;
 
 use Exception;
 use ICanBoogie\EventCollection;
@@ -25,7 +25,7 @@ use Prophecy\Prophecy\ObjectProphecy;
 
 use function ICanBoogie\get_events;
 
-final class RescueMiddlewareTest extends TestCase
+final class RescueTest extends TestCase
 {
 	use ProphecyTrait;
 
@@ -106,6 +106,8 @@ final class RescueMiddlewareTest extends TestCase
 
 	private function respond(Request $request): Response
 	{
-		return (new RescueMiddleware($this->next->reveal()))->respond($request);
+		return (new Rescue())
+			->responder($this->next->reveal())
+			->respond($request);
 	}
 }

@@ -11,23 +11,39 @@
 
 namespace ICanBoogie\Routing;
 
-use ICanBoogie\Routing\RouteCollection;
+use ICanBoogie\Routing\Responder\RouteResponder;
+use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
+use Prophecy\Prophecy\ObjectProphecy;
 
-class RouteDispatcherTest extends \PHPUnit\Framework\TestCase
+class RouteDispatcherTest extends TestCase
 {
+	use ProphecyTrait;
+
+	private ObjectProphecy|RouteProvider $routes;
+	private ObjectProphecy|ResponderProvider $responders;
+
 	protected function setUp(): void
 	{
-		$this->markTestIncomplete();
+		parent::setUp();
+
+		$this->markTestSkipped();
+
+		$this->routes = $this->prophesize(RouteProvider::class);
+		$this->responders = $this->prophesize(ResponderProvider::class);
 	}
 
 	public function test_get_routes()
 	{
-		$routes = $this
-			->getMockBuilder(RouteCollection::class)
-			->disableOriginalConstructor()
-			->getMock();
-
-		$dispatcher = new RouteDispatcher($routes);
-		$this->assertSame($routes, $dispatcher->routes);
+		$dispatcher = new RouteDispatcher(
+			new Rescue(
+				new Alter(
+					new RouteResponder(
+						$this->routes->reveal(),
+						$this->responders->reveal(),
+					)
+				)
+			)
+		);
 	}
 }

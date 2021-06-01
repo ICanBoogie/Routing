@@ -66,7 +66,7 @@ final class Pattern
 	private const EXTENDED_CHARACTER_CLASSES = [
 
 		'{:uuid:}' => '[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}',
-		'{:sha1:}' => '[a-f0-9]{40}'
+		'{:sha1:}' => '[a-f0-9]{40}',
 
 	];
 
@@ -78,8 +78,7 @@ final class Pattern
 	{
 		$catchall = false;
 
-		if ($pattern[-1] == '*')
-		{
+		if ($pattern[-1] == '*') {
 			$catchall = true;
 			$pattern = substr($pattern, 0, -1);
 		}
@@ -87,15 +86,13 @@ final class Pattern
 		$pattern_extended = strtr($pattern, self::EXTENDED_CHARACTER_CLASSES);
 		$parts = preg_split('#(:\w+|<(\w+:)?([^>]+)>)#', $pattern_extended, -1, PREG_SPLIT_DELIM_CAPTURE);
 
-		if ($parts === false)
-		{
+		if ($parts === false) {
 			throw new InvalidPattern("Unable to parse pattern: $pattern.");
 		}
 
 		[ $interleaved, $params, $regex ] = self::parse_parts($parts);
 
-		if ($catchall)
-		{
+		if ($catchall) {
 			$regex .= '(.*)';
 			$params[] = 'all';
 		}
@@ -115,32 +112,26 @@ final class Pattern
 		$params = [];
 		$n = 0;
 
-		for ($i = 0, $j = count($parts); $i < $j ;)
-		{
+		for ($i = 0, $j = count($parts); $i < $j;) {
 			$part = $parts[$i++];
 
 			$regex .= preg_quote($part, '#');
 			$interleaved[] = $part;
 
-			if ($i == $j)
-			{
+			if ($i == $j) {
 				break;
 			}
 
 			$part = $parts[$i++];
 
-			if ($part[0] == ':')
-			{
+			if ($part[0] == ':') {
 				$identifier = substr($part, 1);
 				$separator = $parts[$i];
 				$selector = $separator ? '[^/\\' . $separator[0] . ']+' : '[^/]+';
-			}
-			else
-			{
+			} else {
 				$identifier = substr($parts[$i++], 0, -1);
 
-				if (!$identifier)
-				{
+				if (!$identifier) {
 					$identifier = $n++;
 				}
 
@@ -186,8 +177,7 @@ final class Pattern
 	 */
 	static public function from(string|self $pattern): self
 	{
-		if ($pattern instanceof self)
-		{
+		if ($pattern instanceof self) {
 			return $pattern;
 		}
 
@@ -272,13 +262,11 @@ final class Pattern
 	 */
 	public function format(array|object $values = null): string
 	{
-		if (!$this->params)
-		{
+		if (!$this->params) {
 			return $this->pattern;
 		}
 
-		if (!$values)
-		{
+		if (!$values) {
 			throw new PatternRequiresValues($this);
 		}
 
@@ -296,8 +284,7 @@ final class Pattern
 		$url = '';
 		$method = 'read_value_from_' . (is_array($container) ? 'array' : 'object');
 
-		foreach ($this->interleaved as $i => $value)
-		{
+		foreach ($this->interleaved as $i => $value) {
 			$url .= $i % 2 ? $this->format_part(self::$method($container, $value[0])) : $value;
 		}
 
@@ -309,8 +296,7 @@ final class Pattern
 	 */
 	private function format_part(string|ToSlug $value): string
 	{
-		if ($value instanceof ToSlug)
-		{
+		if ($value instanceof ToSlug) {
 			$value = $value->to_slug();
 		}
 
@@ -330,13 +316,11 @@ final class Pattern
 		# `params` is empty if the pattern is a plain string, thus we can simply compare strings.
 		#
 
-		if (!$this->params)
-		{
+		if (!$this->params) {
 			return $pathname === $this->pattern;
 		}
 
-		if (!preg_match($this->regex, $pathname, $matches))
-		{
+		if (!preg_match($this->regex, $pathname, $matches)) {
 			return false;
 		}
 

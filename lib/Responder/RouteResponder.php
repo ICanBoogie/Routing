@@ -28,7 +28,7 @@ final class RouteResponder implements Responder
 {
 	public function __construct(
 		private RouteProvider $routes,
-		private ResponderProvider $responders,
+		private ResponderProvider $responders
 	) {
 	}
 
@@ -56,8 +56,12 @@ final class RouteResponder implements Responder
 				: throw new NotFound();
 		}
 
+//		if ($route->location) {
+//			return new RedirectResponse(contextualize($route->location), Status::FOUND);
+//		}
+
 		$responder = $this->responders->responder_for_action($route->action)
-			or throw new NoResponder("No responder for action: $route->action.");
+		or throw new NoResponder("No responder for action: $route->action.");
 
 		$request->context->add($route);
 		$request->path_params += $path_params;

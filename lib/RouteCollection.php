@@ -37,29 +37,23 @@ final class RouteCollection implements IteratorAggregate, Countable, MutableRout
 	private array $routes = [];
 
 	/**
-	 * @param Route[] $routes
+	 * @param iterable<Route> $routes
 	 */
 	public function __construct(iterable $routes = [])
 	{
-		foreach ($routes as $route)
-		{
-			$this->add_route($route);
-		}
+		$this->add_routes(...$routes);
 	}
 
-	/**
-	 * Adds a respond definition.
-	 *
-	 * **Note:** The method does *not* revoke cache.
-	 */
-	public function add_route(Route $route): self
+	public function add_routes(Route ...$route): self
 	{
-		$id = $route->id;
+		foreach ($route as $r) {
+			$id = $r->id;
 
-		if ($id) {
-			$this->routes[$id] = $route;
-		} else {
-			$this->routes[] = $route;
+			if ($id) {
+				$this->routes[$id] = $r;
+			} else {
+				$this->routes[] = $r;
+			}
 		}
 
 		$this->revoke_cache();
@@ -77,10 +71,7 @@ final class RouteCollection implements IteratorAggregate, Countable, MutableRout
 	 */
 	public function resource(string $name, Options $options = null): self
 	{
-		foreach (RouteMaker::resource($name, $options) as $route)
-		{
-			$this->add_route($route);
-		}
+		$this->add_routes(...RouteMaker::resource($name, $options));
 
 		return $this;
 	}
