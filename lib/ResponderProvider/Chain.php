@@ -4,9 +4,6 @@ namespace ICanBoogie\Routing\ResponderProvider;
 
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\Routing\ResponderProvider;
-use InvalidArgumentException;
-
-use function sprintf;
 
 /**
  * Tries a chain of controller providers until one provides a controller.
@@ -14,22 +11,16 @@ use function sprintf;
 final class Chain implements ResponderProvider
 {
 	/**
-	 * @var ResponderProvider[]
+	 * @var iterable<ResponderProvider>
 	 */
-	private array $chain = [];
+	private iterable $chain;
 
 	/**
-	 * @param ResponderProvider[] $chain
+	 * @param iterable<ResponderProvider> $providers
 	 */
-	public function __construct(iterable $chain)
+	public function __construct(ResponderProvider ...$providers)
 	{
-		foreach ($chain as $provider) {
-			if (!$provider instanceof ResponderProvider) {
-				throw new InvalidArgumentException(sprintf("Provider needs to implement %s.", ResponderProvider::class));
-			}
-
-			$this->chain[] = $provider;
-		}
+		$this->chain = $providers;
 	}
 
 	public function responder_for_action(string $action): ?Responder

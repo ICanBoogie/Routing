@@ -13,6 +13,7 @@ namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\Responder;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\HTTP\Status;
 use ICanBoogie\Prototyped;
@@ -60,7 +61,7 @@ use function preg_match;
  * @property-read Route $respond The respond being dispatched.
  * @property Response $response
  */
-abstract class ControllerAbstract extends Prototyped implements Controller
+abstract class ControllerAbstract extends Prototyped implements Responder
 {
 	/**
 	 * Return the name of the controller, extracted from its class name.
@@ -115,7 +116,7 @@ abstract class ControllerAbstract extends Prototyped implements Controller
 	 *
 	 * @return Response|mixed
 	 */
-	final public function __invoke(Request $request) //TODO-202105: Only return Response
+	final public function respond(Request $request): Response
 	{
 		$this->request = $request;
 

@@ -14,9 +14,6 @@ class Router
 {
 	static private int $anonymous_action_count = 0;
 
-	/**
-	 * Generates an anonymous respond identifier.
-	 */
 	static private function generate_anonymous_action(): string
 	{
 		return '__anonymous_action_' . ++self::$anonymous_action_count;
@@ -137,7 +134,7 @@ class Router
 	{
 		$action = self::generate_anonymous_action();
 
-		$this->routes->add_route(new Route($pattern, $action, $method));
+		$this->routes->add_routes(new Route($pattern, $action, $method));
 		$this->responders->add_responder($action, new ResponderClosure($closure));
 
 		return $this;

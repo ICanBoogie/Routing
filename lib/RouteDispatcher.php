@@ -16,6 +16,7 @@ use ICanBoogie\Accessor\AccessorTrait;
 use ICanBoogie\HTTP\Dispatcher;
 use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\Responder;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\HTTP\Status;
 use ICanBoogie\Routing\Route\BeforeRespondEvent;
@@ -34,8 +35,6 @@ use function rtrim;
  * `$decontextualized_path` holds the decontextualized path. The path is decontextualized using
  * the {@link decontextualize()} function.
  *
- * @property-read RouteCollection $routes
- *
  * @deprecated
  */
 class RouteDispatcher implements Dispatcher
@@ -45,48 +44,18 @@ class RouteDispatcher implements Dispatcher
 	 */
 	use AccessorTrait;
 
-	/**
-	 * Route collection.
-	 *
-	 * @var RouteCollection|null
-	 */
-	protected $routes;
-
-	protected function get_routes(): ?RouteCollection
-	{
-		return $this->routes;
-	}
-
-	/**
-	 * @param RouteCollection|null $routes
-	 */
-	public function __construct(RouteCollection $routes = null)
-	{
-		$this->routes = $routes;
+	public function __construct(
+		private Responder $responder
+	) {
 	}
 
 	public function __invoke(Request $request): ?Response
 	{
-		$captured = [];
 		$normalized_path = $this->normalize_path($request->normalized_path);
-		$route = $this->resolve_route($request, $normalized_path, $captured);
 
-		if (!$route)
-		{
-			return null;
-		}
-
-		if ($route->location)
-		{
-			return new RedirectResponse(contextualize($route->location), Status::FOUND);
-		}
-
-		$this->alter_params($route, $request, $captured);
-
-		$request->context->route = $route;
 		$request->decontextualized_path = $normalized_path;
 
-		return $this->dispatch($route, $request);
+		return $this->responder->respond($request);
 	}
 
 	/**
@@ -98,33 +67,11 @@ class RouteDispatcher implements Dispatcher
 	{
 		$normalized_path = decontextualize($path);
 
-		if ($normalized_path != '/')
-		{
+		if ($normalized_path != '/') {
 			$normalized_path = rtrim($normalized_path, '/');
 		}
 
 		return $normalized_path;
-	}
-
-	/**
-	 * Resolves route from request.
-	 *
-	 * @return false|Route|null
-	 */
-	protected function resolve_route(Request $request, string $normalized_path, array &$captured)
-	{
-		return $this->routes->find($normalized_path, $captured, $request->method);
-	}
-
-	/**
-	 * Alters request parameters.
-	 *
-	 * @param array $captured Parameters captured from the request's path.
-	 */
-	protected function alter_params(Route $route, Request $request, array $captured): void
-	{
-		$request->path_params = $captured + $request->path_params;
-		$request->params = $captured + $request->params;
 	}
 
 	/**
@@ -137,55 +84,6 @@ class RouteDispatcher implements Dispatcher
 	}
 
 	/**
-	 * Dispatches the route.
-	 */
-	protected function dispatch(Route $route, Request $request): ?Response
-	{
-		$response = null;
-
-		new BeforeRespondEvent($route, $request, $response);
-
-		if (!$response)
-		{
-			$response = $this->respond($route, $request);
-		}
-
-		new RespondEvent($route, $request, $response);
-
-		return $response;
-	}
-
-	/**
-	 * Returns a response for the route and request.
-	 *
-	 * If the controller's result is not `null` but is not in instance of {@link Response}, its
-	 * result is wrapped in a {@link response} instance with the status code 200 and the
-	 * `Content-Type` "text/html; charset=utf-8".
-	 *
-	 * @return Response|mixed
-	 */
-	protected function respond(Route $route, Request $request)
-	{
-		$controller = $this->resolve_controller($route->controller);
-		$controller_args = [ $request ];
-
-		$this->alter_context($request->context, $route, $controller);
-
-		$response = $controller(...$controller_args);
-
-		if ($response !== null && !$response instanceof Response)
-		{
-			$response = new Response($response, Status::OK, [
-
-				'Content-Type' => 'text/html; charset=utf-8'
-
-			]);
-		}
-
-		return $response;
-	}
-
-	/**
 	 * Fires {@link \ICanBoogie\Routing\RouteDispatcher\RescueEvent} and returns the response provided
 	 * by third parties. If no response was provided, the exception (or the exception provided by
 	 * third parties) is re-thrown.
@@ -194,14 +92,12 @@ class RouteDispatcher implements Dispatcher
 	 */
 	public function rescue(Throwable $exception, Request $request): Response
 	{
-		if (isset($request->context->route))
-		{
+		if (isset($request->context->route)) {
 			$response = null;
 
 			new RescueEvent($request->context->route, $request, $exception, $response);
 
-			if ($response)
-			{
+			if ($response) {
 				return $response;
 			}
 		}
@@ -214,19 +110,15 @@ class RouteDispatcher implements Dispatcher
 	 */
 	private function resolve_controller($controller): Controller
 	{
-		if ($controller instanceof Closure)
-		{
+		if ($controller instanceof Closure) {
 			return new ResponderFunc($controller);
 		}
 
-		if (is_callable($controller))
-		{
+		if (is_callable($controller)) {
 			return new ResponderFunc(function () use ($controller) {
-
 				/* @var $this ResponderFunc */
 
 				return $controller($this->request);
-
 			});
 		}
 

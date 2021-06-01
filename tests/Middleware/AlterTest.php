@@ -1,6 +1,6 @@
 <?php
 
-namespace ICanBoogie\Routing\Responder;
+namespace ICanBoogie\Routing\Middleware;
 
 use Exception;
 use ICanBoogie\EventCollection;
@@ -18,7 +18,7 @@ use Prophecy\Prophecy\ObjectProphecy;
 
 use function ICanBoogie\get_events;
 
-final class AlterMiddlewareTest extends TestCase
+final class AlterTest extends TestCase
 {
 	use ProphecyTrait;
 
@@ -82,6 +82,8 @@ final class AlterMiddlewareTest extends TestCase
 
 	private function respond(Request $request): Response
 	{
-		return (new AlterMiddleware($this->next->reveal()))->respond($request);
+		return (new Alter())
+			->responder($this->next->reveal())
+			->respond($request);
 	}
 }
