@@ -21,7 +21,7 @@
 		"source": "https://github.com/ICanBoogie/Routing"
 	},
 	"config": {
-		"sort-packages": false
+		"sort-packages": true
 	},
 	"minimum-stability": "dev",
 	"prefer-stable": true,
