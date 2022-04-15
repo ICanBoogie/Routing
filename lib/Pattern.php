@@ -241,7 +241,7 @@ final class Pattern
 	 * @throws PatternRequiresValues in attempt to format a pattern requiring values without
 	 * providing any.
 	 */
-	public function format(array|object $values = null): string
+	public function format(array|object|null $values = null): string
 	{
 		if (!$this->params) {
 			return $this->pattern;
@@ -256,6 +256,8 @@ final class Pattern
 
 	/**
 	 * Formats pattern parts.
+	 *
+	 * @param array<string, mixed>|object $container
 	 *
 	 * @uses read_value_from_array
 	 * @uses read_value_from_object
