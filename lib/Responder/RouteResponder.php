@@ -18,6 +18,7 @@ use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\ResponderProvider;
+use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteProvider;
 use Throwable;
 
@@ -27,8 +28,8 @@ use Throwable;
 final class RouteResponder implements Responder
 {
 	public function __construct(
-		private RouteProvider $routes,
-		private ResponderProvider $responders
+		private readonly RouteProvider $routes,
+		private readonly ResponderProvider $responders
 	) {
 	}
 
@@ -48,20 +49,23 @@ final class RouteResponder implements Responder
 	public function respond(Request $request): Response
 	{
 		$method = $request->method;
+
 		$route = $this->routes->route_for_uri($request->uri, $method, $path_params);
 
 		if (!$route) {
 			$this->routes->route_for_uri($request->uri)
-				? throw new MethodNotSupported($method)
+				? throw new MethodNotSupported($method->value)
 				: throw new NotFound();
 		}
+
+		assert($route instanceof Route);
 
 //		if ($route->location) {
 //			return new RedirectResponse(contextualize($route->location), Status::FOUND);
 //		}
 
 		$responder = $this->responders->responder_for_action($route->action)
-		or throw new NoResponder("No responder for action: $route->action.");
+			?? throw new NoResponder("No responder for action: $route->action.");
 
 		$request->context->add($route);
 		$request->path_params += $path_params;

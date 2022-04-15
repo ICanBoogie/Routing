@@ -11,7 +11,6 @@
 
 namespace ICanBoogie\Routing;
 
-use ICanBoogie\Accessor\AccessorTrait;
 use ICanBoogie\Routing\Exception\InvalidPattern;
 
 use function array_combine;
@@ -24,6 +23,7 @@ use function preg_split;
 use function str_contains;
 use function strtr;
 use function substr;
+use function trim;
 use function urlencode;
 
 use const PREG_SPLIT_DELIM_CAPTURE;
@@ -47,22 +47,9 @@ use const PREG_SPLIT_DELIM_CAPTURE;
  * var_dump($matching); // true
  * var_dump($captured); // [ 'year' => "2013", 'month' => "07", 'slug' => "test-is-a-test" ]
  * </pre>
- *
- * @property-read string $pattern The pattern.
- * @property-read string|string[] $interleaved The interleaved parts of the pattern.
- * @property-read string[] $params The names of the pattern params.
- * @property-read string $regex The regex of the pattern.
  */
 final class Pattern
 {
-	/**
-	 * @uses get_interleaved
-	 * @uses get_params
-	 * @uses get_pattern
-	 * @uses get_regex
-	 */
-	use AccessorTrait;
-
 	private const EXTENDED_CHARACTER_CLASSES = [
 
 		'{:uuid:}' => '[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}',
@@ -71,10 +58,12 @@ final class Pattern
 	];
 
 	/**
-	 * Parses a respond pattern and returns an array of interleaved paths and parameters, the
+	 * Parses a route pattern and returns an array of interleaved paths and parameters, the
 	 * parameter names and the regular expression for the specified pattern.
+	 *
+	 * @return array{ 0: string[], 1: array<string, string>, 2: string }
 	 */
-	static private function parse(string $pattern): array
+	private static function parse(string $pattern): array
 	{
 		$catchall = false;
 
@@ -104,8 +93,12 @@ final class Pattern
 
 	/**
 	 * Parses pattern parts.
+	 *
+	 * @param string[] $parts
+	 *
+	 * @return array{ 0: string|array{ 0: string, 1: string }, 1: string[], 2: string }
 	 */
-	static private function parse_parts(array $parts): array
+	private static function parse_parts(array $parts): array
 	{
 		$regex = '#^';
 		$interleaved = [];
@@ -143,13 +136,17 @@ final class Pattern
 			$params[] = $identifier;
 		}
 
-		return [ $interleaved, $params, $regex ];
+		return [ $interleaved, $params, $regex ]; // @phpstan-ignore-line
 	}
 
 	/**
 	 * Reads an offset from an array.
+	 *
+	 * @param array<string, mixed> $container
+	 *
+	 * @return mixed
 	 */
-	static private function read_value_from_array(array $container, string $key): mixed
+	private static function read_value_from_array(array $container, string $key): mixed
 	{
 		return $container[$key];
 	}
@@ -157,7 +154,7 @@ final class Pattern
 	/**
 	 * Reads a property from an object.
 	 */
-	static private function read_value_from_object(object $container, string $key): mixed
+	private static function read_value_from_object(object $container, string $key): mixed
 	{
 		return $container->$key;
 	}
@@ -165,75 +162,59 @@ final class Pattern
 	/**
 	 * Checks if the given string is a respond pattern.
 	 */
-	static public function is_pattern(string $pattern): bool
+	public static function is_pattern(string $pattern): bool
 	{
 		return str_contains($pattern, '<') || str_contains($pattern, ':') || str_contains($pattern, '*');
 	}
 
-	static private array $instances = [];
+	/**
+	 * @var array<string, self>
+	 */
+	private static array $instances = [];
 
 	/**
 	 * Creates a {@link Pattern} instance from the specified pattern.
 	 */
-	static public function from(string|self $pattern): self
+	public static function from(string|self $pattern): self
 	{
 		if ($pattern instanceof self) {
 			return $pattern;
 		}
 
+		if (!trim($pattern)) {
+			throw new InvalidPattern("Pattern cannot be blank.");
+		}
+
 		return self::$instances[$pattern] ??= new self($pattern);
 	}
 
-	/**
-	 * Pattern.
+	/*
+	 * INSTANCE
 	 */
-	private string $pattern;
 
-	private function get_pattern(): string
-	{
-		return $this->pattern;
-	}
+	readonly public string $pattern;
 
 	/**
 	 * Interleaved pattern.
 	 *
-	 * @var string|string[]
+	 * @var string[]|string[][]
 	 */
-	private array $interleaved;
-
-	private function get_interleaved(): array
-	{
-		return $this->interleaved;
-	}
+	readonly public array $interleaved;
 
 	/**
 	 * Params of the pattern.
 	 *
 	 * @var string[]
 	 */
-	private array $params;
-
-	private function get_params(): array
-	{
-		return $this->params;
-	}
+	readonly public array $params;
 
 	/**
 	 * Regex of the pattern.
 	 */
-	private string $regex;
-
-	private function get_regex(): string
-	{
-		return $this->regex;
-	}
+	readonly public string $regex;
 
 	private function __construct(string $pattern)
 	{
-		if (!trim($pattern)) {
-			throw new InvalidPattern("Pattern cannot be blank.");
-		}
-
 		[ $interleaved, $params, $regex ] = self::parse($pattern);
 
 		$this->pattern = $pattern;
@@ -253,7 +234,7 @@ final class Pattern
 	/**
 	 * Formats a pattern with the specified values.
 	 *
-	 * @param array|object|null $values The values to format the pattern, either as an array or an
+	 * @param array<string, mixed>|object|null $values The values to format the pattern, either as an array or an
 	 * object. If value is an instance of {@link ToSlug} the `to_slug()` method is used to
 	 * transform the instance into a URL component.
 	 *

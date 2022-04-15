@@ -22,39 +22,16 @@ use ICanBoogie\Routing\Route;
  * Third parties may use this event to provide a response to the request before the route is
  * mapped. The event is usually used by third parties to redirect requests or provide cached
  * responses.
- *
- * @property-read Request $request
- * @property Response $response
  */
 final class BeforeRespondEvent extends Event
 {
 	public const TYPE = 'respond:before';
 
-	protected function get_request(): Request
-	{
-		return $this->request;
-	}
+	public ?Response $response;
 
-	private ?Response $response;
-
-	protected function get_response(): ?Response
-	{
-		return $this->response;
-	}
-
-	protected function set_response(?Response $response): void
-	{
-		$this->response = $response;
-	}
-
-	/**
-	 * @uses get_request
-	 * @uses set_response
-	 * @uses get_response
-	 */
 	public function __construct(
 		Route $target,
-		private Request $request,
+		public readonly Request $request,
 		Response &$response = null
 	) {
 		$this->response = &$response;

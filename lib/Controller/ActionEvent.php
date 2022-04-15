@@ -12,7 +12,7 @@
 namespace ICanBoogie\Routing\Controller;
 
 use ICanBoogie\Event;
-use ICanBoogie\Routing\Controller;
+use ICanBoogie\Routing\ControllerAbstract;
 
 /**
  * Event class for the `ICanBoogie\Routing\Controller::action:before` event.
@@ -28,7 +28,7 @@ class ActionEvent extends Event
 	 */
 	public mixed $result;
 
-	public function __construct(Controller $target, mixed &$result)
+	public function __construct(ControllerAbstract $target, mixed &$result)
 	{
 		$this->result = &$result;
 

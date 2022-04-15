@@ -20,40 +20,16 @@ use ICanBoogie\Routing\Route;
  * Event class for the `ICanBoogie\Routing\Route::respond` event.
  *
  * Third parties may use this event to alter the response before it is returned by the dispatcher.
- *
- * @property-read Route $respond
- * @property-read Request $request
- * @property Response $response
  */
 final class RespondEvent extends Event
 {
 	public const TYPE = 'respond';
 
-	protected function get_request(): Request
-	{
-		return $this->request;
-	}
+	public ?Response $response;
 
-	private ?Response $response;
-
-	protected function get_response(): ?Response
-	{
-		return $this->response;
-	}
-
-	protected function set_response(?Response $response): void
-	{
-		$this->response = $response;
-	}
-
-	/**
-	 * @uses get_request
-	 * @uses get_response
-	 * @uses set_response
-	 */
 	public function __construct(
 		Route $target,
-		private Request $request,
+		public readonly Request $request,
 		Response &$response = null
 	) {
 		$this->response = &$response;

@@ -11,13 +11,10 @@ use ICanBoogie\Routing\ResponderProvider;
 final class Chain implements ResponderProvider
 {
 	/**
-	 * @var iterable<ResponderProvider>
+	 * @var ResponderProvider[]
 	 */
-	private iterable $providers;
+	readonly private iterable $providers;
 
-	/**
-	 * @param iterable<ResponderProvider> $providers
-	 */
 	public function __construct(ResponderProvider ...$providers)
 	{
 		$this->providers = $providers;

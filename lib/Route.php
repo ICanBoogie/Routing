@@ -12,7 +12,7 @@
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\Accessor\AccessorTrait;
-use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\RequestMethod;
 use InvalidArgumentException;
 
 use function in_array;
@@ -21,22 +21,14 @@ use function is_array;
 /**
  * A respond.
  *
- * @property-read Pattern $pattern The pattern of the respond.
- * @property-read string $action Controller action.
- * @property-read string|string[] $methods The supported HTTP methods.
- * @property-read string|null $id Route identifier.
- * @property-read string $url The contextualized URL of the respond.
- * @property-read string $absolute_url The contextualized absolute URL of the respond.
- * @property-read mixed $formatting_value The value used to format the respond.
- * @property-read bool $has_formatting_value `true` if the respond has a formatting value, `false` otherwise.
+ * @property-read string $url The contextualized URL of the route.
+ * @property-read string $absolute_url The contextualized absolute URL of the route.
+ * @property-read mixed $formatting_value The value used to format the route.
+ * @property-read bool $has_formatting_value `true` if the route has a formatting value, `false` otherwise.
  */
 final class Route
 {
 	/**
-	 * @uses get_pattern
-	 * @uses get_action
-	 * @uses get_methods
-	 * @uses get_id
 	 * @uses get_formatting_value
 	 * @uses get_has_formatting_value
 	 * @uses get_url
@@ -45,34 +37,14 @@ final class Route
 	use AccessorTrait;
 
 	/**
-	 * Pattern of the respond.
+	 * Pattern of the response.
 	 */
-	private Pattern $pattern;
-
-	private function get_pattern(): Pattern
-	{
-		return $this->pattern;
-	}
-
-	private function get_action(): string
-	{
-		return $this->action;
-	}
+	readonly public Pattern $pattern;
 
 	/**
-	 * @return string|string[]
+	 * @var array<int|string, mixed>|object|null
 	 */
-	private function get_methods(): string|array
-	{
-		return $this->methods;
-	}
-
-	private function get_id(): ?string
-	{
-		return $this->id;
-	}
-
-	private mixed $formatting_value = null; //TODO-202105: Remove state
+	private array|object|null $formatting_value = null; //TODO-202105: Remove state
 
 	private function get_formatting_value(): mixed
 	{
@@ -95,17 +67,17 @@ final class Route
 	}
 
 	/**
-	 * @param string $pattern Pattern of the respond.
+	 * @param string $pattern Pattern of the route.
 	 * @param string $action Identifier of a qualified action. e.g. 'articles:show'.
-	 * @param string|string[] $methods Request method(s) accepted by the respond.
+	 * @param RequestMethod|RequestMethod[] $methods Request method(s) accepted by the respond.
 	 * @param object[] $extensions
 	 */
 	public function __construct(
 		string $pattern,
-		private string $action,
-		private string|array $methods = Request::METHOD_ANY,
-		private string|null $id = null,
-		private array $extensions = [],
+		public readonly string $action,
+		public readonly RequestMethod|array $methods = RequestMethod::METHOD_ANY,
+		public readonly string|null $id = null,
+		public readonly array $extensions = [],
 	) {
 		$this->pattern = Pattern::from($pattern);
 
@@ -120,7 +92,7 @@ final class Route
 	}
 
 	/**
-	 * Formats a respond into a relative URL using its formatting value.
+	 * Formats a response into a relative URL using its formatting value.
 	 */
 	public function __toString(): string
 	{
@@ -130,11 +102,12 @@ final class Route
 	/**
 	 * Whether the specified method matches with the methods supported by the respond.
 	 */
-	public function method_matches(string $method): bool
+	public function method_matches(RequestMethod $method): bool
 	{
 		$methods = $this->methods;
 
-		if ($method === Request::METHOD_ANY || $method === $methods || $methods === Request::METHOD_ANY)
+		// TODO: what's up with `$method === $methods`?
+		if ($method === RequestMethod::METHOD_ANY || $method === $methods || $methods === RequestMethod::METHOD_ANY)
 		{
 			return true;
 		}
@@ -151,6 +124,10 @@ final class Route
 	 * Formats the respond with the specified values.
 	 *
 	 * Note: The formatting of the respond is deferred to its {@link Pattern} instance.
+	 *
+	 * @param array<string, mixed>|object|null $values
+	 *
+	 * @return FormattedRoute
 	 */
 	public function format(object|array $values = null): FormattedRoute
 	{
@@ -160,9 +137,11 @@ final class Route
 	/**
 	 * Assigns a formatting value to a respond.
 	 *
-	 * @return Route A new respond bound to a formatting value.
+	 * @param array<int|string, mixed>|object $formatting_value
+	 *
+	 * @return Route A new route bound to a formatting value.
 	 */
-	public function assign(mixed $formatting_value): self //TODO-202105: Return another type of object, or better, replace by a formatter.
+	public function assign(array|object $formatting_value): self //TODO-202105: Return another type of object, or better, replace by a formatter.
 	{
 		$clone = clone $this;
 

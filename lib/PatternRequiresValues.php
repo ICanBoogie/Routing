@@ -17,30 +17,14 @@ use Throwable;
 
 /**
  * Exception thrown in attempt to format a pattern requiring values without providing any.
- *
- * @property-read Pattern $pattern
  */
 class PatternRequiresValues extends InvalidArgumentException implements Exception
 {
-	/**
-	 * @uses get_pattern
-	 */
-	use AccessorTrait;
-
-	/**
-	 * @var Pattern
-	 */
-	private $pattern;
-
-	private function get_pattern(): Pattern
-	{
-		return $this->pattern;
-	}
-
-	public function __construct(Pattern $pattern, string $message = "The pattern requires values to be formatted.", int $code = 500, Throwable $previous = null)
-	{
-		$this->pattern = $pattern;
-
-		parent::__construct($message, $code, $previous);
+	public function __construct(
+		public readonly Pattern $pattern,
+		string $message = "The pattern requires values to be formatted.",
+		Throwable $previous = null
+	) {
+		parent::__construct($message, 0, $previous);
 	}
 }

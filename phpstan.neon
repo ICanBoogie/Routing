@@ -2,3 +2,6 @@ parameters:
   level: max
   paths:
     - lib
+  ignoreErrors:
+  	- '#Method .*::get_.* is unused#'
+  	- '#Call to an undefined method .*MockObject::method\(\)#'

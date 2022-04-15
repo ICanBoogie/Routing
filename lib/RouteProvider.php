@@ -11,14 +11,12 @@
 
 namespace ICanBoogie\Routing;
 
-use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\RequestMethod;
 
 interface RouteProvider
 {
 	/**
 	 * Provides a route matching the specified parameters.
-	 *
-	 * @phpstan-param Request::METHOD_* $method
 	 *
 	 * @param array<string|int, string>|null $path_params Parameters captured from the path info.
 	 * @param array<string|int, string>|null $query_params Parameters captured from the query string. Careful!
@@ -26,7 +24,7 @@ interface RouteProvider
 	 */
 	public function route_for_uri(
 		string $uri,
-		string $method = Request::METHOD_ANY,
+		RequestMethod $method = RequestMethod::METHOD_ANY,
 		array &$path_params = null,
 		array &$query_params = null
 	): ?Route;

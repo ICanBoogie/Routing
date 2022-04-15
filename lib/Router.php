@@ -4,6 +4,7 @@ namespace ICanBoogie\Routing;
 
 use Closure;
 use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\RequestMethod;
 use ICanBoogie\HTTP\ResponderClosure;
 use ICanBoogie\HTTP\Response;
 
@@ -12,16 +13,16 @@ use ICanBoogie\HTTP\Response;
  */
 class Router
 {
-	static private int $anonymous_action_count = 0;
+	private static int $anonymous_action_count = 0;
 
-	static private function generate_anonymous_action(): string
+	private static function generate_anonymous_action(): string
 	{
 		return '__anonymous_action_' . ++self::$anonymous_action_count;
 	}
 
 	public function __construct(
-		private MutableRouteProvider $routes,
-		private MutableResponderProvider $responders,
+		private readonly MutableRouteProvider $routes,
+		private readonly MutableResponderProvider $responders,
 	) {
 	}
 
@@ -32,7 +33,7 @@ class Router
 	 */
 	public function any(string $pattern, Closure $closure): self
 	{
-		return $this->method(Request::METHOD_ANY, $pattern, $closure);
+		return $this->method(RequestMethod::METHOD_ANY, $pattern, $closure);
 	}
 
 	/**
@@ -42,7 +43,7 @@ class Router
 	 */
 	public function connect(string $pattern, Closure $closure): self
 	{
-		return $this->method(Request::METHOD_CONNECT, $pattern, $closure);
+		return $this->method(RequestMethod::METHOD_CONNECT, $pattern, $closure);
 	}
 
 	/**
@@ -52,7 +53,7 @@ class Router
 	 */
 	public function delete(string $pattern, Closure $closure): self
 	{
-		return $this->method(Request::METHOD_DELETE, $pattern, $closure);
+		return $this->method(RequestMethod::METHOD_DELETE, $pattern, $closure);
 	}
 
 	/**
@@ -62,7 +63,7 @@ class Router
 	 */
 	public function get(string $pattern, Closure $closure): self
 	{
-		return $this->method(Request::METHOD_GET, $pattern, $closure);
+		return $this->method(RequestMethod::METHOD_GET, $pattern, $closure);
 	}
 
 	/**
@@ -72,7 +73,7 @@ class Router
 	 */
 	public function head(string $pattern, Closure $closure): self
 	{
-		return $this->method(Request::METHOD_HEAD, $pattern, $closure);
+		return $this->method(RequestMethod::METHOD_HEAD, $pattern, $closure);
 	}
 
 	/**
@@ -82,7 +83,7 @@ class Router
 	 */
 	public function options(string $pattern, Closure $closure): self
 	{
-		return $this->method(Request::METHOD_OPTIONS, $pattern, $closure);
+		return $this->method(RequestMethod::METHOD_OPTIONS, $pattern, $closure);
 	}
 
 	/**
@@ -92,7 +93,7 @@ class Router
 	 */
 	public function patch(string $pattern, Closure $closure): self
 	{
-		return $this->method(Request::METHOD_PATCH, $pattern, $closure);
+		return $this->method(RequestMethod::METHOD_PATCH, $pattern, $closure);
 	}
 
 	/**
@@ -102,7 +103,7 @@ class Router
 	 */
 	public function post(string $pattern, Closure $closure): self
 	{
-		return $this->method(Request::METHOD_POST, $pattern, $closure);
+		return $this->method(RequestMethod::METHOD_POST, $pattern, $closure);
 	}
 
 	/**
@@ -112,7 +113,7 @@ class Router
 	 */
 	public function put(string $pattern, Closure $closure): self
 	{
-		return $this->method(Request::METHOD_PUT, $pattern, $closure);
+		return $this->method(RequestMethod::METHOD_PUT, $pattern, $closure);
 	}
 
 	/**
@@ -122,7 +123,7 @@ class Router
 	 */
 	public function trace(string $pattern, Closure $closure): self
 	{
-		return $this->method(Request::METHOD_TRACE, $pattern, $closure);
+		return $this->method(RequestMethod::METHOD_TRACE, $pattern, $closure);
 	}
 
 	/**
@@ -130,7 +131,7 @@ class Router
 	 *
 	 * @return $this
 	 */
-	private function method(string $method, string $pattern, Closure $closure): self
+	private function method(RequestMethod $method, string $pattern, Closure $closure): self
 	{
 		$action = self::generate_anonymous_action();
 

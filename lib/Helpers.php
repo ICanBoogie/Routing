@@ -25,7 +25,7 @@ final class Helpers
 	/**
 	 * @var array<string, callable>
 	 */
-	static private array $mapping = [
+	private static array $mapping = [
 
 		'contextualize'   => [ __CLASS__, 'default_contextualize' ],
 		'decontextualize' => [ __CLASS__, 'default_decontextualize' ],
@@ -40,7 +40,7 @@ final class Helpers
 	 * @uses default_decontextualize
 	 * @uses default_absolutize_url
 	 */
-	static public function __callStatic(string $name, array $arguments): mixed
+	public static function __callStatic(string $name, array $arguments): mixed
 	{
 		return (self::$mapping[$name])(...$arguments);
 	}
@@ -54,7 +54,7 @@ final class Helpers
 	 * @throws RuntimeException is attempt to patch an undefined function.
 	 */
 	// @codeCoverageIgnoreStart
-	static public function patch(string $name, callable $callback): void
+	public static function patch(string $name, callable $callback): void
 	{
 		if (empty(self::$mapping[$name]))
 		{
@@ -69,17 +69,17 @@ final class Helpers
 	 * Default implementations
 	 */
 
-	static private function default_contextualize(string $pathname): string
+	private static function default_contextualize(string $pathname): string
 	{
 		return $pathname;
 	}
 
-	static private function default_decontextualize(string $pathname): string
+	private static function default_decontextualize(string $pathname): string
 	{
 		return $pathname;
 	}
 
-	static private function default_absolutize_url(string $url): string
+	private static function default_absolutize_url(string $url): string
 	{
 		return 'http://' . $_SERVER['HTTP_HOST'] . $url;
 	}

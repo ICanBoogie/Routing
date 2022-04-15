@@ -12,8 +12,8 @@ use ICanBoogie\Routing\ResponderProvider;
 final class WithMiddleware implements ResponderProvider
 {
 	public function __construct(
-		private ResponderProvider $next,
-		private MiddlewareCollection $middleware,
+		private readonly ResponderProvider $next,
+		private readonly MiddlewareCollection $middleware,
 	) {
 	}
 

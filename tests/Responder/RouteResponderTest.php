@@ -15,33 +15,44 @@ use ICanBoogie\HTTP\Exception\NoResponder;
 use ICanBoogie\HTTP\MethodNotSupported;
 use ICanBoogie\HTTP\NotFound;
 use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\RequestMethod;
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\ResponderProvider;
 use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteProvider;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Throwable;
 
 final class RouteResponderTest extends TestCase
 {
 	use ProphecyTrait;
 
-	private ObjectProphecy|RouteProvider $routes;
-	private ObjectProphecy|ResponderProvider $responders;
-	private ObjectProphecy|Responder $responder;
+	private MockObject|RouteProvider $routes;
+
+	/**
+	 * @var ObjectProphecy<ResponderProvider>
+	 */
+	private ObjectProphecy $responders;
+
+	/**
+	 * @var ObjectProphecy<Responder>
+	 */
+	private ObjectProphecy $responder;
 	private Request $request;
 	private Response $response;
 	private Route $route;
 
 	protected function setUp(): void
 	{
-		$this->routes = $this->prophesize(RouteProvider::class);
+		$this->routes = $this->createMock(RouteProvider::class);
 		$this->responders = $this->prophesize(ResponderProvider::class);
 		$this->responder = $this->prophesize(Responder::class);
 		$this->request = Request::from([
-			Request::OPTION_METHOD => Request::METHOD_DELETE,
+			Request::OPTION_METHOD => RequestMethod::METHOD_DELETE,
 			Request::OPTION_URI => '/articles/123',
 			Request::OPTION_PATH_PARAMS => [ 'path_param1' => 'val1' ],
 		]);
@@ -49,13 +60,19 @@ final class RouteResponderTest extends TestCase
 		$this->route = new Route('/articles/<\d+>', 'article:delete');
 	}
 
+	/**
+	 * @throws Throwable
+	 */
 	public function test_respond_no_route(): void
 	{
 		$path_params = null;
 
-		$this->routes->route_for_uri('/articles/123', Request::METHOD_DELETE, $path_params)
-			->willReturn(null);
-		$this->routes->route_for_uri('/articles/123')
+		$this->routes
+			->method('route_for_uri')
+			->withConsecutive(
+				[ '/articles/123', RequestMethod::METHOD_DELETE, $path_params ],
+				[ '/articles/123' ]
+			)
 			->willReturn(null);
 
 		$this->expectException(NotFound::class);
@@ -63,26 +80,38 @@ final class RouteResponderTest extends TestCase
 		$this->respond($this->request);
 	}
 
+	/**
+	 * @throws Throwable
+	 */
 	public function test_respond_no_route_but_any(): void
 	{
 		$path_params = null;
 
-		$this->routes->route_for_uri('/articles/123', Request::METHOD_DELETE, $path_params)
-			->willReturn(null);
-		$this->routes->route_for_uri('/articles/123')
-			->willReturn($this->route);
+		$this->routes
+			->method('route_for_uri')
+			->withConsecutive(
+				[ '/articles/123', RequestMethod::METHOD_DELETE, $path_params ],
+				[ '/articles/123' ]
+			)
+			->willReturnOnConsecutiveCalls(null, $this->route);
 
 		$this->expectException(MethodNotSupported::class);
 
 		$this->respond($this->request);
 	}
 
+	/**
+	 * @throws Throwable
+	 */
 	public function test_respond_no_responder(): void
 	{
 		$path_params = null;
 
-		$this->routes->route_for_uri('/articles/123', Request::METHOD_DELETE, $path_params)
+		$this->routes
+			->method('route_for_uri')
+			->with('/articles/123', RequestMethod::METHOD_DELETE, $path_params)
 			->willReturn($this->route);
+
 		$this->responders->responder_for_action('article:delete')
 			->willReturn(null);
 
@@ -91,6 +120,9 @@ final class RouteResponderTest extends TestCase
 		$this->respond($this->request);
 	}
 
+	/**
+	 * @throws Throwable
+	 */
 	public function test_respond_success(): void
 	{
 		$route = $this->route;
@@ -100,13 +132,13 @@ final class RouteResponderTest extends TestCase
 		// We need this monster because reference params is not working with Prophecy.
 		$this->routes = new class($route) implements RouteProvider {
 			public function __construct(
-				private Route $route,
+				private readonly Route $route,
 			) {
 			}
 
 			public function route_for_uri(
 				string $uri,
-				string $method = Request::METHOD_ANY,
+				RequestMethod $method = RequestMethod::METHOD_ANY,
 				array &$path_params = null,
 				array &$query_params = null
 			): ?Route {
@@ -132,10 +164,13 @@ final class RouteResponderTest extends TestCase
 		$this->assertEquals([ 'path_param1' => 'val1', 'path_param2' => 'val2' ], $request->params);
 	}
 
+	/**
+	 * @throws Throwable
+	 */
 	private function respond(Request $request): Response
 	{
 		return (new RouteResponder(
-			$this->routes->reveal(),
+			$this->routes, // @phpstan-ignore-line
 			$this->responders->reveal(),
 		))->respond($request);
 	}

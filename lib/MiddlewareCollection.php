@@ -5,7 +5,6 @@ namespace ICanBoogie\Routing;
 use ICanBoogie\HTTP\Responder;
 
 use function array_merge;
-use function array_reverse;
 
 /**
  * A collection of middleware.
@@ -20,9 +19,7 @@ final class MiddlewareCollection
 	/**
 	 * @param iterable<Middleware> $middleware
 	 */
-	public function __construct(
-		iterable $middleware = []
-	) {
+	public function __construct(iterable $middleware = []) {
 		$this->add(...$middleware);
 	}
 
@@ -35,7 +32,7 @@ final class MiddlewareCollection
 	{
 		$chain = $endpoint;
 
-		foreach (array_reverse($this->middleware) as $m) {
+		foreach ($this->middleware as $m) {
 			$chain = $m->responder($chain);
 		}
 

@@ -12,6 +12,7 @@ final class Mutable implements MutableResponderProvider
 {
 	/**
 	 * @var array<string, Responder>
+	 *     Where _key_ is an action and _value_ a responder.
 	 */
 	private array $map = [];
 

@@ -46,7 +46,7 @@ final class RouteMaker
 	 *
 	 * @return Route[]
 	 */
-	static public function actions(string $name, array $basics, Options $options = null): array
+	public static function actions(string $name, array $basics, Options $options = null): array
 	{
 		$options ??= new Options();
 		$basics = array_merge($basics, $options->basics);

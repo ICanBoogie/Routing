@@ -3,6 +3,7 @@
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\RequestMethod;
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Responder\RouteResponder;
@@ -16,7 +17,7 @@ final class RouterTest extends TestCase
 	/**
 	 * @dataProvider provide_method
 	 */
-	public function test_method(string $method, string $http_method): void
+	public function test_method(string $method, RequestMethod $http_method): void
 	{
 		$response = new Response();
 		$pattern = '/articles/<\d+>';
@@ -43,16 +44,16 @@ final class RouterTest extends TestCase
 	{
 		return [
 
-			[ 'any', Request::METHOD_ANY ],
-			[ 'connect', Request::METHOD_CONNECT ],
-			[ 'delete', Request::METHOD_DELETE ],
-			[ 'get', Request::METHOD_GET ],
-			[ 'head', Request::METHOD_HEAD ],
-			[ 'options', Request::METHOD_OPTIONS ],
-			[ 'patch', Request::METHOD_PATCH ],
-			[ 'post', Request::METHOD_POST ],
-			[ 'put', Request::METHOD_PUT ],
-			[ 'trace', Request::METHOD_TRACE ],
+			[ 'any', RequestMethod::METHOD_ANY ],
+			[ 'connect', RequestMethod::METHOD_CONNECT ],
+			[ 'delete', RequestMethod::METHOD_DELETE ],
+			[ 'get', RequestMethod::METHOD_GET ],
+			[ 'head', RequestMethod::METHOD_HEAD ],
+			[ 'options', RequestMethod::METHOD_OPTIONS ],
+			[ 'patch', RequestMethod::METHOD_PATCH ],
+			[ 'post', RequestMethod::METHOD_POST ],
+			[ 'put', RequestMethod::METHOD_PUT ],
+			[ 'trace', RequestMethod::METHOD_TRACE ],
 
 		];
 	}

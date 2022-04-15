@@ -22,64 +22,24 @@ use Throwable;
  *
  * Event hooks may use this event to _rescue_ a respond by providing a suitable response, or
  * replace the exception to throw if the rescue fails.
- *
- * @property Throwable $exception
- * @property-read Request $request
- * @property Response|null $response
  */
 final class RescueEvent extends Event
 {
 	public const TYPE = 'rescue';
 
-	protected function get_request(): Request
-	{
-		return $this->request;
-	}
-
 	/**
 	 * Reference to the exception to throw if the rescue fails.
-	 *
-	 * @var Throwable
-	 *
-	 * @uses get_exception
-	 * @uses set_exception
 	 */
-	private Throwable $exception;
-
-	protected function get_exception(): Throwable
-	{
-		return $this->exception;
-	}
-
-	protected function set_exception(Throwable $exception): void
-	{
-		$this->exception = $exception;
-	}
+	public Throwable $exception;
 
 	/**
 	 * Reference to the response that rescue the respond.
-	 *
-	 * @uses get_response
-	 * @uses set_response
 	 */
-	private ?Response $response;
+	public ?Response $response;
 
-	protected function get_response(): ?Response
-	{
-		return $this->response;
-	}
-
-	protected function set_response(?Response $response): void
-	{
-		$this->response = $response;
-	}
-
-	/**
-	 * @uses get_request
-	 */
 	public function __construct(
 		Route $target,
-		private Request $request,
+		public readonly Request $request,
 		Throwable &$exception,
 		?Response &$response
 	) {

@@ -32,8 +32,9 @@ final class Rescue implements Middleware
 	public function responder(Responder $next): Responder
 	{
 		return new class($next) implements Responder {
-			public function __construct(private Responder $next)
-			{
+			public function __construct(
+				private readonly Responder $next
+			) {
 			}
 
 			public function respond(Request $request): Response

@@ -22,7 +22,7 @@ use ICanBoogie\Routing\Route\RespondEvent;
 use function assert;
 
 /**
- * Allows event listeners to provide a response in stead of the next responder, circumventing it, or to alter/process
+ * Allows event listeners to provide a response instead of the next responder, circumventing it, or to alter/process
  * the result response.
  */
 final class Alter implements Middleware
@@ -30,8 +30,9 @@ final class Alter implements Middleware
 	public function responder(Responder $next): Responder
 	{
 		return new class ($next) implements Responder {
-			public function __construct(private Responder $next)
-			{
+			public function __construct(
+				private readonly Responder $next
+			) {
 			}
 
 			public function respond(Request $request): Response

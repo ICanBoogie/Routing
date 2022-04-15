@@ -13,7 +13,7 @@ namespace ICanBoogie\Routing;
 
 use ArrayIterator;
 use Countable;
-use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\RequestMethod;
 use ICanBoogie\Routing\RouteMaker\Options;
 use IteratorAggregate;
 
@@ -77,7 +77,7 @@ final class RouteCollection implements IteratorAggregate, Countable, MutableRout
 	}
 
 	/**
-	 * @return ArrayIterator<mixed, Route>|Route[]
+	 * @return ArrayIterator<int, Route>
 	 */
 	public function getIterator(): ArrayIterator
 	{
@@ -94,7 +94,7 @@ final class RouteCollection implements IteratorAggregate, Countable, MutableRout
 
 	public function route_for_uri(
 		string $uri,
-		string $method = Request::METHOD_ANY,
+		RequestMethod $method = RequestMethod::METHOD_ANY,
 		array &$path_params = null,
 		array &$query_params = null
 	): ?Route

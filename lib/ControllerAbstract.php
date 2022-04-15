@@ -20,6 +20,7 @@ use ICanBoogie\Prototyped;
 use ICanBoogie\Routing\Controller\ActionEvent;
 use ICanBoogie\Routing\Controller\BeforeActionEvent;
 use InvalidArgumentException;
+use JsonException;
 
 use function get_class;
 use function ICanBoogie\underscore;
@@ -29,8 +30,10 @@ use function is_object;
 use function json_encode;
 use function preg_match;
 
+use const JSON_THROW_ON_ERROR;
+
 /**
- * A respond controller.
+ * A route controller.
  *
  * # Accessing the application's properties
  *
@@ -73,8 +76,7 @@ abstract class ControllerAbstract extends Prototyped implements Responder
 	{
 		$controller_class = get_class($this);
 
-		if (preg_match('/(\w+)Controller$/', $controller_class, $matches))
-		{
+		if (preg_match('/(\w+)Controller$/', $controller_class, $matches)) {
 			return underscore($matches[1]);
 		}
 
@@ -90,7 +92,7 @@ abstract class ControllerAbstract extends Prototyped implements Responder
 
 	protected function get_route(): Route
 	{
-		return $this->request->context->route;
+		return $this->request->context->get(Route::class);
 	}
 
 	protected function lazy_get_response(): Response
@@ -103,7 +105,7 @@ abstract class ControllerAbstract extends Prototyped implements Responder
 	}
 
 	/**
-	 * Controls the respond and returns a response.
+	 * Controls the route and returns a response.
 	 *
 	 * The response is obtained by invoking `action()`. When the result is a {@link Response}
 	 * instance it is returned as is, when the `$response` property has been initialized the result
@@ -113,8 +115,6 @@ abstract class ControllerAbstract extends Prototyped implements Responder
 	 * {@link Controller\BeforeActionEvent} is fired before invoking `action()`, the
 	 * `ICanBoogie\Routing\Controller::action:before` event of class
 	 * {@link Controller\ActionEvent} is fired after.
-	 *
-	 * @return Response|mixed
 	 */
 	final public function respond(Request $request): Response
 	{
@@ -124,22 +124,18 @@ abstract class ControllerAbstract extends Prototyped implements Responder
 
 		new BeforeActionEvent($this, $result);
 
-		if (!$result)
-		{
+		if (!$result) {
 			$result = $this->action($request);
 		}
 
 		new ActionEvent($this, $result);
 
-		if ($result instanceof Response)
-		{
+		if ($result instanceof Response) {
 			return $result;
 		}
 
-		if (isset($this->response))
-		{
-			if ($result !== null)
-			{
+		if (isset($this->response)) {
+			if ($result !== null) {
 				$this->response->body = $result;
 			}
 
@@ -167,8 +163,7 @@ abstract class ControllerAbstract extends Prototyped implements Responder
 	 */
 	public function redirect(Route|string $url, int $status = Status::FOUND, array $headers = []): Response
 	{
-		if ($url instanceof Route)
-		{
+		if ($url instanceof Route) {
 			$url = $url->url;
 		}
 
@@ -178,24 +173,19 @@ abstract class ControllerAbstract extends Prototyped implements Responder
 	/**
 	 * Forwards the request.
 	 *
-	 * @param Route|mixed $destination
-	 *
 	 * @return mixed
+	 * @throws JsonException
 	 */
-	public function forward_to(mixed $destination) //TODO-202105: Only support Route?
+	public function forward_to(object|array|string $destination) //TODO-202105: Only support Route?
 	{
-		if ($destination instanceof Route)
-		{
+		if ($destination instanceof Route) {
 			return $this->forward_to_route($destination);
 		}
 
-		if (is_object($destination))
-		{
+		if (is_object($destination)) {
 			$destination = "instance of " . get_class($destination);
-		}
-		else if (is_array($destination))
-		{
-			$destination = json_encode($destination);
+		} elseif (is_array($destination)) {
+			$destination = (string) json_encode($destination, JSON_THROW_ON_ERROR);
 		}
 
 		throw new InvalidArgumentException("Don't know how to forward to: $destination.");
@@ -220,9 +210,8 @@ abstract class ControllerAbstract extends Prototyped implements Responder
 
 		$controller = $route->controller;
 
-		if (!is_callable($controller))
-		{
-			$controller = new $controller;
+		if (!is_callable($controller)) {
+			$controller = new $controller();
 		}
 
 		return $controller($request);

@@ -11,7 +11,7 @@
 
 namespace ICanBoogie\Routing\RouteProvider;
 
-use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\RequestMethod;
 use ICanBoogie\Routing\Exception\InvalidPattern;
 use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteCollection;
@@ -59,17 +59,17 @@ final class MutableTest extends TestCase
 		$routes = new RouteCollection([
 
 			$home = new Route('/', 'home'),
-			new Route('/articles/new', 'articles:edit', Request::METHOD_GET),
-			$index = new Route('/articles', 'articles', [ Request::METHOD_POST, Request::METHOD_PATCH ]),
-			$delete = new Route('/articles/<nid:\d+>', 'articles:delete', Request::METHOD_DELETE),
+			new Route('/articles/new', 'articles:edit', RequestMethod::METHOD_GET),
+			$index = new Route('/articles', 'articles', [ RequestMethod::METHOD_POST, RequestMethod::METHOD_PATCH ]),
+			$delete = new Route('/articles/<nid:\d+>', 'articles:delete', RequestMethod::METHOD_DELETE),
 
 		]);
 
 		$this->assertSame($home, $routes->route_for_uri('/'));
-		$this->assertSame($home, $routes->route_for_uri('/', Request::METHOD_PATCH, $path_params));
+		$this->assertSame($home, $routes->route_for_uri('/', RequestMethod::METHOD_PATCH, $path_params));
 		$this->assertSame($home, $routes->route_for_uri(
 			'/?singer=madonna',
-			Request::METHOD_ANY,
+			RequestMethod::METHOD_ANY,
 			$path_params,
 			$query_params
 		));
@@ -79,7 +79,7 @@ final class MutableTest extends TestCase
 		$this->assertNull($routes->route_for_uri('/undefined'));
 		$this->assertNull($routes->route_for_uri(
 			'/undefined?madonna',
-			Request::METHOD_ANY,
+			RequestMethod::METHOD_ANY,
 			$path_params
 		));
 		$this->assertEmpty($path_params);
@@ -87,26 +87,26 @@ final class MutableTest extends TestCase
 		$this->assertSame($index, $routes->route_for_uri('/articles'));
 		$this->assertSame($index, $routes->route_for_uri(
 			'/articles',
-			Request::METHOD_POST,
+			RequestMethod::METHOD_POST,
 			$path_params
 		));
 		$this->assertSame($index, $routes->route_for_uri(
 			'/articles',
-			Request::METHOD_PATCH,
+			RequestMethod::METHOD_PATCH,
 			$path_params
 		));
-		$this->assertNull($routes->route_for_uri('/articles', Request::METHOD_GET, $path_params));
+		$this->assertNull($routes->route_for_uri('/articles', RequestMethod::METHOD_GET, $path_params));
 
 		$this->assertSame($delete, $routes->route_for_uri(
 			'/articles/123',
-			Request::METHOD_DELETE,
+			RequestMethod::METHOD_DELETE,
 			$path_params
 		));
 		$this->assertEquals([ 'nid' => 123 ], $path_params);
 		// Parameters already captured from the path are discarded from the query.
 		$this->assertSame($delete, $routes->route_for_uri(
 			'/articles/123?nid=456&singer=madonna',
-			Request::METHOD_DELETE,
+			RequestMethod::METHOD_DELETE,
 			$path_params,
 			$query_params
 		));
@@ -124,14 +124,14 @@ final class MutableTest extends TestCase
 	{
 		$routes = new RouteCollection([
 
-			new Route('/api/:constructor/:id/active', 'api:nodes:activate', Request::METHOD_PUT),
-			$ok = new Route('/api/articles/:id/active', 'api:articles:activate', Request::METHOD_PUT),
+			new Route('/api/:constructor/:id/active', 'api:nodes:activate', RequestMethod::METHOD_PUT),
+			$ok = new Route('/api/articles/:id/active', 'api:articles:activate', RequestMethod::METHOD_PUT),
 
 		]);
 
 		$this->assertSame($ok, $routes->route_for_uri(
 			'/api/articles/123/active',
-			Request::METHOD_PUT
+			RequestMethod::METHOD_PUT
 		));
 	}
 
@@ -145,7 +145,7 @@ final class MutableTest extends TestCase
 
 		$this->assertSame($ok, $routes->route_for_uri(
 			'/admin/articles/123/edit',
-			Request::METHOD_ANY,
+			RequestMethod::METHOD_ANY,
 			$path_params
 		));
 		$this->assertEquals([ 123 ], $path_params);
@@ -153,7 +153,7 @@ final class MutableTest extends TestCase
 
 	public function test_resources(): void
 	{
-		$routes = new RouteCollection;
+		$routes = new RouteCollection();
 		$routes->resource('photos', new Options(only: [ RouteMaker::ACTION_INDEX, RouteMaker::ACTION_SHOW ]));
 		$actions = [];
 
