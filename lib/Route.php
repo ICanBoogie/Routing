@@ -100,7 +100,7 @@ final class Route
 	}
 
 	/**
-	 * Whether the specified method matches with the methods supported by the respond.
+	 * Whether the specified method matches with the methods supported by the route.
 	 */
 	public function method_matches(RequestMethod $method): bool
 	{
@@ -121,9 +121,9 @@ final class Route
 	}
 
 	/**
-	 * Formats the respond with the specified values.
+	 * Formats the route with the specified values.
 	 *
-	 * Note: The formatting of the respond is deferred to its {@link Pattern} instance.
+	 * Note: The formatting of the route is deferred to its {@link Pattern} instance.
 	 *
 	 * @param array<string, mixed>|object|null $values
 	 *

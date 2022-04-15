@@ -13,26 +13,27 @@ namespace ICanBoogie\Routing;
 
 use ArrayIterator;
 use Countable;
-use ICanBoogie\HTTP\RequestMethod;
 use ICanBoogie\Routing\RouteMaker\Options;
+use ICanBoogie\Routing\RouteProvider\ById;
+use ICanBoogie\Routing\RouteProvider\ByUri;
 use IteratorAggregate;
+use Traversable;
 
 use function array_diff_key;
 use function count;
 use function ICanBoogie\stable_sort;
-use function parse_str;
-use function parse_url;
 use function substr_count;
 
 /**
- * A respond collection.
+ * A route collection.
  *
  * @implements IteratorAggregate<mixed, Route>
  */
 final class RouteCollection implements IteratorAggregate, Countable, MutableRouteProvider
 {
 	/**
-	 * @var Route[]
+	 * @var array<string|int, Route>
+	 *     Where _key_ is a route identifier or an offset and _value_ is a Route.
 	 */
 	private array $routes = [];
 
@@ -77,9 +78,9 @@ final class RouteCollection implements IteratorAggregate, Countable, MutableRout
 	}
 
 	/**
-	 * @return ArrayIterator<int, Route>
+	 * @return Traversable<string|int, Route>
 	 */
-	public function getIterator(): ArrayIterator
+	public function getIterator(): Traversable
 	{
 		return new ArrayIterator(array_values($this->routes));
 	}
@@ -92,37 +93,41 @@ final class RouteCollection implements IteratorAggregate, Countable, MutableRout
 		return count($this->routes);
 	}
 
-	public function route_for_uri(
-		string $uri,
-		RequestMethod $method = RequestMethod::METHOD_ANY,
-		array &$path_params = null,
-		array &$query_params = null
-	): ?Route
+	public function route_for_predicate(callable $predicate): ?Route
 	{
-		$path_params = [];
-		$query_params = [];
-
-		$parsed = (array) parse_url($uri) + [ 'path' => null, 'query' => null ];
-		$path = $parsed['path'];
-
-		if (!$path)
-		{
-			return null;
+		if ($predicate instanceof ById) {
+			return $this->routes[$predicate->id] ?? null;
 		}
+
+		if ($predicate instanceof ByUri) {
+			return $this->route_for_predicate_by_uri($predicate);
+		}
+
+		foreach ($this->routes as $route) {
+			if ($predicate($route)) {
+				return $route;
+			}
+		}
+
+		return null;
+	}
+
+	private function route_for_predicate_by_uri(ByUri $predicate): ?Route
+	{
+		$path = $predicate->path;
+		$method = $predicate->method;
+		$path_params = [];
 
 		/**
 		 * Search for a matching static respond.
 		 *
 		 * @param Route[] $routes
 		 */
-		$map_static = function(iterable $routes) use($path, $method): ?Route
-		{
-			foreach ($routes as $route)
-			{
+		$map_static = function (iterable $routes) use ($path, $method): ?Route {
+			foreach ($routes as $route) {
 				$pattern = (string) $route->pattern;
 
-				if ($route->method_matches($method) && $pattern === $path)
-				{
+				if ($route->method_matches($method) && $pattern === $path) {
 					return $route;
 				}
 			}
@@ -135,15 +140,12 @@ final class RouteCollection implements IteratorAggregate, Countable, MutableRout
 		 *
 		 * @param Route[] $routes
 		 */
-		$map_dynamic = function(iterable $routes) use($path, &$path_params): ?Route
-		{
-			foreach ($routes as $route)
-			{
+		$map_dynamic = function (iterable $routes) use ($path, &$path_params): ?Route {
+			foreach ($routes as $route) {
 				$pattern = $route->pattern;
 				$via = $route->methods;
 
-				if (!$route->method_matches($via) || !$pattern->matches($path, $path_params))
-				{
+				if (!$route->method_matches($via) || !$pattern->matches($path, $path_params)) {
 					continue;
 				}
 
@@ -157,28 +159,24 @@ final class RouteCollection implements IteratorAggregate, Countable, MutableRout
 
 		$route = null;
 
-		if ($static)
-		{
+		if ($static) {
 			$route = $map_static($static);
 		}
 
-		if (!$route && $dynamic)
-		{
+		if (!$route && $dynamic) {
 			$route = $map_dynamic($dynamic);
 		}
 
-		if (!$route)
-		{
+		if (!$route) {
 			return null;
 		}
 
-		$query = $parsed['query'];
+		// We update the predicate with the path parameters, and remove matches from the query parameters.
 
-		if ($query)
-		{
-			parse_str($query, $query_params);
+		$predicate->path_params = $path_params;
 
-			$query_params = array_diff_key($query_params, $path_params);
+		if ($predicate->query_params) {
+			$predicate->query_params = array_diff_key($predicate->query_params, $path_params);
 		}
 
 		return $route;
@@ -203,6 +201,8 @@ final class RouteCollection implements IteratorAggregate, Countable, MutableRout
 		$this->dynamic = null;
 	}
 
+	private const PATH_SEPARATOR = '/';
+
 	/**
 	 * Sorts routes according to their type and computed weight.
 	 *
@@ -212,7 +212,7 @@ final class RouteCollection implements IteratorAggregate, Countable, MutableRout
 	 * comparison.
 	 *
 	 * Dynamic routes are ordered according to their weight, which is computed from the number
-	 * of static parts before the first capture. The more static parts, the lighter the respond is.
+	 * of static parts before the first capture. The more static parts, the lighter the route is.
 	 *
 	 * @return array{0: Route[], 1: Route[]} An array with the static routes and dynamic routes.
 	 */
@@ -221,8 +221,7 @@ final class RouteCollection implements IteratorAggregate, Countable, MutableRout
 		$static = $this->static;
 		$dynamic = $this->dynamic;
 
-		if ($static !== null && $dynamic !== null)
-		{
+		if ($static !== null && $dynamic !== null) {
 			return [ $static, $dynamic ];
 		}
 
@@ -230,18 +229,14 @@ final class RouteCollection implements IteratorAggregate, Countable, MutableRout
 		$dynamic = [];
 		$weights = [];
 
-		foreach ($this->routes as $route)
-		{
+		foreach ($this->routes as $route) {
 			$pattern = $route->pattern;
 
-			if (!count($pattern->params))
-			{
+			if (!count($pattern->params)) {
 				$static[] = $route;
-			}
-			else
-			{
+			} else {
 				$dynamic[] = $route;
-				$weights[] = substr_count($pattern->interleaved[0], '/');
+				$weights[] = substr_count($pattern->interleaved[0], self::PATH_SEPARATOR); // @phpstan-ignore-line
 			}
 		}
 
@@ -259,10 +254,8 @@ final class RouteCollection implements IteratorAggregate, Countable, MutableRout
 	{
 		$routes = [];
 
-		foreach ($this->routes as $route)
-		{
-			if (!$filter($route))
-			{
+		foreach ($this->routes as $route) {
+			if (!$filter($route)) {
 				continue;
 			}
 

@@ -11,7 +11,6 @@
 
 namespace ICanBoogie\Routing;
 
-use ICanBoogie\Accessor\AccessorTrait;
 use InvalidArgumentException;
 use Throwable;
 

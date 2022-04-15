@@ -108,8 +108,8 @@ thrown if `RouteDefinition::PATTERN` is missing, and [ControllerNotDefined][] is
 `RouteDefinition::CONTROLLER` and `RouteDefinition::LOCATION` are missing.
 
 > **Note:** You can add any parameter you want to the route definition, they are used to create
-the route instance, which might be useful to provide additional information to a controller.
-Better use a custom route class though.
+> the route instance, which might be useful to provide additional information to a controller.
+> Better use a custom route class though.
 
 
 
@@ -283,23 +283,33 @@ $filtered_routes = $routes->filter(new AdminIndexRouteFilter);
 
 
 
-## Mapping a path to a route
+## Route providers
 
-Routes are mapped using a [RouteCollection][] instance. A HTTP method and a namespace can optionally
-be specified to determine the route more accurately. The parameters captured from the routes are
-stored in the `$captured` variable, passed by reference. If the path contains a query string,
-it is parsed and stored under `__query__` in `$captured`.
+Route providers implement the [RouteProvider][] interface. The `route_for_predicate()` method is used to find a route
+that matches a predicate. A predicate can be as simple as a callable. The following predicates come built-in:
+
+- [RouteProvider\ById][]: Matches a route against an identifier.
+- [RouteProvider\ByAction][]: Matches a route against an action.
+- [RouteProvider\ByUri][]: Matches a route against a URI and an optional method. Path parameters and query parameters
+are captured in the predicate.
+
+The following example demonstrates how to find route matching a URL and method, using the `ByUri` predicate:
 
 ```php
 <?php
 
-use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\RequestMethod;
+use ICanBoogie\Routing\RouteProvider\ByUri;
 
-$home_route = $routes->find('/?singer=madonna', $captured);
-var_dump($captured);   // [ '__query__' => [ 'singer' => 'madonna' ] ]
+/* @var ICanBoogie\Routing\RouteProvider $route_provider */
 
-$articles_delete_route = $routes->find('/articles/123', $captured, Request::METHOD_DELETE);
-var_dump($captured);   // [ 'nid' => 123 ]
+$route = $route_provider->route_for_predicate($predicate = new ByUri('/?singer=madonna'));
+echo $route->action; // "home"
+var_dump($predicate->query_params); // [ 'singer' => 'madonna' ]
+
+$route = $route_provider->route_for_predicate($predicate = new ByUri('/articles/123', RequestMethod::METHOD_DELETE));
+echo $route->action; // "articles:show"
+var_dump($predicate->path_params); // [ 'nid' => 123 ]
 ```
 
 
@@ -394,7 +404,7 @@ echo $route->format([ 'year' => 2016, 'month' => 10 ]);
 ```
 
 > **Note:** Assigning a formatting value to an _assigned_ route creates another instance of the
-route. Also, the formatting value is reset when an _assigned_ route is cloned.
+> route. Also, the formatting value is reset when an _assigned_ route is cloned.
 
 Whether a route has an assigned formatting value or not, the `format()` method still requires
 a formatting value, it does *not* use the assign formatting value. Thus, if you want to format
@@ -460,7 +470,7 @@ result of the method.
 Basic controllers extend from [Controller][] and must implement the `action()` method.
 
 > **Note:** The `action()` method is invoked _from within_ the controller, by the `__invoke()` method,
-and should be defined as _protected_. The `__invoke()` method is final, thus cannot be overridden.
+> and should be defined as _protected_. The `__invoke()` method is final, thus cannot be overridden.
 
 ```php
 <?php
@@ -885,7 +895,7 @@ test suite. Alternatively, run `make test-coverage` to run the test suite with t
 [ControllerNotDefined]:                https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.ControllerNotDefined.html
 [FormattedRoute]:                      https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.FormattedRoute.html
 [Pattern]:                             https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.Pattern.html
-[InvalidPattern]:                   https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.PatternNotDefined.html
+[InvalidPattern]:                      https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.PatternNotDefined.html
 [ResourceTrait]:                       https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.Controller.ResourceTrait.html
 [Route]:                               https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.Route.html
 [Route\RescueEvent]:                   https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.Route.RescueEvent.html
@@ -900,3 +910,7 @@ test suite. Alternatively, run `make test-coverage` to run the test suite with t
 [icanboogie/service]:                  https://github.com/ICanBoogie/service
 [icanboogie/view]:                     https://github.com/ICanBoogie/View
 [RESTful]:                             https://en.wikipedia.org/wiki/Representational_state_transfer
+
+[RouteProvider\ByAction]:              lib/RouteProvider/ByAction.php
+[RouteProvider\ById]:                  lib/RouteProvider/ById.php
+[RouteProvider\ByUri]:                 lib/RouteProvider/ByUri.php

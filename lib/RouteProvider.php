@@ -11,21 +11,20 @@
 
 namespace ICanBoogie\Routing;
 
-use ICanBoogie\HTTP\RequestMethod;
-
 interface RouteProvider
 {
 	/**
-	 * Provides a route matching the specified parameters.
+	 * Provides the route matching the specified predicate.
 	 *
-	 * @param array<string|int, string>|null $path_params Parameters captured from the path info.
-	 * @param array<string|int, string>|null $query_params Parameters captured from the query string. Careful!
-	 * Parameters already captured from the path are discarded.
+	 * You can provide you own predicate, or use one provided:
+	 *
+	 * - {@link RouteProvider\ByAction}
+	 * - {@link RouteProvider\ById}
+	 * - {@link RouteProvider\ByUri}
+	 *
+	 * **Note:** Providers might optimize predicate matching and might skip the callable.
+	 *
+	 * @phpstan-param (callable(Route): bool) $predicate
 	 */
-	public function route_for_uri(
-		string $uri,
-		RequestMethod $method = RequestMethod::METHOD_ANY,
-		array &$path_params = null,
-		array &$query_params = null
-	): ?Route;
+	public function route_for_predicate(callable $predicate): ?Route;
 }

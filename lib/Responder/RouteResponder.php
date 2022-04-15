@@ -50,10 +50,12 @@ final class RouteResponder implements Responder
 	{
 		$method = $request->method;
 
-		$route = $this->routes->route_for_uri($request->uri, $method, $path_params);
+		$route = $this->routes->route_for_predicate(
+			$predicate = new RouteProvider\ByUri($request->uri, $method)
+		);
 
 		if (!$route) {
-			$this->routes->route_for_uri($request->uri)
+			$this->routes->route_for_predicate(new RouteProvider\ByUri($request->uri))
 				? throw new MethodNotSupported($method->value)
 				: throw new NotFound();
 		}
@@ -68,8 +70,8 @@ final class RouteResponder implements Responder
 			?? throw new NoResponder("No responder for action: $route->action.");
 
 		$request->context->add($route);
-		$request->path_params += $path_params;
-		$request->params += $path_params;
+		$request->path_params += $predicate->path_params;
+		$request->params += $predicate->path_params;
 
 		return $responder->respond($request);
 	}

@@ -68,10 +68,10 @@ final class RouteResponderTest extends TestCase
 		$path_params = null;
 
 		$this->routes
-			->method('route_for_uri')
+			->method('route_for_predicate')
 			->withConsecutive(
-				[ '/articles/123', RequestMethod::METHOD_DELETE, $path_params ],
-				[ '/articles/123' ]
+				[ new RouteProvider\ByUri('/articles/123', RequestMethod::METHOD_DELETE, $path_params) ],
+				[ new RouteProvider\ByUri('/articles/123') ]
 			)
 			->willReturn(null);
 
@@ -88,10 +88,10 @@ final class RouteResponderTest extends TestCase
 		$path_params = null;
 
 		$this->routes
-			->method('route_for_uri')
+			->method('route_for_predicate')
 			->withConsecutive(
-				[ '/articles/123', RequestMethod::METHOD_DELETE, $path_params ],
-				[ '/articles/123' ]
+				[ new RouteProvider\ByUri('/articles/123', RequestMethod::METHOD_DELETE, $path_params) ],
+				[ new RouteProvider\ByUri('/articles/123') ]
 			)
 			->willReturnOnConsecutiveCalls(null, $this->route);
 
@@ -108,8 +108,8 @@ final class RouteResponderTest extends TestCase
 		$path_params = null;
 
 		$this->routes
-			->method('route_for_uri')
-			->with('/articles/123', RequestMethod::METHOD_DELETE, $path_params)
+			->method('route_for_predicate')
+			->with(new RouteProvider\ByUri('/articles/123', RequestMethod::METHOD_DELETE, $path_params))
 			->willReturn($this->route);
 
 		$this->responders->responder_for_action('article:delete')
@@ -136,13 +136,10 @@ final class RouteResponderTest extends TestCase
 			) {
 			}
 
-			public function route_for_uri(
-				string $uri,
-				RequestMethod $method = RequestMethod::METHOD_ANY,
-				array &$path_params = null,
-				array &$query_params = null
-			): ?Route {
-				$path_params = [ 'path_param2' => 'val2' ];
+			public function route_for_predicate(callable $predicate): ?Route {
+				assert($predicate instanceof RouteProvider\ByUri);
+
+				$predicate->path_params = [ 'path_param2' => 'val2' ];
 
 				return $this->route;
 			}

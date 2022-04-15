@@ -7,6 +7,7 @@ use ICanBoogie\HTTP\RequestMethod;
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Responder\RouteResponder;
+use ICanBoogie\Routing\RouteProvider\ByUri;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 
@@ -31,11 +32,15 @@ final class RouterTest extends TestCase
 		$router = new Router($routes, $responders);
 		$router->$method($pattern, $closure);
 
-		$this->assertInstanceOf(Route::class,
-			$route = $routes->route_for_uri(
-				"/articles/123",
-				$http_method
-			));
+		$this->assertInstanceOf(
+			Route::class,
+			$route = $routes->route_for_predicate(
+				new ByUri(
+					"/articles/123",
+					$http_method
+				)
+			)
+		);
 		$this->assertInstanceOf(Responder::class, $responder = $responders->responder_for_action($route->action));
 		$this->assertSame($response, $responder->respond(Request::from()));
 	}
@@ -65,18 +70,22 @@ final class RouterTest extends TestCase
 		$response = new Response();
 
 		(new Router($routes, $responders))
-			->get('/articles/<id:\d+>',
+			->get(
+				'/articles/<id:\d+>',
 				function (Request $request) use ($response): Response {
 					$id = $request->path_params['id'];
 
 					$this->assertSame('123', $id);
 
 					return $response;
-				})
-			->get('/it-s-a-trap',
+				}
+			)
+			->get(
+				'/it-s-a-trap',
 				function (Request $request): Response {
 					$this->fail("should not be called");
-				});
+				}
+			);
 
 		$responder = new RouteResponder($routes, $responders);
 		$actual = $responder->respond(Request::from([ Request::OPTION_PATH => '/articles/123' ]));
