@@ -43,6 +43,7 @@ final class RouteMaker
 
 	/**
 	 * @param array<string, Basics> $basics Action templates.
+	 *     If {@link Options::$ids} is not specified for an action, the qualified action is used as identifier.
 	 *
 	 * @return Route[]
 	 */
@@ -65,7 +66,7 @@ final class RouteMaker
 				pattern: $basic->pattern,
 				action: $qualified_action,
 				methods: $basic->methods,
-				id: $ids[$action] ?? null,
+				id: $ids[$action] ?? $qualified_action,
 			);
 		}
 
