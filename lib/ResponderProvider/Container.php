@@ -1,29 +1,39 @@
 <?php
 
+/*
+ * This file is part of the ICanBoogie package.
+ *
+ * (c) Olivier Laviale <olivier.laviale@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace ICanBoogie\Routing\ResponderProvider;
 
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\Routing\ResponderProvider;
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Provides responders from a PSR container.
  */
 final class Container implements ResponderProvider
 {
+	/**
+	 * @param array<string, string> $aliases
+	 *     Aliases can be used to map multiple actions to the same service.
+	 */
 	public function __construct(
-		private readonly ContainerInterface $container
+		private readonly ContainerInterface $container,
+		private readonly array $aliases = [],
 	) {
 	}
 
-	/**
-	 * @throws ContainerExceptionInterface
-	 * @throws NotFoundExceptionInterface
-	 */
 	public function responder_for_action(string $action): ?Responder
 	{
+		$action = $this->aliases[$action] ?? $action;
+
 		if (!$this->container->has($action)) {
 			return null;
 		}
