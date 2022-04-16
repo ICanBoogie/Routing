@@ -9,12 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing\RouteDispatcher;
+namespace Test\ICanBoogie\Routing\RouteDispatcher;
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
-use ICanBoogie\Routing\Route\BeforeRespondEvent;
 use ICanBoogie\Routing\Route;
+use ICanBoogie\Routing\Route\BeforeRespondEvent;
 use ICanBoogie\Routing\RouteDispatcher;
 use PHPUnit\Framework\TestCase;
 use TypeError;

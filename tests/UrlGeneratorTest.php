@@ -9,12 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing;
+namespace Test\ICanBoogie\Routing;
 
-use ICanBoogie\Routing\RouteProvider\ByAction;
+use ICanBoogie\Routing\RouteCollection;
+use ICanBoogie\Routing\UrlGenerator;
 use PHPUnit\Framework\TestCase;
-
-use function var_dump;
 
 final class UrlGeneratorTest extends TestCase
 {

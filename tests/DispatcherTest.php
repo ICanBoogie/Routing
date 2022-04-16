@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing;
+namespace Test\ICanBoogie\Routing;
 
 use ICanBoogie\EventCollection;
 use ICanBoogie\EventCollectionProvider;
@@ -17,8 +17,9 @@ use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\RouteCollection;
+use PHPUnit\Framework\TestCase;
 
-class DispatcherTest extends \PHPUnit\Framework\TestCase
+class DispatcherTest extends TestCase
 {
 	/**
 	 * @var EventCollection
@@ -31,10 +32,8 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase
 
 		$this->events = $events = new EventCollection;
 
-		EventCollectionProvider::define(function() use ($events) {
-
+		EventCollectionProvider::define(function () use ($events) {
 			return $events;
-
 		});
 	}
 
@@ -70,10 +69,8 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase
 		$routes
 			->expects($this->once())
 			->method('find')
-			->willReturnCallback(function() use (&$route) {
-
+			->willReturnCallback(function () use (&$route) {
 				return $route;
-
 			});
 
 		/* @var $routes \ICanBoogie\Routing\RouteCollection */
@@ -97,14 +94,19 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase
 		$called_before_dispatch = false;
 
 		$events = $this->events;
-		$events->attach(function(Route\BeforeRespondEvent $event, RouteDispatcher $target) use (&$request, &$expected_response, &$called_before_dispatch) {
+		$events->attach(
+			function (Route\BeforeRespondEvent $event, RouteDispatcher $target) use (
+				&$request,
+				&$expected_response,
+				&
+				$called_before_dispatch
+			) {
+				$called_before_dispatch = true;
 
-			$called_before_dispatch = true;
-
-			$this->assertSame($request, $event->request);
-			$this->assertNull($event->response);
-
-		});
+				$this->assertSame($request, $event->request);
+				$this->assertNull($event->response);
+			}
+		);
 
 		$routes = $this
 			->getMockBuilder(RouteCollection::class)
@@ -114,12 +116,10 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase
 		$routes
 			->expects($this->once())
 			->method('find')
-			->willReturnCallback(function($path, &$captured) use (&$route) {
-
+			->willReturnCallback(function ($path, &$captured) use (&$route) {
 				$captured = [];
 
 				return $route;
-
 			});
 
 		$expected_response = new Response;
@@ -139,7 +139,8 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase
 		$route = new Route('/', [
 
 			'pattern' => '/',
-			'controller' => function() {}
+			'controller' => function () {
+			}
 
 		]);
 
@@ -163,12 +164,9 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase
 
 		/* @var $dispatcher RouteDispatcher */
 
-		try
-		{
+		try {
 			$dispatcher->rescue($exception, $request);
-		}
-		catch (\Exception $e)
-		{
+		} catch (\Exception $e) {
 			$this->assertSame($exception, $e);
 
 			return;
@@ -195,19 +193,14 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase
 
 		/* @var $dispatcher RouteDispatcher */
 
-		$this->events->once(function(Route\RescueEvent $event, Route $target) use ($route, $new_exception) {
-
+		$this->events->once(function (Route\RescueEvent $event, Route $target) use ($route, $new_exception) {
 			$this->assertSame($route, $target);
 			$event->exception = $new_exception;
-
 		});
 
-		try
-		{
+		try {
 			$dispatcher->rescue($exception, $request);
-		}
-		catch (\Exception $e)
-		{
+		} catch (\Exception $e) {
 			$this->assertSame($new_exception, $e);
 
 			return;
@@ -234,11 +227,9 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase
 
 		/* @var $dispatcher RouteDispatcher */
 
-		$this->events->once(function(Route\RescueEvent $event, Route $target) use ($route, $new_response) {
-
+		$this->events->once(function (Route\RescueEvent $event, Route $target) use ($route, $new_response) {
 			$this->assertSame($route, $target);
 			$event->response = $new_response;
-
 		});
 
 		$response = $dispatcher->rescue($exception, $request);

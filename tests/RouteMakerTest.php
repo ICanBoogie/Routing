@@ -9,9 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing;
+namespace Test\ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\RequestMethod;
+use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteMaker as Make;
 use ICanBoogie\Routing\RouteMaker\Basics;
 use ICanBoogie\Routing\RouteMaker\Options;
@@ -138,7 +139,12 @@ final class RouteMakerTest extends TestCase
 					new Route('/photos', 'photos:create', RequestMethod::METHOD_POST, id: 'photos:create'),
 					new Route('/photos/<id:\d+>', 'photos:show', RequestMethod::METHOD_GET, id: 'photos:show'),
 					new Route('/photos/<id:\d+>/edit', 'photos:edit', RequestMethod::METHOD_GET, 'photos:edit'),
-					new Route('/photos/<id:\d+>', 'photos:update', [ RequestMethod::METHOD_PUT, RequestMethod::METHOD_PATCH ], id: 'photos:update'),
+					new Route(
+						'/photos/<id:\d+>',
+						'photos:update',
+						[ RequestMethod::METHOD_PUT, RequestMethod::METHOD_PATCH ],
+						id: 'photos:update'
+					),
 				],
 			],
 
@@ -161,10 +167,15 @@ final class RouteMakerTest extends TestCase
 			],
 
 			[
-				new Options(only: [ Make::ACTION_CREATE, Make::ACTION_SHOW ], basics: [ Make::ACTION_CREATE => new Basics(
-					'/prefix/{name}/suffix', RequestMethod::METHOD_PATCH) ]),
+				new Options(only: [ Make::ACTION_CREATE, Make::ACTION_SHOW ], basics: [
+					Make::ACTION_CREATE => new Basics(
+						'/prefix/{name}/suffix', RequestMethod::METHOD_PATCH
+					)
+				]),
 				[
-					new Route('/prefix/photos/suffix', 'photos:create', RequestMethod::METHOD_PATCH, id: 'photos:create'),
+					new Route(
+						'/prefix/photos/suffix', 'photos:create', RequestMethod::METHOD_PATCH, id: 'photos:create'
+					),
 					new Route('/photos/<id:\d+>', 'photos:show', RequestMethod::METHOD_GET, id: 'photos:show'),
 				],
 			],

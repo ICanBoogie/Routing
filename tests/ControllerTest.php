@@ -9,19 +9,21 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing;
+namespace Test\ICanBoogie\Routing;
 
 use ICanBoogie\EventCollection;
 use ICanBoogie\EventCollectionProvider;
 use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
+use ICanBoogie\Routing\ControllerAbstract;
 use ICanBoogie\Routing\ControllerTest\MySampleController;
+use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteCollection;
+use ICanBoogie\Routing\RouteDispatcher;
+use PHPUnit\Framework\TestCase;
 
-use function var_dump;
-
-class ControllerTest extends \PHPUnit\Framework\TestCase
+class ControllerTest extends TestCase
 {
 	/**
 	 * @var EventCollection
@@ -34,10 +36,8 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 
 		$this->events = $events = new EventCollection;
 
-		EventCollectionProvider::define(function() use ($events) {
-
+		EventCollectionProvider::define(function () use ($events) {
 			return $events;
-
 		});
 	}
 
@@ -50,11 +50,11 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 	public function test_should_not_get_name()
 	{
 		$controller = $this
-			->getMockBuilder(Controller::class)
+			->getMockBuilder(ControllerAbstract::class)
 			->disableOriginalConstructor()
 			->getMockForAbstractClass();
 
-		/* @var $controller Controller */
+		/* @var $controller ControllerAbstract */
 
 		$this->assertNull($controller->name);
 	}
@@ -62,11 +62,11 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 	public function test_lazy_get_response()
 	{
 		$controller = $this
-			->getMockBuilder(Controller::class)
+			->getMockBuilder(ControllerAbstract::class)
 			->disableOriginalConstructor()
 			->getMockForAbstractClass();
 
-		/* @var $controller Controller */
+		/* @var $controller ControllerAbstract */
 
 		$response = $controller->response;
 
@@ -78,10 +78,10 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 	{
 		$request = Request::from('/');
 
-		$response = new Response;
+		$response = new Response();
 
 		$controller = $this
-			->getMockBuilder(Controller::class)
+			->getMockBuilder(ControllerAbstract::class)
 			->disableOriginalConstructor()
 			->setMethods([ 'action' ])
 			->getMockForAbstractClass();
@@ -90,9 +90,9 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 			->method('action')
 			->willReturn($response);
 
-		/* @var $controller Controller */
+		/* @var $controller ControllerAbstract */
 
-		$this->assertSame($response, $controller($request));
+		$this->assertSame($response, $controller->respond($request));
 	}
 
 	public function test_invoke_should_return_string()
@@ -102,7 +102,7 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 		$body = "some string" . uniqid();
 
 		$controller = $this
-			->getMockBuilder(Controller::class)
+			->getMockBuilder(ControllerAbstract::class)
 			->disableOriginalConstructor()
 			->setMethods([ 'action' ])
 			->getMockForAbstractClass();
@@ -111,9 +111,9 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 			->method('action')
 			->willReturn($body);
 
-		/* @var $controller Controller */
+		/* @var $controller ControllerAbstract */
 
-		$response = $controller($request);
+		$response = $controller->respond($request);
 		$this->assertSame($body, $response);
 	}
 
@@ -124,7 +124,7 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 		$body = "some string" . uniqid();
 
 		$controller = $this
-			->getMockBuilder(Controller::class)
+			->getMockBuilder(ControllerAbstract::class)
 			->disableOriginalConstructor()
 			->setMethods([ 'action' ])
 			->getMockForAbstractClass();
@@ -133,11 +133,11 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 			->method('action')
 			->willReturn($body);
 
-		/* @var $controller Controller */
+		/* @var $controller ControllerAbstract */
 
 		$response = $controller->response;
 		$this->assertInstanceOf(Response::class, $response);
-		$response2 = $controller($request);
+		$response2 = $controller->respond($request);
 		$this->assertSame($response, $response2);
 		$this->assertSame($body, $response2->body);
 	}
@@ -148,21 +148,23 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 		$status = Response::STATUS_NO_CONTENT;
 
 		$controller = $this
-			->getMockBuilder(Controller::class)
+			->getMockBuilder(ControllerAbstract::class)
 			->disableOriginalConstructor()
 			->setMethods([ 'action' ])
 			->getMockForAbstractClass();
 		$controller
 			->expects($this->once())
 			->method('action')
-			->willReturnCallback(\Closure::bind(function () use ($status) {
-				/* @var Controller $this */
-				$this->response->status = $status;
-			}, $controller));
+			->willReturnCallback(
+				\Closure::bind(function () use ($status) {
+					/* @var ControllerAbstract $this */
+					$this->response->status = $status;
+				}, $controller)
+			);
 
-		/* @var $controller Controller */
+		/* @var $controller ControllerAbstract */
 
-		$response = $controller($request);
+		$response = $controller->respond($request);
 		$this->assertInstanceOf(Response::class, $response);
 		$this->assertSame($status, $response->status->code);
 	}
@@ -176,17 +178,13 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 			'default' => [
 
 				'pattern' => '/blog/<year:\d{4}>-<month:\d{2}>-:slug.html',
-				'controller' => function($year, $month, $slug) use ($test) {
-
-					/* @var $this ResponderFunc */
-
+				'controller' => function ($year, $month, $slug) use ($test) {
 					$test->assertInstanceOf(Request::class, $this->request);
 					$test->assertEquals(2014, $year);
 					$test->assertEquals(12, $month);
 					$test->assertEquals("my-awesome-post", $slug);
 
 					return 'HERE';
-
 				}
 			]
 		]);
@@ -222,13 +220,13 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 	public function test_redirect_to_path()
 	{
 		$controller = $this
-			->getMockBuilder(Controller::class)
+			->getMockBuilder(ControllerAbstract::class)
 			->disableOriginalConstructor()
 			->getMockForAbstractClass();
 
 		$url = '/path/to/' . uniqid();
 
-		/* @var $controller Controller */
+		/* @var $controller ControllerAbstract */
 		/* @var $response RedirectResponse */
 
 		$response = $controller->redirect($url);
@@ -243,7 +241,7 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 		$url = '/path/to/' . uniqid();
 
 		$controller = $this
-			->getMockBuilder(Controller::class)
+			->getMockBuilder(ControllerAbstract::class)
 			->disableOriginalConstructor()
 			->getMockForAbstractClass();
 
@@ -257,7 +255,7 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 			->method('get_url')
 			->willReturn($url);
 
-		/* @var $controller Controller */
+		/* @var $controller ControllerAbstract */
 		/* @var $response RedirectResponse */
 
 		$response = $controller->redirect($route);
@@ -276,11 +274,11 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 	public function test_forward_to_invalid($invalid)
 	{
 		$controller = $this
-			->getMockBuilder(Controller::class)
+			->getMockBuilder(ControllerAbstract::class)
 			->disableOriginalConstructor()
 			->getMockForAbstractClass();
 
-		/* @var $controller Controller */
+		/* @var $controller ControllerAbstract */
 
 		$this->expectException(\InvalidArgumentException::class);
 		$controller->forward_to($invalid);
@@ -291,8 +289,8 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 		return [
 
 			[ uniqid() ],
-			[ (object) [ uniqid() => uniqid()] ],
-			[ [ uniqid() => uniqid()] ]
+			[ (object) [ uniqid() => uniqid() ] ],
+			[ [ uniqid() => uniqid() ] ]
 
 		];
 	}
@@ -303,27 +301,25 @@ class ControllerTest extends \PHPUnit\Framework\TestCase
 		$response = new Response;
 
 		$controller = $this
-			->getMockBuilder(Controller::class)
+			->getMockBuilder(ControllerAbstract::class)
 			->disableOriginalConstructor()
 			->getMockForAbstractClass();
 
 		/* @var $response RedirectResponse */
-		/* @var $controller Controller */
+		/* @var $controller ControllerAbstract */
 
 		$route = new Route('/articles/<nid:\d+>/edit', [
 
-			'controller' => function(Request $request) use ($original_request, $response) {
-
+			'controller' => function (Request $request) use ($original_request, $response) {
 				$this->assertNotSame($original_request, $request);
 				$this->assertEquals(123, $request['nid']);
 
 				return $response;
-
 			}
 
 		]);
 
-		$controller($original_request); // only to set private `request` property
+		$controller->respond($original_request); // only to set private `request` property
 
 		$this->assertSame($response, $controller->forward_to($route));
 	}

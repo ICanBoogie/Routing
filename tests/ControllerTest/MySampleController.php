@@ -9,13 +9,13 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing\ControllerTest;
+namespace Test\ICanBoogie\Routing\ControllerTest;
 
 use ICanBoogie\HTTP\Request;
-use ICanBoogie\Routing\Controller;
+use ICanBoogie\Routing\ControllerAbstract;
 use ICanBoogie\Routing\Route;
 
-class MySampleController extends Controller
+class MySampleController extends ControllerAbstract
 {
 	protected function action(Request $request)
 	{

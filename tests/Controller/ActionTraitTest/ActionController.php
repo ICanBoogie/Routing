@@ -9,11 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing\Controller\ActionTraitTest;
+namespace Test\ICanBoogie\Routing\Controller\ActionTraitTest;
 
 use ICanBoogie\Routing\Controller;
+use ICanBoogie\Routing\ControllerAbstract;
 
-class ActionController extends Controller
+class ActionController extends ControllerAbstract
 {
 	use Controller\ActionTrait;
 

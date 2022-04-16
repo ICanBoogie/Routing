@@ -9,16 +9,20 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing;
+namespace Test\ICanBoogie\Routing;
 
-class PatternRequiresValuesTest extends \PHPUnit\Framework\TestCase
+use ICanBoogie\Routing\Pattern;
+use ICanBoogie\Routing\PatternRequiresValues;
+use PHPUnit\Framework\TestCase;
+
+class PatternRequiresValuesTest extends TestCase
 {
 	protected function setUp(): void
 	{
 		$this->markTestIncomplete();
 	}
 
-	public function test_instance()
+	public function test_instance(): void
 	{
 		$pattern = Pattern::from('/:year-:month.html');
 		$instance = new PatternRequiresValues($pattern);

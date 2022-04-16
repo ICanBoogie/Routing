@@ -9,10 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing;
+namespace Test\ICanBoogie\Routing;
 
-use ICanBoogie\Routing\PatternTest\WithToSlug;
+use ICanBoogie\Routing\Pattern;
+use ICanBoogie\Routing\PatternRequiresValues;
 use PHPUnit\Framework\TestCase;
+use Test\ICanBoogie\Routing\PatternTest\WithToSlug;
 
 final class PatternTest extends TestCase
 {
@@ -111,12 +113,14 @@ final class PatternTest extends TestCase
 		$rc = $pattern->matches('/news/2012-06-this-is-an-example.html', $captured);
 
 		$this->assertTrue($rc);
-		$this->assertEquals([ 'year' => 2012, 'month' => 06, 'slug' => 'this-is-an-example', 'format' => 'html' ], $captured);
+		$this->assertEquals([ 'year' => 2012, 'month' => 06, 'slug' => 'this-is-an-example', 'format' => 'html' ],
+			$captured);
 
 		$rc = $pattern->matches('/news/2012-this-is-an-example.html', $captured);
 
 		$this->assertTrue($rc);
-		$this->assertEquals([ 'year' => 2012, 'month' => 'this', 'slug' => 'is-an-example', 'format' => 'html' ], $captured);
+		$this->assertEquals([ 'year' => 2012, 'month' => 'this', 'slug' => 'is-an-example', 'format' => 'html' ],
+			$captured);
 
 		# using regex
 
@@ -125,7 +129,8 @@ final class PatternTest extends TestCase
 		$rc = $pattern->matches('/news/2012-06-this-is-an-example.html', $captured);
 
 		$this->assertTrue($rc);
-		$this->assertEquals([ 'year' => 2012, 'month' => 06, 'slug' => 'this-is-an-example', 'format' => 'html' ], $captured);
+		$this->assertEquals([ 'year' => 2012, 'month' => 06, 'slug' => 'this-is-an-example', 'format' => 'html' ],
+			$captured);
 
 		#
 		# matching should fail because "this" does not matches \d{2}
@@ -151,12 +156,15 @@ final class PatternTest extends TestCase
 	{
 		$pattern = Pattern::from('/categories/:category/:slug.html');
 
-		$this->assertEquals('/categories/mathieu/ete-2000.html', $pattern->format([
+		$this->assertEquals(
+			'/categories/mathieu/ete-2000.html',
+			$pattern->format([
 
-			'category' => new WithToSlug('Mathieu'),
-			'slug' => new WithToSlug("Été 2000")
+				'category' => new WithToSlug('Mathieu'),
+				'slug' => new WithToSlug("Été 2000")
 
-		]));
+			])
+		);
 	}
 
 	public function test_unnamed_params(): void
@@ -213,9 +221,11 @@ final class PatternTest extends TestCase
 	}
 }
 
-namespace ICanBoogie\Routing\PatternTest;
+namespace Test\ICanBoogie\Routing\PatternTest;
 
 use ICanBoogie\Routing\ToSlug;
+
+use function ICanBoogie\normalize;
 
 class WithToSlug implements ToSlug
 {
@@ -225,6 +235,6 @@ class WithToSlug implements ToSlug
 
 	public function to_slug(): string
 	{
-		return \ICanBoogie\normalize($this->title);
+		return normalize($this->title);
 	}
 }

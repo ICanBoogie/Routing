@@ -1,13 +1,27 @@
 <?php
 
-namespace ICanBoogie\Routing;
+/*
+ * This file is part of the ICanBoogie package.
+ *
+ * (c) Olivier Laviale <olivier.laviale@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Test\ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\RequestMethod;
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Responder\RouteResponder;
+use ICanBoogie\Routing\ResponderProvider;
+use ICanBoogie\Routing\ResponderProvider\Mutable;
+use ICanBoogie\Routing\Route;
+use ICanBoogie\Routing\RouteCollection;
 use ICanBoogie\Routing\RouteProvider\ByUri;
+use ICanBoogie\Routing\Router;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 
@@ -45,6 +59,9 @@ final class RouterTest extends TestCase
 		$this->assertSame($response, $responder->respond(Request::from()));
 	}
 
+	/**
+	 * @return mixed[]
+	 */
 	public function provide_method(): array
 	{
 		return [

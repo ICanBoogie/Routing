@@ -9,9 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing\RouteProvider;
+namespace Test\ICanBoogie\Routing\RouteProvider;
 
 use ICanBoogie\Routing\Route;
+use ICanBoogie\Routing\RouteProvider\ByAction;
 use PHPUnit\Framework\TestCase;
 
 final class ByActionTest extends TestCase

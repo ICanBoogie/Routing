@@ -9,18 +9,19 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing;
+namespace Test\ICanBoogie\Routing;
 
 use ICanBoogie\Routing\Exception\RouteNotDefined;
+use PHPUnit\Framework\TestCase;
 
-class RouteNotDefinedTest extends \PHPUnit\Framework\TestCase
+class RouteNotDefinedTest extends TestCase
 {
 	protected function setUp(): void
 	{
 		$this->markTestIncomplete();
 	}
 
-	public function test_instance()
+	public function test_instance(): void
 	{
 		$id = 'id' . uniqid();
 		$instance = new RouteNotDefined($id);

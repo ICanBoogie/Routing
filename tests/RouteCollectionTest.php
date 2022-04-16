@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing\RouteProvider;
+namespace Test\ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\RequestMethod;
 use ICanBoogie\Routing\Exception\InvalidPattern;
@@ -17,6 +17,8 @@ use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteCollection;
 use ICanBoogie\Routing\RouteMaker;
 use ICanBoogie\Routing\RouteMaker\Options;
+use ICanBoogie\Routing\RouteProvider\ByAction;
+use ICanBoogie\Routing\RouteProvider\ByUri;
 use PHPUnit\Framework\TestCase;
 
 use function array_push;
@@ -165,10 +167,12 @@ final class RouteCollectionTest extends TestCase
 
 		$this->assertSame(
 			$ok,
-			$routes->route_for_predicate(new ByUri(
-				'/api/articles/123/active',
-				RequestMethod::METHOD_PUT
-			))
+			$routes->route_for_predicate(
+				new ByUri(
+					'/api/articles/123/active',
+					RequestMethod::METHOD_PUT
+				)
+			)
 		);
 	}
 

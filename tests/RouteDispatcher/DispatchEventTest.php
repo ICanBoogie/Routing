@@ -9,9 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing\RouteDispatcher;
+namespace Test\ICanBoogie\Routing\RouteDispatcher;
 
 use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\RequestDispatcher\DispatchEvent;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteDispatcher;
@@ -69,7 +70,7 @@ class DispatchEventTest extends TestCase
 		$route = $this->route;
 		$request = Request::from('/');
 		$response = null;
-		$expected_response = new Response;
+		$expected_response = new Response();
 
 		/* @var $event DispatchEvent */
 

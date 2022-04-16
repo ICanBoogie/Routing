@@ -9,8 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing;
+namespace Test\ICanBoogie\Routing;
 
+use ICanBoogie\Routing\Route;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 

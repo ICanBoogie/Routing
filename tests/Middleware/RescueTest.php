@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing\Middleware;
+namespace Test\ICanBoogie\Routing\Middleware;
 
 use Exception;
 use ICanBoogie\EventCollection;
@@ -17,6 +17,7 @@ use ICanBoogie\EventCollectionProvider;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\HTTP\Response;
+use ICanBoogie\Routing\Middleware\Rescue;
 use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\Route\RescueEvent;
 use PHPUnit\Framework\TestCase;
@@ -29,7 +30,10 @@ final class RescueTest extends TestCase
 {
 	use ProphecyTrait;
 
-	private ObjectProphecy|Responder $next;
+	/**
+	 * @var ObjectProphecy<Responder>
+	 */
+	private ObjectProphecy $next;
 	private Request $request;
 	private Response $response;
 	private Exception $exception;

@@ -48,7 +48,7 @@
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"ICanBoogie\\Routing\\": "tests/"
+			"Test\\ICanBoogie\\Routing\\": "tests/"
 		}
 	}
 }

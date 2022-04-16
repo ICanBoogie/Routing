@@ -9,9 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing;
+namespace Test\ICanBoogie\Routing;
 
 use ICanBoogie\Routing\Responder\RouteResponder;
+use ICanBoogie\Routing\ResponderProvider;
+use ICanBoogie\Routing\RouteProvider;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
@@ -20,8 +22,15 @@ class RouteDispatcherTest extends TestCase
 {
 	use ProphecyTrait;
 
-	private ObjectProphecy|RouteProvider $routes;
-	private ObjectProphecy|ResponderProvider $responders;
+	/**
+	 * @var ObjectProphecy<RouteProvider>
+	 */
+	private ObjectProphecy $routes;
+
+	/**
+	 * @var ObjectProphecy<ResponderProvider>
+	 */
+	private ObjectProphecy $responders;
 
 	protected function setUp(): void
 	{

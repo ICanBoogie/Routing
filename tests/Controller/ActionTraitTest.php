@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing\Controller;
+namespace Test\ICanBoogie\Routing\Controller;
 
 use ICanBoogie\EventCollection;
 use ICanBoogie\EventCollectionProvider;
@@ -28,12 +28,10 @@ class ActionTraitTest extends TestCase
 	{
 		$this->markTestIncomplete();
 
-		$events = new EventCollection;
+		$events = new EventCollection();
 
-		EventCollectionProvider::define(function() use ($events) {
-
+		EventCollectionProvider::define(function () use ($events) {
 			return $events;
-
 		});
 	}
 
@@ -162,8 +160,7 @@ class ActionTraitTest extends TestCase
 		$methods = 'index new create show edit update delete';
 		$cases = [];
 
-		foreach (explode(' ', $methods) as $method)
-		{
+		foreach (explode(' ', $methods) as $method) {
 			$cases[] = [ $method ];
 		}
 

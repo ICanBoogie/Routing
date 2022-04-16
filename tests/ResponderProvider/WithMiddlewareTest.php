@@ -1,6 +1,15 @@
 <?php
 
-namespace ICanBoogie\Routing\ResponderProvider;
+/*
+ * This file is part of the ICanBoogie package.
+ *
+ * (c) Olivier Laviale <olivier.laviale@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Test\ICanBoogie\Routing\ResponderProvider;
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Responder;
@@ -37,7 +46,7 @@ final class WithMiddlewareTest extends TestCase
 			$this->middleware("na"),
 		]);
 
-		$responders = new WithMiddleware(
+		$responders = new ResponderProvider\WithMiddleware(
 			$responderProvider,
 			$middleware
 		);
@@ -60,8 +69,8 @@ final class WithMiddlewareTest extends TestCase
 			{
 				return new class ($next, $this->text) implements Responder {
 					public function __construct(
-						private Responder $next,
-						private string $text
+						private readonly Responder $next,
+						private readonly string $text
 					) {
 					}
 

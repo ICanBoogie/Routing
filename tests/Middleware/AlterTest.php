@@ -1,13 +1,22 @@
 <?php
 
-namespace ICanBoogie\Routing\Middleware;
+/*
+ * This file is part of the ICanBoogie package.
+ *
+ * (c) Olivier Laviale <olivier.laviale@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-use Exception;
+namespace Test\ICanBoogie\Routing\Middleware;
+
 use ICanBoogie\EventCollection;
 use ICanBoogie\EventCollectionProvider;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\HTTP\Response;
+use ICanBoogie\Routing\Middleware\Alter;
 use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\Route\BeforeRespondEvent;
 use ICanBoogie\Routing\Route\RespondEvent;
@@ -22,10 +31,12 @@ final class AlterTest extends TestCase
 {
 	use ProphecyTrait;
 
-	private ObjectProphecy|Responder $next;
+	/**
+	 * @var ObjectProphecy<Responder>
+	 */
+	private ObjectProphecy $next;
 	private Request $request;
 	private Response $response;
-	private Exception $exception;
 
 	protected function setUp(): void
 	{
@@ -37,7 +48,6 @@ final class AlterTest extends TestCase
 		$this->request = Request::from();
 		$this->request->context->add($route);
 		$this->response = new Response();
-		$this->exception = new Exception();
 
 		EventCollectionProvider::define(function () {
 			static $events;

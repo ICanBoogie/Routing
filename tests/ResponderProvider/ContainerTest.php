@@ -9,9 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing\ResponderProvider;
+namespace Test\ICanBoogie\Routing\ResponderProvider;
 
 use ICanBoogie\HTTP\Responder;
+use ICanBoogie\Routing\ResponderProvider\Container;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Container\ContainerInterface;

@@ -1,6 +1,15 @@
 <?php
 
-namespace ICanBoogie\Routing\ResponderProvider;
+/*
+ * This file is part of the ICanBoogie package.
+ *
+ * (c) Olivier Laviale <olivier.laviale@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Test\ICanBoogie\Routing\ResponderProvider;
 
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\Routing\ResponderProvider;
@@ -28,7 +37,7 @@ final class ChainTest extends TestCase
 		$rp4 = $this->prophesize(ResponderProvider::class);
 		$rp4->responder_for_action($action)->shouldNotBeCalled();
 
-		$chain = new Chain(
+		$chain = new ResponderProvider\Chain(
 			$rp1->reveal(),
 			$rp2->reveal(),
 			$rp3->reveal(),

@@ -1,6 +1,15 @@
 <?php
 
-namespace ICanBoogie\Routing\Route;
+/*
+ * This file is part of the ICanBoogie package.
+ *
+ * (c) Olivier Laviale <olivier.laviale@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Test\ICanBoogie\Routing\Route;
 
 use ICanBoogie\EventCollection;
 use ICanBoogie\EventCollectionProvider;
@@ -32,7 +41,7 @@ final class RespondEventTest extends TestCase
 
 	public function test_event(): void
 	{
-		$event = new RespondEvent(
+		$event = new Route\RespondEvent(
 			$this->route,
 			$this->request,
 			$response
@@ -51,11 +60,11 @@ final class RespondEventTest extends TestCase
 
 	public function test_listen(): void
 	{
-		get_events()->attach(function (RespondEvent $event, Route $target) use(&$used): void {
+		get_events()->attach(function (Route\RespondEvent $event, Route $target) use(&$used): void {
 			$used = true;
 		});
 
-		new RespondEvent($this->route, $this->request);
+		new Route\RespondEvent($this->route, $this->request);
 
 		$this->assertTrue($used);
 	}

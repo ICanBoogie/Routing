@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing;
+namespace Test\ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\Exception\NoResponder;
 use ICanBoogie\HTTP\MethodNotAllowed;
@@ -17,6 +17,10 @@ use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\RequestMethod;
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\HTTP\Response;
+use ICanBoogie\Routing\RequestResponderProvider;
+use ICanBoogie\Routing\ResponderProvider;
+use ICanBoogie\Routing\Route;
+use ICanBoogie\Routing\RouteProvider;
 use ICanBoogie\Routing\RouteProvider\ByUri;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;

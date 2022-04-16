@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing\Route;
+namespace Test\ICanBoogie\Routing\Route;
 
 use Exception;
 use ICanBoogie\EventCollection;
@@ -46,7 +46,7 @@ final class RescueEventTest extends TestCase
 
 	public function test_event(): void
 	{
-		$event = new RescueEvent(
+		$event = new Route\RescueEvent(
 			$this->route,
 			$this->request,
 			$this->exception,
@@ -67,11 +67,11 @@ final class RescueEventTest extends TestCase
 
 	public function test_listen(): void
 	{
-		get_events()->attach(function (RescueEvent $event, Route $target) use(&$used): void {
+		get_events()->attach(function (Route\RescueEvent $event, Route $target) use(&$used): void {
 			$event->response = $this->response;
 		});
 
-		new RescueEvent($this->route, $this->request, $this->exception, $response);
+		new Route\RescueEvent($this->route, $this->request, $this->exception, $response);
 
 		$this->assertSame($this->response, $response);
 	}
