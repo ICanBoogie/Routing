@@ -15,7 +15,7 @@ use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\HTTP\Response;
-use ICanBoogie\HTTP\Status;
+use ICanBoogie\HTTP\ResponseStatus;
 use ICanBoogie\Prototyped;
 use ICanBoogie\Routing\Controller\ActionEvent;
 use ICanBoogie\Routing\Controller\BeforeActionEvent;
@@ -29,7 +29,9 @@ use function is_callable;
 use function is_object;
 use function json_encode;
 use function preg_match;
+use function trigger_error;
 
+use const E_USER_WARNING;
 use const JSON_THROW_ON_ERROR;
 
 /**
@@ -97,7 +99,7 @@ abstract class ControllerAbstract extends Prototyped implements Responder
 
 	protected function lazy_get_response(): Response
 	{
-		return new Response(null, Status::OK, [
+		return new Response(null, ResponseStatus::STATUS_OK, [
 
 			'Content-Type' => 'text/html; charset=utf-8'
 
@@ -142,7 +144,7 @@ abstract class ControllerAbstract extends Prototyped implements Responder
 			return $this->response;
 		}
 
-		return $result;
+		return new Response($result);
 	}
 
 	/**
@@ -150,19 +152,24 @@ abstract class ControllerAbstract extends Prototyped implements Responder
 	 *
 	 * @return Response|mixed
 	 */
-	abstract protected function action(Request $request);
+	abstract protected function action(Request $request): mixed;
 
 	/**
 	 * Redirects the request.
 	 *
 	 * @param Route|string $url The URL to redirect the request to.
-	 * @param int $status Status code (defaults to {@link Status::FOUND}, 302).
+	 * @param int $status Status code (defaults to {@link ResponseStatus::STATUS_FOUND}, 302).
 	 * @param array $headers Additional headers.
 	 *
 	 * @return RedirectResponse
 	 */
-	public function redirect(Route|string $url, int $status = Status::FOUND, array $headers = []): Response
-	{
+	public function redirect(
+		Route|string $url,
+		int $status = ResponseStatus::STATUS_FOUND,
+		array $headers = []
+	): RedirectResponse {
+		trigger_error("We need a URL generator here", E_USER_WARNING);
+
 		if ($url instanceof Route) {
 			$url = $url->url;
 		}
