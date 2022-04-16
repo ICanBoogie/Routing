@@ -44,10 +44,7 @@
 	"autoload": {
 		"psr-4": {
 			"ICanBoogie\\Routing\\": "lib/"
-		},
-		"files": [
-			"helpers.php"
-		]
+		}
 	},
 	"autoload-dev": {
 		"psr-4": {

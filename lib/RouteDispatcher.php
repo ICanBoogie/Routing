@@ -45,7 +45,7 @@ class RouteDispatcher implements Dispatcher
 	use AccessorTrait;
 
 	public function __construct(
-		private Responder $responder
+		private readonly Responder $responder
 	) {
 	}
 
@@ -65,7 +65,7 @@ class RouteDispatcher implements Dispatcher
 	 */
 	protected function normalize_path(string $path): string
 	{
-		$normalized_path = decontextualize($path);
+		$normalized_path = $path;
 
 		if ($normalized_path != '/') {
 			$normalized_path = rtrim($normalized_path, '/');
@@ -108,7 +108,7 @@ class RouteDispatcher implements Dispatcher
 	/**
 	 * @param callable|string $controller
 	 */
-	private function resolve_controller($controller): Controller
+	private function resolve_controller($controller): Responder
 	{
 		if ($controller instanceof Closure) {
 			return new ResponderFunc($controller);
