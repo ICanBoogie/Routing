@@ -12,7 +12,6 @@
 namespace ICanBoogie\Routing\Responder;
 
 use ICanBoogie\HTTP\Exception\NoResponder;
-use ICanBoogie\HTTP\MethodNotSupported;
 use ICanBoogie\HTTP\NotFound;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Responder;
@@ -24,6 +23,9 @@ use Throwable;
 
 /**
  * Respond to a request by first matching it to a route then that router to a responder.
+ *
+ * @deprecated
+ * @see RequestResponderProvider
  */
 final class RouteResponder implements Responder
 {
