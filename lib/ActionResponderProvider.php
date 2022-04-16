@@ -14,9 +14,9 @@ namespace ICanBoogie\Routing;
 use ICanBoogie\HTTP\Responder;
 
 /**
- * Mapper from an action to the controller that is application for that action.
+ * Provides a Responder for the specified Action.
  */
-interface ResponderProvider
+interface ActionResponderProvider
 {
 	public function responder_for_action(string $action): ?Responder;
 }

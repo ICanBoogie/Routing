@@ -9,10 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Test\ICanBoogie\Routing\ResponderProvider;
+namespace Test\ICanBoogie\Routing\ActionResponderProvider;
 
 use ICanBoogie\HTTP\Responder;
-use ICanBoogie\Routing\ResponderProvider;
+use ICanBoogie\Routing\ActionResponderProvider;
+use ICanBoogie\Routing\ActionResponderProvider\Chain;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 
@@ -25,19 +26,19 @@ final class ChainTest extends TestCase
 		$action = 'article:show';
 		$responder = $this->prophesize(Responder::class)->reveal();
 
-		$rp1 = $this->prophesize(ResponderProvider::class);
+		$rp1 = $this->prophesize(ActionResponderProvider::class);
 		$rp1->responder_for_action($action)->willReturn(null);
 
-		$rp2 = $this->prophesize(ResponderProvider::class);
+		$rp2 = $this->prophesize(ActionResponderProvider::class);
 		$rp2->responder_for_action($action)->willReturn(null);
 
-		$rp3 = $this->prophesize(ResponderProvider::class);
+		$rp3 = $this->prophesize(ActionResponderProvider::class);
 		$rp3->responder_for_action($action)->willReturn($responder);
 
-		$rp4 = $this->prophesize(ResponderProvider::class);
+		$rp4 = $this->prophesize(ActionResponderProvider::class);
 		$rp4->responder_for_action($action)->shouldNotBeCalled();
 
-		$chain = new ResponderProvider\Chain(
+		$chain = new Chain(
 			$rp1->reveal(),
 			$rp2->reveal(),
 			$rp3->reveal(),

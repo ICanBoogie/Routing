@@ -19,7 +19,7 @@ use ICanBoogie\HTTP\RequestMethod;
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Responder\RouteResponder;
-use ICanBoogie\Routing\ResponderProvider;
+use ICanBoogie\Routing\ActionResponderProvider;
 use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteProvider;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -35,7 +35,7 @@ final class RouteResponderTest extends TestCase
 	private MockObject|RouteProvider $routes;
 
 	/**
-	 * @var ObjectProphecy<ResponderProvider>
+	 * @var ObjectProphecy<ActionResponderProvider>
 	 */
 	private ObjectProphecy $responders;
 
@@ -52,7 +52,7 @@ final class RouteResponderTest extends TestCase
 		$this->markTestSkipped();
 
 		$this->routes = $this->createMock(RouteProvider::class);
-		$this->responders = $this->prophesize(ResponderProvider::class);
+		$this->responders = $this->prophesize(ActionResponderProvider::class);
 		$this->responder = $this->prophesize(Responder::class);
 		$this->request = Request::from([
 			Request::OPTION_METHOD => RequestMethod::METHOD_DELETE,

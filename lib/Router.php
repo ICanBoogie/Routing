@@ -22,7 +22,7 @@ class Router
 
 	public function __construct(
 		private readonly MutableRouteProvider $routes,
-		private readonly MutableResponderProvider $responders,
+		private readonly MutableActionResponderProvider $responders,
 	) {
 	}
 

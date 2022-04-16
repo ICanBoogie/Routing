@@ -15,6 +15,7 @@ use ICanBoogie\HTTP\Exception\NoResponder;
 use ICanBoogie\HTTP\MethodNotAllowed;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Responder;
+use ICanBoogie\HTTP\ResponderProvider;
 use ICanBoogie\HTTP\Response;
 
 /**
@@ -25,11 +26,11 @@ use ICanBoogie\HTTP\Response;
  * - The matching route is added to the request's context.
  * - The request's parameters are updated with the parameters extracted from the URI path.
  */
-final class RequestResponderProvider implements \ICanBoogie\HTTP\ResponderProvider
+final class RequestResponderProvider implements ResponderProvider
 {
 	public function __construct(
 		private readonly RouteProvider $routes,
-		private readonly ResponderProvider $responders,
+		private readonly ActionResponderProvider $responders,
 	) {
 	}
 

@@ -9,14 +9,15 @@
  * file that was distributed with this source code.
  */
 
-namespace Test\ICanBoogie\Routing\ResponderProvider;
+namespace Test\ICanBoogie\Routing\ActionResponderProvider;
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\HTTP\Response;
+use ICanBoogie\Routing\ActionResponderProvider;
+use ICanBoogie\Routing\ActionResponderProvider\WithMiddleware;
 use ICanBoogie\Routing\Middleware;
 use ICanBoogie\Routing\MiddlewareCollection;
-use ICanBoogie\Routing\ResponderProvider;
 use PHPUnit\Framework\TestCase;
 use Throwable;
 
@@ -27,7 +28,7 @@ final class WithMiddlewareTest extends TestCase
 	 */
 	public function test_responder_for_action(): void
 	{
-		$responderProvider = new class() implements ResponderProvider {
+		$responderProvider = new class() implements ActionResponderProvider {
 
 			public function responder_for_action(string $action): ?Responder
 			{
@@ -46,7 +47,7 @@ final class WithMiddlewareTest extends TestCase
 			$this->middleware("na"),
 		]);
 
-		$responders = new ResponderProvider\WithMiddleware(
+		$responders = new WithMiddleware(
 			$responderProvider,
 			$middleware
 		);

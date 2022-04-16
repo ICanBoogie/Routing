@@ -12,7 +12,7 @@
 namespace Test\ICanBoogie\Routing;
 
 use ICanBoogie\Routing\Responder\RouteResponder;
-use ICanBoogie\Routing\ResponderProvider;
+use ICanBoogie\Routing\ActionResponderProvider;
 use ICanBoogie\Routing\RouteProvider;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -28,7 +28,7 @@ class RouteDispatcherTest extends TestCase
 	private ObjectProphecy $routes;
 
 	/**
-	 * @var ObjectProphecy<ResponderProvider>
+	 * @var ObjectProphecy<ActionResponderProvider>
 	 */
 	private ObjectProphecy $responders;
 
@@ -39,7 +39,7 @@ class RouteDispatcherTest extends TestCase
 		$this->markTestSkipped();
 
 		$this->routes = $this->prophesize(RouteProvider::class);
-		$this->responders = $this->prophesize(ResponderProvider::class);
+		$this->responders = $this->prophesize(ActionResponderProvider::class);
 	}
 
 	public function test_get_routes()

@@ -9,16 +9,16 @@
  * file that was distributed with this source code.
  */
 
-namespace ICanBoogie\Routing\ResponderProvider;
+namespace ICanBoogie\Routing\ActionResponderProvider;
 
 use ICanBoogie\HTTP\Responder;
-use ICanBoogie\Routing\ResponderProvider;
+use ICanBoogie\Routing\ActionResponderProvider;
 use Psr\Container\ContainerInterface;
 
 /**
  * Provides responders from a PSR container.
  */
-final class Container implements ResponderProvider
+final class Container implements ActionResponderProvider
 {
 	/**
 	 * @param array<string, string> $aliases

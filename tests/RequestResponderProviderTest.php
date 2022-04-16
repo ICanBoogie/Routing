@@ -18,7 +18,7 @@ use ICanBoogie\HTTP\RequestMethod;
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\RequestResponderProvider;
-use ICanBoogie\Routing\ResponderProvider;
+use ICanBoogie\Routing\ActionResponderProvider;
 use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteProvider;
 use ICanBoogie\Routing\RouteProvider\ByUri;
@@ -40,7 +40,7 @@ final class RequestResponderProviderTest extends TestCase
 	private ObjectProphecy $routes;
 
 	/**
-	 * @var ObjectProphecy<ResponderProvider>
+	 * @var ObjectProphecy<ActionResponderProvider>
 	 */
 	private ObjectProphecy $responders;
 	private Request $request;
@@ -50,7 +50,7 @@ final class RequestResponderProviderTest extends TestCase
 		parent::setUp();
 
 		$this->routes = $this->prophesize(RouteProvider::class);
-		$this->responders = $this->prophesize(ResponderProvider::class);
+		$this->responders = $this->prophesize(ActionResponderProvider::class);
 		$this->request = Request::from([
 			Request::OPTION_URI => '/' . uniqid(),
 			Request::OPTION_METHOD => RequestMethod::METHOD_POST,

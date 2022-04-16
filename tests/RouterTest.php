@@ -16,8 +16,8 @@ use ICanBoogie\HTTP\RequestMethod;
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Responder\RouteResponder;
-use ICanBoogie\Routing\ResponderProvider;
-use ICanBoogie\Routing\ResponderProvider\Mutable;
+use ICanBoogie\Routing\ActionResponderProvider;
+use ICanBoogie\Routing\ActionResponderProvider\Mutable;
 use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteCollection;
 use ICanBoogie\Routing\RouteProvider\ByUri;
@@ -41,7 +41,7 @@ final class RouterTest extends TestCase
 		};
 
 		$routes = new RouteCollection();
-		$responders = new ResponderProvider\Mutable();
+		$responders = new ActionResponderProvider\Mutable();
 
 		$router = new Router($routes, $responders);
 		$router->$method($pattern, $closure);
@@ -83,7 +83,7 @@ final class RouterTest extends TestCase
 	public function test_route(): void
 	{
 		$routes = new RouteCollection();
-		$responders = new ResponderProvider\Mutable();
+		$responders = new ActionResponderProvider\Mutable();
 		$response = new Response();
 
 		(new Router($routes, $responders))

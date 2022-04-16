@@ -16,7 +16,7 @@ use ICanBoogie\HTTP\NotFound;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\HTTP\Response;
-use ICanBoogie\Routing\ResponderProvider;
+use ICanBoogie\Routing\ActionResponderProvider;
 use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteProvider;
 use Throwable;
@@ -31,7 +31,7 @@ final class RouteResponder implements Responder
 {
 	public function __construct(
 		private readonly RouteProvider $routes,
-		private readonly ResponderProvider $responders
+		private readonly ActionResponderProvider $responders
 	) {
 	}
 

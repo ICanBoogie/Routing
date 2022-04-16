@@ -16,7 +16,7 @@ use ICanBoogie\HTTP\Responder;
 /**
  * A responder provider that supports mutations.
  */
-interface MutableResponderProvider extends ResponderProvider
+interface MutableActionResponderProvider extends ActionResponderProvider
 {
 	/**
 	 * Add a responder for an action.
