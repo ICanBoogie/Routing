@@ -12,87 +12,74 @@
 namespace ICanBoogie\Routing\Controller;
 
 use ICanBoogie\HTTP\Request;
-use ICanBoogie\HTTP\Response;
-use ICanBoogie\Routing\Exception\ActionNotDefined;
 use ICanBoogie\Routing\Route;
+use LogicException;
+
 use function array_values;
+use function implode;
 use function method_exists;
+use function preg_replace;
+use function strpos;
 use function strtolower;
-use function strtr;
+use function substr;
 
 /**
  * Action controller implementation.
- *
- * @property-read Route $route
- * @property-read string $action The action being executed.
  */
 trait ActionTrait
 {
-    protected function get_action(): string
-    {
-        $action = $this->route->action;
-
-	    if (!$action)
-	    {
-		    throw new ActionNotDefined("Action not defined for route {$this->route->id}.");
-	    }
-
-	    return $action;
-    }
-
-    /**
-     * Dispatch the request to the appropriate method.
-     *
-     * The {@link $request} property is initialized.
-     *
-     * @return Response|mixed
-     */
-    protected function action(Request $request)
-    {
-        return $this->resolve_action($request)();
-    }
-
-    /**
-     * Resolves the action into a callable.
-     */
-    protected function resolve_action(Request $request): callable
-    {
-        $action = $this->action;
-        $method = $this->resolve_action_method($action, $request);
-        $args = $this->resolve_action_args($action, $request);
-
-        return function () use ($method, $args) {
-
-            return $this->$method(...$args);
-
-        };
-    }
-
-    protected function resolve_action_method(string $action, Request $request): string
-    {
-        $action = strtr($action, '-', '_');
-        $method = 'action_' . strtolower($request->method) . '_' . $action;
-
-        if (method_exists($this, $method))
-        {
-            return $method;
-        }
-
-        $method = 'action_any_' . $action;
-
-        if (method_exists($this, $method))
-        {
-            return $method;
-        }
-
-        return 'action_' . $action;
-    }
+	protected function action(Request $request): mixed
+	{
+		return $this->resolve_action($request)();
+	}
 
 	/**
-	 * @return array<string, string>
+	 * Resolves the action into a callable.
 	 */
-    protected function resolve_action_args(string $action, Request $request): array
-    {
-        return array_values($request->path_params);
-    }
+	protected function resolve_action(Request $request): callable
+	{
+		$method = $this->resolve_action_method($request);
+		$args = $this->resolve_action_args($request);
+
+		return function () use ($request, $method, $args) {
+			return $this->$method($request, ...$args);
+		};
+	}
+
+	protected function resolve_action_method(Request $request): string
+	{
+		$action = $request->context->get(Route::class)->action;
+		$methods = [];
+
+		for (;;) {
+			$base = preg_replace('/[^A-Za-z]+/', '_', $action);
+			$methods[] = strtolower($request->method->value) . '_' . $base;
+			$methods[] = 'any_' . $base;
+			$methods[] = $base;
+
+			$pos = strpos($action, Route::ACTION_SEPARATOR);
+
+			if ($pos === false) {
+				break;
+			}
+
+			$action = substr($action, $pos + 1);
+		}
+
+		foreach ($methods as $method) {
+			if (method_exists($this, $method)) {
+				return $method;
+			}
+		}
+
+		throw new LogicException("Unable to find action method, tried: " . implode(', ', $methods) . ".");
+	}
+
+	/**
+	 * @return array<int|string, string>
+	 */
+	protected function resolve_action_args(Request $request): array
+	{
+		return array_values($request->path_params);
+	}
 }

@@ -418,73 +418,30 @@ The following properties are provided by the [Controller][] class:
 
 ### Action controllers
 
-Action controllers are used to group related HTTP request handling logic into a class and use
-HTTP methods to separate concerns. An action controller is created by extending the
-[Controller][] class and using [ActionTrait][].
-
-The following example demonstrates how an action controller can be used to display a contact
-form, handle its submission, and redirect the user to a _success_ page. The action invoked
-inside the controller is defined after the "#" character. The action may as well be defined
-using the `action` key.
+Here's an example of an action controller, details are available in the [Action controllers
+documentation](docs/ActionControllers.md).
 
 ```php
 <?php
 
-// routes.php
+use ICanBoogie\Routing\ControllerAbstract;
+use ICanBoogie\Routing\Controller\ActionTrait;
 
-use ICanBoogie\Routing\RouteDefinition;
-
-return [
-
-    'contact' => [
-
-        RouteDefinition::PATTERN => '/contact',
-        RouteDefinition::CONTROLLER => AppController::class,
-        RouteDefinition::ACTION => 'contact'
-
-    ]
-
-];
-```
-
-The HTTP method is used as a prefix for the method handling the action. The prefix "any" is used
-for methods that handle any kind of HTTP method, they are a fallback when more accurate methods
-are not available. If you don't care about that, you can omit the HTTP method.
-
-```php
-<?php
-
-use ICanBoogie\Routing\Controller;
-
-class AppController extends Controller
+final class ArticleController extends ControllerAbstract
 {
-    use Controller\ActionTrait;
+    use ActionTrait;
 
-    protected function action_any_contact()
+    private function index(): string
     {
-        return new ContactForm;
+        // …
     }
 
-    protected function action_post_contact()
+    private function show(): string
     {
-        $form = new ContactForm;
-        $request = $this->request;
-
-        if (!$form->validate($request->params, $errors))
-        {
-            return $this->redirect($this->routes['contact']);
-        }
-
-        // …
-
-        $email = $request['email'];
-        $message = $request['message'];
-
         // …
     }
 }
 ```
-
 
 
 

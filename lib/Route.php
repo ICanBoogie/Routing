@@ -19,6 +19,11 @@ use function is_array;
 
 final class Route
 {
+	/**
+	 * Separator used for actions e.g. "articles:show".
+	 */
+	public const ACTION_SEPARATOR = ':';
+
 	readonly public Pattern $pattern;
 
 	/**

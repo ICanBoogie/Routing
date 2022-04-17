@@ -11,159 +11,214 @@
 
 namespace Test\ICanBoogie\Routing\Controller;
 
-use ICanBoogie\EventCollection;
-use ICanBoogie\EventCollectionProvider;
+use Closure;
 use ICanBoogie\HTTP\Request;
-use ICanBoogie\HTTP\Response;
-use ICanBoogie\Routing\Exception\ActionNotDefined;
-use ICanBoogie\Routing\Controller\ActionTraitTest\ActionController;
-use ICanBoogie\Routing\RouteCollection;
-use ICanBoogie\Routing\RouteDefinition;
-use ICanBoogie\Routing\RouteDispatcher;
+use ICanBoogie\Routing\Controller\ActionTrait;
+use ICanBoogie\Routing\Route;
+use LogicException;
 use PHPUnit\Framework\TestCase;
+
+use function uniqid;
 
 class ActionTraitTest extends TestCase
 {
-	protected function setUp(): void
+	public function test_resolve_action_args(): void
 	{
-		$this->markTestIncomplete();
+		$stu = new class () {
+			use ActionTrait {
+				resolve_action_args as public;
+			}
+		};
 
-		$events = new EventCollection();
+		$path_params = [ uniqid() ];
 
-		EventCollectionProvider::define(function () use ($events) {
-			return $events;
-		});
+		$this->assertSame(
+			$path_params,
+			$stu->resolve_action_args(Request::from([ Request::OPTION_PATH_PARAMS => $path_params ]))
+		);
 	}
 
-	public function test_action()
+	public function test_resolve_action_method_no_method(): void
 	{
-		$routes = new RouteCollection([
+		$stu = new class () {
+			use ActionTrait {
+				resolve_action_method as public;
+			}
+		};
 
-			'default' => [
+		$request = Request::from();
+		$request->context->add(new Route('/', 'articles:show'));
 
-				RouteDefinition::PATTERN => '/blog/<year:\d{4}>-<month:\d{2}>-:slug.html',
-				RouteDefinition::CONTROLLER => ActionController::class,
-				RouteDefinition::ACTION => 'view'
-			]
+		$this->expectException(LogicException::class);
+		$this->expectExceptionMessageMatches("/Unable to find action method, tried: get_articles_show/");
 
-		]);
-
-		$dispatcher = new RouteDispatcher($routes);
-		$request = Request::from("/blog/2014-12-my-awesome-post.html");
-		$request->test = $this;
-		$response = $dispatcher($request);
-		$this->assertInstanceOf(Response::class, $response);
-		$this->assertTrue($response->status->is_successful);
-		$this->assertEquals('HERE', $response->body);
-	}
-
-	public function test_should_throw_exception_when_action_is_not_defined()
-	{
-		$routes = new RouteCollection([
-
-			'default' => [
-
-				'pattern' => '/blog/<year:\d{4}>-<month:\d{2}>-:slug.html',
-				'controller' => ActionController::class
-			]
-
-		]);
-
-		$dispatcher = new RouteDispatcher($routes);
-		$request = Request::from("/blog/2014-12-my-awesome-post.html");
-		$request->test = $this;
-		$this->expectException(ActionNotDefined::class);
-		$dispatcher($request);
-	}
-
-	public function test_method_action()
-	{
-		$rc = uniqid();
-		$action = 'action' . uniqid();
-
-		$controller = $this
-			->getMockBuilder(ActionController::class)
-			->disableOriginalConstructor()
-			->onlyMethods([ 'get_action' ])
-			->addMethods([ 'action_post_' . $action ])
-			->getMockForAbstractClass();
-		$controller
-			->expects($this->once())
-			->method('get_action')
-			->willReturn($action);
-		$controller
-			->expects($this->once())
-			->method('action_post_' . $action)
-			->willReturn($rc);
-
-		/* @var $controller ActionController */
-
-		$this->assertSame($rc, $controller(Request::from([ 'uri' => '/', 'is_post' => true ])));
-	}
-
-	public function test_any_action()
-	{
-		$rc = uniqid();
-		$action = 'action' . uniqid();
-
-		$controller = $this
-			->getMockBuilder(ActionController::class)
-			->disableOriginalConstructor()
-			->onlyMethods([ 'get_action' ])
-			->addMethods([ 'action_any_' . $action ])
-			->getMockForAbstractClass();
-		$controller
-			->expects($this->once())
-			->method('get_action')
-			->willReturn($action);
-		$controller
-			->expects($this->once())
-			->method('action_any_' . $action)
-			->willReturn($rc);
-
-		/* @var $controller ActionController */
-
-		$this->assertSame($rc, $controller(Request::from([ 'uri' => '/', 'is_post' => true ])));
+		$stu->resolve_action_method($request);
 	}
 
 	/**
-	 * @dataProvider provider_resource_action
+	 * @dataProvider provide_resolve_action_method
 	 */
-	public function test_resource_action(string $action)
+	public function test_resolve_action_method(string $expected, object $stu): void
 	{
-		$rc = uniqid();
+		$request = Request::from();
+		$request->context->add(new Route('/', 'articles:show'));
 
-		$method = "action_$action";
-
-		$controller = $this
-			->getMockBuilder(ActionController::class)
-			->disableOriginalConstructor()
-			->onlyMethods([ 'get_action' ])
-			->addMethods([ $method ])
-			->getMockForAbstractClass();
-		$controller
-			->expects($this->once())
-			->method('get_action')
-			->willReturn($action);
-		$controller
-			->expects($this->once())
-			->method($method)
-			->willReturn($rc);
-
-		/* @var $controller ActionController */
-
-		$this->assertSame($rc, $controller(Request::from('/')));
+		$this->assertSame(
+			$expected,
+			$stu->resolve_action_method($request) // @phpstan-ignore-line
+		);
 	}
 
-	public function provider_resource_action(): array
+	/**
+	 * @return mixed[]
+	 */
+	public function provide_resolve_action_method(): array
 	{
-		$methods = 'index new create show edit update delete';
-		$cases = [];
+		return [
 
-		foreach (explode(' ', $methods) as $method) {
-			$cases[] = [ $method ];
-		}
+			[
+				'get_articles_show',
+				new class () {
+					/**
+					 * @uses get_articles_show
+					 */
+					use ActionTrait {
+						resolve_action_method as public;
+					}
 
-		return $cases;
+					// @phpstan-ignore-next-line
+					private function get_articles_show()
+					{
+					}
+				}
+			],
+
+			[
+				'any_articles_show',
+				new class () {
+					/**
+					 * @uses any_articles_show
+					 */
+					use ActionTrait {
+						resolve_action_method as public;
+					}
+
+					// @phpstan-ignore-next-line
+					private function any_articles_show()
+					{
+					}
+				}
+			],
+
+			[
+				'articles_show',
+				new class () {
+					/**
+					 * @uses articles_show
+					 */
+					use ActionTrait {
+						resolve_action_method as public;
+					}
+
+					// @phpstan-ignore-next-line
+					private function articles_show()
+					{
+					}
+				}
+			],
+
+			[
+				'get_show',
+				new class () {
+					/**
+					 * @uses get_show
+					 */
+					use ActionTrait {
+						resolve_action_method as public;
+					}
+
+					// @phpstan-ignore-next-line
+					private function get_show()
+					{
+					}
+				}
+			],
+
+			[
+				'any_show',
+				new class () {
+					/**
+					 * @uses any_show
+					 */
+					use ActionTrait {
+						resolve_action_method as public;
+					}
+
+					// @phpstan-ignore-next-line
+					private function any_show()
+					{
+					}
+				}
+			],
+
+			[
+				'show',
+				new class () {
+					/**
+					 * @uses show
+					 */
+					use ActionTrait {
+						resolve_action_method as public;
+					}
+
+					// @phpstan-ignore-next-line
+					private function show()
+					{
+					}
+				}
+			],
+
+		];
+	}
+
+	public function test_resolve_action_and_action(): void
+	{
+		$path_params = [ uniqid() ];
+
+		$assert = function (Request $r, string $nid) use ($path_params) {
+			$this->assertSame($path_params, [ $nid ]);
+		};
+
+		$stu = new class ($assert, $response = uniqid()) {
+			/**
+			 * @uses show
+			 */
+			use ActionTrait {
+				action as public;
+				resolve_action as public;
+			}
+
+			public function __construct(
+				private readonly Closure $assert,
+				private readonly string $response
+			) {
+			}
+
+			// @phpstan-ignore-next-line
+			private function show(Request $request, string $nid): string
+			{
+				($this->assert)($request, $nid);
+
+				return $this->response;
+			}
+		};
+
+		$request = Request::from([ Request::OPTION_PATH_PARAMS => $path_params ]);
+		$request->context->add(new Route('/', 'articles:show'));
+
+		$action = $stu->resolve_action($request);
+
+		$this->assertSame($response, $action());
+		$this->assertSame($response, $stu->action($request));
 	}
 }

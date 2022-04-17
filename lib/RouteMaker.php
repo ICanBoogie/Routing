@@ -36,11 +36,6 @@ final class RouteMaker
 	public const ACTION_UPDATE = 'update';
 	public const ACTION_DELETE = 'delete';
 
-	/*
-	 * Separator for a [qualified] action e.g. 'articles:index'.
-	 */
-	public const SEPARATOR = ':';
-
 	/**
 	 * @param array<string, Basics> $basics Action templates.
 	 *     If {@link Options::$ids} is not specified for an action, the qualified action is used as identifier.
@@ -60,7 +55,7 @@ final class RouteMaker
 
 		foreach ($basics as $action => $basic)
 		{
-			$qualified_action = $as[$action] ?? $name . self::SEPARATOR . $action;
+			$qualified_action = $as[$action] ?? $name . Route::ACTION_SEPARATOR . $action;
 
 			$routes[] = new Route(
 				pattern: $basic->pattern,
