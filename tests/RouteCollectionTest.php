@@ -42,15 +42,15 @@ final class RouteCollectionTest extends TestCase
 	{
 		$this->expectException(InvalidPattern::class);
 
-		new RouteCollection([ new Route('', 'article:index') ]);
+		new RouteCollection([ new Route('', 'article:list') ]);
 	}
 
 	public function test_iterator(): void
 	{
 		$routes = new RouteCollection([
-			$r1 = new Route('/', 'article:index'),
-			$r2 = new Route('/', 'article:index'),
-			$r3 = new Route('/', 'article:index'),
+			$r1 = new Route('/', 'article:list'),
+			$r2 = new Route('/', 'article:list'),
+			$r3 = new Route('/', 'article:list'),
 		]);
 
 		$this->assertSame([ $r1, $r2, $r3 ], self::to_array($routes));
@@ -62,13 +62,13 @@ final class RouteCollectionTest extends TestCase
 
 			$home = new Route('/', 'home'),
 			$edit = new Route('/articles/new', 'articles:edit', RequestMethod::METHOD_GET),
-			$index = new Route('/articles', 'articles', [ RequestMethod::METHOD_POST, RequestMethod::METHOD_PATCH ]),
+			$list = new Route('/articles', 'articles', [ RequestMethod::METHOD_POST, RequestMethod::METHOD_PATCH ]),
 			$delete = new Route('/articles/<nid:\d+>', 'articles:delete', RequestMethod::METHOD_DELETE),
 
 		]);
 
 		$this->assertSame($home, $routes->route_for_predicate(new ByAction('home')));
-		$this->assertSame($index, $routes->route_for_predicate(new ByAction('articles')));
+		$this->assertSame($list, $routes->route_for_predicate(new ByAction('articles')));
 		$this->assertSame($edit, $routes->route_for_predicate(new ByAction('articles:edit')));
 		$this->assertSame($delete, $routes->route_for_predicate(new ByAction('articles:delete')));
 	}
@@ -79,7 +79,7 @@ final class RouteCollectionTest extends TestCase
 
 			$home = new Route('/', 'home'),
 			new Route('/articles/new', 'articles:edit', RequestMethod::METHOD_GET),
-			$index = new Route('/articles', 'articles', [ RequestMethod::METHOD_POST, RequestMethod::METHOD_PATCH ]),
+			$create = new Route('/articles', 'articles', [ RequestMethod::METHOD_POST, RequestMethod::METHOD_PATCH ]),
 			$delete = new Route('/articles/<nid:\d+>', 'articles:delete', RequestMethod::METHOD_DELETE),
 
 		]);
@@ -113,15 +113,15 @@ final class RouteCollectionTest extends TestCase
 		);
 		$this->assertEmpty($p->path_params);
 
-		$this->assertSame($index, $routes->route_for_predicate(new ByUri('/articles')));
+		$this->assertSame($create, $routes->route_for_predicate(new ByUri('/articles')));
 		$this->assertSame(
-			$index,
+			$create,
 			$routes->route_for_predicate(
 				new ByUri('/articles', RequestMethod::METHOD_POST)
 			)
 		);
 		$this->assertSame(
-			$index,
+			$create,
 			$routes->route_for_predicate(
 				new ByUri('/articles', RequestMethod::METHOD_PATCH)
 			)
@@ -196,21 +196,21 @@ final class RouteCollectionTest extends TestCase
 	public function test_resources(): void
 	{
 		$routes = new RouteCollection();
-		$routes->resource('photos', new Options(only: [ RouteMaker::ACTION_INDEX, RouteMaker::ACTION_SHOW ]));
+		$routes->resource('photos', new Options(only: [ RouteMaker::ACTION_LIST, RouteMaker::ACTION_SHOW ]));
 		$actions = [];
 
 		foreach ($routes as $route) {
 			$actions[] = $route->action;
 		}
 
-		$this->assertSame([ 'photos:index', 'photos:show' ], $actions);
+		$this->assertSame([ 'photos:list', 'photos:show' ], $actions);
 	}
 
 	public function test_filter(): void
 	{
 		$routes = new RouteCollection([
 
-			$ok = new Route('/admin/articles', 'admin:articles:index'),
+			$ok = new Route('/admin/articles', 'admin:articles:list'),
 			new Route('/articles/<id:\d+>', 'articles:show'),
 
 		]);

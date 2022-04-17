@@ -431,7 +431,7 @@ final class ArticleController extends ControllerAbstract
 {
     use ActionTrait;
 
-    private function index(): string
+    private function list(): string
     {
         // …
     }
@@ -446,77 +446,7 @@ final class ArticleController extends ControllerAbstract
 
 
 
-### Resource controllers
 
-A resource controller groups the different actions required to handle a resource in a
-[RESTful][] fashion. It is created by extending the [Controller][] class and
-using [ActionTrait][].
-
-The following table list the verbs/routes and their corresponding action. `{name}` is the
-placeholder for the plural name of the resource, while `{id}` is the placeholder for the
-resource identifier.
-
-| HTTP verb | Path                | Action  | Used for                                   |
-| --------- | ------------------- | ------- | ------------------------------------------ |
-| GET       | `/{name}`           | index   | A list of `{resource}`                     |
-| GET       | `/{name}/new`       | new     | A form for creating a new `{resource}`     |
-| POST      | `/{name}`           | create  | Create a new `{resource}`                  |
-| GET       | `/{name}/{id}`      | show    | A specific `{resource}`                    |
-| GET       | `/{name}/{id}/edit` | edit    | A form for editing a specific `{resource}` |
-| PATCH/PUT | `/{name}/{id}`      | update  | Update a specific `{resource}`             |
-| DELETE    | `/{name}/{id}`      | delete  | Delete a specific `{resource}`             |
-
-The routes listed are more of a guideline than a requirement, still the actions are important.
-
-The following example demonstrates how the resource controller for _articles_ may be
-implemented. The example implements all actions, but you are free to implement only
-some of them.
-
-```php
-<?php
-
-use ICanBoogie\Routing\Controller;
-
-class PhotosController extends Controller
-{
-    use Controller\ActionTrait;
-
-    protected function action_index()
-    {
-        // …
-    }
-
-    protected function action_new()
-    {
-        // …
-    }
-
-    protected function action_create()
-    {
-        // …
-    }
-
-    protected function action_show($id)
-    {
-        // …
-    }
-
-    protected function action_edit($id)
-    {
-        // …
-    }
-
-    protected function action_update($id)
-    {
-        // …
-    }
-
-    protected function action_delete($id)
-    {
-        // …
-    }
-}
-```
 
 
 
@@ -540,17 +470,17 @@ use ICanBoogie\Routing\RouteMaker as Make;
 // create all resource actions definitions
 $definitions = Make::resource('articles', ArticlesController::class);
 
-// only create the _index_ definition
+// only create the _list_ definition
 $definitions = Make::resource('articles', ArticlesController::class, [
 
-    Make::OPTION_ONLY => Make::ACTION_INDEX
+    Make::OPTION_ONLY => Make::ACTION_LIST
 
 ]);
 
-// only create the _index_ and _show_ definitions
+// only create the _list_ and _show_ definitions
 $definitions = Make::resource('articles', ArticlesController::class, [
 
-    Make::OPTION_ONLY => [ Make::ACTION_INDEX, Make::ACTION_SHOW ]
+    Make::OPTION_ONLY => [ Make::ACTION_LIST, Make::ACTION_SHOW ]
 
 ]);
 

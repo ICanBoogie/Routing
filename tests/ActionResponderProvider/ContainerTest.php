@@ -26,7 +26,7 @@ final class ContainerTest extends TestCase
 		$responder = $this->prophesize(Responder::class)->reveal();
 
 		$container = $this->prophesize(ContainerInterface::class);
-		$container->has($action_ok = 'article:index')
+		$container->has($action_ok = 'article:list')
 			->willReturn(true);
 		$container->has($action_ko = 'article:show')
 			->willReturn(false);

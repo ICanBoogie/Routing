@@ -109,24 +109,24 @@ final class RouteMakerTest extends TestCase
 		return [
 
 			[
-				new Options(only: [ Make::ACTION_INDEX ]),
+				new Options(only: [ Make::ACTION_LIST ]),
 				[
-					new Route('/photos', 'photos:index', RequestMethod::METHOD_GET, id: 'photos:index'),
+					new Route('/photos', 'photos:list', RequestMethod::METHOD_GET, id: 'photos:list'),
 				],
 			],
 
 			[
-				new Options(only: [ Make::ACTION_INDEX, Make::ACTION_SHOW ], ids: [ Make::ACTION_INDEX => 'my-index' ]),
+				new Options(only: [ Make::ACTION_LIST, Make::ACTION_SHOW ], ids: [ Make::ACTION_LIST => 'my-list' ]),
 				[
-					new Route('/photos', 'photos:index', RequestMethod::METHOD_GET, id: 'my-index'),
+					new Route('/photos', 'photos:list', RequestMethod::METHOD_GET, id: 'my-list'),
 					new Route('/photos/<id:\d+>', 'photos:show', RequestMethod::METHOD_GET, id: 'photos:show'),
 				],
 			],
 
 			[
-				new Options(only: [ Make::ACTION_INDEX, Make::ACTION_SHOW ]),
+				new Options(only: [ Make::ACTION_LIST, Make::ACTION_SHOW ]),
 				[
-					new Route('/photos', 'photos:index', RequestMethod::METHOD_GET, id: 'photos:index'),
+					new Route('/photos', 'photos:list', RequestMethod::METHOD_GET, id: 'photos:list'),
 					new Route('/photos/<id:\d+>', 'photos:show', RequestMethod::METHOD_GET, id: 'photos:show'),
 				],
 			],
@@ -134,7 +134,7 @@ final class RouteMakerTest extends TestCase
 			[
 				new Options(except: [ Make::ACTION_DELETE ]),
 				[
-					new Route('/photos', 'photos:index', RequestMethod::METHOD_GET, id: 'photos:index'),
+					new Route('/photos', 'photos:list', RequestMethod::METHOD_GET, id: 'photos:list'),
 					new Route('/photos/new', 'photos:new', RequestMethod::METHOD_GET, id: 'photos:new'),
 					new Route('/photos', 'photos:create', RequestMethod::METHOD_POST, id: 'photos:create'),
 					new Route('/photos/<id:\d+>', 'photos:show', RequestMethod::METHOD_GET, id: 'photos:show'),
@@ -151,7 +151,7 @@ final class RouteMakerTest extends TestCase
 			[
 				new Options(except: [ Make::ACTION_CREATE, Make::ACTION_UPDATE, Make::ACTION_DELETE ]),
 				[
-					new Route('/photos', 'photos:index', RequestMethod::METHOD_GET, id: 'photos:index'),
+					new Route('/photos', 'photos:list', RequestMethod::METHOD_GET, id: 'photos:list'),
 					new Route('/photos/new', 'photos:new', RequestMethod::METHOD_GET, id: 'photos:new'),
 					new Route('/photos/<id:\d+>', 'photos:show', RequestMethod::METHOD_GET, id: 'photos:show'),
 					new Route('/photos/<id:\d+>/edit', 'photos:edit', RequestMethod::METHOD_GET, id: 'photos:edit'),

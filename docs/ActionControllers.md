@@ -1,9 +1,8 @@
 # Action controllers
 
-Action controllers are used to group related HTTP request handling logic into a class and use HTTP methods to separate
-concerns. An action controller is created by extending the [Controller][] class and using [ActionTrait][].
-
-An action controller can be created easily by extending [ControllerAbstract][] and using the trait [ActionTrait][].
+Action controllers are used to group related HTTP request handling logic into a class and use HTTP
+methods to separate concerns. An action controller can be created easily by extending
+[ControllerAbstract][] and using the trait [ActionTrait][].
 
 ```php
 <?php
@@ -17,9 +16,9 @@ final class ArticleController extends ControllerAbstract
 }
 ```
 
-Next, we define the methods the controllers needs to handle. For instance, for a route with the action `articles:show`,
-one the following methods can be implemented. `{method}` is a placeholder for the method of the request e.g. `get`
-or `post`.
+Next, we define the methods the controllers needs to handle. For instance, for a route with the
+action `articles:show`, one the following methods can be implemented. `{method}` is a placeholder
+for the method of the request e.g. `get` or `post`.
 
 - `{method}_articles_show`
 - `any_articles_show`
@@ -28,8 +27,8 @@ or `post`.
 - `any_show`
 - `show`
 
-Since our controller deals exclusively with articles, let's go with the simplest one: `show`. It's recommended
-to is the `private` visibility.
+Since our controller deals exclusively with articles, let's go with the simplest one: `show`. It's
+recommended to is the `private` visibility.
 
 ```php
 <?php
@@ -48,53 +47,91 @@ final class ArticleController extends ControllerAbstract
 }
 ```
 
-## Use case: A contact form
+## Resource controllers
 
-The following example demonstrates how an action controller can be used to display a contact form, handle its
-submission, and redirect the user to a _success_ page. The action invoked inside the controller is defined after the "#"
-character. The action may as well be defined using the `action` key.
+With [ActionTrait][] and [RouteMaker][] resource controllers can be created with a minimum
+boilerplate.
+
+The following examples demonstrates how to create "resource" routes for "articles":
 
 ```php
 <?php
 
-use ICanBoogie\Routing\Route;
+use ICanBoogie\Routing\RouteMaker;
 
-$route = new Route('/contact', 'contact');
+$routes = RouteMaker::resource('articles');
 ```
 
-The HTTP method is used as a prefix for the method handling the action. The prefix "any" is used
-for methods that handle any kind of HTTP method, they are a fallback when more accurate methods
-are not available. If you don't care about that, you can omit the HTTP method.
+The following table list the verbs/routes and their corresponding action. `{name}` is the
+placeholder for the plural name of the resource, while `{id}` is the placeholder for the resource
+identifier.
+
+| HTTP verb | Path                | Action        | Used for                                   |
+| --------- | ------------------- |---------------| ------------------------------------------ |
+| GET       | `/{name}`           | {name}:list   | A list of `{resource}`                     |
+| GET       | `/{name}/new`       | {name}:new    | A form for creating a new `{resource}`     |
+| POST      | `/{name}`           | {name}:create | Create a new `{resource}`                  |
+| GET       | `/{name}/{id}`      | {name}:show   | A specific `{resource}`                    |
+| GET       | `/{name}/{id}/edit` | {name}:edit   | A form for editing a specific `{resource}` |
+| PATCH/PUT | `/{name}/{id}`      | {name}:update | Update a specific `{resource}`             |
+| DELETE    | `/{name}/{id}`      | {name}:delete | Delete a specific `{resource}`             |
+
+The routes listed are more of a guideline than a requirement, still the actions are important. Such
+routes can easily be created with `RouteMaker`:
+
+The following example demonstrates how the resource controller for _articles_ may be implemented.
+The example implements all actions, but you are free to implement only some of them.
 
 ```php
 <?php
 
-use ICanBoogie\Routing\Controller;
+use ICanBoogie\Routing\Controller\ActionTrait;
+use ICanBoogie\Routing\ControllerAbstract;
 
-class AppController extends Controller
+class ArticleController extends ControllerAbstract
 {
-    use Controller\ActionTrait;
+    use ActionTrait;
 
-    private readonly ContactForm $form;
-
-    protected function any_contact()
+    private function list(Request $request)
     {
-        return $this->form;
+        // …
     }
 
-    protected function post_contact(Request $request)
+    private function new(Request $request)
     {
-        if (!$this->form->validate($request->params, $errors))
-        {
-            return $this->redirect('contact');
-        }
-
         // …
+    }
 
-        $email = $request['email'];
-        $message = $request['message'];
+    private function create(Request $request)
+    {
+        // …
+    }
 
+    private function show(Request $request, int $id)
+    {
+        // …
+    }
+
+    private function edit(Request $request, int $id)
+    {
+        // …
+    }
+
+    private function update(Request $request, int $id)
+    {
+        // …
+    }
+
+    private function delete(Request $request, int $id)
+    {
         // …
     }
 }
 ```
+
+
+
+[Controller]:   ../lib/ControllerAbstract.php
+[ActionTrait]:  ../lib/Controller/ActionTrait.php
+
+[RESTful]: https://en.wikipedia.org/wiki/Representational_state_transfer

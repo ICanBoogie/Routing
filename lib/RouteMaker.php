@@ -28,7 +28,7 @@ final class RouteMaker
 	/*
 	 * Unqualified actions.
 	 */
-	public const ACTION_INDEX = 'index';
+	public const ACTION_LIST = 'list';
 	public const ACTION_NEW = 'new';
 	public const ACTION_CREATE = 'create';
 	public const ACTION_SHOW = 'show';
@@ -87,7 +87,7 @@ final class RouteMaker
 	{
 		return [
 
-			self::ACTION_INDEX  => new Basics(Basics::PATTERN_INDEX,  Basics::METHODS_INDEX),
+			self::ACTION_LIST   => new Basics(Basics::PATTERN_LIST,   Basics::METHODS_LIST),
 			self::ACTION_NEW    => new Basics(Basics::PATTERN_NEW,    Basics::METHODS_NEW),
 			self::ACTION_CREATE => new Basics(Basics::PATTERN_CREATE, Basics::METHODS_CREATE),
 			self::ACTION_SHOW   => new Basics(Basics::PATTERN_SHOW,   Basics::METHODS_SHOW),

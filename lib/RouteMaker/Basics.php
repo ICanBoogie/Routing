@@ -12,7 +12,7 @@ final class Basics
 	public const PLACEHOLDER_NAME = '{name}';
 	public const PLACEHOLDER_ID = '{id}';
 
-	public const PATTERN_INDEX = '/{name}';
+	public const PATTERN_LIST = '/{name}';
 	public const PATTERN_NEW = '/{name}/new';
 	public const PATTERN_CREATE = '/{name}';
 	public const PATTERN_SHOW = '/{name}/{id}';
@@ -20,7 +20,7 @@ final class Basics
 	public const PATTERN_UPDATE = '/{name}/{id}';
 	public const PATTERN_DELETE = '/{name}/{id}';
 
-	public const METHODS_INDEX = RequestMethod::METHOD_GET;
+	public const METHODS_LIST = RequestMethod::METHOD_GET;
 	public const METHODS_NEW = RequestMethod::METHOD_GET;
 	public const METHODS_CREATE = RequestMethod::METHOD_POST;
 	public const METHODS_SHOW = RequestMethod::METHOD_GET;
