@@ -242,6 +242,33 @@ final class RouteCollectionTest extends TestCase
 		$this->assertSame([ $ok ], self::to_array($routes));
 	}
 
+	public function test_routes_with_multiple_methods(): void
+	{
+		$routes = new RouteCollection([
+			$list = new Route(
+				'/articles',
+				'articles:list',
+				[ RequestMethod::METHOD_GET, RequestMethod::METHOD_HEAD ]
+			),
+
+			$show = new Route(
+				'/<year:\d{4}>-<month:\d{2}>-:slug',
+				'articles:show',
+				[ RequestMethod::METHOD_GET, RequestMethod::METHOD_HEAD ]
+			),
+		]);
+
+		$this->assertSame(
+			$list,
+			$routes->route_for_predicate(new ByUri('/articles'))
+		);
+
+		$this->assertSame(
+			$show,
+			$routes->route_for_predicate(new ByUri('/2022-04-madonna'))
+		);
+	}
+
 	/**
 	 * @return Route[]
 	 */

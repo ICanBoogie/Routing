@@ -140,12 +140,11 @@ final class RouteCollection implements IteratorAggregate, Countable, MutableRout
 		 *
 		 * @param Route[] $routes
 		 */
-		$map_dynamic = function (iterable $routes) use ($path, &$path_params): ?Route {
+		$map_dynamic = function (iterable $routes) use ($path, $method, &$path_params): ?Route {
 			foreach ($routes as $route) {
 				$pattern = $route->pattern;
-				$via = $route->methods;
 
-				if (!$route->method_matches($via) || !$pattern->matches($path, $path_params)) {
+				if (!$route->method_matches($method) || !$pattern->matches($path, $path_params)) {
 					continue;
 				}
 
