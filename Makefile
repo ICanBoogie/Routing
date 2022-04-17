@@ -41,15 +41,6 @@ lint:
 	@#phpcs -s
 	@vendor/bin/phpstan
 
-.PHONY: doc
-doc: vendor
-	@mkdir -p build/docs
-	@apigen generate \
-	--source lib \
-	--destination build/docs/ \
-	--title "$(PACKAGE_NAME)" \
-	--template-theme "bootstrap"
-
 .PHONY: clean
 clean:
 	@rm -fR build

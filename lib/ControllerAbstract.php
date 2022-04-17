@@ -23,12 +23,10 @@ use InvalidArgumentException;
 use JsonException;
 
 use function get_class;
-use function ICanBoogie\underscore;
 use function is_array;
 use function is_callable;
 use function is_object;
 use function json_encode;
-use function preg_match;
 use function trigger_error;
 
 use const E_USER_WARNING;
@@ -61,30 +59,12 @@ use const JSON_THROW_ON_ERROR;
  * $this->request
  * ```
  *
- * @property-read string $name The name of the controller.
  * @property-read Request $request The request being dispatched.
- * @property-read Route $respond The respond being dispatched.
+ * @property-read Route $respond The route being dispatched.
  * @property Response $response
  */
 abstract class ControllerAbstract extends Prototyped implements Responder
 {
-	/**
-	 * Return the name of the controller, extracted from its class name.
-	 *
-	 * @return string|null The underscored name of the controller, or `null` if it cannot be
-	 * extracted.
-	 */
-	protected function get_name(): ?string
-	{
-		$controller_class = get_class($this);
-
-		if (preg_match('/(\w+)Controller$/', $controller_class, $matches)) {
-			return underscore($matches[1]);
-		}
-
-		return null;
-	}
-
 	private Request $request;
 
 	protected function get_request(): Request
