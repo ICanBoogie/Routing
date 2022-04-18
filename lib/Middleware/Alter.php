@@ -27,37 +27,37 @@ use function assert;
  */
 final class Alter implements Middleware
 {
-	public function responder(Responder $next): Responder
-	{
-		return new class ($next) implements Responder {
-			public function __construct(
-				private readonly Responder $next
-			) {
-			}
+    public function responder(Responder $next): Responder
+    {
+        return new class ($next) implements Responder {
+            public function __construct(
+                private readonly Responder $next
+            ) {
+            }
 
-			public function respond(Request $request): Response
-			{
-				$route = $this->extract_route($request);
+            public function respond(Request $request): Response
+            {
+                $route = $this->extract_route($request);
 
-				new BeforeRespondEvent($route, $request, $response);
+                new BeforeRespondEvent($route, $request, $response);
 
-				if (!$response) {
-					$response = $this->next->respond($request);
-				}
+                if (!$response) {
+                    $response = $this->next->respond($request);
+                }
 
-				new RespondEvent($route, $request, $response);
+                new RespondEvent($route, $request, $response);
 
-				return $response;
-			}
+                return $response;
+            }
 
-			private function extract_route(Request $request): Route
-			{
-				$route = $request->context->get(Route::class);
+            private function extract_route(Request $request): Route
+            {
+                $route = $request->context->get(Route::class);
 
-				assert($route instanceof Route);
+                assert($route instanceof Route);
 
-				return $route;
-			}
-		};
-	}
+                return $route;
+            }
+        };
+    }
 }

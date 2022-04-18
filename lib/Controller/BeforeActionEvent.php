@@ -22,17 +22,17 @@ use ICanBoogie\Routing\ControllerAbstract;
  */
 class BeforeActionEvent extends Event
 {
-	public const TYPE = 'action:before';
+    public const TYPE = 'action:before';
 
-	/**
-	 * Reference to the result.
-	 */
-	public mixed $result;
+    /**
+     * Reference to the result.
+     */
+    public mixed $result;
 
-	public function __construct(ControllerAbstract $target, mixed &$result)
-	{
-		$this->result = &$result;
+    public function __construct(ControllerAbstract $target, mixed &$result)
+    {
+        $this->result = &$result;
 
-		parent::__construct($target, self::TYPE);
-	}
+        parent::__construct($target, self::TYPE);
+    }
 }

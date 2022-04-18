@@ -17,16 +17,16 @@ use PHPUnit\Framework\TestCase;
 
 class PatternRequiresValuesTest extends TestCase
 {
-	protected function setUp(): void
-	{
-		$this->markTestIncomplete();
-	}
+    protected function setUp(): void
+    {
+        $this->markTestIncomplete();
+    }
 
-	public function test_instance(): void
-	{
-		$pattern = Pattern::from('/:year-:month.html');
-		$instance = new PatternRequiresValues($pattern);
-		$this->assertSame($pattern, $instance->pattern);
-		$this->assertSame(500, $instance->getCode());
-	}
+    public function test_instance(): void
+    {
+        $pattern = Pattern::from('/:year-:month.html');
+        $instance = new PatternRequiresValues($pattern);
+        $this->assertSame($pattern, $instance->pattern);
+        $this->assertSame(500, $instance->getCode());
+    }
 }

@@ -18,8 +18,8 @@ use ICanBoogie\HTTP\Responder;
  */
 interface MutableActionResponderProvider extends ActionResponderProvider
 {
-	/**
-	 * Add a responder for an action.
-	 */
-	public function add_responder(string $action, Responder $responder): void;
+    /**
+     * Add a responder for an action.
+     */
+    public function add_responder(string $action, Responder $responder): void;
 }

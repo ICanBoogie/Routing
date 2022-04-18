@@ -50,267 +50,267 @@ use const PREG_SPLIT_DELIM_CAPTURE;
  */
 final class Pattern
 {
-	private const EXTENDED_CHARACTER_CLASSES = [
+    private const EXTENDED_CHARACTER_CLASSES = [
 
-		'{:uuid:}' => '[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}',
-		'{:sha1:}' => '[a-f0-9]{40}',
+        '{:uuid:}' => '[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}',
+        '{:sha1:}' => '[a-f0-9]{40}',
 
-	];
+    ];
 
-	/**
-	 * Parses a route pattern and returns an array of interleaved paths and parameters, the
-	 * parameter names and the regular expression for the specified pattern.
-	 *
-	 * @return array{ 0: string[], 1: array<string, string>, 2: string }
-	 */
-	private static function parse(string $pattern): array
-	{
-		$catchall = false;
+    /**
+     * Parses a route pattern and returns an array of interleaved paths and parameters, the
+     * parameter names and the regular expression for the specified pattern.
+     *
+     * @return array{ 0: string[], 1: array<string, string>, 2: string }
+     */
+    private static function parse(string $pattern): array
+    {
+        $catchall = false;
 
-		if ($pattern[-1] == '*') {
-			$catchall = true;
-			$pattern = substr($pattern, 0, -1);
-		}
+        if ($pattern[-1] == '*') {
+            $catchall = true;
+            $pattern = substr($pattern, 0, -1);
+        }
 
-		$pattern_extended = strtr($pattern, self::EXTENDED_CHARACTER_CLASSES);
-		$parts = preg_split('#(:\w+|<(\w+:)?([^>]+)>)#', $pattern_extended, -1, PREG_SPLIT_DELIM_CAPTURE);
+        $pattern_extended = strtr($pattern, self::EXTENDED_CHARACTER_CLASSES);
+        $parts = preg_split('#(:\w+|<(\w+:)?([^>]+)>)#', $pattern_extended, -1, PREG_SPLIT_DELIM_CAPTURE);
 
-		if ($parts === false) {
-			throw new InvalidPattern("Unable to parse pattern: $pattern.");
-		}
+        if ($parts === false) {
+            throw new InvalidPattern("Unable to parse pattern: $pattern.");
+        }
 
-		[ $interleaved, $params, $regex ] = self::parse_parts($parts);
+        [ $interleaved, $params, $regex ] = self::parse_parts($parts);
 
-		if ($catchall) {
-			$regex .= '(.*)';
-			$params[] = 'all';
-		}
+        if ($catchall) {
+            $regex .= '(.*)';
+            $params[] = 'all';
+        }
 
-		$regex .= '$#';
+        $regex .= '$#';
 
-		return [ $interleaved, $params, $regex ];
-	}
+        return [ $interleaved, $params, $regex ]; // @phpstan-ignore-line
+    }
 
-	/**
-	 * Parses pattern parts.
-	 *
-	 * @param string[] $parts
-	 *
-	 * @return array{ 0: string|array{ 0: string, 1: string }, 1: string[], 2: string }
-	 */
-	private static function parse_parts(array $parts): array
-	{
-		$regex = '#^';
-		$interleaved = [];
-		$params = [];
-		$n = 0;
+    /**
+     * Parses pattern parts.
+     *
+     * @param string[] $parts
+     *
+     * @return array{ 0: string|array{ 0: string, 1: string }, 1: string[], 2: string }
+     */
+    private static function parse_parts(array $parts): array
+    {
+        $regex = '#^';
+        $interleaved = [];
+        $params = [];
+        $n = 0;
 
-		for ($i = 0, $j = count($parts); $i < $j;) {
-			$part = $parts[$i++];
+        for ($i = 0, $j = count($parts); $i < $j;) {
+            $part = $parts[$i++];
 
-			$regex .= preg_quote($part, '#');
-			$interleaved[] = $part;
+            $regex .= preg_quote($part, '#');
+            $interleaved[] = $part;
 
-			if ($i == $j) {
-				break;
-			}
+            if ($i == $j) {
+                break;
+            }
 
-			$part = $parts[$i++];
+            $part = $parts[$i++];
 
-			if ($part[0] == ':') {
-				$identifier = substr($part, 1);
-				$separator = $parts[$i];
-				$selector = $separator ? '[^/\\' . $separator[0] . ']+' : '[^/]+';
-			} else {
-				$identifier = substr($parts[$i++], 0, -1);
+            if ($part[0] == ':') {
+                $identifier = substr($part, 1);
+                $separator = $parts[$i];
+                $selector = $separator ? '[^/\\' . $separator[0] . ']+' : '[^/]+';
+            } else {
+                $identifier = substr($parts[$i++], 0, -1);
 
-				if (!$identifier) {
-					$identifier = $n++;
-				}
+                if (!$identifier) {
+                    $identifier = $n++;
+                }
 
-				$selector = $parts[$i++];
-			}
+                $selector = $parts[$i++];
+            }
 
-			$regex .= '(' . $selector . ')';
-			$interleaved[] = [ $identifier, $selector ];
-			$params[] = $identifier;
-		}
+            $regex .= '(' . $selector . ')';
+            $interleaved[] = [ $identifier, $selector ];
+            $params[] = $identifier;
+        }
 
-		return [ $interleaved, $params, $regex ]; // @phpstan-ignore-line
-	}
+        return [ $interleaved, $params, $regex ]; // @phpstan-ignore-line
+    }
 
-	/**
-	 * Reads an offset from an array.
-	 *
-	 * @param array<string, mixed> $container
-	 *
-	 * @return mixed
-	 */
-	private static function read_value_from_array(array $container, string $key): mixed
-	{
-		return $container[$key];
-	}
+    /**
+     * Reads an offset from an array.
+     *
+     * @param array<string, mixed> $container
+     *
+     * @return mixed
+     */
+    private static function read_value_from_array(array $container, string $key): mixed
+    {
+        return $container[$key];
+    }
 
-	/**
-	 * Reads a property from an object.
-	 */
-	private static function read_value_from_object(object $container, string $key): mixed
-	{
-		return $container->$key;
-	}
+    /**
+     * Reads a property from an object.
+     */
+    private static function read_value_from_object(object $container, string $key): mixed
+    {
+        return $container->$key;
+    }
 
-	/**
-	 * Checks if the given string is a respond pattern.
-	 */
-	public static function is_pattern(string $pattern): bool
-	{
-		return str_contains($pattern, '<') || str_contains($pattern, ':') || str_contains($pattern, '*');
-	}
+    /**
+     * Checks if the given string is a respond pattern.
+     */
+    public static function is_pattern(string $pattern): bool
+    {
+        return str_contains($pattern, '<') || str_contains($pattern, ':') || str_contains($pattern, '*');
+    }
 
-	/**
-	 * @var array<string, self>
-	 */
-	private static array $instances = [];
+    /**
+     * @var array<string, self>
+     */
+    private static array $instances = [];
 
-	/**
-	 * Creates a {@link Pattern} instance from the specified pattern.
-	 */
-	public static function from(string|self $pattern): self
-	{
-		if ($pattern instanceof self) {
-			return $pattern;
-		}
+    /**
+     * Creates a {@link Pattern} instance from the specified pattern.
+     */
+    public static function from(string|self $pattern): self
+    {
+        if ($pattern instanceof self) {
+            return $pattern;
+        }
 
-		if (!trim($pattern)) {
-			throw new InvalidPattern("Pattern cannot be blank.");
-		}
+        if (!trim($pattern)) {
+            throw new InvalidPattern("Pattern cannot be blank.");
+        }
 
-		return self::$instances[$pattern] ??= new self($pattern);
-	}
+        return self::$instances[$pattern] ??= new self($pattern);
+    }
 
-	/*
-	 * INSTANCE
-	 */
+    /*
+     * INSTANCE
+     */
 
-	readonly public string $pattern;
+    public readonly string $pattern;
 
-	/**
-	 * Interleaved pattern.
-	 *
-	 * @var string[]|string[][]
-	 */
-	readonly public array $interleaved;
+    /**
+     * Interleaved pattern.
+     *
+     * @var string[]|string[][]
+     */
+    public readonly array $interleaved;
 
-	/**
-	 * Params of the pattern.
-	 *
-	 * @var string[]
-	 */
-	readonly public array $params;
+    /**
+     * Params of the pattern.
+     *
+     * @var string[]
+     */
+    public readonly array $params;
 
-	/**
-	 * Regex of the pattern.
-	 */
-	readonly public string $regex;
+    /**
+     * Regex of the pattern.
+     */
+    public readonly string $regex;
 
-	private function __construct(string $pattern)
-	{
-		[ $interleaved, $params, $regex ] = self::parse($pattern);
+    private function __construct(string $pattern)
+    {
+        [ $interleaved, $params, $regex ] = self::parse($pattern);
 
-		$this->pattern = $pattern;
-		$this->interleaved = $interleaved;
-		$this->params = $params;
-		$this->regex = $regex;
-	}
+        $this->pattern = $pattern;
+        $this->interleaved = $interleaved;
+        $this->params = $params;
+        $this->regex = $regex;
+    }
 
-	/**
-	 * Returns the respond pattern specified during construct.
-	 */
-	public function __toString(): string
-	{
-		return $this->pattern;
-	}
+    /**
+     * Returns the respond pattern specified during construct.
+     */
+    public function __toString(): string
+    {
+        return $this->pattern;
+    }
 
-	/**
-	 * Formats a pattern with the specified values.
-	 *
-	 * @param array<string, mixed>|object|null $values The values to format the pattern, either as an array or an
-	 * object. If value is an instance of {@link ToSlug} the `to_slug()` method is used to
-	 * transform the instance into a URL component.
-	 *
-	 * @throws PatternRequiresValues in attempt to format a pattern requiring values without
-	 * providing any.
-	 */
-	public function format(array|object|null $values = null): string
-	{
-		if (!$this->params) {
-			return $this->pattern;
-		}
+    /**
+     * Formats a pattern with the specified values.
+     *
+     * @param array<string, mixed>|object|null $values The values to format the pattern, either as an array or an
+     * object. If value is an instance of {@link ToSlug} the `to_slug()` method is used to
+     * transform the instance into a URL component.
+     *
+     * @throws PatternRequiresValues in attempt to format a pattern requiring values without
+     * providing any.
+     */
+    public function format(array|object|null $values = null): string
+    {
+        if (!$this->params) {
+            return $this->pattern;
+        }
 
-		if (!$values) {
-			throw new PatternRequiresValues($this);
-		}
+        if (!$values) {
+            throw new PatternRequiresValues($this);
+        }
 
-		return $this->format_parts($values);
-	}
+        return $this->format_parts($values);
+    }
 
-	/**
-	 * Formats pattern parts.
-	 *
-	 * @param array<string, mixed>|object $container
-	 *
-	 * @uses read_value_from_array
-	 * @uses read_value_from_object
-	 */
-	private function format_parts(array|object $container): string
-	{
-		$url = '';
-		$method = 'read_value_from_' . (is_array($container) ? 'array' : 'object');
+    /**
+     * Formats pattern parts.
+     *
+     * @param array<string, mixed>|object $container
+     *
+     * @uses read_value_from_array
+     * @uses read_value_from_object
+     */
+    private function format_parts(array|object $container): string
+    {
+        $url = '';
+        $method = 'read_value_from_' . (is_array($container) ? 'array' : 'object');
 
-		foreach ($this->interleaved as $i => $value) {
-			$url .= $i % 2 ? $this->format_part(self::$method($container, $value[0])) : $value;
-		}
+        foreach ($this->interleaved as $i => $value) {
+            $url .= $i % 2 ? $this->format_part(self::$method($container, $value[0])) : $value;
+        }
 
-		return $url;
-	}
+        return $url;
+    }
 
-	/**
-	 * Formats pattern part.
-	 */
-	private function format_part(string|ToSlug $value): string
-	{
-		if ($value instanceof ToSlug) {
-			$value = $value->to_slug();
-		}
+    /**
+     * Formats pattern part.
+     */
+    private function format_part(string|ToSlug $value): string
+    {
+        if ($value instanceof ToSlug) {
+            $value = $value->to_slug();
+        }
 
-		return urlencode($value);
-	}
+        return urlencode($value);
+    }
 
-	/**
-	 * Checks if a pathname matches the pattern.
-	 *
-	 * @param array<string, string> $captured The parameters captured from the pathname.
-	 */
-	public function matches(string $pathname, array &$captured = null): bool
-	{
-		$captured = [];
+    /**
+     * Checks if a pathname matches the pattern.
+     *
+     * @param array<string, string> $captured The parameters captured from the pathname.
+     */
+    public function matches(string $pathname, array &$captured = null): bool
+    {
+        $captured = [];
 
-		#
-		# `params` is empty if the pattern is a plain string, thus we can simply compare strings.
-		#
+        #
+        # `params` is empty if the pattern is a plain string, thus we can simply compare strings.
+        #
 
-		if (!$this->params) {
-			return $pathname === $this->pattern;
-		}
+        if (!$this->params) {
+            return $pathname === $this->pattern;
+        }
 
-		if (!preg_match($this->regex, $pathname, $matches)) {
-			return false;
-		}
+        if (!preg_match($this->regex, $pathname, $matches)) {
+            return false;
+        }
 
-		array_shift($matches);
+        array_shift($matches);
 
-		$captured = array_combine($this->params, $matches);
+        $captured = array_combine($this->params, $matches);
 
-		return true;
-	}
+        return true;
+    }
 }

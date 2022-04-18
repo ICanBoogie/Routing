@@ -29,42 +29,42 @@ use function assert;
  */
 final class Rescue implements Middleware
 {
-	public function responder(Responder $next): Responder
-	{
-		return new class($next) implements Responder {
-			public function __construct(
-				private readonly Responder $next
-			) {
-			}
+    public function responder(Responder $next): Responder
+    {
+        return new class ($next) implements Responder {
+            public function __construct(
+                private readonly Responder $next
+            ) {
+            }
 
-			public function respond(Request $request): Response
-			{
-				try {
-					return $this->next->respond($request);
-				} catch (Throwable $e) {
-					return $this->rescue($request, $e);
-				}
-			}
+            public function respond(Request $request): Response
+            {
+                try {
+                    return $this->next->respond($request);
+                } catch (Throwable $e) {
+                    return $this->rescue($request, $e);
+                }
+            }
 
-			/**
-			 * @throws Throwable
-			 */
-			private function rescue(Request $request, Throwable $exception): Response
-			{
-				$route = $request->context->find(Route::class);
+            /**
+             * @throws Throwable
+             */
+            private function rescue(Request $request, Throwable $exception): Response
+            {
+                $route = $request->context->find(Route::class);
 
-				if ($route) {
-					assert($route instanceof Route);
+                if ($route) {
+                    assert($route instanceof Route);
 
-					new RescueEvent($route, $request, $exception, $response);
+                    new RescueEvent($route, $request, $exception, $response);
 
-					if ($response) {
-						return $response;
-					}
-				}
+                    if ($response) {
+                        return $response;
+                    }
+                }
 
-				throw $exception;
-			}
-		};
-	}
+                throw $exception;
+            }
+        };
+    }
 }

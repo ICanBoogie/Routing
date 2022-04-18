@@ -25,17 +25,17 @@ use ICanBoogie\Routing\Route;
  */
 final class BeforeRespondEvent extends Event
 {
-	public const TYPE = 'respond:before';
+    public const TYPE = 'respond:before';
 
-	public ?Response $response;
+    public ?Response $response;
 
-	public function __construct(
-		Route $target,
-		public readonly Request $request,
-		Response &$response = null
-	) {
-		$this->response = &$response;
+    public function __construct(
+        Route $target,
+        public readonly Request $request,
+        Response &$response = null
+    ) {
+        $this->response = &$response;
 
-		parent::__construct($target, self::TYPE);
-	}
+        parent::__construct($target, self::TYPE);
+    }
 }

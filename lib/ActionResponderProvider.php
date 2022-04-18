@@ -18,5 +18,5 @@ use ICanBoogie\HTTP\Responder;
  */
 interface ActionResponderProvider
 {
-	public function responder_for_action(string $action): ?Responder;
+    public function responder_for_action(string $action): ?Responder;
 }

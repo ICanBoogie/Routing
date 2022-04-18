@@ -19,11 +19,11 @@ use Throwable;
  */
 class PatternRequiresValues extends InvalidArgumentException implements Exception
 {
-	public function __construct(
-		public readonly Pattern $pattern,
-		string $message = "The pattern requires values to be formatted.",
-		Throwable $previous = null
-	) {
-		parent::__construct($message, 0, $previous);
-	}
+    public function __construct(
+        public readonly Pattern $pattern,
+        string $message = "The pattern requires values to be formatted.",
+        Throwable $previous = null
+    ) {
+        parent::__construct($message, 0, $previous);
+    }
 }

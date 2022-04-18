@@ -16,16 +16,16 @@ use PHPUnit\Framework\TestCase;
 
 class RouteNotDefinedTest extends TestCase
 {
-	protected function setUp(): void
-	{
-		$this->markTestIncomplete();
-	}
+    protected function setUp(): void
+    {
+        $this->markTestIncomplete();
+    }
 
-	public function test_instance(): void
-	{
-		$id = 'id' . uniqid();
-		$instance = new RouteNotDefined($id);
-		$this->assertSame($id, $instance->id);
-		$this->assertSame(404, $instance->getCode());
-	}
+    public function test_instance(): void
+    {
+        $id = 'id' . uniqid();
+        $instance = new RouteNotDefined($id);
+        $this->assertSame($id, $instance->id);
+        $this->assertSame(404, $instance->getCode());
+    }
 }

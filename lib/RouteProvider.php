@@ -13,18 +13,18 @@ namespace ICanBoogie\Routing;
 
 interface RouteProvider
 {
-	/**
-	 * Provides the route matching the specified predicate.
-	 *
-	 * You can provide you own predicate, or use one provided:
-	 *
-	 * - {@link RouteProvider\ByAction}
-	 * - {@link RouteProvider\ById}
-	 * - {@link RouteProvider\ByUri}
-	 *
-	 * **Note:** Providers might optimize predicate matching and might skip the callable.
-	 *
-	 * @phpstan-param (callable(Route): bool) $predicate
-	 */
-	public function route_for_predicate(callable $predicate): ?Route;
+    /**
+     * Provides the route matching the specified predicate.
+     *
+     * The following predicates are builtin:
+     *
+     * - {@link RouteProvider\ByAction}
+     * - {@link RouteProvider\ById}
+     * - {@link RouteProvider\ByUri}
+     *
+     * **Note:** Providers might optimize predicate matching and might skip the callable.
+     *
+     * @phpstan-param (callable(Route): bool) $predicate
+     */
+    public function route_for_predicate(callable $predicate): ?Route;
 }

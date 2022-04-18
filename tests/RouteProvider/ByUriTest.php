@@ -17,23 +17,23 @@ use PHPUnit\Framework\TestCase;
 
 final class ByUriTest extends TestCase
 {
-	public function test_predicate(): void
-	{
-		$predicate = new ByUri('/articles/123?order=-date&nid=456');
+    public function test_predicate(): void
+    {
+        $predicate = new ByUri('/articles/123?order=-date&nid=456');
 
-		$this->assertFalse($predicate(new Route('/', 'article:home')));
-		$this->assertEquals('/articles/123', $predicate->path);
-		$this->assertEmpty($predicate->path_params);
-		$this->assertEquals([ 'order' => '-date', 'nid' => '456' ], $predicate->query_params);
+        $this->assertFalse($predicate(new Route('/', 'article:home')));
+        $this->assertEquals('/articles/123', $predicate->path);
+        $this->assertEmpty($predicate->path_params);
+        $this->assertEquals([ 'order' => '-date', 'nid' => '456' ], $predicate->query_params);
 
-		$this->assertFalse($predicate(new Route('/articles', 'article:show')));
-		$this->assertEquals('/articles/123', $predicate->path);
-		$this->assertEmpty($predicate->path_params);
-		$this->assertEquals([ 'order' => '-date', 'nid' => '456' ], $predicate->query_params);
+        $this->assertFalse($predicate(new Route('/articles', 'article:show')));
+        $this->assertEquals('/articles/123', $predicate->path);
+        $this->assertEmpty($predicate->path_params);
+        $this->assertEquals([ 'order' => '-date', 'nid' => '456' ], $predicate->query_params);
 
-		$this->assertTrue($predicate(new Route('/articles/<nid:\d+>', 'article:list')));
-		$this->assertEquals('/articles/123', $predicate->path);
-		$this->assertEquals([ 'nid' => '123' ], $predicate->path_params);
-		$this->assertEquals([ 'order' => '-date' ], $predicate->query_params);
-	}
+        $this->assertTrue($predicate(new Route('/articles/<nid:\d+>', 'article:list')));
+        $this->assertEquals('/articles/123', $predicate->path);
+        $this->assertEquals([ 'nid' => '123' ], $predicate->path_params);
+        $this->assertEquals([ 'order' => '-date' ], $predicate->query_params);
+    }
 }

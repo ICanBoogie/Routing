@@ -18,8 +18,8 @@ namespace ICanBoogie\Routing;
  */
 interface ToSlug
 {
-	/**
-	 * Returns a slug representation of the instance.
-	 */
-	public function to_slug(): string;
+    /**
+     * Returns a slug representation of the instance.
+     */
+    public function to_slug(): string;
 }

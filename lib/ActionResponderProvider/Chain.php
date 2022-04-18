@@ -19,26 +19,26 @@ use ICanBoogie\Routing\ActionResponderProvider;
  */
 final class Chain implements ActionResponderProvider
 {
-	/**
-	 * @var ActionResponderProvider[]
-	 */
-	readonly private iterable $providers;
+    /**
+     * @var ActionResponderProvider[]
+     */
+    private readonly iterable $providers;
 
-	public function __construct(ActionResponderProvider ...$providers)
-	{
-		$this->providers = $providers;
-	}
+    public function __construct(ActionResponderProvider ...$providers)
+    {
+        $this->providers = $providers;
+    }
 
-	public function responder_for_action(string $action): ?Responder
-	{
-		foreach ($this->providers as $provider) {
-			$responder = $provider->responder_for_action($action);
+    public function responder_for_action(string $action): ?Responder
+    {
+        foreach ($this->providers as $provider) {
+            $responder = $provider->responder_for_action($action);
 
-			if ($responder) {
-				return $responder;
-			}
-		}
+            if ($responder) {
+                return $responder;
+            }
+        }
 
-		return null;
-	}
+        return null;
+    }
 }

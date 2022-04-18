@@ -18,13 +18,13 @@ use ICanBoogie\Routing\Route;
  */
 final class ById
 {
-	public function __construct(
-		public readonly string $id
-	) {
-	}
+    public function __construct(
+        public readonly string $id
+    ) {
+    }
 
-	public function __invoke(Route $route): bool
-	{
-		return $route->id === $this->id;
-	}
+    public function __invoke(Route $route): bool
+    {
+        return $route->id === $this->id;
+    }
 }

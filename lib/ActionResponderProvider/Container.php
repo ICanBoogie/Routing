@@ -20,24 +20,24 @@ use Psr\Container\ContainerInterface;
  */
 final class Container implements ActionResponderProvider
 {
-	/**
-	 * @param array<string, string> $aliases
-	 *     Aliases can be used to map multiple actions to the same service.
-	 */
-	public function __construct(
-		private readonly ContainerInterface $container,
-		private readonly array $aliases = [],
-	) {
-	}
+    /**
+     * @param array<string, string> $aliases
+     *     Aliases can be used to map multiple actions to the same service.
+     */
+    public function __construct(
+        private readonly ContainerInterface $container,
+        private readonly array $aliases = [],
+    ) {
+    }
 
-	public function responder_for_action(string $action): ?Responder
-	{
-		$action = $this->aliases[$action] ?? $action;
+    public function responder_for_action(string $action): ?Responder
+    {
+        $action = $this->aliases[$action] ?? $action;
 
-		if (!$this->container->has($action)) {
-			return null;
-		}
+        if (!$this->container->has($action)) {
+            return null;
+        }
 
-		return $this->container->get($action); // @phpstan-ignore-line
-	}
+        return $this->container->get($action); // @phpstan-ignore-line
+    }
 }

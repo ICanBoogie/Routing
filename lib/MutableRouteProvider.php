@@ -16,10 +16,10 @@ namespace ICanBoogie\Routing;
  */
 interface MutableRouteProvider extends RouteProvider
 {
-	/**
-	 * Add routes to the provider.
-	 *
-	 * @return $this
-	 */
-	public function add_routes(Route ...$route): self;
+    /**
+     * Add routes to the provider.
+     *
+     * @return $this
+     */
+    public function add_routes(Route ...$route): self;
 }

@@ -19,45 +19,45 @@ use Psr\Container\ContainerInterface;
 
 final class ContainerTest extends TestCase
 {
-	use ProphecyTrait;
+    use ProphecyTrait;
 
-	public function test_provides_responder(): void
-	{
-		$responder = $this->prophesize(Responder::class)->reveal();
+    public function test_provides_responder(): void
+    {
+        $responder = $this->prophesize(Responder::class)->reveal();
 
-		$container = $this->prophesize(ContainerInterface::class);
-		$container->has($action_ok = 'article:list')
-			->willReturn(true);
-		$container->has($action_ko = 'article:show')
-			->willReturn(false);
-		$container->get($action_ok)
-			->willReturn($responder);
+        $container = $this->prophesize(ContainerInterface::class);
+        $container->has($action_ok = 'article:list')
+            ->willReturn(true);
+        $container->has($action_ko = 'article:show')
+            ->willReturn(false);
+        $container->get($action_ok)
+            ->willReturn($responder);
 
-		$provider = new Container($container->reveal());
+        $provider = new Container($container->reveal());
 
-		$this->assertSame($responder, $provider->responder_for_action($action_ok));
-		$this->assertNull($provider->responder_for_action($action_ko));
-	}
+        $this->assertSame($responder, $provider->responder_for_action($action_ok));
+        $this->assertNull($provider->responder_for_action($action_ko));
+    }
 
-	public function test_provides_responder_with_aliases(): void
-	{
-		$responder = $this->prophesize(Responder::class)->reveal();
+    public function test_provides_responder_with_aliases(): void
+    {
+        $responder = $this->prophesize(Responder::class)->reveal();
 
-		$container = $this->prophesize(ContainerInterface::class);
-		$container->has($idOk = 'controller.articles')
-			->willReturn(true);
-		$container->has($idKo = 'something:else')
-			->willReturn(false);
-		$container->get($idOk)
-			->willReturn($responder);
+        $container = $this->prophesize(ContainerInterface::class);
+        $container->has($idOk = 'controller.articles')
+            ->willReturn(true);
+        $container->has($idKo = 'something:else')
+            ->willReturn(false);
+        $container->get($idOk)
+            ->willReturn($responder);
 
-		$provider = new Container($container->reveal(), [
-			'articles:show' => 'controller.articles',
-			'articles:list' => 'controller.articles',
-		]);
+        $provider = new Container($container->reveal(), [
+            'articles:show' => 'controller.articles',
+            'articles:list' => 'controller.articles',
+        ]);
 
-		$this->assertSame($responder, $provider->responder_for_action('articles:show'));
-		$this->assertSame($responder, $provider->responder_for_action('articles:list'));
-		$this->assertNull($provider->responder_for_action($idKo));
-	}
+        $this->assertSame($responder, $provider->responder_for_action('articles:show'));
+        $this->assertSame($responder, $provider->responder_for_action('articles:list'));
+        $this->assertNull($provider->responder_for_action($idKo));
+    }
 }

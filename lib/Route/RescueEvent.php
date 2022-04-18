@@ -25,27 +25,27 @@ use Throwable;
  */
 final class RescueEvent extends Event
 {
-	public const TYPE = 'rescue';
+    public const TYPE = 'rescue';
 
-	/**
-	 * Reference to the exception to throw if the rescue fails.
-	 */
-	public Throwable $exception;
+    /**
+     * Reference to the exception to throw if the rescue fails.
+     */
+    public Throwable $exception;
 
-	/**
-	 * Reference to the response that rescue the respond.
-	 */
-	public ?Response $response;
+    /**
+     * Reference to the response that rescue the respond.
+     */
+    public ?Response $response;
 
-	public function __construct(
-		Route $target,
-		public readonly Request $request,
-		Throwable &$exception,
-		?Response &$response
-	) {
-		$this->exception = &$exception;
-		$this->response = &$response;
+    public function __construct(
+        Route $target,
+        public readonly Request $request,
+        Throwable &$exception,
+        ?Response &$response
+    ) {
+        $this->exception = &$exception;
+        $this->response = &$response;
 
-		parent::__construct($target, self::TYPE);
-	}
+        parent::__construct($target, self::TYPE);
+    }
 }

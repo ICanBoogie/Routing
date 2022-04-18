@@ -19,32 +19,32 @@ use Prophecy\PhpUnit\ProphecyTrait;
 
 final class ChainTest extends TestCase
 {
-	use ProphecyTrait;
+    use ProphecyTrait;
 
-	public function test_responder_for_action(): void
-	{
-		$action = 'article:show';
-		$responder = $this->prophesize(Responder::class)->reveal();
+    public function test_responder_for_action(): void
+    {
+        $action = 'article:show';
+        $responder = $this->prophesize(Responder::class)->reveal();
 
-		$rp1 = $this->prophesize(ActionResponderProvider::class);
-		$rp1->responder_for_action($action)->willReturn(null);
+        $rp1 = $this->prophesize(ActionResponderProvider::class);
+        $rp1->responder_for_action($action)->willReturn(null);
 
-		$rp2 = $this->prophesize(ActionResponderProvider::class);
-		$rp2->responder_for_action($action)->willReturn(null);
+        $rp2 = $this->prophesize(ActionResponderProvider::class);
+        $rp2->responder_for_action($action)->willReturn(null);
 
-		$rp3 = $this->prophesize(ActionResponderProvider::class);
-		$rp3->responder_for_action($action)->willReturn($responder);
+        $rp3 = $this->prophesize(ActionResponderProvider::class);
+        $rp3->responder_for_action($action)->willReturn($responder);
 
-		$rp4 = $this->prophesize(ActionResponderProvider::class);
-		$rp4->responder_for_action($action)->shouldNotBeCalled();
+        $rp4 = $this->prophesize(ActionResponderProvider::class);
+        $rp4->responder_for_action($action)->shouldNotBeCalled();
 
-		$chain = new Chain(
-			$rp1->reveal(),
-			$rp2->reveal(),
-			$rp3->reveal(),
-			$rp4->reveal(),
-		);
+        $chain = new Chain(
+            $rp1->reveal(),
+            $rp2->reveal(),
+            $rp3->reveal(),
+            $rp4->reveal(),
+        );
 
-		$this->assertSame($responder, $chain->responder_for_action($action));
-	}
+        $this->assertSame($responder, $chain->responder_for_action($action));
+    }
 }

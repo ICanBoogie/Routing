@@ -32,121 +32,121 @@ use function uniqid;
 
 final class RequestResponderProviderTest extends TestCase
 {
-	use ProphecyTrait;
+    use ProphecyTrait;
 
-	/**
-	 * @var ObjectProphecy<RouteProvider>
-	 */
-	private ObjectProphecy $routes;
+    /**
+     * @var ObjectProphecy<RouteProvider>
+     */
+    private ObjectProphecy $routes;
 
-	/**
-	 * @var ObjectProphecy<ActionResponderProvider>
-	 */
-	private ObjectProphecy $responders;
-	private Request $request;
+    /**
+     * @var ObjectProphecy<ActionResponderProvider>
+     */
+    private ObjectProphecy $responders;
+    private Request $request;
 
-	protected function setUp(): void
-	{
-		parent::setUp();
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-		$this->routes = $this->prophesize(RouteProvider::class);
-		$this->responders = $this->prophesize(ActionResponderProvider::class);
-		$this->request = Request::from([
-			Request::OPTION_URI => '/' . uniqid(),
-			Request::OPTION_METHOD => RequestMethod::METHOD_POST,
-		]);
-	}
+        $this->routes = $this->prophesize(RouteProvider::class);
+        $this->responders = $this->prophesize(ActionResponderProvider::class);
+        $this->request = Request::from([
+            Request::OPTION_URI => '/' . uniqid(),
+            Request::OPTION_METHOD => RequestMethod::METHOD_POST,
+        ]);
+    }
 
-	public function test_unsupported_method(): void
-	{
-		$request = $this->request;
+    public function test_unsupported_method(): void
+    {
+        $request = $this->request;
 
-		$this->routes->route_for_predicate(new ByUri($request->uri, $request->method))
-			->willReturn(null);
-		$this->routes->route_for_predicate(new ByUri($request->uri))
-			->willReturn(new Route('/', 'action'));
+        $this->routes->route_for_predicate(new ByUri($request->uri, $request->method))
+            ->willReturn(null);
+        $this->routes->route_for_predicate(new ByUri($request->uri))
+            ->willReturn(new Route('/', 'action'));
 
-		$stu = $this->makeSTU();
+        $stu = $this->makeSTU();
 
-		$this->expectException(MethodNotAllowed::class);
-		$this->expectExceptionMessage("Method not allowed: POST.");
+        $this->expectException(MethodNotAllowed::class);
+        $this->expectExceptionMessage("Method not allowed: POST.");
 
-		$stu->responder_for_request($request);
-	}
+        $stu->responder_for_request($request);
+    }
 
-	public function test_route_not_found(): void
-	{
-		$request = $this->request;
+    public function test_route_not_found(): void
+    {
+        $request = $this->request;
 
-		$this->routes->route_for_predicate(new ByUri($request->uri, $request->method))
-			->willReturn(null);
-		$this->routes->route_for_predicate(new ByUri($request->uri))
-			->willReturn(null);
+        $this->routes->route_for_predicate(new ByUri($request->uri, $request->method))
+            ->willReturn(null);
+        $this->routes->route_for_predicate(new ByUri($request->uri))
+            ->willReturn(null);
 
-		$stu = $this->makeSTU();
+        $stu = $this->makeSTU();
 
-		$this->assertNull($stu->responder_for_request($this->request));
-	}
+        $this->assertNull($stu->responder_for_request($this->request));
+    }
 
-	public function test_no_responder_for_route(): void
-	{
-		$request = $this->request;
+    public function test_no_responder_for_route(): void
+    {
+        $request = $this->request;
 
-		$this->routes->route_for_predicate(new ByUri($request->uri, $request->method))
-			->willReturn(new Route('/', $action = 'articles:create'));
+        $this->routes->route_for_predicate(new ByUri($request->uri, $request->method))
+            ->willReturn(new Route('/', $action = 'articles:create'));
 
-		$this->responders->responder_for_action($action)
-			->willReturn(null);
+        $this->responders->responder_for_action($action)
+            ->willReturn(null);
 
-		$this->expectException(NoResponder::class);
-		$this->expectExceptionMessage("No responder for action: articles:create.");
+        $this->expectException(NoResponder::class);
+        $this->expectExceptionMessage("No responder for action: articles:create.");
 
-		$this->makeSTU()->responder_for_request($this->request);
-	}
+        $this->makeSTU()->responder_for_request($this->request);
+    }
 
-	/**
-	 * @throws Throwable
-	 */
-	public function test_returns_responder(): void
-	{
-		$request = $this->request;
-		$response = new Response();
-		$route = new Route('/', $action = 'articles:create');
-		$path_params = [ 'id' => uniqid() ];
+    /**
+     * @throws Throwable
+     */
+    public function test_returns_responder(): void
+    {
+        $request = $this->request;
+        $response = new Response();
+        $route = new Route('/', $action = 'articles:create');
+        $path_params = [ 'id' => uniqid() ];
 
-		$responder = $this->prophesize(Responder::class);
-		$responder->respond(
-			Argument::that(function (Request $r) use ($request, $route, $path_params): bool {
-				$this->assertSame($request, $r);
-				$this->assertSame($route, $r->context->get(Route::class));
-				$this->assertSame($path_params, $r->path_params);
-				$this->assertSame($path_params, $r->params);
-				return true;
-			})
-		)->willReturn($response);
+        $responder = $this->prophesize(Responder::class);
+        $responder->respond(
+            Argument::that(function (Request $r) use ($request, $route, $path_params): bool {
+                $this->assertSame($request, $r);
+                $this->assertSame($route, $r->context->get(Route::class));
+                $this->assertSame($path_params, $r->path_params);
+                $this->assertSame($path_params, $r->params);
+                return true;
+            })
+        )->willReturn($response);
 
-		$this->routes->route_for_predicate(
-			Argument::that(function (ByUri $predicate) use ($path_params): bool {
-				$predicate->path_params = $path_params;
+        $this->routes->route_for_predicate(
+            Argument::that(function (ByUri $predicate) use ($path_params): bool {
+                $predicate->path_params = $path_params;
 
-				return true;
-			})
-		)
-			->willReturn($route);
+                return true;
+            })
+        )
+            ->willReturn($route);
 
-		$this->responders->responder_for_action($action)
-			->willReturn($responder);
+        $this->responders->responder_for_action($action)
+            ->willReturn($responder);
 
-		$r = $this->makeSTU()->responder_for_request($this->request);
+        $r = $this->makeSTU()->responder_for_request($this->request);
 
-		$this->assertSame($response, $r?->respond($request));
-	}
+        $this->assertSame($response, $r?->respond($request));
+    }
 
-	private function makeSTU(): \ICanBoogie\HTTP\ResponderProvider
-	{
-		return new RequestResponderProvider(
-			$this->routes->reveal(),
-			$this->responders->reveal(),
-		);
-	}
+    private function makeSTU(): \ICanBoogie\HTTP\ResponderProvider
+    {
+        return new RequestResponderProvider(
+            $this->routes->reveal(),
+            $this->responders->reveal(),
+        );
+    }
 }

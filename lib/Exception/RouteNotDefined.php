@@ -20,16 +20,16 @@ use Throwable;
  */
 class RouteNotDefined extends \Exception implements Exception
 {
-	public function __construct(
-		public readonly string $id,
-		int $code = ResponseStatus::STATUS_NOT_FOUND,
-		Throwable $previous = null
-	) {
-		parent::__construct($this->format_message($id), $code, $previous);
-	}
+    public function __construct(
+        public readonly string $id,
+        int $code = ResponseStatus::STATUS_NOT_FOUND,
+        Throwable $previous = null
+    ) {
+        parent::__construct($this->format_message($id), $code, $previous);
+    }
 
-	private function format_message(string $id): string
-	{
-		return "The route `$id` is not defined.";
-	}
+    private function format_message(string $id): string
+    {
+        return "The route `$id` is not defined.";
+    }
 }

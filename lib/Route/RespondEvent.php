@@ -23,17 +23,17 @@ use ICanBoogie\Routing\Route;
  */
 final class RespondEvent extends Event
 {
-	public const TYPE = 'respond';
+    public const TYPE = 'respond';
 
-	public ?Response $response;
+    public ?Response $response;
 
-	public function __construct(
-		Route $target,
-		public readonly Request $request,
-		Response &$response = null
-	) {
-		$this->response = &$response;
+    public function __construct(
+        Route $target,
+        public readonly Request $request,
+        Response &$response = null
+    ) {
+        $this->response = &$response;
 
-		parent::__construct($target, self::TYPE);
-	}
+        parent::__construct($target, self::TYPE);
+    }
 }

@@ -634,32 +634,13 @@ Routing\Helpers::patch('decontextualize', function($str) use($path) {
 
 
 
+## Continuous Integration
 
+The project is continuously tested by [GitHub actions](https://github.com/ICanBoogie/Routing/actions).
 
-## Requirements
-
-The package requires PHP 8.0 or later.
-
-
-
-
-
-## Installation
-
-```bash
-composer require icanboogie/routing
-```
-
-
-
-
-
-## Documentation
-
-The package is documented as part of the [ICanBoogie][] framework
-[documentation][]. You can generate the documentation for the package and its dependencies with the `make doc` command. The documentation is generated in the `build/docs` directory. [ApiGen](http://apigen.org/) is required. The directory can later be cleaned with the `make clean` command.
-
-
+[![Tests](https://github.com/ICanBoogie/Routing/workflows/test/badge.svg?branch=master)](https://github.com/ICanBoogie/Routing/actions?query=workflow%3Atest)
+[![Static Analysis](https://github.com/ICanBoogie/Routing/workflows/static-analysis/badge.svg?branch=master)](https://github.com/ICanBoogie/Routing/actions?query=workflow%3Astatic-analysis)
+[![Code Style](https://github.com/ICanBoogie/Routing/workflows/code-style/badge.svg?branch=master)](https://github.com/ICanBoogie/Routing/actions?query=workflow%3Acode-style)
 
 
 

@@ -17,14 +17,14 @@ use PHPUnit\Framework\TestCase;
 
 final class UrlGeneratorTest extends TestCase
 {
-	public function test_generate_url(): void
-	{
-		$routes = new RouteCollection();
-		$routes->resource('articles');
+    public function test_generate_url(): void
+    {
+        $routes = new RouteCollection();
+        $routes->resource('articles');
 
-		$generator = new UrlGenerator($routes);
-		$url = $generator->generate_url('articles:show', [ 'id' => 123 ]);
+        $generator = new UrlGenerator($routes);
+        $url = $generator->generate_url('articles:show', [ 'id' => 123 ]);
 
-		$this->assertEquals("/articles/123", $url);
-	}
+        $this->assertEquals("/articles/123", $url);
+    }
 }

@@ -20,20 +20,20 @@ use ICanBoogie\Routing\ActionResponderProvider;
  */
 final class WithMiddleware implements ActionResponderProvider
 {
-	public function __construct(
-		private readonly ActionResponderProvider $next,
-		private readonly MiddlewareCollection $middleware,
-	) {
-	}
+    public function __construct(
+        private readonly ActionResponderProvider $next,
+        private readonly MiddlewareCollection $middleware,
+    ) {
+    }
 
-	public function responder_for_action(string $action): ?Responder
-	{
-		$responder = $this->next->responder_for_action($action);
+    public function responder_for_action(string $action): ?Responder
+    {
+        $responder = $this->next->responder_for_action($action);
 
-		if (!$responder) {
-			return null;
-		}
+        if (!$responder) {
+            return null;
+        }
 
-		return $this->middleware->chain($responder);
-	}
+        return $this->middleware->chain($responder);
+    }
 }

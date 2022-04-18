@@ -19,5 +19,4 @@ use LogicException;
  */
 class ActionNotDefined extends LogicException implements Exception
 {
-
 }

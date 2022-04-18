@@ -18,28 +18,28 @@ use function is_string;
 
 class UrlGenerator
 {
-	public function __construct(
-		private readonly RouteProvider $routes
-	) {
-	}
+    public function __construct(
+        private readonly RouteProvider $routes
+    ) {
+    }
 
-	/**
-	 * @phpstan-param string|(callable(Route): bool) $predicate
-	 *
-	 * @param array<string, mixed>|object|null $params
-	 *     Parameters that reference placeholders in the route pattern.
-	 *
-	 * @return string
-	 */
-	public function generate_url(string|callable $predicate, array|object|null $params = null): string
-	{
-		if (is_string($predicate)) {
-			$predicate = new ById($predicate);
-		}
+    /**
+     * @phpstan-param string|(callable(Route): bool) $predicate
+     *
+     * @param array<string, mixed>|object|null $params
+     *     Parameters that reference placeholders in the route pattern.
+     *
+     * @return string
+     */
+    public function generate_url(string|callable $predicate, array|object|null $params = null): string
+    {
+        if (is_string($predicate)) {
+            $predicate = new ById($predicate);
+        }
 
-		$route = $this->routes->route_for_predicate($predicate)
-			?? throw new RouteNotFound(predicate: $predicate);
+        $route = $this->routes->route_for_predicate($predicate)
+            ?? throw new RouteNotFound(predicate: $predicate);
 
-		return $route->pattern->format($params);
-	}
+        return $route->pattern->format($params);
+    }
 }

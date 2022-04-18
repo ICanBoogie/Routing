@@ -21,72 +21,71 @@ use TypeError;
 
 class DispatchEventTest extends TestCase
 {
-	private $dispatcher;
-	private $route;
+    private $dispatcher;
+    private $route;
 
-	protected function setUp(): void
-	{
-		$this->markTestIncomplete();
+    protected function setUp(): void
+    {
+        $this->markTestIncomplete();
 
-		$this->dispatcher = $this
-			->getMockBuilder(RouteDispatcher::class)
-			->disableOriginalConstructor()
-			->getMock();
+        $this->dispatcher = $this
+            ->getMockBuilder(RouteDispatcher::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
-		$this->route = $this
-			->getMockBuilder(Route::class)
-			->disableOriginalConstructor()
-			->getMock();
+        $this->route = $this
+            ->getMockBuilder(Route::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+    }
 
-	}
+    public function test_invalid_response_type()
+    {
+        /* @var $dispatcher RouteDispatcher */
+        /* @var $route Route */
 
-	public function test_invalid_response_type()
-	{
-		/* @var $dispatcher RouteDispatcher */
-		/* @var $route Route */
+        $dispatcher = $this->dispatcher;
+        $route = $this->route;
+        $request = Request::from('/');
 
-		$dispatcher = $this->dispatcher;
-		$route = $this->route;
-		$request = Request::from('/');
+        $this->expectException(TypeError::class);
 
-		$this->expectException(TypeError::class);
+        DispatchEvent::from([
 
-		DispatchEvent::from([
+            'target' => $dispatcher,
+            'route' => $route,
+            'request' => $request,
+            'response' => &$dispatcher
 
-			'target' => $dispatcher,
-			'route' => $route,
-			'request' => $request,
-			'response' => &$dispatcher
+        ]);
+    }
 
-		]);
-	}
+    public function test_response_reference()
+    {
+        /* @var $dispatcher RouteDispatcher */
+        /* @var $route Route */
 
-	public function test_response_reference()
-	{
-		/* @var $dispatcher RouteDispatcher */
-		/* @var $route Route */
+        $dispatcher = $this->dispatcher;
+        $route = $this->route;
+        $request = Request::from('/');
+        $response = null;
+        $expected_response = new Response();
 
-		$dispatcher = $this->dispatcher;
-		$route = $this->route;
-		$request = Request::from('/');
-		$response = null;
-		$expected_response = new Response();
+        /* @var $event DispatchEvent */
 
-		/* @var $event DispatchEvent */
+        $event = DispatchEvent::from([
 
-		$event = DispatchEvent::from([
+            'target' => $dispatcher,
+            'route' => $route,
+            'request' => $request,
+            'response' => &$response
 
-			'target' => $dispatcher,
-			'route' => $route,
-			'request' => $request,
-			'response' => &$response
+        ]);
 
-		]);
-
-		$this->assertSame($route, $event->route);
-		$this->assertSame($request, $event->request);
-		$this->assertNull($event->response);
-		$event->response = $expected_response;
-		$this->assertSame($expected_response, $event->response);
-	}
+        $this->assertSame($route, $event->route);
+        $this->assertSame($request, $event->request);
+        $this->assertNull($event->response);
+        $event->response = $expected_response;
+        $this->assertSame($expected_response, $event->response);
+    }
 }
