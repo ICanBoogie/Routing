@@ -18,8 +18,10 @@ use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Route;
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
+use Throwable;
 
-use function ICanBoogie\get_events;
+use function ICanBoogie\emit;
 
 final class RescueEventTest extends TestCase
 {
@@ -27,6 +29,7 @@ final class RescueEventTest extends TestCase
     private Request $request;
     private Response $response;
     private Exception $exception;
+    private EventCollection $events;
 
     protected function setUp(): void
     {
@@ -36,22 +39,22 @@ final class RescueEventTest extends TestCase
         $this->request = Request::from();
         $this->response = new Response();
         $this->exception = new Exception();
+        $this->events = new EventCollection();
 
-        EventCollectionProvider::define(function () {
-            static $events;
-
-            return $events ??= new EventCollection();
-        });
+        EventCollectionProvider::define(fn() => $this->events);
     }
 
+    /**
+     * @throws Throwable
+     */
     public function test_event(): void
     {
-        $event = new Route\RescueEvent(
+        $event = emit(new Route\RescueEvent(
             $this->route,
             $this->request,
             $this->exception,
             $response
-        );
+        ));
 
         $this->assertSame($this->route, $event->target);
         $this->assertSame($this->request, $event->request);
@@ -65,13 +68,17 @@ final class RescueEventTest extends TestCase
         $this->assertSame($this->response, $event->response);
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Throwable
+     */
     public function test_listen(): void
     {
-        get_events()->attach(function (Route\RescueEvent $event, Route $target) use (&$used): void {
+        $this->events->attach(function (Route\RescueEvent $event, Route $target): void {
             $event->response = $this->response;
         });
 
-        new Route\RescueEvent($this->route, $this->request, $this->exception, $response);
+        emit(new Route\RescueEvent($this->route, $this->request, $this->exception, $response));
 
         $this->assertSame($this->response, $response);
     }

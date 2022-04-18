@@ -20,6 +20,7 @@ use ICanBoogie\Routing\Route\BeforeRespondEvent;
 use ICanBoogie\Routing\Route\RespondEvent;
 
 use function assert;
+use function ICanBoogie\emit;
 
 /**
  * Allows event listeners to provide a response instead of the next responder, circumventing it, or to alter/process
@@ -39,13 +40,13 @@ final class Alter implements Middleware
             {
                 $route = $this->extract_route($request);
 
-                new BeforeRespondEvent($route, $request, $response);
+                emit(new BeforeRespondEvent($route, $request, $response));
 
                 if (!$response) {
                     $response = $this->next->respond($request);
                 }
 
-                new RespondEvent($route, $request, $response);
+                emit(new RespondEvent($route, $request, $response));
 
                 return $response;
             }

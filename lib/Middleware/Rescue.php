@@ -20,6 +20,7 @@ use ICanBoogie\Routing\Route\RescueEvent;
 use Throwable;
 
 use function assert;
+use function ICanBoogie\emit;
 
 /**
  * Tries to rescue a failed response.
@@ -56,7 +57,7 @@ final class Rescue implements Middleware
                 if ($route) {
                     assert($route instanceof Route);
 
-                    new RescueEvent($route, $request, $exception, $response);
+                    emit(new RescueEvent($route, $request, $exception, $response));
 
                     if ($response) {
                         return $response;

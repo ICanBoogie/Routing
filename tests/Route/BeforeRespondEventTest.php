@@ -18,12 +18,15 @@ use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Route;
 use PHPUnit\Framework\TestCase;
 
-use function ICanBoogie\get_events;
+use Throwable;
+
+use function ICanBoogie\emit;
 
 final class BeforeRespondEventTest extends TestCase
 {
     private Route $route;
     private Request $request;
+    private EventCollection $events;
 
     protected function setUp(): void
     {
@@ -31,21 +34,21 @@ final class BeforeRespondEventTest extends TestCase
 
         $this->route = new Route('/', '/');
         $this->request = Request::from();
+        $this->events = new EventCollection();
 
-        EventCollectionProvider::define(function () {
-            static $events;
-
-            return $events ??= new EventCollection();
-        });
+        EventCollectionProvider::define(fn() => $this->events);
     }
 
+    /**
+     * @throws Throwable
+     */
     public function test_event(): void
     {
-        $event = new Route\BeforeRespondEvent(
+        $event = emit(new Route\BeforeRespondEvent(
             $this->route,
             $this->request,
             $response
-        );
+        ));
 
         $this->assertSame($this->route, $event->target);
         $this->assertSame($this->request, $event->request);
@@ -58,13 +61,16 @@ final class BeforeRespondEventTest extends TestCase
         $this->assertSame($new_response, $event->response);
     }
 
+    /**
+     * @throws Throwable
+     */
     public function test_listen(): void
     {
-        get_events()->attach(function (Route\BeforeRespondEvent $event, Route $target) use (&$used): void {
+        $this->events->attach(function (Route\BeforeRespondEvent $event, Route $target) use (&$used): void {
             $used = true;
         });
 
-        new Route\BeforeRespondEvent($this->route, $this->request);
+        emit(new Route\BeforeRespondEvent($this->route, $this->request));
 
         $this->assertTrue($used);
     }

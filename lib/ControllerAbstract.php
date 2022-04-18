@@ -21,8 +21,10 @@ use ICanBoogie\Routing\Controller\ActionEvent;
 use ICanBoogie\Routing\Controller\BeforeActionEvent;
 use InvalidArgumentException;
 use JsonException;
+use Throwable;
 
 use function get_class;
+use function ICanBoogie\emit;
 use function is_array;
 use function is_callable;
 use function is_object;
@@ -97,6 +99,8 @@ abstract class ControllerAbstract extends Prototyped implements Responder
      * {@link Controller\BeforeActionEvent} is fired before invoking `action()`, the
      * `ICanBoogie\Routing\Controller::action:before` event of class
      * {@link Controller\ActionEvent} is fired after.
+     *
+     * @throws Throwable
      */
     final public function respond(Request $request): Response
     {
@@ -104,13 +108,13 @@ abstract class ControllerAbstract extends Prototyped implements Responder
 
         $result = null;
 
-        new BeforeActionEvent($this, $result);
+        emit(new BeforeActionEvent($this, $result));
 
         if (!$result) {
             $result = $this->action($request);
         }
 
-        new ActionEvent($this, $result);
+        emit(new ActionEvent($this, $result));
 
         if ($result instanceof Response) {
             return $result;
