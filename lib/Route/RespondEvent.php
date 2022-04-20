@@ -17,14 +17,10 @@ use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Route;
 
 /**
- * Event class for the `ICanBoogie\Routing\Route::respond` event.
- *
- * Third parties may use this event to alter the response before it is returned by the dispatcher.
+ * Listeners may use this event to alter the response before it is returned by the dispatcher.
  */
 final class RespondEvent extends Event
 {
-    public const TYPE = 'respond';
-
     public ?Response $response;
 
     public function __construct(
@@ -34,6 +30,6 @@ final class RespondEvent extends Event
     ) {
         $this->response = &$response;
 
-        parent::__construct($target, self::TYPE);
+        parent::__construct($target);
     }
 }

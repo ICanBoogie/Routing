@@ -17,16 +17,11 @@ use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Route;
 
 /**
- * Event class for the `ICanBoogie\Routing\Route::respond:before` event.
- *
- * Third parties may use this event to provide a response to the request before the route is
- * mapped. The event is usually used by third parties to redirect requests or provide cached
- * responses.
+ * Listeners may use this event to provide a response to the request before the route is mapped. The event is usually
+ * used by third parties to redirect requests or provide cached responses.
  */
 final class BeforeRespondEvent extends Event
 {
-    public const TYPE = 'respond:before';
-
     public ?Response $response;
 
     public function __construct(
@@ -36,6 +31,6 @@ final class BeforeRespondEvent extends Event
     ) {
         $this->response = &$response;
 
-        parent::__construct($target, self::TYPE);
+        parent::__construct($target);
     }
 }

@@ -18,15 +18,11 @@ use ICanBoogie\Routing\Route;
 use Throwable;
 
 /**
- * Event class for the `ICanBoogie\Routing\Route::rescue` event.
- *
- * Event hooks may use this event to _rescue_ a respond by providing a suitable response, or
- * replace the exception to throw if the rescue fails.
+ * Listeners may use this event to _rescue_ a route by providing a suitable response, or replace the exception to throw
+ * if the rescue fails.
  */
 final class RescueEvent extends Event
 {
-    public const TYPE = 'rescue';
-
     /**
      * Reference to the exception to throw if the rescue fails.
      */
@@ -46,6 +42,6 @@ final class RescueEvent extends Event
         $this->exception = &$exception;
         $this->response = &$response;
 
-        parent::__construct($target, self::TYPE);
+        parent::__construct($target);
     }
 }

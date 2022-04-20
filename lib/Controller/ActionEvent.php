@@ -15,14 +15,10 @@ use ICanBoogie\Event;
 use ICanBoogie\Routing\ControllerAbstract;
 
 /**
- * Event class for the `ICanBoogie\Routing\Controller::action:before` event.
- *
- * Event hooks may use this event to alter the result returned by the `action()` method.
+ * Listener may use this event to alter the result returned by the `action()` method.
  */
 class ActionEvent extends Event
 {
-    public const TYPE = 'action';
-
     /**
      * Reference to the result.
      */
@@ -32,6 +28,6 @@ class ActionEvent extends Event
     {
         $this->result = &$result;
 
-        parent::__construct($target, self::TYPE);
+        parent::__construct($target);
     }
 }

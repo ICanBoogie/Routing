@@ -15,15 +15,11 @@ use ICanBoogie\Event;
 use ICanBoogie\Routing\ControllerAbstract;
 
 /**
- * Event class for the `ICanBoogie\Routing\Controller::action:before` event.
- *
- * Event hooks may use this event to alter the controller before the action is invoked, or provide
- * a result and thus cancel the action.
+ * Listeners may use this event to alter the controller before the action is invoked, or provide a result and thus
+ * cancel the action.
  */
 class BeforeActionEvent extends Event
 {
-    public const TYPE = 'action:before';
-
     /**
      * Reference to the result.
      */
@@ -33,6 +29,6 @@ class BeforeActionEvent extends Event
     {
         $this->result = &$result;
 
-        parent::__construct($target, self::TYPE);
+        parent::__construct($target);
     }
 }

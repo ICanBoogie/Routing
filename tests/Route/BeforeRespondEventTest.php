@@ -17,7 +17,6 @@ use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Route;
 use PHPUnit\Framework\TestCase;
-
 use Throwable;
 
 use function ICanBoogie\emit;
