@@ -12,18 +12,14 @@
 namespace ICanBoogie\Routing\RouteProvider;
 
 use ArrayIterator;
-use ICanBoogie\Routing\MutableRouteProvider;
+use ICanBoogie\Routing\IterableRouteProvider;
 use ICanBoogie\Routing\Route;
-use IteratorAggregate;
 use Traversable;
 
 /**
  * A mutable route provider.
- *
- * @implements IteratorAggregate<int, Route>
- *     The key has no meaning.
  */
-final class Mutable implements MutableRouteProvider, IteratorAggregate
+final class Mutable implements IterableRouteProvider
 {
     /**
      * @var Route[]

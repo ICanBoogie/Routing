@@ -11,18 +11,14 @@
 
 namespace ICanBoogie\Routing\RouteProvider;
 
+use ICanBoogie\Routing\IterableRouteProvider;
 use ICanBoogie\Routing\Route;
-use ICanBoogie\Routing\RouteProvider;
-use IteratorAggregate;
 use Traversable;
 
 /**
  * An immutable route provider.
- *
- * @implements IteratorAggregate<int, Route>
- *     The key has no meaning.
  */
-final class Immutable implements RouteProvider, IteratorAggregate
+final class Immutable implements IterableRouteProvider
 {
     private Mutable $mutable;
 
