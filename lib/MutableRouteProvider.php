@@ -18,8 +18,6 @@ interface MutableRouteProvider extends RouteProvider
 {
     /**
      * Add routes to the provider.
-     *
-     * @return $this
      */
-    public function add_routes(Route ...$route): self;
+    public function add_routes(Route ...$route): void;
 }

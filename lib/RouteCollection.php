@@ -45,7 +45,7 @@ final class RouteCollection implements IteratorAggregate, Countable, MutableRout
         $this->add_routes(...$routes);
     }
 
-    public function add_routes(Route ...$route): self
+    public function add_routes(Route ...$route): void
     {
         foreach ($route as $r) {
             $id = $r->id;
@@ -58,8 +58,6 @@ final class RouteCollection implements IteratorAggregate, Countable, MutableRout
         }
 
         $this->revoke_cache();
-
-        return $this;
     }
 
     /**
