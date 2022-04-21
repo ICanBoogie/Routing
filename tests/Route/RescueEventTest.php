@@ -56,7 +56,7 @@ final class RescueEventTest extends TestCase
             $response
         ));
 
-        $this->assertSame($this->route, $event->target);
+        $this->assertSame($this->route, $event->sender);
         $this->assertSame($this->request, $event->request);
         $this->assertSame($this->exception, $event->exception);
         $this->assertNull($response);
@@ -74,7 +74,7 @@ final class RescueEventTest extends TestCase
      */
     public function test_listen(): void
     {
-        $this->events->attach(function (Route\RescueEvent $event, Route $target): void {
+        $this->events->attach(function (Route\RescueEvent $event, Route $sender): void {
             $event->response = $this->response;
         });
 

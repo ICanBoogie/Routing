@@ -86,7 +86,7 @@ final class RescueTest extends TestCase
 
         $this->expectExceptionObject($new_exception);
 
-        get_events()->attach(function (RescueEvent $event, Route $target) use ($new_exception) {
+        get_events()->attach(function (RescueEvent $event, Route $sender) use ($new_exception) {
             $event->exception = $new_exception;
         });
 
@@ -101,7 +101,7 @@ final class RescueTest extends TestCase
         $this->next->respond($request)
             ->willThrow($this->exception);
 
-        get_events()->attach(function (RescueEvent $event, Route $target) {
+        get_events()->attach(function (RescueEvent $event, Route $sender) {
             $event->response = $this->response;
         });
 

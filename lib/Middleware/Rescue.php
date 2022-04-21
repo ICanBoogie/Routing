@@ -25,7 +25,7 @@ use function ICanBoogie\emit;
 /**
  * Tries to rescue a failed response.
  *
- * {@link RescueEvent} is fired with the exception as target. If an event listener provides a response, it is returned,
+ * {@link RescueEvent} is fired with the exception as sender. If an event listener provides a response, it is returned,
  * otherwise the exception re-thrown.
  */
 final class Rescue implements Middleware

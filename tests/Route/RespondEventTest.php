@@ -49,7 +49,7 @@ final class RespondEventTest extends TestCase
             $response
         ));
 
-        $this->assertSame($this->route, $event->target);
+        $this->assertSame($this->route, $event->sender);
         $this->assertSame($this->request, $event->request);
         $this->assertNull($response);
         $this->assertNull($event->response);
@@ -65,7 +65,7 @@ final class RespondEventTest extends TestCase
      */
     public function test_listen(): void
     {
-        $this->events->attach(function (Route\RespondEvent $event, Route $target) use (&$used): void {
+        $this->events->attach(function (Route\RespondEvent $event, Route $sender) use (&$used): void {
             $used = true;
         });
 

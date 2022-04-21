@@ -24,12 +24,12 @@ final class RespondEvent extends Event
     public ?Response $response;
 
     public function __construct(
-        Route $target,
+        Route $sender,
         public readonly Request $request,
         Response &$response = null
     ) {
         $this->response = &$response;
 
-        parent::__construct($target);
+        parent::__construct($sender);
     }
 }

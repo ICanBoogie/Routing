@@ -69,7 +69,7 @@ final class AlterTest extends TestCase
         $this->next->respond(Argument::any())
             ->shouldNotBeCalled();
 
-        get_events()->attach(function (BeforeRespondEvent $event, Route $target) {
+        get_events()->attach(function (BeforeRespondEvent $event, Route $sender) {
             $event->response = $this->response;
         });
 
@@ -83,7 +83,7 @@ final class AlterTest extends TestCase
 
         $new_response = new Response();
 
-        get_events()->attach(function (RespondEvent $event, Route $target) use ($new_response) {
+        get_events()->attach(function (RespondEvent $event, Route $sender) use ($new_response) {
             $event->response = $new_response;
         });
 

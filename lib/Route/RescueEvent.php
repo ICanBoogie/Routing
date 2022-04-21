@@ -34,7 +34,7 @@ final class RescueEvent extends Event
     public ?Response $response;
 
     public function __construct(
-        Route $target,
+        Route $sender,
         public readonly Request $request,
         Throwable &$exception,
         ?Response &$response
@@ -42,6 +42,6 @@ final class RescueEvent extends Event
         $this->exception = &$exception;
         $this->response = &$response;
 
-        parent::__construct($target);
+        parent::__construct($sender);
     }
 }

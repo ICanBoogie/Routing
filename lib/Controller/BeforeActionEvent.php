@@ -25,10 +25,10 @@ class BeforeActionEvent extends Event
      */
     public mixed $result;
 
-    public function __construct(ControllerAbstract $target, mixed &$result)
+    public function __construct(ControllerAbstract $sender, mixed &$result)
     {
         $this->result = &$result;
 
-        parent::__construct($target);
+        parent::__construct($sender);
     }
 }
