@@ -61,7 +61,7 @@ final class Pattern
      * Parses a route pattern and returns an array of interleaved paths and parameters, the
      * parameter names and the regular expression for the specified pattern.
      *
-     * @return array{ 0: string[], 1: array<string, string>, 2: string }
+     * @phpstan-return array{ 0: string, 1: string[]|string[], 2: array<int, int|string>, 3: string }
      */
     private static function parse(string $pattern): array
     {
@@ -88,7 +88,7 @@ final class Pattern
 
         $regex .= '$#';
 
-        return [ $interleaved, $params, $regex ]; // @phpstan-ignore-line
+        return [ $pattern, $interleaved, $params, $regex ]; // @phpstan-ignore-line
     }
 
     /**
@@ -185,46 +185,47 @@ final class Pattern
             throw new InvalidPattern("Pattern cannot be blank.");
         }
 
-        return self::$instances[$pattern] ??= new self($pattern);
+        return self::$instances[$pattern] ??= new self(...self::parse($pattern));
+    }
+
+    /**
+     * @param array{
+     *     'pattern': string,
+     *     'interleaved': string[]|string[][],
+     *     'params': array<int, int|string>,
+     *     'regex': string
+     *     } $an_array
+     */
+    public static function __set_state(array $an_array): self
+    {
+        return new self(
+            $an_array['pattern'],
+            $an_array['interleaved'],
+            $an_array['params'],
+            $an_array['regex']
+        );
     }
 
     /*
      * INSTANCE
      */
 
-    public readonly string $pattern;
-
     /**
-     * Interleaved pattern.
-     *
-     * @var string[]|string[][]
+     * @param string $pattern
+     * @param string[]|string[][] $interleaved Interleaved pattern.
+     * @param array<int, int|string> $params Params of the pattern.
+     * @param string $regex Regex of the pattern.
      */
-    public readonly array $interleaved;
-
-    /**
-     * Params of the pattern.
-     *
-     * @var string[]
-     */
-    public readonly array $params;
-
-    /**
-     * Regex of the pattern.
-     */
-    public readonly string $regex;
-
-    private function __construct(string $pattern)
-    {
-        [ $interleaved, $params, $regex ] = self::parse($pattern);
-
-        $this->pattern = $pattern;
-        $this->interleaved = $interleaved;
-        $this->params = $params;
-        $this->regex = $regex;
+    private function __construct(
+        public readonly string $pattern,
+        public readonly array $interleaved,
+        public readonly array $params,
+        public readonly string $regex
+    ) {
     }
 
     /**
-     * Returns the respond pattern specified during construct.
+     * Returns the route pattern specified during construct.
      */
     public function __toString(): string
     {

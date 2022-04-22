@@ -22,6 +22,17 @@ use Traversable;
 final class Mutable implements IterableRouteProvider
 {
     /**
+     * @param array{ 'routes': Route[] } $an_array
+     */
+    public static function __set_state(array $an_array): self
+    {
+        $instance = new self();
+        $instance->routes = $an_array['routes'];
+
+        return $instance;
+    }
+
+    /**
      * @var Route[]
      */
     private array $routes = [];

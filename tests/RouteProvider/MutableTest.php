@@ -16,10 +16,9 @@ use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteProvider\ByAction;
 use ICanBoogie\Routing\RouteProvider\Mutable;
 use PHPUnit\Framework\TestCase;
+use Test\ICanBoogie\Routing\SetStateHelper;
 
 use function implode;
-use function serialize;
-use function unserialize;
 
 final class MutableTest extends TestCase
 {
@@ -56,11 +55,9 @@ final class MutableTest extends TestCase
         $this->assertSame("page:home page:about page:contact", implode(' ', $actions));
     }
 
-    public function test_serialize_unserialize(): void
+    public function test_export(): void
     {
-        $serialized = serialize($this->provider);
-        $provider = unserialize($serialized);
-
-        $this->assertEquals($this->provider, $provider);
+        $actual = SetStateHelper::export_import($this->provider);
+        $this->assertEquals($this->provider, $actual);
     }
 }

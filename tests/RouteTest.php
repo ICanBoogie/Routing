@@ -11,6 +11,7 @@
 
 namespace Test\ICanBoogie\Routing;
 
+use ICanBoogie\HTTP\RequestMethod;
 use ICanBoogie\Routing\Route;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -33,5 +34,18 @@ final class RouteTest extends TestCase
         $this->assertSame($s, $r->pattern->pattern);
         $this->assertSame($action, $r->action);
         $this->assertSame($id, $r->id);
+    }
+
+    public function test_export(): void
+    {
+        $route = new Route(
+            '/news/:year-:month-:slug.:format',
+            'article:show',
+            methods: RequestMethod::METHOD_ANY,
+            id: 'my-show',
+        );
+        $actual = SetStateHelper::export_import($route);
+
+        $this->assertEquals($route, $actual);
     }
 }

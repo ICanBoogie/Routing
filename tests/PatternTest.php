@@ -225,6 +225,14 @@ final class PatternTest extends TestCase
         $this->assertTrue($match);
         $this->assertSame($hash, $captured['hash']);
     }
+
+    public function test_export(): void
+    {
+        $pattern = Pattern::from('/admin/dealers/<\d+>/edit/<\d+>');
+        $actual = SetStateHelper::export_import($pattern);
+
+        $this->assertEquals($pattern, $actual);
+    }
 }
 
 namespace Test\ICanBoogie\Routing\PatternTest;

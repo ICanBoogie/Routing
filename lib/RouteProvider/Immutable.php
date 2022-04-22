@@ -13,6 +13,8 @@ namespace ICanBoogie\Routing\RouteProvider;
 
 use ICanBoogie\Routing\IterableRouteProvider;
 use ICanBoogie\Routing\Route;
+use ReflectionClass;
+use ReflectionException;
 use Traversable;
 
 /**
@@ -21,6 +23,20 @@ use Traversable;
 final class Immutable implements IterableRouteProvider
 {
     private Mutable $mutable;
+
+    /**
+     * @param array{ 'mutable': Mutable } $an_array
+     *
+     * @throws ReflectionException
+     */
+    public static function __set_state(array $an_array): self
+    {
+        /* @var self $instance */
+        $instance = (new ReflectionClass(self::class))->newInstanceWithoutConstructor();
+        $instance->mutable = $an_array['mutable'];
+
+        return $instance;
+    }
 
     /**
      * @param iterable<Route> $routes

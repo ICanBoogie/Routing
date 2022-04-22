@@ -24,16 +24,27 @@ final class Route
      */
     public const ACTION_SEPARATOR = ':';
 
+    public static function __set_state(array $an_array): object
+    {
+        return new self(
+            $an_array['pattern'],
+            $an_array['action'],
+            $an_array['methods'],
+            $an_array['id'],
+            $an_array['extensions']
+        );
+    }
+
     public readonly Pattern $pattern;
 
     /**
-     * @param string $pattern Pattern of the route.
+     * @param string|Pattern $pattern Pattern of the route.
      * @param string $action Identifier of a qualified action. e.g. 'articles:show'.
      * @param RequestMethod|RequestMethod[] $methods Request method(s) accepted by the respond.
      * @param object[] $extensions
      */
     public function __construct(
-        string $pattern,
+        string|Pattern $pattern,
         public readonly string $action,
         public readonly RequestMethod|array $methods = RequestMethod::METHOD_ANY,
         public readonly string|null $id = null,
