@@ -32,6 +32,7 @@ final class Memoize implements IterableRouteProvider
 
     private IterableRouteProvider $by_id;
     private IterableRouteProvider $by_action;
+    private IterableRouteProvider $by_id_or_action;
     private IterableRouteProvider $by_uri;
 
     public function route_for_predicate(callable $predicate): ?Route
@@ -42,6 +43,10 @@ final class Memoize implements IterableRouteProvider
 
         if ($predicate instanceof ByAction) {
             return ($this->by_action ??= new MemoizeByAction($this->inner_provider))->route_for_predicate($predicate);
+        }
+
+        if ($predicate instanceof ByIdOrAction) {
+            return ($this->by_id_or_action ??= new MemoizeByIdOrAction($this->inner_provider))->route_for_predicate($predicate);
         }
 
         if ($predicate instanceof ByUri) {

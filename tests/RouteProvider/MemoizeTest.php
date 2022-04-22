@@ -15,6 +15,7 @@ use ICanBoogie\Routing\IterableRouteProvider;
 use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteProvider\ByAction;
 use ICanBoogie\Routing\RouteProvider\ById;
+use ICanBoogie\Routing\RouteProvider\ByIdOrAction;
 use ICanBoogie\Routing\RouteProvider\ByUri;
 use ICanBoogie\Routing\RouteProvider\Immutable;
 use ICanBoogie\Routing\RouteProvider\Memoize;
@@ -94,6 +95,16 @@ final class MemoizeTest extends TestCase
 
         $this->assertEquals(0, $this->spy->times_route_for_predicate);
         $this->assertEquals(1, $this->spy->times_iterator);
+    }
+
+    public function test_by_id_or_action(): void
+    {
+        $this->assertSame($this->r1, $this->provider->route_for_predicate(new ByIdOrAction('page:home')));
+        $this->assertSame($this->r2, $this->provider->route_for_predicate(new ByIdOrAction('about')));
+        $this->assertSame($this->r3, $this->provider->route_for_predicate(new ByIdOrAction('page:contact')));
+
+        $this->assertEquals(0, $this->spy->times_route_for_predicate);
+        $this->assertEquals(2, $this->spy->times_iterator);
     }
 
     public function test_by_uri(): void

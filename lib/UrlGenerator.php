@@ -12,7 +12,7 @@
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\Routing\Exception\RouteNotFound;
-use ICanBoogie\Routing\RouteProvider\ById;
+use ICanBoogie\Routing\RouteProvider\ByIdOrAction;
 
 use function is_string;
 
@@ -24,18 +24,16 @@ class UrlGenerator
     }
 
     /**
-     * @phpstan-param string|(callable(Route): bool) $predicate
+     * @phpstan-param string|(callable(Route): bool) $predicate_or_id_or_action
      *
      * @param array<string, mixed>|object|null $params
      *     Parameters that reference placeholders in the route pattern.
-     *
-     * @return string
      */
-    public function generate_url(string|callable $predicate, array|object|null $params = null): string
+    public function generate_url(string|callable $predicate_or_id_or_action, array|object|null $params = null): string
     {
-        if (is_string($predicate)) {
-            $predicate = new ById($predicate);
-        }
+        $predicate = is_string($predicate_or_id_or_action)
+            ? new ByIdOrAction($predicate_or_id_or_action)
+            : $predicate_or_id_or_action;
 
         $route = $this->routes->route_for_predicate($predicate)
             ?? throw new RouteNotFound(predicate: $predicate);

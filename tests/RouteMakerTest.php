@@ -55,13 +55,11 @@ final class RouteMakerTest extends TestCase
                         '/dogs/<id:\d+>/walk',
                         'dogs:walk',
                         RequestMethod::METHOD_CONNECT,
-                        id: 'dogs:walk'
                     ),
                     new Route(
                         '/run/dogs/<id:\d+>',
                         'dogs:run',
                         [ RequestMethod::METHOD_HEAD, RequestMethod::METHOD_GET ],
-                        id: 'dogs:run'
                     ),
                 ],
             ],
@@ -83,7 +81,6 @@ final class RouteMakerTest extends TestCase
                         '/dogs/<id:\d+>/walk',
                         'dogs:walk',
                         RequestMethod::METHOD_CONNECT,
-                        id: 'dogs:walk'
                     ),
                 ],
             ],
@@ -111,7 +108,7 @@ final class RouteMakerTest extends TestCase
             [
                 new Options(only: [ Make::ACTION_LIST ]),
                 [
-                    new Route('/photos', 'photos:list', RequestMethod::METHOD_GET, id: 'photos:list'),
+                    new Route('/photos', 'photos:list', RequestMethod::METHOD_GET),
                 ],
             ],
 
@@ -119,31 +116,30 @@ final class RouteMakerTest extends TestCase
                 new Options(only: [ Make::ACTION_LIST, Make::ACTION_SHOW ], ids: [ Make::ACTION_LIST => 'my-list' ]),
                 [
                     new Route('/photos', 'photos:list', RequestMethod::METHOD_GET, id: 'my-list'),
-                    new Route('/photos/<id:\d+>', 'photos:show', RequestMethod::METHOD_GET, id: 'photos:show'),
+                    new Route('/photos/<id:\d+>', 'photos:show', RequestMethod::METHOD_GET),
                 ],
             ],
 
             [
                 new Options(only: [ Make::ACTION_LIST, Make::ACTION_SHOW ]),
                 [
-                    new Route('/photos', 'photos:list', RequestMethod::METHOD_GET, id: 'photos:list'),
-                    new Route('/photos/<id:\d+>', 'photos:show', RequestMethod::METHOD_GET, id: 'photos:show'),
+                    new Route('/photos', 'photos:list', RequestMethod::METHOD_GET),
+                    new Route('/photos/<id:\d+>', 'photos:show', RequestMethod::METHOD_GET),
                 ],
             ],
 
             [
                 new Options(except: [ Make::ACTION_DELETE ]),
                 [
-                    new Route('/photos', 'photos:list', RequestMethod::METHOD_GET, id: 'photos:list'),
-                    new Route('/photos/new', 'photos:new', RequestMethod::METHOD_GET, id: 'photos:new'),
-                    new Route('/photos', 'photos:create', RequestMethod::METHOD_POST, id: 'photos:create'),
-                    new Route('/photos/<id:\d+>', 'photos:show', RequestMethod::METHOD_GET, id: 'photos:show'),
-                    new Route('/photos/<id:\d+>/edit', 'photos:edit', RequestMethod::METHOD_GET, 'photos:edit'),
+                    new Route('/photos', 'photos:list', RequestMethod::METHOD_GET),
+                    new Route('/photos/new', 'photos:new', RequestMethod::METHOD_GET),
+                    new Route('/photos', 'photos:create', RequestMethod::METHOD_POST),
+                    new Route('/photos/<id:\d+>', 'photos:show', RequestMethod::METHOD_GET),
+                    new Route('/photos/<id:\d+>/edit', 'photos:edit', RequestMethod::METHOD_GET),
                     new Route(
                         '/photos/<id:\d+>',
                         'photos:update',
                         [ RequestMethod::METHOD_PUT, RequestMethod::METHOD_PATCH ],
-                        id: 'photos:update'
                     ),
                 ],
             ],
@@ -151,18 +147,18 @@ final class RouteMakerTest extends TestCase
             [
                 new Options(except: [ Make::ACTION_CREATE, Make::ACTION_UPDATE, Make::ACTION_DELETE ]),
                 [
-                    new Route('/photos', 'photos:list', RequestMethod::METHOD_GET, id: 'photos:list'),
-                    new Route('/photos/new', 'photos:new', RequestMethod::METHOD_GET, id: 'photos:new'),
-                    new Route('/photos/<id:\d+>', 'photos:show', RequestMethod::METHOD_GET, id: 'photos:show'),
-                    new Route('/photos/<id:\d+>/edit', 'photos:edit', RequestMethod::METHOD_GET, id: 'photos:edit'),
+                    new Route('/photos', 'photos:list', RequestMethod::METHOD_GET),
+                    new Route('/photos/new', 'photos:new', RequestMethod::METHOD_GET),
+                    new Route('/photos/<id:\d+>', 'photos:show', RequestMethod::METHOD_GET),
+                    new Route('/photos/<id:\d+>/edit', 'photos:edit', RequestMethod::METHOD_GET),
                 ],
             ],
 
             [
                 new Options(only: [ Make::ACTION_CREATE, Make::ACTION_SHOW ], as: [ Make::ACTION_CREATE => 'madonna' ]),
                 [
-                    new Route('/photos', 'madonna', RequestMethod::METHOD_POST, id: 'madonna'),
-                    new Route('/photos/<id:\d+>', 'photos:show', RequestMethod::METHOD_GET, id: 'photos:show'),
+                    new Route('/photos', 'madonna', RequestMethod::METHOD_POST),
+                    new Route('/photos/<id:\d+>', 'photos:show', RequestMethod::METHOD_GET),
                 ],
             ],
 
@@ -178,9 +174,8 @@ final class RouteMakerTest extends TestCase
                         '/prefix/photos/suffix',
                         'photos:create',
                         RequestMethod::METHOD_PATCH,
-                        id: 'photos:create'
                     ),
-                    new Route('/photos/<id:\d+>', 'photos:show', RequestMethod::METHOD_GET, id: 'photos:show'),
+                    new Route('/photos/<id:\d+>', 'photos:show', RequestMethod::METHOD_GET),
                 ],
             ],
 

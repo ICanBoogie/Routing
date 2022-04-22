@@ -60,7 +60,7 @@ final class RouteMaker
                 pattern: $basic->pattern,
                 action: $qualified_action,
                 methods: $basic->methods,
-                id: $ids[$action] ?? $qualified_action,
+                id: $ids[$action] ?? null,
             );
         }
 
