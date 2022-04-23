@@ -22,7 +22,7 @@ final class ByIdOrActionTest extends TestCase
         $predicate = new ByIdOrAction('articles:home');
 
         $this->assertTrue($predicate(new Route('/', 'articles:home')));
-        $this->assertTrue($predicate(new Route('/', 'articles:home', id: 'articles:list' )));
+        $this->assertTrue($predicate(new Route('/', 'articles:home', id: 'articles:list')));
         $this->assertFalse($predicate(new Route('/', 'articles:index', id: 'article:index')));
         $this->assertFalse($predicate(new Route('/', 'articles:show', id: 'article:show')));
     }

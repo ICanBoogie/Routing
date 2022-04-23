@@ -62,7 +62,7 @@ use const JSON_THROW_ON_ERROR;
  * ```
  *
  * @property-read Request $request The request being dispatched.
- * @property-read Route $respond The route being dispatched.
+ * @property-read Route $route The route being dispatched.
  * @property Response $response
  */
 abstract class ControllerAbstract extends Prototyped implements Responder

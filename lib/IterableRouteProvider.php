@@ -21,5 +21,4 @@ use IteratorAggregate;
  */
 interface IterableRouteProvider extends RouteProvider, IteratorAggregate
 {
-
 }

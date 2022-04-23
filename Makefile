@@ -18,7 +18,8 @@ vendor:
 test-dependencies: vendor
 
 .PHONY: test
-test: test-dependencies clean-sandbox
+test: test-dependencies
+	@rm ./tests/sandbox/*
 	@$(PHPUNIT)
 
 .PHONY: test-coverage
@@ -33,14 +34,10 @@ test-coveralls: test-dependencies
 
 .PHONY: test-container
 test-container:
-	@docker-compose run --rm app bash
+	@-docker-compose run --rm app bash
 	@docker-compose down -v
 
 .PHONY: lint
 lint:
 	@XDEBUG_MODE=off phpcs -s
 	@XDEBUG_MODE=off vendor/bin/phpstan
-
-.PHONY: clean-sandbox
-clean-sandbox:
-	@rm ./tests/sandbox/*

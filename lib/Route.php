@@ -24,7 +24,16 @@ final class Route
      */
     public const ACTION_SEPARATOR = ':';
 
-    public static function __set_state(array $an_array): object
+    /**
+     * @param array{
+     *     'pattern': Pattern,
+     *     'action': string,
+     *     'methods': RequestMethod|RequestMethod[],
+     *     'id': string,
+     *     'extensions': object[]
+     * } $an_array
+     */
+    public static function __set_state(array $an_array): self
     {
         return new self(
             $an_array['pattern'],

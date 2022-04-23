@@ -1,10 +1,9 @@
 # Routing
 
-[![Release](https://img.shields.io/packagist/v/icanboogie/routing.svg)](https://packagist.org/packages/icanboogie/routing)
-[![Build Status](https://img.shields.io/github/workflow/status/ICanBoogie/Routing/test)](https://github.com/ICanBoogie/Routing/actions?query=workflow%3Atest)
-[![Code Quality](https://img.shields.io/scrutinizer/g/ICanBoogie/Routing.svg)](https://scrutinizer-ci.com/g/ICanBoogie/Routing)
-[![Code Coverage](https://img.shields.io/coveralls/ICanBoogie/Routing.svg)](https://coveralls.io/r/ICanBoogie/Routing)
-[![Packagist](https://img.shields.io/packagist/dt/icanboogie/routing.svg)](https://packagist.org/packages/icanboogie/routing)
+[![Packagist](https://img.shields.io/packagist/v/icanboogie/routing.svg)](https://packagist.org/packages/icanboogie/routing)
+[![Code Quality](https://img.shields.io/scrutinizer/g/ICanBoogie/routing.svg)](https://scrutinizer-ci.com/g/ICanBoogie/routing)
+[![Code Coverage](https://img.shields.io/coveralls/ICanBoogie/routing.svg)](https://coveralls.io/r/ICanBoogie/routing)
+[![Downloads](https://img.shields.io/packagist/dt/icanboogie/routing.svg)](https://packagist.org/packages/icanboogie/routing)
 
 The **icanboogie/routing** package handles URL rewriting in native PHP. A request is mapped
 to a route, which in turn gets dispatched to a controller, and possibly an action. If the
@@ -12,6 +11,12 @@ process is successful a response is returned. Events are fired during the proces
 hooks to alter the request, the route, the controller, or the response.
 
 
+
+#### Installation
+
+```bash
+composer require icanboogie/routing
+```
 
 
 
@@ -52,26 +57,6 @@ $dispatcher = new RouteDispatcher($routes);
 $response = $dispatcher($request);
 $response();
 ```
-
-
-
-
-
-### Before a route is dispatched
-
-Before a route is dispatched the `ICanBoogie\Routing\RouteDispatcher::dispatch:before` event
-of class [RouteDispatcher\BeforeDispatchEvent][] is fired. Event hooks may use this event
-to provide a response and thus cancel the dispatching.
-
-
-
-
-
-### A route is dispatched
-
-The `ICanBoogie\Routing\RouteDispatcher::dispatch` event of class [RouteDispatcher\DispatchEvent][]
-is fired if the route has been dispatched successfully. Event hooks may use this event to
-alter the response.
 
 
 
@@ -156,10 +141,6 @@ You can use them in any combination:
 The `RouteDefinition::CONTROLLER` key specifies the callable to invoke, or the class name of a
 callable. An action can be specified with `RouteDefinition::ACTION` and if the callable uses
 [ActionTrait][] the call will be mapped automatically to the appropriate method.
-
-Controllers can also be defined as service references when the [icanboogie/service] package
-is used.
-
 
 
 
@@ -574,59 +555,7 @@ The following exceptions are defined:
 
 - [ActionNotDefined][]: Thrown when an action is not defined, for instance when a route handled
 by a controller using [ActionTrait][] has an empty `action` property.
-- [ControllerNotDefined][]: Thrown when trying to define a route without a controller nor location.
 - [InvalidPattern][]: Thrown when trying to define a route without pattern.
-- [RouteNotDefined][]: Thrown when trying to obtain a route that is not defined in a
-[RouteCollection][] instance.
-
-
-
-
-
-## Helpers
-
-The following helpers are available:
-
-- [contextualize](https://icanboogie.org/api/routing/master/function-ICanBoogie.Routing.contextualize.html): Contextualize a pathname.
-- [decontextualize](https://icanboogie.org/api/routing/master/function-ICanBoogie.Routing.decontextualize.html): Decontextualize a pathname.
-- [absolutize_url](https://icanboogie.org/api/routing/master/function-ICanBoogie.Routing.absolutize_url.html): Absolutize an URL.
-
-
-
-
-
-### Patching helpers
-
-Helpers can be patched using the `Helpers::patch()` method.
-
-The following code demonstrates how routes can _start_ with the custom path "/my/application":
-
-```php
-<?php
-
-use ICanBoogie\Routing;
-
-$path = "/my/application";
-
-Routing\Helpers::patch('contextualize', function($str) use($path) {
-
-    return $path . $str;
-
-});
-
-Routing\Helpers::patch('decontextualize', function($str) use($path) {
-
-    if (strpos($str, $path . '/') === 0)
-    {
-        $str = substr($str, strlen($path));
-    }
-
-    return $str;
-
-});
-```
-
-
 
 
 
@@ -638,9 +567,22 @@ Routing\Helpers::patch('decontextualize', function($str) use($path) {
 
 The project is continuously tested by [GitHub actions](https://github.com/ICanBoogie/Routing/actions).
 
-[![Tests](https://github.com/ICanBoogie/Routing/workflows/test/badge.svg?branch=master)](https://github.com/ICanBoogie/Routing/actions?query=workflow%3Atest)
-[![Static Analysis](https://github.com/ICanBoogie/Routing/workflows/static-analysis/badge.svg?branch=master)](https://github.com/ICanBoogie/Routing/actions?query=workflow%3Astatic-analysis)
-[![Code Style](https://github.com/ICanBoogie/Routing/workflows/code-style/badge.svg?branch=master)](https://github.com/ICanBoogie/Routing/actions?query=workflow%3Acode-style)
+[![Tests](https://github.com/ICanBoogie/routing/workflows/test/badge.svg?branch=master)](https://github.com/ICanBoogie/routing/actions?query=workflow%3Atest)
+[![Static Analysis](https://github.com/ICanBoogie/routing/workflows/static-analysis/badge.svg?branch=master)](https://github.com/ICanBoogie/routing/actions?query=workflow%3Astatic-analysis)
+[![Code Style](https://github.com/ICanBoogie/routing/workflows/code-style/badge.svg?branch=master)](https://github.com/ICanBoogie/routing/actions?query=workflow%3Acode-style)
+
+
+
+## Code of Conduct
+
+This project adheres to a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project and its
+community, you are expected to uphold this code.
+
+
+
+## Contributing
+
+Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 
 
@@ -652,16 +594,14 @@ test suite. Alternatively, run `make test-coverage` to run the test suite with t
 
 
 
-
-
 ## License
 
-**icanboogie/routing** is released under the [New BSD License](LICENSE).
+**icanboogie/routing** is released under the [BSD-3-Clause](LICENSE).
 
 
 
 
-
+[ICanBoogie]:                          https://icanboogie/org
 [ControllerBindings]:                  https://icanboogie.org/api/bind-routing/5.0/class-ICanBoogie.Binding.Routing.ControllerBindings.html
 [Response]:                            https://icanboogie.org/api/http/4.0/class-ICanBoogie.HTTP.Response.html
 [Request]:                             https://icanboogie.org/api/http/4.0/class-ICanBoogie.HTTP.Request.html
@@ -685,7 +625,6 @@ test suite. Alternatively, run `make test-coverage` to run the test suite with t
 [RouteDispatcher\DispatchEvent]:       https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.RouteDispatcher.DispatchEvent.html
 [RouteMaker]:                          https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.RouteMaker.html
 [RouteNotDefined]:                     https://icanboogie.org/api/routing/5.0/class-ICanBoogie.Routing.RouteNotDefined.html
-[ICanBoogie]:                          https://github.com/ICanBoogie/ICanBoogie
 [icanboogie/bind-routing]:             https://github.com/ICanBoogie/bind-routing
 [icanboogie/service]:                  https://github.com/ICanBoogie/service
 [icanboogie/view]:                     https://github.com/ICanBoogie/View

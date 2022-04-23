@@ -38,21 +38,26 @@ final class Memoize implements IterableRouteProvider
     public function route_for_predicate(callable $predicate): ?Route
     {
         if ($predicate instanceof ById) {
-            return ($this->by_id ??= new MemoizeById($this->inner_provider))->route_for_predicate($predicate);
+            return ($this->by_id ??= new MemoizeById($this->inner_provider))
+                ->route_for_predicate($predicate);
         }
 
         if ($predicate instanceof ByAction) {
-            return ($this->by_action ??= new MemoizeByAction($this->inner_provider))->route_for_predicate($predicate);
+            return ($this->by_action ??= new MemoizeByAction($this->inner_provider))
+                ->route_for_predicate($predicate);
         }
 
         if ($predicate instanceof ByIdOrAction) {
-            return ($this->by_id_or_action ??= new MemoizeByIdOrAction($this->inner_provider))->route_for_predicate($predicate);
+            return ($this->by_id_or_action ??= new MemoizeByIdOrAction($this->inner_provider))
+                ->route_for_predicate($predicate);
         }
 
         if ($predicate instanceof ByUri) {
-            return ($this->by_uri ??= new MemoizeByUri($this->inner_provider))->route_for_predicate($predicate);
+            return ($this->by_uri ??= new MemoizeByUri($this->inner_provider))
+                ->route_for_predicate($predicate);
         }
 
-        return $this->inner_provider->route_for_predicate($predicate);
+        return $this->inner_provider
+            ->route_for_predicate($predicate);
     }
 }

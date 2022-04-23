@@ -29,7 +29,7 @@ use function urlencode;
 use const PREG_SPLIT_DELIM_CAPTURE;
 
 /**
- * Representation of a respond pattern.
+ * Representation of a route pattern.
  *
  * <pre>
  * <?php
@@ -160,7 +160,7 @@ final class Pattern
     }
 
     /**
-     * Checks if the given string is a respond pattern.
+     * Checks if the given string is a route pattern.
      */
     public static function is_pattern(string $pattern): bool
     {
