@@ -13,13 +13,14 @@ namespace ICanBoogie\Routing\RouteProvider;
 
 use ArrayIterator;
 use ICanBoogie\Routing\IterableRouteProvider;
+use ICanBoogie\Routing\MutableRouteProvider;
 use ICanBoogie\Routing\Route;
 use Traversable;
 
 /**
  * A mutable route provider.
  */
-final class Mutable implements IterableRouteProvider
+final class Mutable implements IterableRouteProvider, MutableRouteProvider
 {
     /**
      * @param array{ 'routes': Route[] } $an_array

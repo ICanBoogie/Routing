@@ -14,7 +14,6 @@ namespace ICanBoogie\Routing\UrlGenerator;
 use ICanBoogie\Routing\Exception\RouteNotFound;
 use ICanBoogie\Routing\RouteProvider;
 use ICanBoogie\Routing\RouteProvider\ByIdOrAction;
-
 use ICanBoogie\Routing\UrlGenerator;
 
 use function http_build_query;

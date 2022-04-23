@@ -19,7 +19,6 @@ use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\ControllerAbstract;
 use ICanBoogie\Routing\ControllerTest\MySampleController;
 use ICanBoogie\Routing\Route;
-use ICanBoogie\Routing\RouteCollection;
 use ICanBoogie\Routing\RouteDispatcher;
 use PHPUnit\Framework\TestCase;
 
@@ -167,54 +166,6 @@ class ControllerTest extends TestCase
         $response = $controller->respond($request);
         $this->assertInstanceOf(Response::class, $response);
         $this->assertSame($status, $response->status->code);
-    }
-
-    public function test_closure()
-    {
-        $test = $this;
-
-        $routes = new RouteCollection([
-
-            'default' => [
-
-                'pattern' => '/blog/<year:\d{4}>-<month:\d{2}>-:slug.html',
-                'controller' => function ($year, $month, $slug) use ($test) {
-                    $test->assertInstanceOf(Request::class, $this->request);
-                    $test->assertEquals(2014, $year);
-                    $test->assertEquals(12, $month);
-                    $test->assertEquals("my-awesome-post", $slug);
-
-                    return 'HERE';
-                }
-            ]
-        ]);
-
-        $dispatcher = new RouteDispatcher($routes);
-        $request = Request::from("/blog/2014-12-my-awesome-post.html");
-        $response = $dispatcher($request);
-        $this->assertInstanceOf(Response::class, $response);
-        $this->assertTrue($response->status->is_successful);
-        $this->assertEquals('HERE', $response->body);
-    }
-
-    public function test_generic_controller()
-    {
-        $routes = new RouteCollection([
-
-            'default' => [
-
-                'pattern' => '/blog/<year:\d{4}>-<month:\d{2}>-:slug.html',
-                'controller' => MySampleController::class
-            ]
-        ]);
-
-        $dispatcher = new RouteDispatcher($routes);
-        $request = Request::from("/blog/2014-12-my-awesome-post.html");
-        $request->test = $this;
-        $response = $dispatcher($request);
-        $this->assertInstanceOf(Response::class, $response);
-        $this->assertTrue($response->status->is_successful);
-        $this->assertEquals('HERE', $response->body);
     }
 
     public function test_redirect_to_path()

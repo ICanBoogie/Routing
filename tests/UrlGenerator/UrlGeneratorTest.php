@@ -11,7 +11,7 @@
 
 namespace Test\ICanBoogie\Routing\UrlGenerator;
 
-use ICanBoogie\Routing\RouteCollection;
+use ICanBoogie\Routing\RouteCollector;
 use ICanBoogie\Routing\UrlGenerator\UrlGeneratorWithRouteProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -19,8 +19,9 @@ final class UrlGeneratorTest extends TestCase
 {
     public function test_generate_url(): void
     {
-        $routes = new RouteCollection();
-        $routes->resource('articles');
+        $routes = (new RouteCollector())
+            ->resource('articles')
+            ->collect();
 
         $generator = new UrlGeneratorWithRouteProvider($routes);
 

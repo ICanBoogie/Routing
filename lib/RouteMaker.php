@@ -28,12 +28,40 @@ final class RouteMaker
     /*
      * Unqualified actions.
      */
+
+    /**
+     * Display a list of records.
+     */
     public const ACTION_LIST = 'list';
+
+    /**
+     * Display an HTML form for creating a new record.
+     */
     public const ACTION_NEW = 'new';
+
+    /**
+     * Create a new record.
+     */
     public const ACTION_CREATE = 'create';
+
+    /**
+     * Display a specific record.
+     */
     public const ACTION_SHOW = 'show';
+
+    /**
+     * Display an HTML form for editing a new record.
+     */
     public const ACTION_EDIT = 'edit';
+
+    /**
+     * Update a specific record.
+     */
     public const ACTION_UPDATE = 'update';
+
+    /**
+     * Delete a specific record.
+     */
     public const ACTION_DELETE = 'delete';
 
     /**

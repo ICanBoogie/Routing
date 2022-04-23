@@ -18,8 +18,8 @@ use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\ActionResponderProvider;
 use ICanBoogie\Routing\RequestResponderProvider;
 use ICanBoogie\Routing\Route;
-use ICanBoogie\Routing\RouteCollection;
 use ICanBoogie\Routing\RouteProvider\ByUri;
+use ICanBoogie\Routing\RouteProvider\Mutable;
 use ICanBoogie\Routing\Router;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -39,7 +39,7 @@ final class RouterTest extends TestCase
             return $response;
         };
 
-        $routes = new RouteCollection();
+        $routes = new Mutable();
         $responders = new ActionResponderProvider\Mutable();
 
         $router = new Router($routes, $responders);
@@ -81,7 +81,7 @@ final class RouterTest extends TestCase
 
     public function test_route(): void
     {
-        $routes = new RouteCollection();
+        $routes = new Mutable();
         $responders = new ActionResponderProvider\Mutable();
         $response = new Response();
 
