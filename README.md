@@ -5,10 +5,33 @@
 [![Code Coverage](https://img.shields.io/coveralls/ICanBoogie/routing.svg)](https://coveralls.io/r/ICanBoogie/routing)
 [![Downloads](https://img.shields.io/packagist/dt/icanboogie/routing.svg)](https://packagist.org/packages/icanboogie/routing)
 
-The **icanboogie/routing** package handles URL rewriting in native PHP. A request is mapped
-to a route, which in turn gets dispatched to a controller, and possibly an action. If the
-process is successful a response is returned. Events are emitted during the process to allow
-listener to alter the request, the route, the controller, or the response.
+The **icanboogie/routing** package handles URL rewriting in native PHP. A Request is mapped to a
+Route, which in turn is mapped to a Responder. If the process is successful a response is returned.
+Events are emitted along the way to allow listeners to alter the request or the response, or recover
+from failure.
+
+The following example is an overview of a request processing. The routing components are part of the
+stack of responder providers.
+
+```php
+<?php
+
+namespace ICanBoogie\HTTP;
+
+/* @var ResponderProvider $responder_provider */
+
+// The request is usually created from the $_SERVER super global.
+$request = Request::from($_SERVER);
+
+// The Responder Provider matches a request with a Responder
+$responder = $responder_provider->responder_for_request($request);
+
+// The Responder responds to the request with a Response, it might also throw an exception.
+$response = $responder->respond($request);
+
+// The response is sent to the client.
+$response();
+```
 
 
 

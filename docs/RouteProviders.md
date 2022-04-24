@@ -7,23 +7,29 @@ more sophisticated ones that can improve performance.
 
 ## Predicates
 
-Route providers implement the [RouteProvider][] interface. The `route_for_predicate()` method is used to find a route
-that matches a predicate. A predicate can be as simple as a callable. The following predicates come built-in:
+Route providers implement the [RouteProvider][] interface. The `route_for_predicate()` method is
+used to find a route that matches a predicate. A predicate can be as simple as a callable. The
+following predicates come built-in:
 
 - [RouteProvider\ById][]: Matches a route against an identifier.
 - [RouteProvider\ByAction][]: Matches a route against an action.
-- [RouteProvider\ByUri][]: Matches a route against a URI and an optional method. Path parameters and query parameters
-  are captured in the predicate.
+- [RouteProvider\ByIdOrAction][]: Matches a route against an identifier or an action, whichever
+  comes first.
+- [RouteProvider\ByUri][]: Matches a route against a URI and an optional method. Path parameters and
+  query parameters are captured in the predicate.
 
-The following example demonstrates how to find route matching a URL and method, using the `ByUri` predicate:
+The following example demonstrates how to find route matching a URL and method, using the `ByUri`
+predicate:
 
 ```php
 <?php
 
+namespace ICanBoogie\Routing;
+
 use ICanBoogie\HTTP\RequestMethod;
 use ICanBoogie\Routing\RouteProvider\ByUri;
 
-/* @var ICanBoogie\Routing\RouteProvider $route_provider */
+/* @var RouteProvider $route_provider */
 
 $route = $route_provider->route_for_predicate($predicate = new ByUri('/?singer=madonna'));
 echo $route->action; // "home"
@@ -33,3 +39,11 @@ $route = $route_provider->route_for_predicate($predicate = new ByUri('/articles/
 echo $route->action; // "articles:show"
 var_dump($predicate->path_params); // [ 'nid' => 123 ]
 ```
+
+
+
+[RouteProvider]: ../lib/RouteProvider.php
+[RouteProvider\ById]: ../lib/RouteProvider/ById.php
+[RouteProvider\ByAction]: ../lib/RouteProvider/ByAction.php
+[RouteProvider\ByIdOrAction]: ../lib/RouteProvider/ByIdOrAction.php
+[RouteProvider\ByUri]: ../lib/RouteProvider/ByUri.php

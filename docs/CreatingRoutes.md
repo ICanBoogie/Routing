@@ -1,13 +1,30 @@
-# Defining routes
+# Creating routes
 
 There are few ways to define routes. You can build the [Route][] instances yourself or use the route
 collector. Whatever you choose you will end up with a variant of [RouteProvider][].
 
-## Defining routes by hand
+## Creating routes using the collector
 
-To define your routes and hand, you need to create instance of [Route][] and store them in an
-instance of either [RouteProvider\Mutable][] or [RouteProvider\Immutable][], depending on whether you
-want to be able to add routes later or not.
+The route collector offers a convenient fluent interface to define your routes.
+
+```php
+<?php
+
+namespace ICanBoogie\Routing;
+
+$routes = (new RouteCollector())
+    ->route('/', 'page:home')
+    ->get('/contact.html', 'contact:new')
+    ->post('/contact.html', 'contact:create')
+    ->resource('photos')
+    ->collect();
+```
+
+## Creating routes by hand
+
+You can define your routes by hand, and store them in an instance of either
+[RouteProvider\Mutable][] or [RouteProvider\Immutable][], depending on whether you want to be able
+to add routes later or not.
 
 ```php
 <?php
@@ -30,24 +47,7 @@ $routes = new Imutable([
 ]);
 ```
 
-## Defining routes using the collector
-
-The route collector offers a convenient fluent interface to define your routes.
-
-```php
-<?php
-
-namespace ICanBoogie\Routing;
-
-$routes = (new RouteCollector())
-    ->route('/', 'page:home')
-    ->get('/contact.html', 'contact:new')
-    ->post('/contact.html', 'contact:create')
-    ->resource('photos')
-    ->collect();
-```
-
-#### Defining resource routes using `RouteMaker`
+## Creating resource routes using `RouteMaker`
 
 Given a resource name and a controller, the `RouteMaker::resource()` method makes the various
 routes required to handle a resource. Options can be specified to filter the routes to create,
@@ -58,43 +58,43 @@ The following example demonstrates how to create routes for an _article_ resourc
 ```php
 <?php
 
-namespace App;
+namespace ICanBoogie\Routing;
 
 use ICanBoogie\Routing\RouteMaker as Make;
 
-// create all resource actions definitions
-$definitions = Make::resource('articles', ArticlesController::class);
+// create all resource routes
+$routes = Make::resource('articles');
 
 // only create the _list_ definition
-$definitions = Make::resource('articles', ArticlesController::class, [
+$routes = Make::resource('articles', ArticlesController::class, [
 
     Make::OPTION_ONLY => Make::ACTION_LIST
 
 ]);
 
 // only create the _list_ and _show_ definitions
-$definitions = Make::resource('articles', ArticlesController::class, [
+$routes = Make::resource('articles', ArticlesController::class, [
 
     Make::OPTION_ONLY => [ Make::ACTION_LIST, Make::ACTION_SHOW ]
 
 ]);
 
 // create definitions except _destroy_
-$definitions = Make::resource('articles', ArticlesController::class, [
+$routes = Make::resource('articles', ArticlesController::class, [
 
     Make::OPTION_EXCEPT => Make::ACTION_DELETE
 
 ]);
 
 // create definitions except _updated_ and _destroy_
-$definitions = Make::resource('articles', PhotosController::class, [
+$routes = Make::resource('articles', PhotosController::class, [
 
     Make::OPTION_EXCEPT => [ Make::ACTION_UPDATE, Make::ACTION_DELETE ]
 
 ]);
 
 // specify _key_ property name and its regex constraint
-$definitions = Make::resource('articles', ArticlesController::class, [
+$routes = Make::resource('articles', ArticlesController::class, [
 
     Make::OPTION_ID_NAME => 'uuid',
     Make::OPTION_ID_REGEX => '{:uuid:}'
@@ -102,7 +102,7 @@ $definitions = Make::resource('articles', ArticlesController::class, [
 ]);
 
 // specify the identifier of the _create_ definition
-$definitions = Make::resource('articles', ArticlesController::class, [
+$routes = Make::resource('articles', ArticlesController::class, [
 
     Make::OPTION_AS => [
 
