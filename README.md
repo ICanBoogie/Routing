@@ -143,16 +143,6 @@ $response = $responder->respond($request);
 
 
 
-### Rescuing a route
-
-If an exception is raised during dispatching, the `ICanBoogie\Routing\Route::rescue` event
-of class [Route\RescueEvent][] is fired. Event hooks may use this event to rescue the route and
-provide a response, or replace the exception that will be thrown if the rescue fails.
-
-
-
-
-
 ## Controllers
 
 Previous examples demonstrated how closures could be used to handle routes. Closures are
