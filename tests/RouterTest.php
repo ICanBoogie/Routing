@@ -11,6 +11,7 @@
 
 namespace Test\ICanBoogie\Routing;
 
+use ICanBoogie\HTTP\NotFound;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\RequestMethod;
 use ICanBoogie\HTTP\Responder;
@@ -23,6 +24,7 @@ use ICanBoogie\Routing\RouteProvider\Mutable;
 use ICanBoogie\Routing\Router;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Throwable;
 
 final class RouterTest extends TestCase
 {
@@ -30,14 +32,13 @@ final class RouterTest extends TestCase
 
     /**
      * @dataProvider provide_method
+     * @throws Throwable
      */
     public function test_method(string $method, RequestMethod $http_method): void
     {
         $response = new Response();
         $pattern = '/articles/<\d+>';
-        $closure = function () use ($response): Response {
-            return $response;
-        };
+        $closure = fn(): Response => $response;
 
         $routes = new Mutable();
         $responders = new ActionResponderProvider\Mutable();
@@ -55,7 +56,7 @@ final class RouterTest extends TestCase
 
         $this->assertInstanceOf(Route::class, $route);
         $this->assertInstanceOf(Responder::class, $responder = $responders->responder_for_action($route->action));
-        $this->assertSame($response, $responder?->respond(Request::from()));
+        $this->assertSame($response, $responder->respond(Request::from()));
     }
 
     /**
@@ -79,6 +80,9 @@ final class RouterTest extends TestCase
         ];
     }
 
+    /**
+     * @throws NotFound
+     */
     public function test_route(): void
     {
         $routes = new Mutable();
@@ -104,7 +108,7 @@ final class RouterTest extends TestCase
             );
 
         $request = Request::from([ Request::OPTION_PATH => '/articles/123' ]);
-        $responder = new Responder\WithProvider(new RequestResponderProvider($routes, $responders));
+        $responder = new Responder\DelegateToProvider(new RequestResponderProvider($routes, $responders));
         $actual = $responder->respond($request);
 
         $this->assertSame($response, $actual);

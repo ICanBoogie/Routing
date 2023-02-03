@@ -5,7 +5,7 @@ namespace ICanBoogie\Routing;
 use Closure;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\RequestMethod;
-use ICanBoogie\HTTP\ResponderClosure;
+use ICanBoogie\HTTP\Responder\DelegateToClosure;
 use ICanBoogie\HTTP\Response;
 
 /**
@@ -136,7 +136,7 @@ class Router
         $action = self::generate_anonymous_action();
 
         $this->routes->add_routes(new Route($pattern, $action, $method));
-        $this->responders->add_responder($action, new ResponderClosure($closure));
+        $this->responders->add_responder($action, new DelegateToClosure($closure));
 
         return $this;
     }
