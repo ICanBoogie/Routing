@@ -19,7 +19,7 @@ use ICanBoogie\Routing\UrlGenerator;
 use function http_build_query;
 use function is_string;
 
-class UrlGeneratorWithRouteProvider implements UrlGenerator
+final class UrlGeneratorWithRouteProvider implements UrlGenerator
 {
     public function __construct(
         private readonly RouteProvider $routes

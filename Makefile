@@ -41,3 +41,6 @@ test-container:
 lint:
 	@XDEBUG_MODE=off phpcs -s
 	@XDEBUG_MODE=off vendor/bin/phpstan
+
+.phpdoc: lib
+	docker run --rm -v ${PWD}:/data phpdoc/phpdoc:3 -d lib

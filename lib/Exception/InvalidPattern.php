@@ -16,7 +16,7 @@ use InvalidArgumentException;
 use Throwable;
 
 /**
- * Exception thrown when a respond pattern is blank.
+ * Exception thrown when a route pattern is blank.
  */
 class InvalidPattern extends InvalidArgumentException implements Exception
 {

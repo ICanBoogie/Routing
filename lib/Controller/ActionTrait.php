@@ -36,17 +36,15 @@ trait ActionTrait
     /**
      * Resolves the action into a callable.
      */
-    protected function resolve_action(Request $request): callable
+    private function resolve_action(Request $request): callable
     {
         $method = $this->resolve_action_method($request);
         $args = $this->resolve_action_args($request);
 
-        return function () use ($request, $method, $args) {
-            return $this->$method($request, ...$args);
-        };
+        return fn() => $this->$method($request, ...$args);
     }
 
-    protected function resolve_action_method(Request $request): string
+    private function resolve_action_method(Request $request): string
     {
         $action = $request->context->get(Route::class)->action;
         $methods = [];
@@ -72,13 +70,13 @@ trait ActionTrait
             }
         }
 
-        throw new LogicException("Unable to find action method, tried: " . implode(', ', $methods) . ".");
+        throw new LogicException("Unable to find action method, tried: " . implode(', ', $methods));
     }
 
     /**
-     * @return array<int|string, string>
+     * @return string[]
      */
-    protected function resolve_action_args(Request $request): array
+    private function resolve_action_args(Request $request): array
     {
         return array_values($request->path_params);
     }

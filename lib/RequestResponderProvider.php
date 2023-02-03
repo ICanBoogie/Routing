@@ -71,6 +71,7 @@ final class RequestResponderProvider implements ResponderProvider
             {
                 $request->context->add($this->route);
                 $request->path_params += $this->path_params;
+                // @phpstan-ignore-next-line
                 $request->params += $this->path_params;
 
                 return $this->responder->respond($request);
