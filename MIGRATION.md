@@ -42,6 +42,7 @@
 
 - `AccessorTrait` usage has mostly been replaced by `readonly` properties.
 
+- Drop Prophecy
 
 
 [ICanBoogie/HTTP]: https://github.com/ICanBoogie/HTTP

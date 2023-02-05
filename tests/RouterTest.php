@@ -23,13 +23,10 @@ use ICanBoogie\Routing\RouteProvider\ByUri;
 use ICanBoogie\Routing\RouteProvider\Mutable;
 use ICanBoogie\Routing\Router;
 use PHPUnit\Framework\TestCase;
-use Prophecy\PhpUnit\ProphecyTrait;
 use Throwable;
 
 final class RouterTest extends TestCase
 {
-    use ProphecyTrait;
-
     /**
      * @dataProvider provide_method
      * @throws Throwable

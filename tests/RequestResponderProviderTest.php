@@ -15,45 +15,46 @@ use ICanBoogie\HTTP\Exception\NoResponder;
 use ICanBoogie\HTTP\MethodNotAllowed;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\RequestMethod;
+use ICanBoogie\HTTP\RequestOptions;
 use ICanBoogie\HTTP\Responder;
+use ICanBoogie\HTTP\ResponderProvider;
 use ICanBoogie\HTTP\Response;
-use ICanBoogie\Routing\RequestResponderProvider;
 use ICanBoogie\Routing\ActionResponderProvider;
+use ICanBoogie\Routing\RequestResponderProvider;
 use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteProvider;
 use ICanBoogie\Routing\RouteProvider\ByUri;
+use olvlvl\Given\GivenTrait;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Prophecy\Argument;
-use Prophecy\PhpUnit\ProphecyTrait;
-use Prophecy\Prophecy\ObjectProphecy;
 use Throwable;
 
 use function uniqid;
 
 final class RequestResponderProviderTest extends TestCase
 {
-    use ProphecyTrait;
+    use GivenTrait;
 
     /**
-     * @var ObjectProphecy<RouteProvider>
+     * @var MockObject&RouteProvider
      */
-    private ObjectProphecy $routes;
+    private RouteProvider $routes;
 
     /**
-     * @var ObjectProphecy<ActionResponderProvider>
+     * @var MockObject&ActionResponderProvider
      */
-    private ObjectProphecy $responders;
+    private ActionResponderProvider $responders;
     private Request $request;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->routes = $this->prophesize(RouteProvider::class);
-        $this->responders = $this->prophesize(ActionResponderProvider::class);
+        $this->routes = $this->createMock(RouteProvider::class);
+        $this->responders = $this->createMock(ActionResponderProvider::class);
         $this->request = Request::from([
-            Request::OPTION_URI => '/' . uniqid(),
-            Request::OPTION_METHOD => RequestMethod::METHOD_POST,
+            RequestOptions::OPTION_URI => '/' . uniqid(),
+            RequestOptions::OPTION_METHOD => RequestMethod::METHOD_POST,
         ]);
     }
 
@@ -61,10 +62,13 @@ final class RequestResponderProviderTest extends TestCase
     {
         $request = $this->request;
 
-        $this->routes->route_for_predicate(new ByUri($request->uri, $request->method))
-            ->willReturn(null);
-        $this->routes->route_for_predicate(new ByUri($request->uri))
-            ->willReturn(new Route('/', 'action'));
+        $this->routes
+            ->method('route_for_predicate')
+            ->will(
+                $this
+                    ->given(new ByUri($request->uri, $request->method))->return(null)
+                    ->given(new ByUri($request->uri))->return(new Route('/', 'action'))
+            );
 
         $stu = $this->makeSTU();
 
@@ -78,10 +82,13 @@ final class RequestResponderProviderTest extends TestCase
     {
         $request = $this->request;
 
-        $this->routes->route_for_predicate(new ByUri($request->uri, $request->method))
-            ->willReturn(null);
-        $this->routes->route_for_predicate(new ByUri($request->uri))
-            ->willReturn(null);
+        $this->routes
+            ->method('route_for_predicate')
+            ->will(
+                $this
+                    ->given(new ByUri($request->uri, $request->method))->return(null)
+                    ->given(new ByUri($request->uri))->return(null)
+            );
 
         $stu = $this->makeSTU();
 
@@ -92,10 +99,14 @@ final class RequestResponderProviderTest extends TestCase
     {
         $request = $this->request;
 
-        $this->routes->route_for_predicate(new ByUri($request->uri, $request->method))
+        $this->routes
+            ->method('route_for_predicate')
+            ->with(new ByUri($request->uri, $request->method))
             ->willReturn(new Route('/', $action = 'articles:create'));
 
-        $this->responders->responder_for_action($action)
+        $this->responders
+            ->method('responder_for_action')
+            ->with($action)
             ->willReturn(null);
 
         $this->expectException(NoResponder::class);
@@ -114,27 +125,29 @@ final class RequestResponderProviderTest extends TestCase
         $route = new Route('/', $action = 'articles:create');
         $path_params = [ 'id' => uniqid() ];
 
-        $responder = $this->prophesize(Responder::class);
-        $responder->respond(
-            Argument::that(function (Request $r) use ($request, $route, $path_params): bool {
+        $responder = $this->createMock(Responder::class);
+        $responder
+            ->method('respond')
+            ->willReturnCallback(function (Request $r) use ($request, $route, $path_params, $response): Response {
                 $this->assertSame($request, $r);
                 $this->assertSame($route, $r->context->get(Route::class));
                 $this->assertSame($path_params, $r->path_params);
                 $this->assertSame($path_params, $r->params);
-                return true;
-            })
-        )->willReturn($response);
 
-        $this->routes->route_for_predicate(
-            Argument::that(function (ByUri $predicate) use ($path_params): bool {
+                return $response;
+            });
+
+        $this->routes
+            ->method('route_for_predicate')
+            ->willReturnCallback(function (ByUri $predicate) use ($path_params, $route) {
                 $predicate->path_params = $path_params;
 
-                return true;
-            })
-        )
-            ->willReturn($route);
+                return $route;
+            });
 
-        $this->responders->responder_for_action($action)
+        $this->responders
+            ->method('responder_for_action')
+            ->with($action)
             ->willReturn($responder);
 
         $r = $this->makeSTU()->responder_for_request($this->request);
@@ -142,11 +155,11 @@ final class RequestResponderProviderTest extends TestCase
         $this->assertSame($response, $r?->respond($request));
     }
 
-    private function makeSTU(): \ICanBoogie\HTTP\ResponderProvider
+    private function makeSTU(): ResponderProvider
     {
         return new RequestResponderProvider(
-            $this->routes->reveal(),
-            $this->responders->reveal(),
+            $this->routes,
+            $this->responders,
         );
     }
 }

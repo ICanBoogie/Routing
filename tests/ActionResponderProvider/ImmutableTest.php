@@ -14,14 +14,11 @@ namespace Test\ICanBoogie\Routing\ActionResponderProvider;
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\Routing\ActionResponderProvider;
 use PHPUnit\Framework\TestCase;
-use Prophecy\PhpUnit\ProphecyTrait;
 
 use function uniqid;
 
 final class ImmutableTest extends TestCase
 {
-    use ProphecyTrait;
-
     public function test_responder_for_action(): void
     {
         $stu = new ActionResponderProvider\Immutable([
@@ -56,6 +53,6 @@ final class ImmutableTest extends TestCase
 
     private function mockResponder(): Responder
     {
-        return $this->prophesize(Responder::class)->reveal();
+        return $this->createMock(Responder::class);
     }
 }

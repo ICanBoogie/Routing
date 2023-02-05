@@ -13,27 +13,33 @@ namespace Test\ICanBoogie\Routing\ActionResponderProvider;
 
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\Routing\ActionResponderProvider\Container;
+use olvlvl\Given\GivenTrait;
 use PHPUnit\Framework\TestCase;
-use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Container\ContainerInterface;
 
 final class ContainerTest extends TestCase
 {
-    use ProphecyTrait;
+    use GivenTrait;
 
     public function test_provides_responder(): void
     {
-        $responder = $this->prophesize(Responder::class)->reveal();
+        $responder = $this->createMock(Responder::class);
 
-        $container = $this->prophesize(ContainerInterface::class);
-        $container->has($action_ok = 'article:list')
-            ->willReturn(true);
-        $container->has($action_ko = 'article:show')
-            ->willReturn(false);
-        $container->get($action_ok)
+        $container = $this->createMock(ContainerInterface::class);
+        $container
+            ->method('has')
+            ->will(
+                $this
+                    ->given($action_ok = 'article:list')->return(true)
+                    ->given($action_ko = 'article:show')->return(false)
+            );
+
+        $container
+            ->method('get')
+            ->with($action_ok)
             ->willReturn($responder);
 
-        $provider = new Container($container->reveal());
+        $provider = new Container($container);
 
         $this->assertSame($responder, $provider->responder_for_action($action_ok));
         $this->assertNull($provider->responder_for_action($action_ko));
@@ -41,17 +47,22 @@ final class ContainerTest extends TestCase
 
     public function test_provides_responder_with_aliases(): void
     {
-        $responder = $this->prophesize(Responder::class)->reveal();
+        $responder = $this->createMock(Responder::class);
 
-        $container = $this->prophesize(ContainerInterface::class);
-        $container->has($idOk = 'controller.articles')
-            ->willReturn(true);
-        $container->has($idKo = 'something:else')
-            ->willReturn(false);
-        $container->get($idOk)
+        $container = $this->createMock(ContainerInterface::class);
+        $container
+            ->method('has')
+            ->will(
+                $this
+                    ->given($idOk = 'controller.articles')->return(true)
+                    ->given($idKo = 'something:else')->return(false)
+            );
+        $container
+            ->method('get')
+            ->with($idOk)
             ->willReturn($responder);
 
-        $provider = new Container($container->reveal(), [
+        $provider = new Container($container, [
             'articles:show' => 'controller.articles',
             'articles:list' => 'controller.articles',
         ]);

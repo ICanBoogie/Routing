@@ -21,23 +21,18 @@
 		"source": "https://github.com/ICanBoogie/Routing"
 	},
 	"config": {
-		"sort-packages": true,
-		"allow-plugins": {
-			"phpstan/extension-installer": true
-		}
+		"sort-packages": true
 	},
 	"minimum-stability": "dev",
 	"prefer-stable": true,
 	"prefer-dist": true,
-	"require": {
+    "require": {
 		"php": ">=8.1",
 		"ext-json": "*",
 		"icanboogie/http": "^6.0"
 	},
 	"require-dev": {
-		"jangregor/phpstan-prophecy": "^1.0",
-		"phpspec/prophecy-phpunit": "^2.0",
-		"phpstan/extension-installer": "^1.1",
+		"olvlvl/phpunit-given": "dev-main",
 		"phpstan/phpstan": "^1.5.4",
 		"phpunit/phpunit": "^9.5",
 		"psr/container": "^2.0"

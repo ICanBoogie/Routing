@@ -20,21 +20,14 @@ use ICanBoogie\Routing\Middleware\Alter;
 use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\Route\BeforeRespondEvent;
 use ICanBoogie\Routing\Route\RespondEvent;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Prophecy\Argument;
-use Prophecy\PhpUnit\ProphecyTrait;
-use Prophecy\Prophecy\ObjectProphecy;
 
 use function ICanBoogie\get_events;
 
 final class AlterTest extends TestCase
 {
-    use ProphecyTrait;
-
-    /**
-     * @var ObjectProphecy<Responder>
-     */
-    private ObjectProphecy $next;
+    private MockObject&Responder $next;
     private Request $request;
     private Response $response;
 
@@ -44,7 +37,7 @@ final class AlterTest extends TestCase
 
         $route = new Route("/", "article:show");
 
-        $this->next = $this->prophesize(Responder::class);
+        $this->next = $this->createMock(Responder::class);
         $this->request = Request::from();
         $this->request->context->add($route);
         $this->response = new Response();
@@ -58,7 +51,9 @@ final class AlterTest extends TestCase
 
     public function test_response_from_next(): void
     {
-        $this->next->respond($request = $this->request)
+        $this->next
+            ->method('respond')
+            ->with($request = $this->request)
             ->willReturn($response = $this->response);
 
         $this->assertSame($response, $this->respond($request));
@@ -66,8 +61,10 @@ final class AlterTest extends TestCase
 
     public function test_response_from_before_event(): void
     {
-        $this->next->respond(Argument::any())
-            ->shouldNotBeCalled();
+        $this->next
+            ->expects($this->never())
+            ->method('respond')
+            ->with($this->anything());
 
         get_events()->attach(function (BeforeRespondEvent $event, Route $sender) {
             $event->response = $this->response;
@@ -78,7 +75,9 @@ final class AlterTest extends TestCase
 
     public function test_response_from_after_event(): void
     {
-        $this->next->respond($request = $this->request)
+        $this->next
+            ->method('respond')
+            ->with($request = $this->request)
             ->willReturn($this->response);
 
         $new_response = new Response();
@@ -93,7 +92,7 @@ final class AlterTest extends TestCase
     private function respond(Request $request): Response
     {
         return (new Alter())
-            ->responder($this->next->reveal())
+            ->responder($this->next)
             ->respond($request);
     }
 }

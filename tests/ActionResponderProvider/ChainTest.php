@@ -11,38 +11,36 @@
 
 namespace Test\ICanBoogie\Routing\ActionResponderProvider;
 
+use Exception;
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\Routing\ActionResponderProvider;
 use ICanBoogie\Routing\ActionResponderProvider\Chain;
 use PHPUnit\Framework\TestCase;
-use Prophecy\PhpUnit\ProphecyTrait;
 
 final class ChainTest extends TestCase
 {
-    use ProphecyTrait;
-
     public function test_responder_for_action(): void
     {
         $action = 'article:show';
-        $responder = $this->prophesize(Responder::class)->reveal();
+        $responder = $this->createMock(Responder::class);
 
-        $rp1 = $this->prophesize(ActionResponderProvider::class);
-        $rp1->responder_for_action($action)->willReturn(null);
+        $rp1 = $this->createMock(ActionResponderProvider::class);
+        $rp1->method('responder_for_action')->with($action)->willReturn(null);
 
-        $rp2 = $this->prophesize(ActionResponderProvider::class);
-        $rp2->responder_for_action($action)->willReturn(null);
+        $rp2 = $this->createMock(ActionResponderProvider::class);
+        $rp2->method('responder_for_action')->with($action)->willReturn(null);
 
-        $rp3 = $this->prophesize(ActionResponderProvider::class);
-        $rp3->responder_for_action($action)->willReturn($responder);
+        $rp3 = $this->createMock(ActionResponderProvider::class);
+        $rp3->method('responder_for_action')->with($action)->willReturn($responder);
 
-        $rp4 = $this->prophesize(ActionResponderProvider::class);
-        $rp4->responder_for_action($action)->shouldNotBeCalled();
+        $rp4 = $this->createMock(ActionResponderProvider::class);
+        $rp4->expects($this->never())->method('responder_for_action')->with($action)->willThrowException(new Exception("madonna"));
 
         $chain = new Chain(
-            $rp1->reveal(),
-            $rp2->reveal(),
-            $rp3->reveal(),
-            $rp4->reveal(),
+            $rp1,
+            $rp2,
+            $rp3,
+            $rp4,
         );
 
         $this->assertSame($responder, $chain->responder_for_action($action));
