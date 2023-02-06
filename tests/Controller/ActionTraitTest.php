@@ -13,6 +13,7 @@ namespace Test\ICanBoogie\Routing\Controller;
 
 use Closure;
 use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\RequestOptions;
 use ICanBoogie\Routing\Controller\ActionTrait;
 use ICanBoogie\Routing\Route;
 use LogicException;
@@ -20,7 +21,7 @@ use PHPUnit\Framework\TestCase;
 
 use function uniqid;
 
-class ActionTraitTest extends TestCase
+final class ActionTraitTest extends TestCase
 {
     public function test_resolve_action_args(): void
     {
@@ -34,7 +35,7 @@ class ActionTraitTest extends TestCase
 
         $this->assertSame(
             $path_params,
-            $stu->resolve_action_args(Request::from([ Request::OPTION_PATH_PARAMS => $path_params ]))
+            $stu->resolve_action_args(Request::from([ RequestOptions::OPTION_PATH_PARAMS => $path_params ]))
         );
     }
 
@@ -87,7 +88,7 @@ class ActionTraitTest extends TestCase
                     }
 
                     // @phpstan-ignore-next-line
-                    private function get_articles_show()
+                    private function get_articles_show(): void
                     {
                     }
                 }
@@ -104,7 +105,7 @@ class ActionTraitTest extends TestCase
                     }
 
                     // @phpstan-ignore-next-line
-                    private function any_articles_show()
+                    private function any_articles_show(): void
                     {
                     }
                 }
@@ -121,7 +122,7 @@ class ActionTraitTest extends TestCase
                     }
 
                     // @phpstan-ignore-next-line
-                    private function articles_show()
+                    private function articles_show(): void
                     {
                     }
                 }
@@ -138,7 +139,7 @@ class ActionTraitTest extends TestCase
                     }
 
                     // @phpstan-ignore-next-line
-                    private function get_show()
+                    private function get_show(): void
                     {
                     }
                 }
@@ -155,7 +156,7 @@ class ActionTraitTest extends TestCase
                     }
 
                     // @phpstan-ignore-next-line
-                    private function any_show()
+                    private function any_show(): void
                     {
                     }
                 }
@@ -172,7 +173,7 @@ class ActionTraitTest extends TestCase
                     }
 
                     // @phpstan-ignore-next-line
-                    private function show()
+                    private function show(): void
                     {
                     }
                 }
@@ -185,7 +186,7 @@ class ActionTraitTest extends TestCase
     {
         $path_params = [ uniqid() ];
 
-        $assert = function (Request $r, string $nid) use ($path_params) {
+        $assert = function (string $nid) use ($path_params): void {
             $this->assertSame($path_params, [ $nid ]);
         };
 
@@ -205,15 +206,15 @@ class ActionTraitTest extends TestCase
             }
 
             // @phpstan-ignore-next-line
-            private function show(Request $request, string $nid): string
+            private function show(string $nid): string
             {
-                ($this->assert)($request, $nid);
+                ($this->assert)($nid);
 
                 return $this->response;
             }
         };
 
-        $request = Request::from([ Request::OPTION_PATH_PARAMS => $path_params ]);
+        $request = Request::from([ RequestOptions::OPTION_PATH_PARAMS => $path_params ]);
         $request->context->add(new Route('/', 'articles:show'));
 
         $action = $stu->resolve_action($request);

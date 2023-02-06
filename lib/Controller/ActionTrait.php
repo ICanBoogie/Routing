@@ -41,7 +41,7 @@ trait ActionTrait
         $method = $this->resolve_action_method($request);
         $args = $this->resolve_action_args($request);
 
-        return fn() => $this->$method($request, ...$args);
+        return fn() => $this->$method(...$args);
     }
 
     private function resolve_action_method(Request $request): string
