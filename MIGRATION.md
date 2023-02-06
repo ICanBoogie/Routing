@@ -21,7 +21,7 @@
 
 ### Backward Incompatible Changes
 
-- `Controller` is now `ControllerAbstract`.
+- `Controller` is now `ControllerAbstract`. `ControllerAbstract` is no longer extending `Prototyped`, required services need to be provided through the constructor.
 
 - `Pattern:match()` is now `Pattern:matches()`.
 
