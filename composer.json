@@ -1,50 +1,50 @@
 {
-	"name": "icanboogie/routing",
-	"type": "library",
-	"description": "Request routing",
-	"keywords": [
-		"routing",
-		"controller"
-	],
-	"homepage": "https://icanboogie.org/",
-	"license": "BSD-3-Clause",
-	"authors": [
-		{
-			"name": "Olivier Laviale",
-			"email": "olivier.laviale@gmail.com",
-			"homepage": "https://olvlvl.com/",
-			"role": "Developer"
-		}
-	],
-	"support": {
-		"issues": "https://github.com/ICanBoogie/Routing/issues",
-		"source": "https://github.com/ICanBoogie/Routing"
-	},
-	"config": {
-		"sort-packages": true
-	},
-	"minimum-stability": "dev",
-	"prefer-stable": true,
-	"prefer-dist": true,
+    "name": "icanboogie/routing",
+    "type": "library",
+    "description": "Request routing",
+    "keywords": [
+        "routing",
+        "controller"
+    ],
+    "homepage": "https://icanboogie.org/",
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Olivier Laviale",
+            "email": "olivier.laviale@gmail.com",
+            "homepage": "https://olvlvl.com/",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/ICanBoogie/Routing/issues",
+        "source": "https://github.com/ICanBoogie/Routing"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "prefer-dist": true,
     "require": {
-		"php": ">=8.1",
-		"ext-json": "*",
-		"icanboogie/http": "^6.0"
-	},
-	"require-dev": {
-		"olvlvl/phpunit-given": "dev-main",
-		"phpstan/phpstan": "^1.5.4",
-		"phpunit/phpunit": "^9.5",
-		"psr/container": "^2.0"
-	},
-	"autoload": {
-		"psr-4": {
-			"ICanBoogie\\Routing\\": "lib/"
-		}
-	},
-	"autoload-dev": {
-		"psr-4": {
-			"Test\\ICanBoogie\\Routing\\": "tests/"
-		}
-	}
+        "php": ">=8.1",
+        "ext-json": "*",
+        "icanboogie/http": "^6.0"
+    },
+    "require-dev": {
+        "olvlvl/phpunit-given": "dev-main",
+        "phpstan/phpstan": "^1.5.4",
+        "phpunit/phpunit": "^9.5",
+        "psr/container": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "ICanBoogie\\Routing\\": "lib/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Test\\ICanBoogie\\Routing\\": "tests/"
+        }
+    }
 }

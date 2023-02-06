@@ -301,9 +301,9 @@ by a controller using [ActionTrait][] has an empty `action` property.
 
 The project is continuously tested by [GitHub actions](https://github.com/ICanBoogie/Routing/actions).
 
-[![Tests](https://github.com/ICanBoogie/routing/workflows/test/badge.svg?branch=master)](https://github.com/ICanBoogie/routing/actions?query=workflow%3Atest)
-[![Static Analysis](https://github.com/ICanBoogie/routing/workflows/static-analysis/badge.svg?branch=master)](https://github.com/ICanBoogie/routing/actions?query=workflow%3Astatic-analysis)
-[![Code Style](https://github.com/ICanBoogie/routing/workflows/code-style/badge.svg?branch=master)](https://github.com/ICanBoogie/routing/actions?query=workflow%3Acode-style)
+[![Tests](https://github.com/ICanBoogie/Routing/workflows/test/badge.svg?branch=master)](https://github.com/ICanBoogie/Routing/actions?query=workflow%3Atest)
+[![Static Analysis](https://github.com/ICanBoogie/Routing/workflows/static-analysis/badge.svg?branch=master)](https://github.com/ICanBoogie/Routing/actions?query=workflow%3Astatic-analysis)
+[![Code Style](https://github.com/ICanBoogie/Routing/workflows/code-style/badge.svg?branch=master)](https://github.com/ICanBoogie/Routing/actions?query=workflow%3Acode-style)
 
 
 
