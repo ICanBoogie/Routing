@@ -1,6 +1,10 @@
 # Migration
 
-## v5.0x to v6.0x
+## v5.x to v6.x
+
+### New Requirements
+
+- PHP 8.1+
 
 ### New features
 
@@ -37,8 +41,6 @@
 - `RouteDefinition` is gone, routes are defined with `Route`
 
 ### Other Changes
-
-- Requires PHP 8.1+
 
 - `AccessorTrait` usage has mostly been replaced by `readonly` properties.
 

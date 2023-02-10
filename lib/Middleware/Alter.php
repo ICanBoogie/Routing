@@ -19,7 +19,6 @@ use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\Route\BeforeRespondEvent;
 use ICanBoogie\Routing\Route\RespondEvent;
 
-use function assert;
 use function ICanBoogie\emit;
 
 /**
@@ -53,11 +52,7 @@ final class Alter implements Middleware
 
             private function extract_route(Request $request): Route
             {
-                $route = $request->context->get(Route::class);
-
-                assert($route instanceof Route);
-
-                return $route;
+                return $request->context->get(Route::class);
             }
         };
     }

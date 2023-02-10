@@ -33,7 +33,7 @@
     },
     "require-dev": {
         "olvlvl/phpunit-given": "dev-main",
-        "phpstan/phpstan": "^1.5.4",
+        "phpstan/phpstan": "^1.6",
         "phpunit/phpunit": "^9.5",
         "psr/container": "^2.0"
     },

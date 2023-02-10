@@ -2,5 +2,6 @@ parameters:
   level: max
   paths:
     - lib
+#    - tests
   excludePaths:
-    - lib/ControllerAbstract.php
+    - tests/sandbox/*

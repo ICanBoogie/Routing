@@ -27,7 +27,7 @@ use function ICanBoogie\get_events;
 
 final class AlterTest extends TestCase
 {
-    private MockObject&Responder $next;
+    private MockObject & Responder $next;
     private Request $request;
     private Response $response;
 

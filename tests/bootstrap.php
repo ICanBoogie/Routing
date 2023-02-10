@@ -11,9 +11,6 @@
 
 namespace ICanBoogie;
 
-/* @var $loader \Composer\Autoload\ClassLoader */
-
-$loader = require __DIR__ . '/../vendor/autoload.php';
-$loader->addPsr4('ICanBoogie\\Routing\\', __DIR__);
+require __DIR__ . '/../vendor/autoload.php';
 
 $_SERVER['HTTP_HOST'] = 'icanboogie.org';

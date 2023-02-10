@@ -235,7 +235,7 @@ final class Pattern
     /**
      * Formats a pattern with the specified values.
      *
-     * @param array<string, mixed>|object|null $values The values to format the pattern, either as an array or an
+     * @param array<string|int, mixed>|object|null $values The values to format the pattern, either as an array or an
      * object. If value is an instance of {@link ToSlug} the `to_slug()` method is used to
      * transform the instance into a URL component.
      *
@@ -258,7 +258,7 @@ final class Pattern
     /**
      * Formats pattern parts.
      *
-     * @param array<string, mixed>|object $container
+     * @param array<int|string, mixed>|object $container
      *
      * @uses read_value_from_array
      * @uses read_value_from_object

@@ -21,7 +21,9 @@ use PHPUnit\Framework\TestCase;
 
 final class ControllerAbstractTest extends TestCase
 {
+    /** @phpstan-ignore-next-line  */
     private readonly Route $route;
+    /** @phpstan-ignore-next-line  */
     private readonly Request $request;
 
     protected function setUp(): void
@@ -30,7 +32,9 @@ final class ControllerAbstractTest extends TestCase
 
         EventCollectionProvider::define(fn(): EventCollection => $events);
 
+        /** @phpstan-ignore-next-line  */
         $this->route = new Route('/', 'articles:show');
+        /** @phpstan-ignore-next-line  */
         $this->request = Request::from();
         $this->request->context->add($this->route);
     }
@@ -71,7 +75,6 @@ final class ControllerAbstractTest extends TestCase
     {
         $response = new Response();
         $controller = new class ($response) extends ControllerAbstract {
-
             public function __construct(
                 private readonly Response $_response
             ) {
