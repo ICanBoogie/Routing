@@ -12,8 +12,8 @@
 namespace ICanBoogie\Routing\RouteProvider;
 
 use ArrayIterator;
-use ICanBoogie\Routing\IterableRouteProvider;
 use ICanBoogie\Routing\Route;
+use ICanBoogie\Routing\RouteProvider;
 use Traversable;
 
 use function array_values;
@@ -22,10 +22,10 @@ use function iterator_to_array;
 /**
  * Speed up route resolution for predicate {@link ById}.
  */
-final class MemoizeByIdOrAction implements IterableRouteProvider
+final class MemoizeByIdOrAction implements RouteProvider
 {
     public function __construct(
-        private readonly IterableRouteProvider $inner_provider
+        private readonly RouteProvider $inner_provider
     ) {
     }
 
@@ -50,8 +50,8 @@ final class MemoizeByIdOrAction implements IterableRouteProvider
         );
     }
 
-    private IterableRouteProvider $by_id;
-    private IterableRouteProvider $by_action;
+    private RouteProvider $by_id;
+    private RouteProvider $by_action;
 
     private function route_for_id_or_action(string $id_or_action): ?Route
     {

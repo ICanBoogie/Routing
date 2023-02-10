@@ -11,8 +11,8 @@
 
 namespace Test\ICanBoogie\Routing\RouteProvider;
 
-use ICanBoogie\Routing\IterableRouteProvider;
 use ICanBoogie\Routing\Route;
+use ICanBoogie\Routing\RouteProvider;
 use ICanBoogie\Routing\RouteProvider\ByAction;
 use ICanBoogie\Routing\RouteProvider\Immutable;
 use PHPUnit\Framework\TestCase;
@@ -22,7 +22,7 @@ use function implode;
 
 final class ImmutableTest extends TestCase
 {
-    private IterableRouteProvider $provider;
+    private RouteProvider $provider;
     private Route $r1;
     private Route $r2;
     private Route $r3;

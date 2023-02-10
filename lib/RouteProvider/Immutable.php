@@ -11,8 +11,8 @@
 
 namespace ICanBoogie\Routing\RouteProvider;
 
-use ICanBoogie\Routing\IterableRouteProvider;
 use ICanBoogie\Routing\Route;
+use ICanBoogie\Routing\RouteProvider;
 use ReflectionClass;
 use ReflectionException;
 use Traversable;
@@ -20,7 +20,7 @@ use Traversable;
 /**
  * An immutable route provider.
  */
-final class Immutable implements IterableRouteProvider
+final class Immutable implements RouteProvider
 {
     private Mutable $mutable;
 

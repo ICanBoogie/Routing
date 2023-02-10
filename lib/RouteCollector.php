@@ -26,7 +26,7 @@ class RouteCollector
         $this->routes = new RouteProvider\Mutable();
     }
 
-    public function collect(): IterableRouteProvider
+    public function collect(): RouteProvider
     {
         return new RouteProvider\Immutable($this->routes);
     }

@@ -11,17 +11,17 @@
 
 namespace ICanBoogie\Routing\RouteProvider;
 
-use ICanBoogie\Routing\IterableRouteProvider;
 use ICanBoogie\Routing\Route;
+use ICanBoogie\Routing\RouteProvider;
 use Traversable;
 
 /**
  * Speed up route resolution for predicate {@link ById}, {@link ByAction}, and {@link ByUri}.
  */
-final class Memoize implements IterableRouteProvider
+final class Memoize implements RouteProvider
 {
     public function __construct(
-        private readonly IterableRouteProvider $inner_provider
+        private readonly RouteProvider $inner_provider
     ) {
     }
 
@@ -30,10 +30,10 @@ final class Memoize implements IterableRouteProvider
         return $this->inner_provider->getIterator();
     }
 
-    private IterableRouteProvider $by_id;
-    private IterableRouteProvider $by_action;
-    private IterableRouteProvider $by_id_or_action;
-    private IterableRouteProvider $by_uri;
+    private RouteProvider $by_id;
+    private RouteProvider $by_action;
+    private RouteProvider $by_id_or_action;
+    private RouteProvider $by_uri;
 
     public function route_for_predicate(callable $predicate): ?Route
     {

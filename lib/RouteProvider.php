@@ -11,7 +11,13 @@
 
 namespace ICanBoogie\Routing;
 
-interface RouteProvider
+use IteratorAggregate;
+
+/**
+ * @extends IteratorAggregate<Route>
+ *     The key has no meaning.
+ */
+interface RouteProvider extends IteratorAggregate
 {
     /**
      * Provides the route matching the specified predicate.
@@ -24,7 +30,7 @@ interface RouteProvider
      *
      * **Note:** Providers might optimize predicate matching and might skip the callable.
      *
-     * @phpstan-param (callable(Route): bool) $predicate
+     * @param (callable(Route): bool) $predicate
      */
     public function route_for_predicate(callable $predicate): ?Route;
 }

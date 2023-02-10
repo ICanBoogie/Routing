@@ -11,8 +11,8 @@
 
 namespace Test\ICanBoogie\Routing\RouteProvider;
 
-use ICanBoogie\Routing\IterableRouteProvider;
 use ICanBoogie\Routing\Route;
+use ICanBoogie\Routing\RouteProvider;
 use Traversable;
 
 /**
@@ -20,13 +20,13 @@ use Traversable;
  *
  * Mostly used to spy on memoize providers.
  */
-final class SpyIterableRouteProvider implements IterableRouteProvider
+final class SpyRouteProvider implements RouteProvider
 {
     public int $times_iterator = 0;
     public int $times_route_for_predicate = 0;
 
     public function __construct(
-        private readonly IterableRouteProvider $inner_provider
+        private readonly RouteProvider $inner_provider
     ) {
     }
 

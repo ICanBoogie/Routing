@@ -11,8 +11,8 @@
 
 namespace Test\ICanBoogie\Routing\RouteProvider;
 
-use ICanBoogie\Routing\IterableRouteProvider;
 use ICanBoogie\Routing\Route;
+use ICanBoogie\Routing\RouteProvider;
 use ICanBoogie\Routing\RouteProvider\ByAction;
 use ICanBoogie\Routing\RouteProvider\ById;
 use ICanBoogie\Routing\RouteProvider\ByIdOrAction;
@@ -25,8 +25,8 @@ use function implode;
 
 final class MemoizeTest extends TestCase
 {
-    private IterableRouteProvider $provider;
-    private SpyIterableRouteProvider $spy;
+    private RouteProvider $provider;
+    private SpyRouteProvider $spy;
     private Route $r1;
     private Route $r2;
     private Route $r3;
@@ -36,7 +36,7 @@ final class MemoizeTest extends TestCase
         parent::setUp();
 
         $this->provider = new Memoize(
-            $this->spy = new SpyIterableRouteProvider(
+            $this->spy = new SpyRouteProvider(
                 new Immutable([
                     $this->r1 = new Route('/', 'page:home'),
                     $this->r2 = new Route('/about.html', 'page:about', id: 'about'),
