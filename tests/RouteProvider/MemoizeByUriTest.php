@@ -163,15 +163,14 @@ final class MemoizeByUriTest extends TestCase
             ])
         );
 
-        $this->assertSame(
-            $ok,
-            $routes->route_for_predicate(
-                new ByUri(
-                    '/api/articles/123/active',
-                    RequestMethod::METHOD_PUT
-                )
+        $actual = $routes->route_for_predicate(
+            new ByUri(
+                '/api/articles/123/active',
+                RequestMethod::METHOD_PUT
             )
         );
+
+        $this->assertSame($ok, $actual);
     }
 
     public function test_nameless_capture(): void

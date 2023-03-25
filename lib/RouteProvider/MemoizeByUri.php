@@ -19,8 +19,8 @@ use Traversable;
 use function array_diff_key;
 use function array_values;
 use function count;
-use function ICanBoogie\stable_sort;
 use function iterator_to_array;
+use function spl_object_id;
 use function substr_count;
 
 /**
@@ -170,11 +170,15 @@ final class MemoizeByUri implements RouteProvider
                 $static[] = $route;
             } else {
                 $dynamic[] = $route;
-                $weights[] = substr_count($pattern->interleaved[0], self::PATH_SEPARATOR); // @phpstan-ignore-line
+                $weights[spl_object_id($route)] = substr_count($pattern->interleaved[0], self::PATH_SEPARATOR); // @phpstan-ignore-line
             }
         }
 
-        stable_sort($dynamic, fn($v, $k) => -$weights[$k]);
+        uasort(
+            $dynamic,
+            // it's weight, not priority, the comparison needs to be reversed
+            fn(Route $a, Route $b): int => $weights[spl_object_id($b)] <=> $weights[spl_object_id($a)]
+        );
 
         return [ $this->static = $static, $this->dynamic = $dynamic ];
     }
