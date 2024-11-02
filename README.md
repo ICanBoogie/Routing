@@ -1,8 +1,8 @@
 # Routing
 
 [![Packagist](https://img.shields.io/packagist/v/icanboogie/routing.svg)](https://packagist.org/packages/icanboogie/routing)
-[![Code Quality](https://img.shields.io/scrutinizer/g/ICanBoogie/routing.svg)](https://scrutinizer-ci.com/g/ICanBoogie/routing)
-[![Code Coverage](https://img.shields.io/coveralls/ICanBoogie/routing.svg)](https://coveralls.io/r/ICanBoogie/routing)
+[![Code Quality](https://img.shields.io/scrutinizer/g/ICanBoogie/Routing.svg)](https://scrutinizer-ci.com/g/ICanBoogie/Routing)
+[![Code Coverage](https://coveralls.io/repos/github/ICanBoogie/Routing/badge.svg?branch=6.0)](https://coveralls.io/r/ICanBoogie/Routing?branch=6.0)
 [![Downloads](https://img.shields.io/packagist/dt/icanboogie/routing.svg)](https://packagist.org/packages/icanboogie/routing)
 
 The **icanboogie/routing** package handles URL rewriting in native PHP. A Request is mapped to a
@@ -37,7 +37,7 @@ $response();
 
 #### Installation
 
-```bash
+```shell
 composer require icanboogie/routing
 ```
 
@@ -301,22 +301,22 @@ by a controller using [ActionTrait][] has an empty `action` property.
 
 The project is continuously tested by [GitHub actions](https://github.com/ICanBoogie/Routing/actions).
 
-[![Tests](https://github.com/ICanBoogie/Routing/workflows/test/badge.svg?branch=master)](https://github.com/ICanBoogie/Routing/actions?query=workflow%3Atest)
-[![Static Analysis](https://github.com/ICanBoogie/Routing/workflows/static-analysis/badge.svg?branch=master)](https://github.com/ICanBoogie/Routing/actions?query=workflow%3Astatic-analysis)
-[![Code Style](https://github.com/ICanBoogie/Routing/workflows/code-style/badge.svg?branch=master)](https://github.com/ICanBoogie/Routing/actions?query=workflow%3Acode-style)
+[![Tests](https://github.com/ICanBoogie/HTTP/actions/workflows/test.yml/badge.svg?branch=6.0)](https://github.com/ICanBoogie/HTTP/actions/workflows/test.yml)
+[![Static Analysis](https://github.com/ICanBoogie/HTTP/actions/workflows/static-analysis.yml/badge.svg?branch=6.0)](https://github.com/ICanBoogie/HTTP/actions/workflows/static-analysis.yml)
+[![Code Style](https://github.com/ICanBoogie/HTTP/actions/workflows/code-style.yml/badge.svg?branch=6.0)](https://github.com/ICanBoogie/HTTP/actions/workflows/code-style.yml)
 
 
 
 ## Code of Conduct
 
 This project adheres to a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in
-this project and its community, you are expected to uphold this code.
+this project and its community, you're expected to uphold this code.
 
 
 
 ## Contributing
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+See [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 
 

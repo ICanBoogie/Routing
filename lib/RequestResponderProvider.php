@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the ICanBoogie package.
- *
- * (c) Olivier Laviale <olivier.laviale@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\Exception\NoResponder;
@@ -26,11 +17,11 @@ use ICanBoogie\HTTP\Response;
  * - The matching route is added to the request's context.
  * - The request's parameters are updated with the parameters extracted from the URI path.
  */
-final class RequestResponderProvider implements ResponderProvider
+final readonly class RequestResponderProvider implements ResponderProvider
 {
     public function __construct(
-        private readonly RouteProvider $routes,
-        private readonly ActionResponderProvider $responders,
+        private RouteProvider $routes,
+        private ActionResponderProvider $responders,
     ) {
     }
 
@@ -47,7 +38,7 @@ final class RequestResponderProvider implements ResponderProvider
 
         if (!$route) {
             // We try again the same URI but this time with request method ANY,
-            // if we have a match then the method used is probably wrong.
+            // if we have a match, then the method used is probably wrong.
             return $this->routes->route_for_predicate(new RouteProvider\ByUri($request->uri))
                 ? throw new MethodNotAllowed($method->value)
                 : null;

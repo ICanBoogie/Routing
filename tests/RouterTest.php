@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the ICanBoogie package.
- *
- * (c) Olivier Laviale <olivier.laviale@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace Test\ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\NotFound;
@@ -22,15 +13,16 @@ use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteProvider\ByUri;
 use ICanBoogie\Routing\RouteProvider\Mutable;
 use ICanBoogie\Routing\Router;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Throwable;
 
 final class RouterTest extends TestCase
 {
     /**
-     * @dataProvider provide_method
      * @throws Throwable
      */
+    #[DataProvider('provide_method')]
     public function test_method(string $method, RequestMethod $http_method): void
     {
         $response = new Response();
@@ -59,7 +51,7 @@ final class RouterTest extends TestCase
     /**
      * @return mixed[]
      */
-    public function provide_method(): array
+    public static function provide_method(): array
     {
         return [
 

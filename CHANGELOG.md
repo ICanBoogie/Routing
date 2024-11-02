@@ -1,10 +1,10 @@
-# Migration
+# CHANGELOG
 
-## v5.x to v6.x
+## v5.x to v6.0
 
 ### New Requirements
 
-- PHP 8.1+
+- PHP 8.2+
 
 ### New features
 

@@ -27,14 +27,14 @@
     "prefer-stable": true,
     "prefer-dist": true,
     "require": {
-        "php": ">=8.1",
+        "php": ">=8.2",
         "ext-json": "*",
         "icanboogie/http": "^6.0"
     },
     "require-dev": {
-        "olvlvl/phpunit-given": "dev-main",
-        "phpstan/phpstan": "^1.6",
-        "phpunit/phpunit": "^9.5",
+        "olvlvl/phpunit-given": "^11.0",
+        "phpstan/phpstan": "^1.12",
+        "phpunit/phpunit": "^11.4",
         "psr/container": "^2.0"
     },
     "autoload": {

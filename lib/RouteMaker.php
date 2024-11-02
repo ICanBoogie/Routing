@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the ICanBoogie package.
- *
- * (c) Olivier Laviale <olivier.laviale@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\Routing\RouteMaker\Basics;
@@ -70,7 +61,7 @@ final class RouteMaker
      *
      * @return Route[]
      */
-    public static function actions(string $name, array $basics, Options $options = null): array
+    public static function actions(string $name, array $basics, ?Options $options = null): array
     {
         $options ??= new Options();
         $basics = array_merge($basics, $options->basics);
@@ -100,7 +91,7 @@ final class RouteMaker
      *
      * @return Route[]
      */
-    public static function resource(string $name, Options $options = null): array
+    public static function resource(string $name, ?Options $options = null): array
     {
         return self::actions($name, self::default_resource_actions(), $options);
     }

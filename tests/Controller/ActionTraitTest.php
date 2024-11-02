@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the ICanBoogie package.
- *
- * (c) Olivier Laviale <olivier.laviale@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace Test\ICanBoogie\Routing\Controller;
 
 use Closure;
@@ -17,6 +8,7 @@ use ICanBoogie\HTTP\RequestOptions;
 use ICanBoogie\Routing\Controller\ActionTrait;
 use ICanBoogie\Routing\Route;
 use LogicException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 use function uniqid;
@@ -56,9 +48,7 @@ final class ActionTraitTest extends TestCase
         $stu->resolve_action_method($request);
     }
 
-    /**
-     * @dataProvider provide_resolve_action_method
-     */
+    #[DataProvider('provide_resolve_action_method')]
     public function test_resolve_action_method(string $expected, object $stu): void
     {
         $request = Request::from();
@@ -73,7 +63,7 @@ final class ActionTraitTest extends TestCase
     /**
      * @return mixed[]
      */
-    public function provide_resolve_action_method(): array
+    public static function provide_resolve_action_method(): array
     {
         return [
 

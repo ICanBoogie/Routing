@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the ICanBoogie package.
- *
- * (c) Olivier Laviale <olivier.laviale@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\Routing\Exception\InvalidPattern;
@@ -292,7 +283,7 @@ final class Pattern
      *
      * @param array<string, string> $captured The parameters captured from the pathname.
      */
-    public function matches(string $pathname, array &$captured = null): bool
+    public function matches(string $pathname, ?array &$captured = null): bool
     {
         $captured = [];
 

@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the ICanBoogie package.
- *
- * (c) Olivier Laviale <olivier.laviale@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\RequestMethod;
@@ -20,7 +11,7 @@ use function is_array;
 final class Route
 {
     /**
-     * Separator used for actions e.g. "articles:show".
+     * Separator used for actions; for example, "articles:show".
      */
     public const ACTION_SEPARATOR = ':';
 
@@ -48,8 +39,8 @@ final class Route
 
     /**
      * @param string|Pattern $pattern Pattern of the route.
-     * @param string $action Identifier of a qualified action. e.g. 'articles:show'.
-     * @param RequestMethod|RequestMethod[] $methods Request method(s) accepted by the respond.
+     * @param string $action Identifier of a qualified action; for example, 'articles:show'.
+     * @param RequestMethod|RequestMethod[] $methods Request methods accepted by the route.
      * @param object[] $extensions
      */
     public function __construct(
@@ -67,7 +58,7 @@ final class Route
     }
 
     /**
-     * Whether the specified method matches with the method(s) supported by the route.
+     * Whether the specified method matches with the methods supported by the route.
      */
     public function method_matches(RequestMethod $method): bool
     {

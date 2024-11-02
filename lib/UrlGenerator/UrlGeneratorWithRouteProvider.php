@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the ICanBoogie package.
- *
- * (c) Olivier Laviale <olivier.laviale@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace ICanBoogie\Routing\UrlGenerator;
 
 use ICanBoogie\Routing\Exception\RouteNotFound;
@@ -19,10 +10,10 @@ use ICanBoogie\Routing\UrlGenerator;
 use function http_build_query;
 use function is_string;
 
-final class UrlGeneratorWithRouteProvider implements UrlGenerator
+final readonly class UrlGeneratorWithRouteProvider implements UrlGenerator
 {
     public function __construct(
-        private readonly RouteProvider $routes
+        private RouteProvider $routes
     ) {
     }
 

@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the ICanBoogie package.
- *
- * (c) Olivier Laviale <olivier.laviale@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace Test\ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\RequestMethod;
@@ -16,16 +7,17 @@ use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteMaker as Make;
 use ICanBoogie\Routing\RouteMaker\Basics;
 use ICanBoogie\Routing\RouteMaker\Options;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class RouteMakerTest extends TestCase
 {
     /**
-     * @dataProvider provide_actions_options
      *
      * @param array<string, Basics> $basics
      * @param Route[] $expected
      */
+    #[DataProvider('provide_actions_options')]
     public function test_actions(array $basics, ?Options $options, array $expected): void
     {
         $this->assertEquals($expected, Make::actions('dogs', $basics, $options));
@@ -34,7 +26,7 @@ final class RouteMakerTest extends TestCase
     /**
      * @return mixed[]
      */
-    public function provide_actions_options(): array
+    public static function provide_actions_options(): array
     {
         return [
 
@@ -89,10 +81,9 @@ final class RouteMakerTest extends TestCase
     }
 
     /**
-     * @dataProvider provide_resource_options
-     *
      * @param Route[] $expected
      */
+    #[DataProvider('provide_resource_options')]
     public function test_resource(?Options $options, array $expected): void
     {
         $this->assertEquals($expected, Make::resource('photos', $options));
@@ -101,7 +92,7 @@ final class RouteMakerTest extends TestCase
     /**
      * @return mixed[]
      */
-    public function provide_resource_options(): array
+    public static function provide_resource_options(): array
     {
         return [
 

@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the ICanBoogie package.
- *
- * (c) Olivier Laviale <olivier.laviale@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace ICanBoogie\Routing\RouteProvider;
 
 use ArrayIterator;
@@ -61,13 +52,13 @@ final class MemoizeByUri implements RouteProvider
         $path_params = [];
 
         /**
-         * Search for a matching static respond.
+         * Search for a matching static route.
          *
          * @param Route[] $routes
          */
         $map_static = function (iterable $routes) use ($path, $method): ?Route {
             foreach ($routes as $route) {
-                $pattern = (string) $route->pattern;
+                $pattern = (string)$route->pattern;
 
                 if ($route->method_matches($method) && $pattern === $path) {
                     return $route;
@@ -78,7 +69,7 @@ final class MemoizeByUri implements RouteProvider
         };
 
         /**
-         * Search for a matching dynamic respond.
+         * Search for a matching dynamic route.
          *
          * @param Route[] $routes
          */
@@ -112,7 +103,7 @@ final class MemoizeByUri implements RouteProvider
             return null;
         }
 
-        // We update the predicate with the path parameters, and remove matches from the query parameters.
+        // We update the predicate with the path parameters and remove matches from the query parameters.
 
         $predicate->path_params = $path_params;
 
@@ -136,7 +127,7 @@ final class MemoizeByUri implements RouteProvider
     private const PATH_SEPARATOR = '/';
 
     /**
-     * Sorts routes according to their type and computed weight.
+     * Sort routes according to their type and computed weight.
      *
      * Routes and grouped in two groups: static routes and dynamic routes. The difference between
      * static and dynamic routes is that dynamic routes capture parameters from the path and thus
@@ -170,13 +161,16 @@ final class MemoizeByUri implements RouteProvider
                 $static[] = $route;
             } else {
                 $dynamic[] = $route;
-                $weights[spl_object_id($route)] = substr_count($pattern->interleaved[0], self::PATH_SEPARATOR); // @phpstan-ignore-line
+                $weights[spl_object_id($route)] = substr_count(
+                    $pattern->interleaved[0], // @phpstan-ignore-line
+                    self::PATH_SEPARATOR
+                );
             }
         }
 
         uasort(
             $dynamic,
-            // it's weight, not priority, the comparison needs to be reversed
+            // the comparison needs to be reversed to transform weights into priorities
             fn(Route $a, Route $b): int => $weights[spl_object_id($b)] <=> $weights[spl_object_id($a)]
         );
 

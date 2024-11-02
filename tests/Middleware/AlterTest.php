@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the ICanBoogie package.
- *
- * (c) Olivier Laviale <olivier.laviale@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace Test\ICanBoogie\Routing\Middleware;
 
 use ICanBoogie\EventCollection;
@@ -82,9 +73,9 @@ final class AlterTest extends TestCase
 
         $new_response = new Response();
 
-        get_events()->attach(function (RespondEvent $event, Route $sender) use ($new_response) {
-            $event->response = $new_response;
-        });
+        get_events()->attach(
+            fn(RespondEvent $event, Route $sender) => $event->response = $new_response
+        );
 
         $this->assertSame($new_response, $this->respond($request));
     }

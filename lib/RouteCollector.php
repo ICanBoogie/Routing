@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the ICanBoogie package.
- *
- * (c) Olivier Laviale <olivier.laviale@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\RequestMethod;
@@ -35,8 +26,8 @@ class RouteCollector
      * Add a route.
      *
      * @param string $pattern Pattern of the route.
-     * @param string $action Identifier of a qualified action. e.g. 'articles:show'.
-     * @param RequestMethod|RequestMethod[] $methods Request method(s) accepted by the route.
+     * @param string $action Identifier of a qualified action; for example, 'articles:show'.
+     * @param RequestMethod|RequestMethod[] $methods Request methods accepted by the route.
      *
      * @return $this
      */
@@ -55,7 +46,7 @@ class RouteCollector
      * Add a route.
      *
      * @param string $pattern Pattern of the route.
-     * @param string $action Identifier of a qualified action. e.g. 'articles:show'.
+     * @param string $action Identifier of a qualified action; for example, 'articles:show'.
      *
      * @return $this
      */
@@ -70,7 +61,7 @@ class RouteCollector
      * Add a route.
      *
      * @param string $pattern Pattern of the route.
-     * @param string $action Identifier of a qualified action. e.g. 'articles:show'.
+     * @param string $action Identifier of a qualified action; for example, 'articles:show'.
      *
      * @return $this
      */
@@ -85,7 +76,7 @@ class RouteCollector
      * Add a route.
      *
      * @param string $pattern Pattern of the route.
-     * @param string $action Identifier of a qualified action. e.g. 'articles:create'.
+     * @param string $action Identifier of a qualified action; for example, 'articles:create'.
      *
      * @return $this
      */
@@ -100,7 +91,7 @@ class RouteCollector
      * Add a route.
      *
      * @param string $pattern Pattern of the route.
-     * @param string $action Identifier of a qualified action. e.g. 'articles:update'.
+     * @param string $action Identifier of a qualified action; for example, 'articles:update'.
      *
      * @return $this
      */
@@ -115,7 +106,7 @@ class RouteCollector
      * Add a route.
      *
      * @param string $pattern Pattern of the route.
-     * @param string $action Identifier of a qualified action. e.g. 'articles:update'.
+     * @param string $action Identifier of a qualified action; for example, 'articles:update'.
      *
      * @return $this
      */
@@ -130,7 +121,7 @@ class RouteCollector
      * Add a route.
      *
      * @param string $pattern Pattern of the route.
-     * @param string $action Identifier of a qualified action. e.g. 'articles:delete'.
+     * @param string $action Identifier of a qualified action; for example, 'articles:delete'.
      *
      * @return $this
      */
@@ -145,7 +136,7 @@ class RouteCollector
      * Add a route.
      *
      * @param string $pattern Pattern of the route.
-     * @param string $action Identifier of a qualified action. e.g. 'articles:show'.
+     * @param string $action Identifier of a qualified action; for example, 'articles:show'.
      *
      * @return $this
      */
@@ -160,7 +151,7 @@ class RouteCollector
      * Add a route.
      *
      * @param string $pattern Pattern of the route.
-     * @param string $action Identifier of a qualified action. e.g. 'articles:show'.
+     * @param string $action Identifier of a qualified action; for example, 'articles:show'.
      *
      * @return $this
      */
@@ -174,8 +165,8 @@ class RouteCollector
     /**
      * Adds resource routes.
      *
-     * **Note:** The respond definitions for the resource are created by {@link RouteMaker::resource}. Both methods
-     * accept the same arguments.
+     * **Note**: The route definitions for the resource are created by {@link RouteMaker::resource}.
+     * Both methods accept the same arguments.
      *
      * @see RouteMaker::resource
      */
