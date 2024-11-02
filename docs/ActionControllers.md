@@ -16,9 +16,9 @@ final class ArticleController extends ControllerAbstract
 }
 ```
 
-Next, we define the methods the controllers needs to handle. For instance, for a route with the
-action `articles:show`, one the following methods can be implemented. `{method}` is a placeholder
-for the method of the request e.g. `get` or `post`.
+Next, we define the methods the controller needs to handle. For instance, for a route with the
+action `articles:show`, one the following methods can be implemented. Use `{method}` as placeholder
+for the method of the request; for example, `get` or `post`.
 
 - `{method}_articles_show`
 - `any_articles_show`
@@ -27,8 +27,8 @@ for the method of the request e.g. `get` or `post`.
 - `any_show`
 - `show`
 
-Since our controller deals exclusively with articles, let's go with the simplest one: `show`. It's
-recommended to is the `private` visibility.
+Since our controller deals exclusively with articles, let start with the simplest one: `show`. It is
+recommended to use the `private` visibility.
 
 ```php
 <?php
@@ -38,6 +38,9 @@ use ICanBoogie\Routing\Controller\ActionTrait;
 
 final class ArticleController extends ControllerAbstract
 {
+    /**
+     * @uses show
+     */
     use ActionTrait;
 
     private function show(): string
@@ -52,7 +55,7 @@ final class ArticleController extends ControllerAbstract
 With [ActionTrait][] and [RouteMaker][] resource controllers can be created with a minimum
 boilerplate.
 
-The following examples demonstrates how to create "resource" routes for "articles":
+The following example demonstrates how to create "resource" routes for "articles":
 
 ```php
 <?php
@@ -62,12 +65,12 @@ use ICanBoogie\Routing\RouteMaker;
 $routes = RouteMaker::resource('articles');
 ```
 
-The following table list the verbs/routes and their corresponding action. `{name}` is the
+The following table lists the verbs/routes and their corresponding action. `{name}` is the
 placeholder for the plural name of the resource, while `{id}` is the placeholder for the resource
 identifier.
 
 | HTTP verb | Path                | Action        | Used for                                   |
-| --------- | ------------------- |---------------| ------------------------------------------ |
+|-----------|---------------------|---------------|--------------------------------------------|
 | GET       | `/{name}`           | {name}:list   | A list of `{resource}`                     |
 | GET       | `/{name}/new`       | {name}:new    | A form for creating a new `{resource}`     |
 | POST      | `/{name}`           | {name}:create | Create a new `{resource}`                  |
@@ -80,7 +83,7 @@ The routes listed are more of a guideline than a requirement, still the actions 
 routes can easily be created with `RouteMaker`:
 
 The following example demonstrates how the resource controller for _articles_ may be implemented.
-The example implements all actions, but you are free to implement only some of them.
+The example implements all actions, but you're free to implement only some of them.
 
 ```php
 <?php
@@ -131,7 +134,7 @@ class ArticleController extends ControllerAbstract
 
 
 
-[Controller]:   ../lib/ControllerAbstract.php
-[ActionTrait]:  ../lib/Controller/ActionTrait.php
+[ControllerAbstract]:   ../lib/ControllerAbstract.php
+[ActionTrait]:          ../lib/Controller/ActionTrait.php
 
 [RESTful]: https://en.wikipedia.org/wiki/Representational_state_transfer
