@@ -15,6 +15,6 @@ interface UrlGenerator
     public function generate_url(
         string|callable $predicate_or_id_or_action,
         array|object|null $path_params = null,
-        array|object $query_params = null,
+        array|object|null $query_params = null,
     ): string;
 }

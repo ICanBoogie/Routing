@@ -293,9 +293,9 @@ by a controller using [ActionTrait][] has an empty `action` property.
 
 The project is continuously tested by [GitHub actions](https://github.com/ICanBoogie/Routing/actions).
 
-[![Tests](https://github.com/ICanBoogie/HTTP/actions/workflows/test.yml/badge.svg?branch=6.0)](https://github.com/ICanBoogie/HTTP/actions/workflows/test.yml)
-[![Static Analysis](https://github.com/ICanBoogie/HTTP/actions/workflows/static-analysis.yml/badge.svg?branch=6.0)](https://github.com/ICanBoogie/HTTP/actions/workflows/static-analysis.yml)
-[![Code Style](https://github.com/ICanBoogie/HTTP/actions/workflows/code-style.yml/badge.svg?branch=6.0)](https://github.com/ICanBoogie/HTTP/actions/workflows/code-style.yml)
+[![Tests](https://github.com/ICanBoogie/Routing/actions/workflows/test.yml/badge.svg?branch=6.0)](https://github.com/ICanBoogie/Routing/actions/workflows/test.yml)
+[![Static Analysis](https://github.com/ICanBoogie/Routing/actions/workflows/static-analysis.yml/badge.svg?branch=6.0)](https://github.com/ICanBoogie/Routing/actions/workflows/static-analysis.yml)
+[![Code Style](https://github.com/ICanBoogie/Routing/actions/workflows/code-style.yml/badge.svg?branch=6.0)](https://github.com/ICanBoogie/Routing/actions/workflows/code-style.yml)
 
 
 
@@ -309,13 +309,6 @@ this project and its community, you're expected to uphold this code.
 ## Contributing
 
 See [CONTRIBUTING](CONTRIBUTING.md) for details.
-
-
-
-## License
-
-**icanboogie/routing** is released under the [BSD-3-Clause](LICENSE).
-
 
 
 

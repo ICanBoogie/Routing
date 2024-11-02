@@ -170,7 +170,7 @@ class RouteCollector
      *
      * @see RouteMaker::resource
      */
-    public function resource(string $name, Options $options = null): self
+    public function resource(string $name, ?Options $options = null): self
     {
         $this->routes->add_routes(...RouteMaker::resource($name, $options));
 
