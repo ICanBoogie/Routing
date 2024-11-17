@@ -2,9 +2,12 @@
 
 namespace ICanBoogie\Routing\Controller;
 
+use Closure;
 use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Route;
 use LogicException;
+use Stringable;
 
 use function array_values;
 use function implode;
@@ -16,10 +19,12 @@ use function substr;
 
 /**
  * Action controller implementation.
+ *
+ * @phpstan-ignore trait.unused
  */
 trait ActionTrait
 {
-    protected function action(Request $request): mixed
+    protected function action(Request $request): Response|Closure|Stringable|string|null
     {
         return $this->resolve_action($request)();
     }

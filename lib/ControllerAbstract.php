@@ -2,11 +2,13 @@
 
 namespace ICanBoogie\Routing;
 
+use Closure;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Controller\ActionEvent;
 use ICanBoogie\Routing\Controller\BeforeActionEvent;
+use Stringable;
 
 use function ICanBoogie\emit;
 
@@ -55,7 +57,7 @@ abstract class ControllerAbstract implements Responder
         // @phpstan-ignore-next-line
         $this->response = new Response(headers: [
 
-            'Content-Type' => 'text/html; charset=utf-8'
+            'Content-Type' => 'text/html; charset=utf-8',
 
         ]);
 
@@ -78,8 +80,5 @@ abstract class ControllerAbstract implements Responder
         return $this->response;
     }
 
-    /**
-     * @return Response|mixed
-     */
-    abstract protected function action(Request $request): mixed;
+    abstract protected function action(Request $request): Response|Closure|Stringable|string|null;
 }

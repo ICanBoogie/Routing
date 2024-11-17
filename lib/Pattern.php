@@ -260,9 +260,11 @@ final class Pattern
         $method = 'read_value_from_' . (is_array($container) ? 'array' : 'object');
 
         foreach ($this->interleaved as $i => $value) {
+            // @phpstan-ignore-next-line
             $url .= $i % 2 ? $this->format_part(self::$method($container, $value[0])) : $value;
         }
 
+        // @phpstan-ignore-next-line
         return $url;
     }
 
@@ -281,14 +283,14 @@ final class Pattern
     /**
      * Checks if a pathname matches the pattern.
      *
-     * @param array<string, string> $captured The parameters captured from the pathname.
+     * @param array<int|string, string> $captured The parameters captured from the pathname.
      */
-    public function matches(string $pathname, ?array &$captured = null): bool
+    public function matches(string $pathname, &$captured = []): bool
     {
         $captured = [];
 
         #
-        # `params` is empty if the pattern is a plain string, thus we can simply compare strings.
+        # `params` is empty if the pattern is a plain string, thus we can compare strings.
         #
 
         if (!$this->params) {

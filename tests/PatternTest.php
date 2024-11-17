@@ -30,7 +30,7 @@ final class PatternTest extends TestCase
         $s = '/news/:year-:month-:slug.:format';
         $p = Pattern::from($s);
 
-        $this->assertEquals($s, (string) $p);
+        $this->assertEquals($s, (string)$p);
     }
 
     public function testNoPatternButQuery(): void
@@ -87,14 +87,14 @@ final class PatternTest extends TestCase
     public function test_should_catch_them_all(): void
     {
         $pattern = Pattern::from('/articles/2014-*');
-        $this->assertTrue($pattern->matches('/articles/2014-', $capture));
-        $this->assertEquals([ 'all' => '' ], $capture);
-        $this->assertTrue($pattern->matches('/articles/2014-madonna', $capture));
-        $this->assertEquals([ 'all' => 'madonna' ], $capture);
-        $this->assertTrue($pattern->matches('/articles/2014-lady-gaga', $capture));
-        $this->assertEquals([ 'all' => 'lady-gaga' ], $capture);
-        $this->assertFalse($pattern->matches('/articles/2015-lady-gaga', $capture));
-        $this->assertEmpty($capture);
+        $this->assertTrue($pattern->matches('/articles/2014-', $captured));
+        $this->assertEquals([ 'all' => '' ], $captured);
+        $this->assertTrue($pattern->matches('/articles/2014-madonna', $captured));
+        $this->assertEquals([ 'all' => 'madonna' ], $captured);
+        $this->assertTrue($pattern->matches('/articles/2014-lady-gaga', $captured));
+        $this->assertEquals([ 'all' => 'lady-gaga' ], $captured);
+        $this->assertFalse($pattern->matches('/articles/2015-lady-gaga', $captured));
+        $this->assertEmpty($captured);
     }
 
     public function testMatchingAndCapture(): void
@@ -106,7 +106,7 @@ final class PatternTest extends TestCase
         $this->assertTrue($rc);
         $this->assertEquals(
             [ 'year' => 2012, 'month' => 06, 'slug' => 'this-is-an-example', 'format' => 'html' ],
-            $captured
+            $captured,
         );
 
         $rc = $pattern->matches('/news/2012-this-is-an-example.html', $captured);
@@ -114,7 +114,7 @@ final class PatternTest extends TestCase
         $this->assertTrue($rc);
         $this->assertEquals(
             [ 'year' => 2012, 'month' => 'this', 'slug' => 'is-an-example', 'format' => 'html' ],
-            $captured
+            $captured,
         );
 
         # using regex
@@ -126,7 +126,7 @@ final class PatternTest extends TestCase
         $this->assertTrue($rc);
         $this->assertEquals(
             [ 'year' => 2012, 'month' => 06, 'slug' => 'this-is-an-example', 'format' => 'html' ],
-            $captured
+            $captured,
         );
 
         #
@@ -158,9 +158,9 @@ final class PatternTest extends TestCase
             $pattern->format([
 
                 'category' => new WithToSlug('Mathieu'),
-                'slug' => new WithToSlug("Été 2000")
+                'slug' => new WithToSlug("Été 2000"),
 
-            ])
+            ]),
         );
     }
 
@@ -173,10 +173,10 @@ final class PatternTest extends TestCase
 
     public function test_named_params(): void
     {
-        $object = (object) [
+        $object = (object)[
 
             'nid' => 123,
-            'slug' => "madonna"
+            'slug' => "madonna",
 
         ];
 
@@ -201,6 +201,7 @@ final class PatternTest extends TestCase
     {
         $uuid = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
         $pattern = Pattern::from('/articles/<uuid:{:uuid:}>/edit');
+        $captured = [];
         $match = $pattern->matches("/articles/$uuid/edit", $captured);
 
         $this->assertTrue($match);
@@ -211,6 +212,7 @@ final class PatternTest extends TestCase
     {
         $hash = sha1(uniqid());
         $pattern = Pattern::from('/articles/<hash:{:sha1:}>/edit');
+        $captured = [];
         $match = $pattern->matches("/articles/$hash/edit", $captured);
 
         $this->assertTrue($match);

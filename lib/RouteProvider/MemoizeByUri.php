@@ -57,6 +57,7 @@ final class MemoizeByUri implements RouteProvider
          * @param Route[] $routes
          */
         $map_static = function (iterable $routes) use ($path, $method): ?Route {
+            /** @var Route $route */
             foreach ($routes as $route) {
                 $pattern = (string)$route->pattern;
 
@@ -74,6 +75,7 @@ final class MemoizeByUri implements RouteProvider
          * @param Route[] $routes
          */
         $map_dynamic = function (iterable $routes) use ($path, $method, &$path_params): ?Route {
+            /** @var Route $route */
             foreach ($routes as $route) {
                 $pattern = $route->pattern;
 

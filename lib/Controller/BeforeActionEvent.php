@@ -2,8 +2,11 @@
 
 namespace ICanBoogie\Routing\Controller;
 
+use Closure;
 use ICanBoogie\Event;
+use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\ControllerAbstract;
+use Stringable;
 
 /**
  * Listeners may use this event to alter the controller before the action is invoked or provide a result and thus
@@ -11,15 +14,10 @@ use ICanBoogie\Routing\ControllerAbstract;
  */
 class BeforeActionEvent extends Event
 {
-    /**
-     * Reference to the result.
-     */
-    public mixed $result;
-
-    public function __construct(ControllerAbstract $sender, mixed &$result)
-    {
-        $this->result = &$result;
-
+    public function __construct(
+        ControllerAbstract $sender,
+        public Response|Closure|Stringable|string|null &$result,
+    ) {
         parent::__construct($sender);
     }
 }
