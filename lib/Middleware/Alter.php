@@ -32,9 +32,7 @@ final class Alter implements Middleware
 
                 emit(new BeforeRespondEvent($route, $request, $response));
 
-                if (!$response) {
-                    $response = $this->next->respond($request);
-                }
+                $response ??= $this->next->respond($request);
 
                 emit(new RespondEvent($route, $request, $response));
 

@@ -12,15 +12,11 @@ use ICanBoogie\Routing\Route;
  */
 final class RespondEvent extends Event
 {
-    public ?Response $response;
-
     public function __construct(
         Route $sender,
         public readonly Request $request,
-        ?Response &$response = null
+        public Response &$response
     ) {
-        $this->response = &$response;
-
         parent::__construct($sender);
     }
 }

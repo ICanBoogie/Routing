@@ -16,6 +16,7 @@ final class RespondEventTest extends TestCase
 {
     private Route $route;
     private Request $request;
+    private Response $response;
     private EventCollection $events;
 
     protected function setUp(): void
@@ -24,6 +25,7 @@ final class RespondEventTest extends TestCase
 
         $this->route = new Route('/', '/');
         $this->request = Request::from();
+        $this->response = new Response();
         $this->events = new EventCollection();
 
         EventCollectionProvider::define(fn() => $this->events);
@@ -34,6 +36,8 @@ final class RespondEventTest extends TestCase
      */
     public function test_event(): void
     {
+        $response = $this->response;
+
         $event = emit(new Route\RespondEvent(
             $this->route,
             $this->request,
@@ -42,8 +46,7 @@ final class RespondEventTest extends TestCase
 
         $this->assertSame($this->route, $event->sender);
         $this->assertSame($this->request, $event->request);
-        $this->assertNull($response);
-        $this->assertNull($event->response);
+        $this->assertSame($this->response, $event->response);
 
         $event->response = $new_response = new Response();
 
@@ -60,7 +63,7 @@ final class RespondEventTest extends TestCase
             $used = true;
         });
 
-        emit(new Route\RespondEvent($this->route, $this->request));
+        emit(new Route\RespondEvent($this->route, $this->request, $this->response));
 
         $this->assertTrue($used);
     }
