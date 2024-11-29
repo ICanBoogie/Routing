@@ -27,9 +27,9 @@
     "prefer-stable": true,
     "prefer-dist": true,
     "require": {
-        "php": ">=8.2",
+        "php": ">=8.4",
         "ext-json": "*",
-        "icanboogie/http": "^6.0"
+        "icanboogie/http": "^7.0"
     },
     "require-dev": {
         "olvlvl/phpunit-given": "^11.0",

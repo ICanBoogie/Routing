@@ -13,8 +13,8 @@ namespace ICanBoogie\Routing\RouteMaker;
 
 final class Options
 {
-    public const DEFAULT_ID_NAME = 'id';
-    public const DEFAULT_ID_REGEX = '\d+';
+    public const string DEFAULT_ID_NAME = 'id';
+    public const string DEFAULT_ID_REGEX = '\d+';
 
     /**
      * @param string $id_name Name of the identifier property.

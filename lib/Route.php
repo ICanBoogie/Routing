@@ -13,7 +13,7 @@ final class Route
     /**
      * Separator used for actions; for example, "articles:show".
      */
-    public const ACTION_SEPARATOR = ':';
+    public const string ACTION_SEPARATOR = ':';
 
     /**
      * @param array{

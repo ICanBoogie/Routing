@@ -31,13 +31,7 @@ final class Mutable implements RouteProvider, MutableRouteProvider
 
     public function route_for_predicate(callable $predicate): ?Route
     {
-        foreach ($this->routes as $route) {
-            if ($predicate($route)) {
-                return $route;
-            }
-        }
-
-        return null;
+        return array_find($this->routes, fn($route) => $predicate($route));
     }
 
     public function add_routes(Route ...$routes): void

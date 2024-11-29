@@ -8,7 +8,7 @@ use Throwable;
 
 class RouteNotFound extends LogicException implements Exception
 {
-    public const DEFAULT_MESSAGE = "Unable to find route with the specified predicate";
+    public const string DEFAULT_MESSAGE = "Unable to find route with the specified predicate";
 
     public function __construct(
         string $message = self::DEFAULT_MESSAGE,

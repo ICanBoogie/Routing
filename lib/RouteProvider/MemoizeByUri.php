@@ -126,7 +126,7 @@ final class MemoizeByUri implements RouteProvider
      */
     private ?array $dynamic = null;
 
-    private const PATH_SEPARATOR = '/';
+    private const string PATH_SEPARATOR = '/';
 
     /**
      * Sort routes according to their type and computed weight.

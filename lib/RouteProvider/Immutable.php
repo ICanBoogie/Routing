@@ -23,7 +23,7 @@ final class Immutable implements RouteProvider
     public static function __set_state(array $an_array): self
     {
         /* @var self $instance */
-        $instance = (new ReflectionClass(self::class))->newInstanceWithoutConstructor();
+        $instance = new ReflectionClass(self::class)->newInstanceWithoutConstructor();
         $instance->mutable = $an_array['mutable'];
 
         return $instance;

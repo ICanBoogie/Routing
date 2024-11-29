@@ -20,9 +20,9 @@ final class Alter implements Middleware
 {
     public function responder(Responder $next): Responder
     {
-        return new class ($next) implements Responder {
+        return new readonly class ($next) implements Responder {
             public function __construct(
-                private readonly Responder $next
+                private Responder $next
             ) {
             }
 

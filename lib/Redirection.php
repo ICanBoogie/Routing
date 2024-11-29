@@ -4,9 +4,9 @@ namespace ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\RequestMethod;
 
-final class Redirection
+final readonly class Redirection
 {
-    public readonly Pattern $pattern;
+    public Pattern $pattern;
 
     /**
      * @param string $pattern Pattern of the route.
@@ -15,8 +15,8 @@ final class Redirection
      */
     public function __construct(
         string $pattern,
-        public readonly string $location,
-        public readonly RequestMethod|array $methods = RequestMethod::METHOD_ANY,
+        public string $location,
+        public RequestMethod|array $methods = RequestMethod::METHOD_ANY,
     ) {
         $this->pattern = Pattern::from($pattern);
     }

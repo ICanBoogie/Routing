@@ -9,24 +9,24 @@ use ICanBoogie\HTTP\RequestMethod;
  */
 final class Basics
 {
-    public const PLACEHOLDER_NAME = '{name}';
-    public const PLACEHOLDER_ID = '{id}';
+    public const string PLACEHOLDER_NAME = '{name}';
+    public const string PLACEHOLDER_ID = '{id}';
 
-    public const PATTERN_LIST = '/{name}';
-    public const PATTERN_NEW = '/{name}/new';
-    public const PATTERN_CREATE = '/{name}';
-    public const PATTERN_SHOW = '/{name}/{id}';
-    public const PATTERN_EDIT = '/{name}/{id}/edit';
-    public const PATTERN_UPDATE = '/{name}/{id}';
-    public const PATTERN_DELETE = '/{name}/{id}';
+    public const string PATTERN_LIST = '/{name}';
+    public const string PATTERN_NEW = '/{name}/new';
+    public const string PATTERN_CREATE = '/{name}';
+    public const string PATTERN_SHOW = '/{name}/{id}';
+    public const string PATTERN_EDIT = '/{name}/{id}/edit';
+    public const string PATTERN_UPDATE = '/{name}/{id}';
+    public const string PATTERN_DELETE = '/{name}/{id}';
 
-    public const METHODS_LIST = RequestMethod::METHOD_GET;
-    public const METHODS_NEW = RequestMethod::METHOD_GET;
-    public const METHODS_CREATE = RequestMethod::METHOD_POST;
-    public const METHODS_SHOW = RequestMethod::METHOD_GET;
-    public const METHODS_EDIT = RequestMethod::METHOD_GET;
-    public const METHODS_UPDATE = [ RequestMethod::METHOD_PUT, RequestMethod::METHOD_PATCH ];
-    public const METHODS_DELETE = RequestMethod::METHOD_DELETE;
+    public const RequestMethod METHODS_LIST = RequestMethod::METHOD_GET;
+    public const RequestMethod METHODS_NEW = RequestMethod::METHOD_GET;
+    public const RequestMethod METHODS_CREATE = RequestMethod::METHOD_POST;
+    public const RequestMethod METHODS_SHOW = RequestMethod::METHOD_GET;
+    public const RequestMethod METHODS_EDIT = RequestMethod::METHOD_GET;
+    public const array METHODS_UPDATE = [ RequestMethod::METHOD_PUT, RequestMethod::METHOD_PATCH ];
+    public const RequestMethod METHODS_DELETE = RequestMethod::METHOD_DELETE;
 
     /**
      * @param RequestMethod|RequestMethod[] $methods
