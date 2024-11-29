@@ -11,8 +11,10 @@ use Throwable;
  */
 class InvalidPattern extends InvalidArgumentException implements Exception
 {
-    public function __construct(string $message = "Invalid pattern", Throwable $previous = null)
-    {
+    public function __construct(
+        string $message = "Invalid pattern",
+        ?Throwable $previous = null
+    ) {
         parent::__construct($message, previous: $previous);
     }
 }
