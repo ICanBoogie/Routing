@@ -41,7 +41,7 @@ use const PREG_SPLIT_DELIM_CAPTURE;
  */
 final class Pattern
 {
-    private const EXTENDED_CHARACTER_CLASSES = [
+    private const array EXTENDED_CHARACTER_CLASSES = [
 
         '{:uuid:}' => '[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}',
         '{:sha1:}' => '[a-f0-9]{40}',
@@ -128,26 +128,6 @@ final class Pattern
         }
 
         return [ $interleaved, $params, $regex ]; // @phpstan-ignore-line
-    }
-
-    /**
-     * Reads an offset from an array.
-     *
-     * @param array<string, mixed> $container
-     *
-     * @return mixed
-     */
-    private static function read_value_from_array(array $container, string $key): mixed
-    {
-        return $container[$key];
-    }
-
-    /**
-     * Reads a property from an object.
-     */
-    private static function read_value_from_object(object $container, string $key): mixed
-    {
-        return $container->$key;
     }
 
     /**
@@ -250,18 +230,17 @@ final class Pattern
      * Formats pattern parts.
      *
      * @param array<int|string, mixed>|object $container
-     *
-     * @uses read_value_from_array
-     * @uses read_value_from_object
      */
     private function format_parts(array|object $container): string
     {
         $url = '';
-        $method = 'read_value_from_' . (is_array($container) ? 'array' : 'object');
+        $method = is_array($container )
+            ? fn (array $container, string $key): mixed => $container[$key]
+            : fn (object $container, string $key): mixed => $container->$key;
 
         foreach ($this->interleaved as $i => $value) {
             // @phpstan-ignore-next-line
-            $url .= $i % 2 ? $this->format_part(self::$method($container, $value[0])) : $value;
+            $url .= $i % 2 ? $this->format_part($method($container, $value[0])) : $value;
         }
 
         // @phpstan-ignore-next-line
@@ -285,7 +264,7 @@ final class Pattern
      *
      * @param array<int|string, string> $captured The parameters captured from the pathname.
      */
-    public function matches(string $pathname, &$captured = []): bool
+    public function matches(string $pathname, array|null &$captured = []): bool
     {
         $captured = [];
 
