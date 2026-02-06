@@ -33,7 +33,7 @@ abstract class ControllerAbstract implements Responder
     public readonly Route $route;
 
     /**
-     * {@link action()} can use this built-in response instead of returning its own instance.
+     * {@see action()} can use this built-in response instead of returning its own instance.
      */
     // @phpstan-ignore-next-line
     protected readonly Response $response;
@@ -41,12 +41,12 @@ abstract class ControllerAbstract implements Responder
     /**
      * Responds to a request.
      *
-     * A built-in response is available for {@link action()} to use, but if it returns a {@link Response}
+     * A built-in response is available for {@see action()} to use, but if it returns a {@see Response}
      * instance it is returned as is. Any other type is used as the response's body. A `null` result doesn't
      * alter the body of the built-in response, the built-in response is returned as is.
      *
-     * {@link Controller\BeforeActionEvent} is emitted before invoking {@link action()},
-     * {@link Controller\ActionEvent} is emitted after.
+     * {@see Controller\BeforeActionEvent} is emitted before invoking {@see action()},
+     * {@see Controller\ActionEvent} is emitted after.
      */
     final public function respond(Request $request): Response
     {

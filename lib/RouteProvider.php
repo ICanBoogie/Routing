@@ -15,9 +15,9 @@ interface RouteProvider extends IteratorAggregate
      *
      * The following predicates are builtin:
      *
-     * - {@link RouteProvider\ByAction}
-     * - {@link RouteProvider\ById}
-     * - {@link RouteProvider\ByUri}
+     * - {@see RouteProvider\ByAction}
+     * - {@see RouteProvider\ById}
+     * - {@see RouteProvider\ByUri}
      *
      * **Note**: Providers might optimize predicate matching and might skip the callable.
      *

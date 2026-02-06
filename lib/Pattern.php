@@ -144,7 +144,7 @@ final class Pattern
     private static array $instances = [];
 
     /**
-     * Creates a {@link Pattern} instance from the specified pattern.
+     * Creates a {@see Pattern} instance from the specified pattern.
      */
     public static function from(string|self $pattern): self
     {
@@ -207,7 +207,7 @@ final class Pattern
      * Formats a pattern with the specified values.
      *
      * @param array<string|int, mixed>|object|null $values The values to format the pattern, either as an array or an
-     * object. If value is an instance of {@link ToSlug} the `to_slug()` method is used to
+     * object. If value is an instance of {@see ToSlug} the `to_slug()` method is used to
      * transform the instance into a URL component.
      *
      * @throws PatternRequiresValues in attempt to format a pattern requiring values without

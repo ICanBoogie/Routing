@@ -14,8 +14,8 @@ use function parse_url;
 /**
  * A predicate that matches a route against a URI and an optional HTTP method.
  *
- * If the match failed, disregard the parameters {@link $path}, {@link $path_params},
- * and {@link $query_params}.
+ * If the match failed, disregard the parameters {@see $path}, {@see $path_params},
+ * and {@see $query_params}.
  */
 final class ByUri
 {

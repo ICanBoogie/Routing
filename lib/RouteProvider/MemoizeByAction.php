@@ -11,7 +11,7 @@ use function array_values;
 use function iterator_to_array;
 
 /**
- * Speed up route resolution for predicate {@link ByAction}.
+ * Speed up route resolution for predicate {@see ByAction}.
  */
 final class MemoizeByAction implements RouteProvider
 {

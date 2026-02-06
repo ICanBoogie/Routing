@@ -57,7 +57,7 @@ final class RouteMaker
 
     /**
      * @param array<string, Basics> $basics Action templates.
-     *     If {@link Options::$ids} is not specified for an action, the qualified action is used as identifier.
+     *     If {@see Options::$ids} is not specified for an action, the qualified action is used as identifier.
      *
      * @return Route[]
      */

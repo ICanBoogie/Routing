@@ -6,7 +6,7 @@ use ICanBoogie\HTTP\RequestMethod;
 use ICanBoogie\Routing\RouteMaker\Options;
 
 /**
- * Collect routes to build a {@link RouteProvider}.
+ * Collect routes to build a {@see RouteProvider}.
  */
 class RouteCollector
 {
@@ -165,7 +165,7 @@ class RouteCollector
     /**
      * Adds resource routes.
      *
-     * **Note**: The route definitions for the resource are created by {@link RouteMaker::resource}.
+     * **Note**: The route definitions for the resource are created by {@see RouteMaker::resource}.
      * Both methods accept the same arguments.
      *
      * @see RouteMaker::resource

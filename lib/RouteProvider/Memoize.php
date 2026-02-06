@@ -7,7 +7,7 @@ use ICanBoogie\Routing\RouteProvider;
 use Traversable;
 
 /**
- * Speed up route resolution for predicate {@link ById}, {@link ByAction}, and {@link ByUri}.
+ * Speed up route resolution for predicate {@see ById}, {@see ByAction}, and {@see ByUri}.
  */
 final class Memoize implements RouteProvider
 {

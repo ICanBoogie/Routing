@@ -15,7 +15,7 @@ use function spl_object_id;
 use function substr_count;
 
 /**
- * Speed up route resolution for predicate {@link ByUri}.
+ * Speed up route resolution for predicate {@see ByUri}.
  */
 final class MemoizeByUri implements RouteProvider
 {
