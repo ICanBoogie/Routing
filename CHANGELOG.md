@@ -20,7 +20,7 @@ None
 
 ### Other changes
 
-None
+- `RouteNotFound` extends `NotFound`.
 
 
 

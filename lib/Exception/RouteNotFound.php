@@ -2,11 +2,11 @@
 
 namespace ICanBoogie\Routing\Exception;
 
+use ICanBoogie\HTTP\NotFound;
 use ICanBoogie\Routing\Exception;
-use LogicException;
 use Throwable;
 
-class RouteNotFound extends LogicException implements Exception
+class RouteNotFound extends NotFound implements Exception
 {
     public const string DEFAULT_MESSAGE = "Unable to find route with the specified predicate";
 
