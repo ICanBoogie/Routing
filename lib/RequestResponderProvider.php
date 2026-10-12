@@ -30,6 +30,10 @@ final readonly class RequestResponderProvider implements ResponderProvider
      */
     public function responder_for_request(Request $request): ?Responder
     {
+        if ($request->uri === null) {
+            return null;
+        }
+
         $method = $request->method;
 
         $route = $this->routes->route_for_predicate(
