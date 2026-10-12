@@ -8,7 +8,9 @@ PHP 8.4+
 
 ### New features
 
-None
+- Added `RouteProvider\Chain`, which asks a list of route providers in turn, the first route found wins.
+  Use it with a `Mutable` alongside a decorated `Immutable` to add a bit of freedom at runtime, see
+  [docs/RouteProviders.md](docs/RouteProviders.md).
 
 ### Deprecated Features
 

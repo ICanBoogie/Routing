@@ -44,6 +44,8 @@ var_dump($predicate->path_params); // [ 'nid' => 123 ]
 
 - `RouteProvider\Mutable`: A list of routes that can grow with `add_routes()`.
 - `RouteProvider\Immutable`: A fixed list of routes. This is what `RouteCollector::collect()` returns.
+- `RouteProvider\Chain`: Asks each provider of a list in turn, the first route found wins. See
+  [Recommended setup](#recommended-setup).
 
 Providers are iterable, e.g. to list all routes:
 
@@ -52,6 +54,44 @@ foreach ($route_provider as $route) {
     echo "$route->pattern → $route->action\n";
 }
 ```
+
+## Recommended setup
+
+`Immutable` is the base of an application: it holds the routes that are set in stone. Because they can't
+change, it is safe to decorate it with `Memoize`, whose indexes would be stale as soon as a route is
+added. `Mutable` is for the bit of freedom you need at runtime (routes registered by a plugin, or in a
+test), where a linear scan is not an issue. A `Chain` puts them together. The order is yours to choose, see below.
+
+```php
+<?php
+
+use ICanBoogie\Routing\RouteProvider\Chain;
+use ICanBoogie\Routing\RouteProvider\Memoize;
+use ICanBoogie\Routing\RouteProvider\Mutable;
+use ICanBoogie\Routing\Route;
+
+/* @var \ICanBoogie\Routing\RouteProvider\Immutable $immutable */
+
+$mutable = new Mutable();
+// Mutable first if you want to override routes; it has a small cost if you're reasonable
+// Mutable second if you only want to add new routes
+$routes = new Chain([ new Memoize($immutable), $mutable ]);
+
+// Later, at runtime
+$mutable->add_routes(new Route('/plugin/status', 'plugin:status'));
+```
+
+- **The first provider wins.** If both providers have a route for the same URI, identifier or action,
+  only the route of the first one is found. With the mutable provider second, as in the example, it can
+  only add new routes. With the mutable provider first, its routes override those of the base, at the
+  price of a linear scan of the mutable provider before every lookup of the base.
+- **Iteration** lists the routes of the providers in the order of the chain.
+- **Pass an array of providers.** The providers are iterated for each lookup, an iterator that can only
+  be traversed once (such as a generator) would be exhausted by the first one.
+- **Avoid decorating a `Mutable`** with `Memoize`, unless you are done adding routes: routes added
+  after the first lookup would not be found by the indexes.
+- **A `Chain` is not exported.** Export the `Immutable` base, which is the expensive part, and
+  create the `Chain` when the application starts.
 
 ## Performance
 
