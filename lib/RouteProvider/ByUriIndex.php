@@ -179,6 +179,7 @@ final class ByUriIndex
      * routes of the chunk are tested one by one.
      *
      * @param array<int|string, string>|null $path_params
+     * @param-out array<int|string, string> $path_params
      */
     private function find_dynamic(string $path, RequestMethod $method, array|null &$path_params): ?Route
     {
@@ -216,6 +217,8 @@ final class ByUriIndex
                 }
             }
         }
+
+        $path_params = [];
 
         return null;
     }

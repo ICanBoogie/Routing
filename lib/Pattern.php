@@ -277,6 +277,7 @@ final class Pattern
      * Checks if a pathname matches the pattern.
      *
      * @param array<int|string, string> $captured The parameters captured from the pathname.
+     * @param-out array<int|string, string> $captured
      */
     public function matches(string $pathname, array|null &$captured = []): bool
     {
