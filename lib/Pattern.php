@@ -3,11 +3,15 @@
 namespace ICanBoogie\Routing;
 
 use ICanBoogie\Routing\Exception\InvalidPattern;
+use ICanBoogie\Routing\Exception\PatternMissingValue;
+use InvalidArgumentException;
 
 use function array_combine;
 use function array_shift;
 use function count;
+use function get_debug_type;
 use function is_array;
+use function is_scalar;
 use function preg_match;
 use function preg_quote;
 use function preg_split;
@@ -212,6 +216,7 @@ final class Pattern
      *
      * @throws PatternRequiresValues in attempt to format a pattern requiring values without
      * providing any.
+     * @throws PatternMissingValue when a value is missing for one of the placeholders.
      */
     public function format(array|object|null $values = null): string
     {
@@ -234,29 +239,38 @@ final class Pattern
     private function format_parts(array|object $container): string
     {
         $url = '';
-        $method = is_array($container )
-            ? fn (array $container, string $key): mixed => $container[$key]
-            : fn (object $container, string $key): mixed => $container->$key;
+        $method = is_array($container)
+            ? fn (array $container, string|int $key): mixed => $container[$key] ?? null
+            : fn (object $container, string|int $key): mixed => $container->$key ?? null;
 
-        foreach ($this->interleaved as $i => $value) {
-            // @phpstan-ignore-next-line
-            $url .= $i % 2 ? $this->format_part($method($container, $value[0])) : $value;
+        foreach ($this->interleaved as $value) {
+            if (!is_array($value)) {
+                $url .= $value;
+                continue;
+            }
+
+            $part = $method($container, $value[0]) ?? throw new PatternMissingValue($this, $value[0]);
+
+            $url .= $this->format_part($part);
         }
 
-        // @phpstan-ignore-next-line
         return $url;
     }
 
     /**
      * Formats pattern part.
      */
-    private function format_part(string|ToSlug $value): string
+    private function format_part(mixed $value): string
     {
         if ($value instanceof ToSlug) {
             $value = $value->to_slug();
         }
 
-        return urlencode($value);
+        if (!is_scalar($value)) {
+            throw new InvalidArgumentException("Cannot format value of type " . get_debug_type($value) . ".");
+        }
+
+        return urlencode((string) $value);
     }
 
     /**

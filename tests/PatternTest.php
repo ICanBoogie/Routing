@@ -2,6 +2,7 @@
 
 namespace Test\ICanBoogie\Routing;
 
+use ICanBoogie\Routing\Exception\PatternMissingValue;
 use ICanBoogie\Routing\Pattern;
 use ICanBoogie\Routing\PatternRequiresValues;
 use PHPUnit\Framework\TestCase;
@@ -195,6 +196,27 @@ final class PatternTest extends TestCase
         $pattern = Pattern::from(":year-:month.html");
         $this->expectException(PatternRequiresValues::class);
         $pattern->format();
+    }
+
+    public function test_formatting_with_missing_value(): void
+    {
+        $pattern = Pattern::from('/a/<id:\d+>');
+
+        try {
+            $pattern->format([ 'x' => 1 ]);
+            $this->fail("Expected " . PatternMissingValue::class);
+        } catch (PatternMissingValue $e) {
+            $this->assertSame($pattern, $e->pattern);
+            $this->assertSame('id', $e->key);
+            $this->assertStringContainsString("'id'", $e->getMessage());
+            $this->assertStringContainsString('/a/<id:\d+>', $e->getMessage());
+        }
+    }
+
+    public function test_formatting_object_with_missing_value(): void
+    {
+        $this->expectException(PatternMissingValue::class);
+        Pattern::from('/a/:id')->format((object) [ 'x' => 1 ]);
     }
 
     public function test_uuid(): void

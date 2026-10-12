@@ -67,8 +67,10 @@ Anonymous placeholders (`<\d+>`) are addressed by index (`[ 0 => 123 ]`).
 
 - `RouteNotFound` — no route matches. The failing predicate is available as `$e->predicate`.
 - `PatternRequiresValues` — the route has placeholders but no `path_params` were provided.
+- `PatternMissingValue` — a value is missing for one of the placeholders. It extends
+  `PatternRequiresValues`, and exposes the `pattern` and the missing `key`.
 
-Both implement `ICanBoogie\Routing\Exception`, see [Exceptions](Exceptions.md).
+All implement `ICanBoogie\Routing\Exception`, see [Exceptions](Exceptions.md).
 
 
 

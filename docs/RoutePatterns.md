@@ -54,7 +54,9 @@ $pattern->format([ 'year' => '2013', 'month' => '07', 'slug' => 'this-is-a-test'
 ```
 
 Patterns without placeholder are compared as plain strings, which is what makes them fast to match.
-Formatting a pattern that has placeholders without values throws `PatternRequiresValues`.
+Formatting a pattern that has placeholders without values throws `PatternRequiresValues`, and a
+missing value for one of them throws `PatternMissingValue`, which names the pattern and the
+placeholder.
 
 ## Tips
 

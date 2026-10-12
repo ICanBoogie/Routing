@@ -24,6 +24,8 @@ The following exceptions are defined:
 
 - [ActionNotDefined][]: Thrown in an attempt to handle a route without action.
 - [InvalidPattern][]: Thrown when a pattern is blank or cannot be parsed.
+- [PatternMissingValue][]: Thrown when formatting a pattern and a value is missing for one of its placeholders.
+  It extends `PatternRequiresValues` and exposes the `pattern` and the missing `key`.
 - [PatternRequiresValues][]: Thrown when formatting a pattern that has placeholders without values.
 - [RouteNotFound][]: Thrown when no route matches a predicate, for instance when generating a URL.
   It extends `ICanBoogie\HTTP\NotFound` and exposes the `predicate` that failed.
@@ -33,5 +35,6 @@ The following exceptions are defined:
 [ActionNotDefined]: ../lib/Exception/ActionNotDefined.php
 [ActionTrait]:      ../lib/Controller/ActionTrait.php
 [InvalidPattern]:   ../lib/Exception/InvalidPattern.php
+[PatternMissingValue]: ../lib/Exception/PatternMissingValue.php
 [PatternRequiresValues]: ../lib/PatternRequiresValues.php
 [RouteNotFound]:   ../lib/Exception/RouteNotFound.php

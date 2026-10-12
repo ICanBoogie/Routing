@@ -13,6 +13,9 @@ PHP 8.4+
   which is what `Memoize` costs with PHP-FPM. Use `Compiled::dump()` to generate the file, see
   [docs/RouteProviders.md](docs/RouteProviders.md).
 
+- Added `Exception\PatternMissingValue`, thrown by `Pattern::format()` when a value is missing for a
+  placeholder, instead of a PHP warning followed by a `TypeError`. It extends `PatternRequiresValues`.
+
 ### Deprecated Features
 
 None
