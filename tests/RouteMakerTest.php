@@ -172,4 +172,17 @@ final class RouteMakerTest extends TestCase
 
         ];
     }
+
+    public function test_does_not_mutate_basics(): void
+    {
+        $basics = new Basics('/{name}/{id}/walk', RequestMethod::METHOD_GET);
+        $options = new Options(only: [ 'walk' ], basics: [ 'walk' => $basics ]);
+
+        $first = Make::actions('dogs', [], $options);
+        $second = Make::actions('cats', [], $options);
+
+        $this->assertSame('/{name}/{id}/walk', $basics->pattern);
+        $this->assertStringStartsWith('/dogs/', $first[0]->pattern->pattern);
+        $this->assertStringStartsWith('/cats/', $second[0]->pattern->pattern);
+    }
 }

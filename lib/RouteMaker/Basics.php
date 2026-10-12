@@ -7,7 +7,7 @@ use ICanBoogie\HTTP\RequestMethod;
 /**
  * Defines pattern and methods of an action.
  */
-final class Basics
+final readonly class Basics
 {
     public const string PLACEHOLDER_NAME = '{name}';
     public const string PLACEHOLDER_ID = '{id}';

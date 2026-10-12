@@ -30,6 +30,9 @@ None
 
 ### Other changes
 
+- `RouteMaker\Basics` is now `readonly`, and `RouteMaker` no longer mutates the instances it receives, so an
+  `Options` instance can be reused for several resources.
+
 - `RouteNotFound` extends `NotFound`.
 - Improved route resolution performance: `MemoizeByUri` finds static routes with a single array
   lookup instead of scanning them, and tests dynamic routes by chunks of about 30 with a single

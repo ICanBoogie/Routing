@@ -148,10 +148,9 @@ final class RouteMaker
         $id = "<$options->id_name:$options->id_regex>";
         $replace = [ Basics::PLACEHOLDER_NAME => $name, Basics::PLACEHOLDER_ID => $id ];
 
-        foreach ($basics as $basic) {
-            $basic->pattern = strtr($basic->pattern, $replace);
-        }
-
-        return $basics;
+        return array_map(
+            fn(Basics $basic): Basics => new Basics(strtr($basic->pattern, $replace), $basic->methods),
+            $basics
+        );
     }
 }
