@@ -68,13 +68,49 @@ use ICanBoogie\Routing\RouteProvider\Memoize;
 $routes = new Memoize($routes);
 ```
 
-- `ByUri`: static routes are compared as strings and tried first, then dynamic routes are tried,
-  routes with more static leading path segments first.
+- `ByUri`: static routes are found with a single array lookup and tried first, then dynamic routes are
+  tried by chunks of about 30 routes, each chunk matched with a single regular expression, routes
+  with more static leading path segments first.
 - `ById`, `ByAction`, `ByIdOrAction`: lookups are indexed.
 - Custom callable predicates fall through to the decorated provider.
 
-Both `Mutable` and `Immutable` implement `__set_state()`, so a provider can be exported with
-`var_export()` and cached as a PHP file, which makes it a good candidate for build-time caching.
+### Compiling routes for production
+
+`Memoize` computes its indexes in memory, which is lost when the process ends. With PHP-FPM, that's
+every request. On top of that, loading routes from a file means creating every `Route` object.
+Together, that is the dominant cost of routing: tens of microseconds for 100 routes, most of a
+millisecond for 1,000, whereas finding a route takes about a microsecond.
+
+`RouteProvider\Compiled` avoids both. The routes and their indexes are compiled once into
+constant arrays, written to a PHP file, and loaded through OPcache, which shares them between
+requests. `Route` instances are only created for the routes that are needed.
+
+```php
+<?php
+
+use ICanBoogie\Routing\RouteProvider\Compiled;
+
+/* @var \ICanBoogie\Routing\RouteProvider $routes */
+/* @var string $file */
+
+// At build time, or during deployment
+$tmp = "$file." . uniqid('', true);
+file_put_contents($tmp, Compiled::dump($routes));
+rename($tmp, $file); // atomic, a concurrent request never reads a partial file
+
+// At runtime
+$routes = new Compiled(require $file);
+```
+
+`Compiled` optimizes the same predicates as `Memoize`, and is iterable. Route extensions are exported
+with `var_export()`, they must implement `__set_state()`. The file has to be regenerated whenever
+routes change.
+
+Make sure OPcache is enabled. PHP-FPM also benefits from `pcre.jit=1`, which is the default.
+
+Both `Mutable` and `Immutable` also implement `__set_state()`, so they can be exported with
+`var_export()` and cached as a PHP file. This is simpler, but the objects are created on each
+request and `Memoize` has to build its indexes again.
 
 ## Writing a custom predicate
 

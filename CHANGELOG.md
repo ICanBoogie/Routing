@@ -8,7 +8,10 @@ PHP 8.4+
 
 ### New features
 
-None
+- Added `RouteProvider\Compiled`, a route provider backed by plain data that can be exported to a PHP file
+  and loaded through OPcache. It avoids creating routes and computing indexes on every request,
+  which is what `Memoize` costs with PHP-FPM. Use `Compiled::dump()` to generate the file, see
+  [docs/RouteProviders.md](docs/RouteProviders.md).
 
 ### Deprecated Features
 

@@ -355,6 +355,42 @@ Cold start with dynamic routes is dominated by regex compilation (about 2.5 ms f
 routes, vs 3.4 ms before), which only a compiled/cached route table (suggestion 4) can avoid.
 The cold benchmark now uses unique patterns per iteration so PCRE's cache doesn't hide this.
 
+### Where a PHP-FPM request spends its time (after PERF03)
+
+Lookup is now 0.5 to 5 µs, but under PHP-FPM nothing survives between requests, so each request
+first loads the route table and rebuilds `Memoize`'s indexes. `benchmarks/run.php` measures it as
+`request: include + … match`: the table exported with `var_export()` to a file loaded through
+OPcache (`__set_state()` hydration), wrapped in `Memoize`, then one lookup:
+
+| routes | request (µs) | of which lookup |
+|-------:|-------------:|----------------:|
+|     10 |          6.6 |           ~0.5  |
+|    100 |         59.8 |           ~0.5  |
+|  1,000 |          654 |       ~0.5 to 5 |
+
+The setup is split about evenly between hydrating the `Route` and `Pattern` objects (`__set_state()`,
+roughly 37 µs per 100 routes) and `Memoize` building its static map and chunk regexes (roughly 28 µs
+per 100 routes). Both are repeated on every request and are two orders of magnitude above the
+lookup. This is what suggestion 4 targets: a compiled table holding only constant arrays
+(static map, chunk regexes, per-route data), which OPcache shares across requests without
+allocating anything, and which instantiates only the matched `Route`.
+
+### After PERF04 (compiled provider)
+
+`RouteProvider\Compiled` loaded from an exported file, same scenarios, µs per request:
+
+| routes | include + Memoize, static | Compiled, static | include + Memoize, dynamic | Compiled, dynamic |
+|-------:|--------------------------:|-----------------:|---------------------------:|------------------:|
+|     10 |                       7.1 |              1.0 |                        9.7 |               1.5 |
+|    100 |                      70.7 |              1.0 |                       72.4 |               3.4 |
+|  1,000 |                     777   |              2.9 |                      766   |               6.0 |
+
+Lookups by id or action are indexed in the compiled data and create a single `Route`
+(0.8 µs at 100 and 1,000 routes), so URL generation does not hydrate the table either.
+
+Note: OPcache does not cache files younger than `opcache.file_update_protection` (2 s); the
+benchmark sets it to 0, otherwise it measures compilation.
+
 A good target to claim a success: matching a dynamic route among 1,000 routes should cost within a
 small constant of matching one among 10.
 

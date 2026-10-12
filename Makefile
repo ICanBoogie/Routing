@@ -40,7 +40,7 @@ test-container-84:
 
 .PHONY: benchmark
 benchmark: vendor
-	@php -d opcache.enable_cli=1 -d pcre.jit=1 benchmarks/run.php $(ARGS)
+	@php -d opcache.enable_cli=1 -d opcache.file_update_protection=0 -d pcre.jit=1 benchmarks/run.php $(ARGS)
 
 .PHONY: lint
 lint:
