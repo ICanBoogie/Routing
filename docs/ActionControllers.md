@@ -79,8 +79,10 @@ identifier.
 | PATCH/PUT | `/{name}/{id}`      | {name}:update | Update a specific `{resource}`             |
 | DELETE    | `/{name}/{id}`      | {name}:delete | Delete a specific `{resource}`             |
 
-The routes listed are more of a guideline than a requirement, still the actions are important. Such
-routes can easily be created with `RouteMaker`:
+The routes listed are more of a guideline than a requirement, still the actions are important.
+
+The values of the path parameters are passed to the action method as arguments, in the order they
+appear in the pattern. The request is available through `$this->request`.
 
 The following example demonstrates how the resource controller for _articles_ may be implemented.
 The example implements all actions, but you're free to implement only some of them.
@@ -95,37 +97,37 @@ class ArticleController extends ControllerAbstract
 {
     use ActionTrait;
 
-    private function list(Request $request)
+    private function list()
     {
         // …
     }
 
-    private function new(Request $request)
+    private function new()
     {
         // …
     }
 
-    private function create(Request $request)
+    private function create()
     {
         // …
     }
 
-    private function show(Request $request, int $id)
+    private function show(int $id)
     {
         // …
     }
 
-    private function edit(Request $request, int $id)
+    private function edit(int $id)
     {
         // …
     }
 
-    private function update(Request $request, int $id)
+    private function update(int $id)
     {
         // …
     }
 
-    private function delete(Request $request, int $id)
+    private function delete(int $id)
     {
         // …
     }
@@ -136,5 +138,4 @@ class ArticleController extends ControllerAbstract
 
 [ControllerAbstract]:   ../lib/ControllerAbstract.php
 [ActionTrait]:          ../lib/Controller/ActionTrait.php
-
-[RESTful]: https://en.wikipedia.org/wiki/Representational_state_transfer
+[RouteMaker]:           ../lib/RouteMaker.php

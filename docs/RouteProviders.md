@@ -40,6 +40,51 @@ echo $route->action; // "articles:show"
 var_dump($predicate->path_params); // [ 'nid' => 123 ]
 ```
 
+## Implementations
+
+- `RouteProvider\Mutable`: A list of routes that can grow with `add_routes()`.
+- `RouteProvider\Immutable`: A fixed list of routes. This is what `RouteCollector::collect()` returns.
+
+Providers are iterable, e.g. to list all routes:
+
+```php
+foreach ($route_provider as $route) {
+    echo "$route->pattern → $route->action\n";
+}
+```
+
+## Performance
+
+Matching a URI against a plain provider is a linear scan with a regex per dynamic route.
+`RouteProvider\Memoize` decorates a provider and speeds up the built-in predicates:
+
+```php
+<?php
+
+use ICanBoogie\Routing\RouteProvider\Memoize;
+
+/* @var \ICanBoogie\Routing\RouteProvider $routes */
+
+$routes = new Memoize($routes);
+```
+
+- `ByUri`: static routes are compared as strings and tried first, then dynamic routes are tried,
+  routes with more static leading path segments first.
+- `ById`, `ByAction`, `ByIdOrAction`: lookups are indexed.
+- Custom callable predicates fall through to the decorated provider.
+
+Both `Mutable` and `Immutable` implement `__set_state()`, so a provider can be exported with
+`var_export()` and cached as a PHP file, which makes it a good candidate for build-time caching.
+
+## Writing a custom predicate
+
+A predicate is any `callable(Route): bool`:
+
+```php
+$route = $routes->route_for_predicate(
+    fn(Route $route) => str_starts_with($route->action, 'admin:')
+);
+```
 
 
 [RouteProvider]: ../lib/RouteProvider.php
