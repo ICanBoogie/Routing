@@ -21,6 +21,8 @@ None
 ### Other changes
 
 - `RouteNotFound` extends `NotFound`.
+- Improved route resolution performance: `MemoizeByUri` finds static routes with a single array
+  lookup instead of scanning them.
 
 
 

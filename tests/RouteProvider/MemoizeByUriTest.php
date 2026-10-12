@@ -180,4 +180,21 @@ final class MemoizeByUriTest extends TestCase
         );
         $this->assertEquals([ 123 ], $p->path_params);
     }
+
+    public function test_static_routes_sharing_a_path(): void
+    {
+        $routes = new MemoizeByUri(
+            new Immutable([
+                $get = new Route('/articles', 'articles:list', RequestMethod::METHOD_GET),
+                $post = new Route('/articles', 'articles:create', RequestMethod::METHOD_POST),
+                $any = new Route('/articles', 'articles:any'),
+            ])
+        );
+
+        $this->assertSame($get, $routes->route_for_predicate(new ByUri('/articles', RequestMethod::METHOD_GET)));
+        $this->assertSame($post, $routes->route_for_predicate(new ByUri('/articles', RequestMethod::METHOD_POST)));
+        $this->assertSame($any, $routes->route_for_predicate(new ByUri('/articles', RequestMethod::METHOD_PUT)));
+        $this->assertSame($get, $routes->route_for_predicate(new ByUri('/articles')));
+        $this->assertNull($routes->route_for_predicate(new ByUri('/articles/')));
+    }
 }

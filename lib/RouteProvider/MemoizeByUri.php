@@ -52,24 +52,6 @@ final class MemoizeByUri implements RouteProvider
         $path_params = [];
 
         /**
-         * Search for a matching static route.
-         *
-         * @param Route[] $routes
-         */
-        $map_static = function (iterable $routes) use ($path, $method): ?Route {
-            /** @var Route $route */
-            foreach ($routes as $route) {
-                $pattern = (string)$route->pattern;
-
-                if ($route->method_matches($method) && $pattern === $path) {
-                    return $route;
-                }
-            }
-
-            return null;
-        };
-
-        /**
          * Search for a matching dynamic route.
          *
          * @param Route[] $routes
@@ -93,8 +75,11 @@ final class MemoizeByUri implements RouteProvider
 
         $route = null;
 
-        if ($static) {
-            $route = $map_static($static);
+        foreach ($static[$path] ?? [] as $candidate) {
+            if ($candidate->method_matches($method)) {
+                $route = $candidate;
+                break;
+            }
         }
 
         if (!$route && $dynamic) {
@@ -117,7 +102,8 @@ final class MemoizeByUri implements RouteProvider
     }
 
     /**
-     * @var Route[]|null
+     * @var array<string, Route[]>|null
+     *     Where _key_ is the path of the static routes, in declaration order.
      */
     private ?array $static = null;
 
@@ -133,13 +119,14 @@ final class MemoizeByUri implements RouteProvider
      *
      * Routes and grouped in two groups: static routes and dynamic routes. The difference between
      * static and dynamic routes is that dynamic routes capture parameters from the path and thus
-     * require a regex to compute the matches, whereas static routes only require is simple string
-     * comparison.
+     * require a regex to compute the matches, whereas static routes only require a simple string
+     * comparison. Static routes are indexed by path, so they are found with a single array lookup.
      *
      * Dynamic routes are ordered according to their weight, which is computed from the number
      * of static parts before the first capture. The more static parts, the lighter the route is.
      *
-     * @return array{0: Route[], 1: Route[]} An array with the static routes and dynamic routes.
+     * @return array{0: array<string, Route[]>, 1: Route[]} An array with the static routes indexed by
+     * path, and the dynamic routes.
      */
     private function sort_routes(): array
     {
@@ -160,7 +147,7 @@ final class MemoizeByUri implements RouteProvider
             $pattern = $route->pattern;
 
             if (!count($pattern->params)) {
-                $static[] = $route;
+                $static[$pattern->pattern][] = $route;
             } else {
                 $dynamic[] = $route;
                 $weights[spl_object_id($route)] = substr_count(

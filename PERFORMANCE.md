@@ -323,6 +323,19 @@ suggestions 1 to 3 address. `generate_url()` is flat: the map lookup is not the 
 formatting is (suggestion 7). Plain `Immutable` is slower still (347 µs for the last dynamic route
 at 1,000), so `Memoize` is already worth it. Numbers vary by machine; compare runs on the same one.
 
+### After PERF01 (static hash map)
+
+`Memoize(Immutable)`, same settings, µs per call:
+
+| routes | static, last | dynamic, last | no match | cold |
+|-------:|-------------:|--------------:|---------:|-----:|
+|     10 | 0.53 (was 1.09) | 1.37 (was 2.02) | 1.24 (was 1.95) | 4.2 (was 3.7) |
+|    100 | 0.53 (was 4.85) | 7.22 (was 12.10) | 7.03 (was 11.91) | 24 (was 28) |
+|  1,000 | 0.55 (was 52.5) | 82.7 (was 123.6) | 78.3 (was 117.8) | 305 (was 883) |
+
+Static matching is now flat. Dynamic and no-match lookups also got cheaper because they no longer
+scan the static routes first; they are still linear (suggestion 3).
+
 A good target to claim a success: matching a dynamic route among 1,000 routes should cost within a
 small constant of matching one among 10.
 
