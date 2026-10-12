@@ -53,6 +53,21 @@ foreach ($route_provider as $route) {
 }
 ```
 
+## Precedence
+
+When several routes match a URI, the provider decides which one is returned:
+
+- `Mutable` and `Immutable` return the **first route in declaration order**. Declare
+  `/articles/new` before `/articles/<id>`, or the latter wins.
+- `Memoize`, `MemoizeByUri` and `Compiled` return **static routes first**, then dynamic routes with
+  more static leading path segments first (`/articles/<id>/edit` before `/articles/<id>`), and
+  finally declaration order for routes of equal weight.
+
+The same route table can therefore give different results with a plain provider and with a
+memoized one. `Mutable` and `Immutable` are conveniences to build and iterate over a table; use
+`Memoize` or `Compiled` to serve requests, and avoid patterns that overlap, because routes of equal
+weight (e.g. `/articles/<id:\d+>` and `/articles/<slug>`) are only separated by declaration order.
+
 ## Performance
 
 Matching a URI against a plain provider is a linear scan with a regex per dynamic route.

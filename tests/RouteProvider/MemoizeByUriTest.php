@@ -10,6 +10,7 @@ use ICanBoogie\Routing\RouteProvider\ById;
 use ICanBoogie\Routing\RouteProvider\ByUri;
 use ICanBoogie\Routing\RouteProvider\Immutable;
 use ICanBoogie\Routing\RouteProvider\MemoizeByUri;
+use ICanBoogie\Routing\RouteProvider\Mutable;
 use PHPUnit\Framework\TestCase;
 
 use function implode;
@@ -238,5 +239,29 @@ final class MemoizeByUriTest extends TestCase
         $this->assertSame([ 'slug' => '1' ], $p->path_params);
         $this->assertSame($any, $routes->route_for_predicate($p = new ByUri('/articles/abc', RequestMethod::METHOD_GET)));
         $this->assertSame([ 'slug' => 'abc' ], $p->path_params);
+    }
+
+    /**
+     * Static routes win over dynamic routes, and dynamic routes with more leading static segments win over
+     * the others, whatever the declaration order. {@see Mutable} follows the declaration order instead.
+     */
+    public function test_precedence_is_independent_of_declaration_order(): void
+    {
+        $catch_all = new Route('/<path:.+>', 'catch_all');
+        $show = new Route('/articles/<id:\d+>', 'show');
+        $edit = new Route('/articles/<id:\d+>/edit', 'edit');
+        $new = new Route('/articles/new', 'new');
+        $routes = [ $catch_all, $show, $edit, $new ];
+
+        $mutable = new Mutable();
+        $mutable->add_routes(...$routes);
+        $memoized = new MemoizeByUri($mutable);
+
+        $this->assertSame($new, $memoized->route_for_predicate(new ByUri('/articles/new')));
+        $this->assertSame($edit, $memoized->route_for_predicate(new ByUri('/articles/12/edit')));
+        $this->assertSame($show, $memoized->route_for_predicate(new ByUri('/articles/12')));
+        $this->assertSame($catch_all, $memoized->route_for_predicate(new ByUri('/other')));
+
+        $this->assertSame($catch_all, $mutable->route_for_predicate(new ByUri('/articles/new')));
     }
 }
