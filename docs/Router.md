@@ -1,7 +1,7 @@
 # Using the Router
 
 [Router][] is the shortest path from a pattern to a handler. Each method registers a [Route][] with
-a generated action (`__anonymous_action_N`) and a responder that calls your closure.
+an action (generated unless you provide one) and a responder that calls your closure.
 
 ```php
 <?php
@@ -32,13 +32,22 @@ pattern are in `$request->path_params`.
 
 `Router` requires _mutable_ providers (`RouteProvider\Mutable` and `ActionResponderProvider\Mutable`).
 
-> [!TIP]
-> Routes created by the Router have anonymous actions, so they cannot be targeted by
-> [URL generation](UrlGeneration.md) with a meaningful action. If you need to generate URLs, define
-> the route with an action or an identifier using the [route collector](CreatingRoutes.md) and
-> register the responder with `ActionResponderProvider\Mutable::add_responder()`.
+## Naming actions
 
+By default, the action of a route is generated (`__anonymous_action_N`), which is unstable and
+cannot be targeted by [URL generation](UrlGeneration.md). Pass an `action` to name it; it takes
+precedence over the generated one:
 
+```php
+<?php
+
+$router->get('/articles', fn() => new Response('Articles'), action: 'articles:list');
+
+$url_generator->generate_url('articles:list'); // /articles
+```
+
+The action is also the key of the responder in `ActionResponderProvider\Mutable`, use a unique one
+per route.
 
 [Router]: ../lib/Router.php
 [Route]: ../lib/Route.php

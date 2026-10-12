@@ -28,112 +28,127 @@ class Router
 
     /**
      * @param Closure(Request):Response $closure
+     * @param string|null $action An action name, which takes precedence over a generated one.
      *
      * @return $this
      */
-    public function any(string $pattern, Closure $closure): self
+    public function any(string $pattern, Closure $closure, string|null $action = null): self
     {
-        return $this->method(RequestMethod::METHOD_ANY, $pattern, $closure);
+        return $this->method(RequestMethod::METHOD_ANY, $pattern, $closure, $action);
     }
 
     /**
      * @param Closure(Request):Response $closure
+     * @param string|null $action An action name, which takes precedence over a generated one.
      *
      * @return $this
      */
-    public function connect(string $pattern, Closure $closure): self
+    public function connect(string $pattern, Closure $closure, string|null $action = null): self
     {
-        return $this->method(RequestMethod::METHOD_CONNECT, $pattern, $closure);
+        return $this->method(RequestMethod::METHOD_CONNECT, $pattern, $closure, $action);
     }
 
     /**
      * @param Closure(Request):Response $closure
+     * @param string|null $action An action name, which takes precedence over a generated one.
      *
      * @return $this
      */
-    public function delete(string $pattern, Closure $closure): self
+    public function delete(string $pattern, Closure $closure, string|null $action = null): self
     {
-        return $this->method(RequestMethod::METHOD_DELETE, $pattern, $closure);
+        return $this->method(RequestMethod::METHOD_DELETE, $pattern, $closure, $action);
     }
 
     /**
      * @param Closure(Request):Response $closure
+     * @param string|null $action An action name, which takes precedence over a generated one.
      *
      * @return $this
      */
-    public function get(string $pattern, Closure $closure): self
+    public function get(string $pattern, Closure $closure, string|null $action = null): self
     {
-        return $this->method(RequestMethod::METHOD_GET, $pattern, $closure);
+        return $this->method(RequestMethod::METHOD_GET, $pattern, $closure, $action);
     }
 
     /**
      * @param Closure(Request):Response $closure
+     * @param string|null $action An action name, which takes precedence over a generated one.
      *
      * @return $this
      */
-    public function head(string $pattern, Closure $closure): self
+    public function head(string $pattern, Closure $closure, string|null $action = null): self
     {
-        return $this->method(RequestMethod::METHOD_HEAD, $pattern, $closure);
+        return $this->method(RequestMethod::METHOD_HEAD, $pattern, $closure, $action);
     }
 
     /**
      * @param Closure(Request):Response $closure
+     * @param string|null $action An action name, which takes precedence over a generated one.
      *
      * @return $this
      */
-    public function options(string $pattern, Closure $closure): self
+    public function options(string $pattern, Closure $closure, string|null $action = null): self
     {
-        return $this->method(RequestMethod::METHOD_OPTIONS, $pattern, $closure);
+        return $this->method(RequestMethod::METHOD_OPTIONS, $pattern, $closure, $action);
     }
 
     /**
      * @param Closure(Request):Response $closure
+     * @param string|null $action An action name, which takes precedence over a generated one.
      *
      * @return $this
      */
-    public function patch(string $pattern, Closure $closure): self
+    public function patch(string $pattern, Closure $closure, string|null $action = null): self
     {
-        return $this->method(RequestMethod::METHOD_PATCH, $pattern, $closure);
+        return $this->method(RequestMethod::METHOD_PATCH, $pattern, $closure, $action);
     }
 
     /**
      * @param Closure(Request):Response $closure
+     * @param string|null $action An action name, which takes precedence over a generated one.
      *
      * @return $this
      */
-    public function post(string $pattern, Closure $closure): self
+    public function post(string $pattern, Closure $closure, string|null $action = null): self
     {
-        return $this->method(RequestMethod::METHOD_POST, $pattern, $closure);
+        return $this->method(RequestMethod::METHOD_POST, $pattern, $closure, $action);
     }
 
     /**
      * @param Closure(Request):Response $closure
+     * @param string|null $action An action name, which takes precedence over a generated one.
      *
      * @return $this
      */
-    public function put(string $pattern, Closure $closure): self
+    public function put(string $pattern, Closure $closure, string|null $action = null): self
     {
-        return $this->method(RequestMethod::METHOD_PUT, $pattern, $closure);
+        return $this->method(RequestMethod::METHOD_PUT, $pattern, $closure, $action);
     }
 
     /**
      * @param Closure(Request):Response $closure
+     * @param string|null $action An action name, which takes precedence over a generated one.
      *
      * @return $this
      */
-    public function trace(string $pattern, Closure $closure): self
+    public function trace(string $pattern, Closure $closure, string|null $action = null): self
     {
-        return $this->method(RequestMethod::METHOD_TRACE, $pattern, $closure);
+        return $this->method(RequestMethod::METHOD_TRACE, $pattern, $closure, $action);
     }
 
     /**
      * @param Closure(Request):Response $closure
+     * @param string|null $action An action name, which takes precedence over a generated one.
      *
      * @return $this
      */
-    private function method(RequestMethod $method, string $pattern, Closure $closure): self
-    {
-        $action = self::generate_anonymous_action();
+    private function method(
+        RequestMethod $method,
+        string $pattern,
+        Closure $closure,
+        string|null $action,
+    ): self {
+        $action ??= self::generate_anonymous_action();
 
         $this->routes->add_routes(new Route($pattern, $action, $method));
         $this->responders->add_responder($action, new DelegateToClosure($closure));

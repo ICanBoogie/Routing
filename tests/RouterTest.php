@@ -102,4 +102,24 @@ final class RouterTest extends TestCase
 
         $this->assertSame($response, $actual);
     }
+
+    public function test_action(): void
+    {
+        $routes = new Mutable();
+        $responders = new ActionResponderProvider\Mutable();
+        $response = new Response();
+
+        (new Router($routes, $responders))
+            ->get('/articles', fn(): Response => $response, action: 'articles:list');
+
+        $route = $routes->route_for_predicate(new ByUri('/articles', RequestMethod::METHOD_GET));
+
+        assert($route instanceof Route);
+
+        $this->assertSame('articles:list', $route->action);
+
+        $responder = $responders->responder_for_action('articles:list');
+
+        $this->assertSame($response, $responder->respond(Request::from()));
+    }
 }

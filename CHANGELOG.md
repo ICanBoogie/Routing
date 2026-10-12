@@ -16,6 +16,10 @@ PHP 8.4+
 - Added `Exception\PatternMissingValue`, thrown by `Pattern::format()` when a value is missing for a
   placeholder, instead of a PHP warning followed by a `TypeError`. It extends `PatternRequiresValues`.
 
+- Added an optional `action` parameter to the `Router` methods (`get()`, `post()`, …). It takes
+  precedence over the generated anonymous action, so that routes created by the `Router` can be
+  used for URL generation.
+
 ### Deprecated Features
 
 None
