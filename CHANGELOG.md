@@ -11,6 +11,11 @@ PHP 8.4+
 - Added `RouteProvider\Chain`, which asks a list of route providers in turn, the first route found wins.
   Use it with a `Mutable` alongside a decorated `Immutable` to add a bit of freedom at runtime, see
   [docs/RouteProviders.md](docs/RouteProviders.md).
+- Added `RouteProvider\Compiled`, a route provider meant for production that compiles another provider
+  into plain data to speed up route resolution. It implements `__set_state()` like `Mutable` and
+  `Immutable`, so it can be exported with `var_export()` and cached as a PHP file loaded through
+  OPcache. It avoids creating routes and computing indexes on every request, which is what `Memoize`
+  costs with PHP-FPM, see [docs/RouteProviders.md](docs/RouteProviders.md).
 
 ### Deprecated Features
 

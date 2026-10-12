@@ -58,9 +58,10 @@ foreach ($route_provider as $route) {
 ## Recommended setup
 
 `Immutable` is the base of an application: it holds the routes that are set in stone. Because they can't
-change, it is safe to decorate it with `Memoize`, whose indexes would be stale as soon as a route is
-added. `Mutable` is for the bit of freedom you need at runtime (routes registered by a plugin, or in a
-test), where a linear scan is not an issue. A `Chain` puts them together. The order is yours to choose, see below.
+change, it is safe to decorate it with `Memoize` or `Compiled`, whose indexes would be stale as soon as a
+route is added. `Mutable` is for the bit of freedom you need at runtime (routes registered by a plugin, or
+in a test), where a linear scan is not an issue. A `Chain` puts them together. The order is yours to
+choose, see below.
 
 ```php
 <?php
@@ -88,10 +89,11 @@ $mutable->add_routes(new Route('/plugin/status', 'plugin:status'));
 - **Iteration** lists the routes of the providers in the order of the chain.
 - **Pass an array of providers.** The providers are iterated for each lookup, an iterator that can only
   be traversed once (such as a generator) would be exhausted by the first one.
-- **Avoid decorating a `Mutable`** with `Memoize`, unless you are done adding routes: routes added
-  after the first lookup would not be found by the indexes.
-- **A `Chain` is not exported.** Export the `Immutable` base, which is the expensive part, and
-  create the `Chain` when the application starts.
+- **Avoid decorating a `Mutable`** with `Memoize`, or compiling it, unless you are done adding routes:
+  routes added after the first lookup would not be found by the indexes.
+- **A `Chain` is not exported.** Export the base, which is the expensive part (see
+  [Compiling routes for production](#compiling-routes-for-production)), and create the `Chain` when the
+  application starts.
 
 ## Performance
 
@@ -114,7 +116,55 @@ $routes = new Memoize($routes);
 - Custom callable predicates fall through to the decorated provider.
 
 Both `Mutable` and `Immutable` implement `__set_state()`, so a provider can be exported with
-`var_export()` and cached as a PHP file, which makes it a good candidate for build-time caching.
+`var_export()` and cached as a PHP file, which makes it a good candidate for build-time caching. This
+is simple, but the objects are created on each request and `Memoize` has to build its indexes again,
+see below.
+
+### Compiling routes for production
+
+`Memoize` computes its indexes in memory, which is lost when the process ends. With PHP-FPM, that's
+every request. On top of that, loading routes from a file means creating every `Route` object.
+Together, that is the dominant cost of routing: tens of microseconds for 100 routes, most of a
+millisecond for 1,000, whereas finding a route takes about a microsecond.
+
+`RouteProvider\Compiled` avoids both. It compiles another provider into constant arrays: the routes
+and the indexes used to match them. The inner provider is not kept. The instance implements
+`__set_state()`, like `Mutable` and `Immutable`, so it can be exported with `var_export()` and used as
+a configuration value, e.g. the result of a configuration builder, which the configuration cache then
+stores as a PHP file. The file is loaded through OPcache, which shares the arrays between requests,
+and the compiled data is restored without compiling again. `Route` instances are only created for the
+routes that are needed.
+
+```php
+<?php
+
+use ICanBoogie\Routing\RouteProvider\Compiled;
+
+/* @var \ICanBoogie\Routing\RouteProvider $provider */
+/* @var string $file */
+
+// At build time, or during deployment
+$tmp = "$file." . uniqid('', true);
+file_put_contents($tmp, '<?php return ' . var_export(new Compiled($provider), true) . ';');
+rename($tmp, $file); // atomic, a concurrent request never reads a partial file
+
+// At runtime
+$routes = require $file;
+```
+
+`Compiled` optimizes the same predicates as `Memoize`, and is iterable. Other predicates are tested
+against every route. Route extensions are exported with `var_export()`, they must implement
+`__set_state()`. The file has to be regenerated whenever routes change. An instance can be exported
+whether or not it has already been used.
+
+`Compiled` is made for production, where the work is done once, ahead of time, and requests only read
+the result. Compiling takes milliseconds for a large table (about 3 ms for 1,000 routes), which is
+irrelevant at build time but would be wasted on every request. Compile the routes while warming up
+the application, e.g. before the Docker image is built, so that the image ships with the exported file
+and no request ever compiles. In development, where routes change often, a plain `Mutable` or
+`Immutable` provider, possibly decorated with `Memoize`, is simpler.
+
+Make sure OPcache is enabled. PHP-FPM also benefits from `pcre.jit=1`, which is the default.
 
 ## Writing a custom predicate
 

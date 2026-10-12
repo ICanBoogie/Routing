@@ -42,6 +42,10 @@ final class Route
      * @param string $action Identifier of a qualified action; for example, 'articles:show'.
      * @param RequestMethod|RequestMethod[] $methods Request methods accepted by the route.
      * @param object[] $extensions
+     *
+     * > [!WARN]
+     * > Route extensions must be exportable with `var_export()`, that is to say, they
+     * > must implement `__set_state()`.
      */
     public function __construct(
         string|Pattern $pattern,

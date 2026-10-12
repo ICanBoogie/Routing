@@ -3,7 +3,9 @@
 Suggestions to improve the performance of the package, inspired by how
 [symfony/routing](https://github.com/symfony/routing) and
 [nikic/FastRoute](https://github.com/nikic/FastRoute) match and generate URLs. They are
-suggestions, not commitments. None of them has been benchmarked yet; step 0 is to measure.
+suggestions, not commitments. Each one is measured with `make benchmark` before it is adopted; the
+ones
+that were done say so in the triage table.
 
 ## Ground rules
 
@@ -22,20 +24,20 @@ Anything that passes neither is dropped, however well it works elsewhere.
 
 What the baseline (see *Measuring*) supports, and what it does not:
 
-|  # | Suggestion                        | Verdict                  | Why                                                                                                                                                                          |
-|---:|-----------------------------------|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|  1 | Static hash map                   | **Do**                   | Static lookup grows 1.1 → 52 µs from 10 to 1,000 routes; a hash lookup should be flat.                                                                                       |
-|  3 | Chunked combined regex            | **Do**                   | Dynamic lookup grows 2 → 124 µs. Prototype first; keep only if it wins at 100 routes too, not just 1,000.                                                                    |
-|  4 | Compiled provider                 | **Measure first**        | Cold start is 883 µs at 1,000 routes, but only matters for PHP-FPM. Add a benchmark loading the table through `__set_state()` from OPcache before deciding; adds public API. |
-|  5 | Single URI parse / lazy 405       | **Do, for the API**      | Speed matters only on 404/405 paths. The real gain is `MethodNotAllowed` knowing the allowed methods (`Allow` header).                                                       |
-|  9 | Partition by method               | **Only if needed**       | Unproven. Re-evaluate after 1 and 3; a hash map and chunking may already remove the cost.                                                                                    |
-|  2 | Prefix buckets                    | **Only if needed**       | Only if chunking (3) is not enough.                                                                                                                                          |
-|  6 | Cheaper `Pattern::matches()`      | **Only if profiled**     | Micro-optimizations; do them if a profile shows `matches()` dominating after 1 and 3.                                                                                        |
-|  7 | Faster `Pattern::format()`        | **Drop for now**         | `generate_url()` is flat at 0.8 µs for 10 to 1,000 routes. There is nothing to win. `rawurlencode` is a correctness question, not performance.                               |
-|  8 | Fewer allocations                 | **Drop for now**         | Not measured; the `static` counter in `Router` is only an issue if suggestion 4 happens.                                                                                     |
-| 10 | Validate the table when built     | **API, not performance** | Detecting shadowed or duplicate routes is a usability gain (see SUGGESTIONS.md); also a prerequisite for safely reordering routes in 3.                                      |
-| 11 | Atomic compiled file              | **Only with 4**          | Needed only if a compiled provider exists.                                                                                                                                   |
-| 12 | Validate parameters in `format()` | **API, not performance** | Costs time. Only a usability feature; belongs in SUGGESTIONS.md.                                                                                                             |
+|  # | Suggestion                        | Verdict                  | Why                                                                                                                                                              |
+|---:|-----------------------------------|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|  1 | Static hash map                   | **Do**                   | Static lookup grows 1.1 → 52 µs from 10 to 1,000 routes; a hash lookup should be flat.                                                                           |
+|  3 | Chunked combined regex            | **Do**                   | Dynamic lookup grows 2 → 124 µs. Prototype first; keep only if it wins at 100 routes too, not just 1,000.                                                        |
+|  4 | Compiled provider                 | **Done (PERF04)**        | Cold start is 883 µs at 1,000 routes, and a request pays 660 µs to load the table and rebuild `Memoize`. `Compiled` brings it to about 1 µs, see *After PERF04*. |
+|  5 | Single URI parse / lazy 405       | **Do, for the API**      | Speed matters only on 404/405 paths. The real gain is `MethodNotAllowed` knowing the allowed methods (`Allow` header).                                           |
+|  9 | Partition by method               | **Only if needed**       | Unproven. Re-evaluate after 1 and 3; a hash map and chunking may already remove the cost.                                                                        |
+|  2 | Prefix buckets                    | **Only if needed**       | Only if chunking (3) is not enough.                                                                                                                              |
+|  6 | Cheaper `Pattern::matches()`      | **Only if profiled**     | Micro-optimizations; do them if a profile shows `matches()` dominating after 1 and 3.                                                                            |
+|  7 | Faster `Pattern::format()`        | **Drop for now**         | `generate_url()` is flat at 0.8 µs for 10 to 1,000 routes. There is nothing to win. `rawurlencode` is a correctness question, not performance.                   |
+|  8 | Fewer allocations                 | **Drop for now**         | Not measured; the `static` counter in `Router` is only an issue if suggestion 4 happens.                                                                         |
+| 10 | Validate the table when built     | **API, not performance** | Detecting shadowed or duplicate routes is a usability gain (see SUGGESTIONS.md); also a prerequisite for safely reordering routes in 3.                          |
+| 11 | Atomic compiled file              | **Left to the app**      | The provider is exported as a value, the application (e.g. the configuration cache) writes the file.                                                             |
+| 12 | Validate parameters in `format()` | **API, not performance** | Costs time. Only a usability feature; belongs in SUGGESTIONS.md.                                                                                                 |
 
 ## How requests are resolved today
 
@@ -191,6 +193,11 @@ and push it further:
 This is the structural difference with Symfony: the work is done at build time, not in
 `sort_routes()` on the first request of each PHP process.
 
+**Done (PERF04).** There is no dumper: `Compiled` decorates a provider, keeps only plain data, and
+implements `__set_state()`, so `var_export()` is the dump and the application decides where the file
+goes (in bind-routing, the configuration cache). The routes are stored once and the indexes refer to
+them by position, which also covers `ById` and `ByAction`.
+
 ### 5. Avoid parsing the URI twice, and twice on failure
 
 - `RequestResponderProvider` creates a `ByUri` (a `parse_url()` + `parse_str()`) and, on a miss,
@@ -327,10 +334,10 @@ at 1,000), so `Memoize` is already worth it. Numbers vary by machine; compare ru
 
 `Memoize(Immutable)`, same settings, µs per call:
 
-| routes | static, last | dynamic, last | no match | cold |
-|-------:|-------------:|--------------:|---------:|-----:|
-|     10 | 0.53 (was 1.09) | 1.37 (was 2.02) | 1.24 (was 1.95) | 4.2 (was 3.7) |
-|    100 | 0.53 (was 4.85) | 7.22 (was 12.10) | 7.03 (was 11.91) | 24 (was 28) |
+| routes |    static, last |    dynamic, last |         no match |          cold |
+|-------:|----------------:|-----------------:|-----------------:|--------------:|
+|     10 | 0.53 (was 1.09) |  1.37 (was 2.02) |  1.24 (was 1.95) | 4.2 (was 3.7) |
+|    100 | 0.53 (was 4.85) | 7.22 (was 12.10) | 7.03 (was 11.91) |   24 (was 28) |
 |  1,000 | 0.55 (was 52.5) | 82.7 (was 123.6) | 78.3 (was 117.8) | 305 (was 883) |
 
 Static matching is now flat. Dynamic and no-match lookups also got cheaper because they no longer
@@ -340,8 +347,8 @@ scan the static routes first; they are still linear (suggestion 3).
 
 `Memoize(Immutable)`, µs per call, with chunks of about 30 routes (measured since PERF01):
 
-| routes | dynamic, last | no match |
-|-------:|--------------:|---------:|
+| routes |   dynamic, last |        no match |
+|-------:|----------------:|----------------:|
 |     10 | 0.84 (was 1.37) | 0.56 (was 1.24) |
 |    100 | 0.98 (was 7.22) | 0.69 (was 7.03) |
 |  1,000 | 5.30 (was 82.7) | 4.21 (was 78.3) |
@@ -354,6 +361,51 @@ routes of the chunk are tried one by one instead of silently missing.
 Cold start with dynamic routes is dominated by regex compilation (about 2.5 ms for 500 dynamic
 routes, vs 3.4 ms before), which only a compiled/cached route table (suggestion 4) can avoid.
 The cold benchmark now uses unique patterns per iteration so PCRE's cache doesn't hide this.
+
+### Where a PHP-FPM request spends its time (after PERF03)
+
+Lookup is now 0.5 to 5 µs, but under PHP-FPM nothing survives between requests, so each request
+first loads the route table and rebuilds `Memoize`'s indexes. `benchmarks/run.php` measures it as
+`request: include + … match`: the table exported with `var_export()` to a file loaded through
+OPcache (`__set_state()` hydration), wrapped in `Memoize`, then one lookup (µs per request):
+
+| routes | include + Memoize, static | include + Memoize, dynamic |
+|-------:|--------------------------:|---------------------------:|
+|     10 |                       6.6 |                        8.0 |
+|    100 |                        58 |                         65 |
+|  1,000 |                       660 |                        730 |
+
+The setup is two orders of magnitude above the lookup. It is made of hydrating every `Route` and
+`Pattern` object (`__set_state()`) and of `Memoize` building its static map and chunk regexes, both
+repeated on every request. This is what suggestion 4 targets: a compiled table holding only
+constant arrays (routes, indexes, chunk regexes), which OPcache shares across requests without
+allocating anything, and which instantiates only the matched `Route`.
+
+### After PERF04 (compiled provider)
+
+`RouteProvider\Compiled` decorates a provider at build time and is exported with `var_export()` in
+its place, so it can be used as a configuration value. The routes are stored once, and the indexes
+(`by_id`, `by_action`, the static map and the chunks) refer to them by position. Same scenarios,
+µs per request:
+
+| routes | inc. + Memoize, static | Compiled, static | inc. + Memoize, dynamic | Compiled, dynamic |
+|-------:|-----------------------:|-----------------:|------------------------:|------------------:|
+|     10 |                    6.6 |              1.0 |                     8.0 |               1.4 |
+|    100 |                     58 |              1.0 |                      65 |               1.6 |
+|  1,000 |                    660 |              1.1 |                     730 |               6.0 |
+
+The benchmark lists the compiled scenarios under `Compiled(Immutable)`, next to `Immutable` and
+`Memoize(Immutable)`. Compiling is a build-time cost, paid once and not per request: building a
+`Compiled` from 1,000 routes takes about 0.5 ms for static routes and 2.8 ms with dynamic routes
+(the cold scenarios), mostly PCRE compiling the chunk regexes. `generate_url()` through a
+`Compiled` provider stays flat at about 0.6 µs from 10 to 1,000 routes.
+
+`Compiled` creates a `Route` only when it is needed, so the cost no longer grows with the size of
+the table for static matches, and dynamic matches only pay for the regexes of the chunks they
+traverse.
+
+Note: OPcache does not cache files younger than `opcache.file_update_protection` (2 s); the
+benchmark sets it to 0, otherwise it measures compilation.
 
 A good target to claim a success: matching a dynamic route among 1,000 routes should cost within a
 small constant of matching one among 10.

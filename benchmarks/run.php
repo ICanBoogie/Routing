@@ -5,14 +5,16 @@
  *
  *     php benchmarks/run.php [--iterations=N] [--sizes=10,100,1000] [--json]
  *
- * Run with `-d opcache.enable_cli=1 -d pcre.jit=1` to approximate production.
+ * Run with `-d opcache.enable_cli=1 -d opcache.file_update_protection=0 -d pcre.jit=1` to approximate
+ * production (without the last option OPcache refuses to cache files younger than 2 seconds, and the
+ * `request:` scenarios measure compilation).
  */
 
 use ICanBoogie\HTTP\RequestMethod;
 use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteProvider;
-use ICanBoogie\Routing\RouteProvider\ByIdOrAction;
 use ICanBoogie\Routing\RouteProvider\ByUri;
+use ICanBoogie\Routing\RouteProvider\Compiled;
 use ICanBoogie\Routing\RouteProvider\Immutable;
 use ICanBoogie\Routing\RouteProvider\Memoize;
 use ICanBoogie\Routing\UrlGenerator\UrlGeneratorWithRouteProvider;
@@ -94,6 +96,7 @@ foreach ($sizes as $size) {
     $providers = [
         'Immutable' => fn(): RouteProvider => new Immutable($routes),
         'Memoize(Immutable)' => fn(): RouteProvider => new Memoize(new Immutable($routes)),
+        'Compiled(Immutable)' => fn(): RouteProvider => new Compiled(new Immutable($routes)),
     ];
 
     foreach ($providers as $name => $factory) {
@@ -109,9 +112,11 @@ foreach ($sizes as $size) {
                 $uri = $key === 'static, last'
                     ? "/{$p($last_static)}/page-$salt$last_static"
                     : "/{$p($last_dynamic)}/section-$salt$last_dynamic/12/hello-world";
-                $cold_factory = $name === 'Immutable'
-                    ? fn() => new Immutable($cold_routes)
-                    : fn() => new Memoize(new Immutable($cold_routes));
+                $cold_factory = match ($name) {
+                    'Immutable' => fn() => new Immutable($cold_routes),
+                    'Memoize(Immutable)' => fn() => new Memoize(new Immutable($cold_routes)),
+                    default => fn() => new Compiled(new Immutable($cold_routes)),
+                };
 
                 $start = hrtime(true);
                 $cold_factory()->route_for_predicate(new ByUri($uri, RequestMethod::METHOD_GET));
@@ -119,6 +124,47 @@ foreach ($sizes as $size) {
             }
 
             $results[] = [ 'size' => $size, 'provider' => $name, 'scenario' => "$label (build + 1 lookup)", 'ns' => $total / $runs ];
+        }
+
+        // Request: what a PHP-FPM request pays before the first lookup, when the route table is
+        // exported to a file loaded through OPcache and decorated with Memoize.
+        if ($name === 'Memoize(Immutable)') {
+            $file = sys_get_temp_dir() . "/routing-bench-$size.php";
+            file_put_contents($file, '<?php return ' . var_export(new Immutable($routes), true) . ';');
+
+            $ns = measure(
+                fn() => (new Memoize(include $file))
+                    ->route_for_predicate(new ByUri($uris['static, last'], RequestMethod::METHOD_GET)),
+                max(100, intdiv($iterations, 20))
+            );
+            $results[] = [ 'size' => $size, 'provider' => $name, 'scenario' => 'request: include + static match', 'ns' => $ns ];
+
+            $ns = measure(
+                fn() => (new Memoize(include $file))
+                    ->route_for_predicate(new ByUri($uris['dynamic, last'] ?? $uris['static, last'], RequestMethod::METHOD_GET)),
+                max(100, intdiv($iterations, 20))
+            );
+            $results[] = [ 'size' => $size, 'provider' => $name, 'scenario' => 'request: include + dynamic match', 'ns' => $ns ];
+
+            unlink($file);
+        }
+
+        // Request, with the route table compiled and exported to a file loaded through OPcache. No Memoize.
+        if ($name === 'Compiled(Immutable)') {
+            $file = sys_get_temp_dir() . "/routing-bench-compiled-$size.php";
+            file_put_contents($file, "<?php return " . var_export(new Compiled(new Immutable($routes)), true) . ";\n");
+
+            foreach ([ 'static, last' => 'static', 'dynamic, last' => 'dynamic' ] as $key => $label) {
+                $uri = $uris[$key] ?? $uris['static, last'];
+                $ns = measure(
+                    fn() => (include $file)
+                        ->route_for_predicate(new ByUri($uri, RequestMethod::METHOD_GET)),
+                    max(100, intdiv($iterations, 20))
+                );
+                $results[] = [ 'size' => $size, 'provider' => $name, 'scenario' => "request: compiled, $label match", 'ns' => $ns ];
+            }
+
+            unlink($file);
         }
 
         $provider = $factory();
