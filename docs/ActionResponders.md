@@ -3,6 +3,7 @@
 A route only carries an _action_ (e.g. `articles:show`). An [ActionResponderProvider][] maps that
 action to the `Responder` that handles it:
 
+<!-- skip-check -->
 ```php
 public function responder_for_action(string $action): ?Responder;
 ```

@@ -30,6 +30,8 @@ A string is resolved with [RouteProvider\ByIdOrAction][]: a route `id` wins over
 routes an explicit `id` is a good way to keep URL generation stable if actions are renamed:
 
 ```php
+use ICanBoogie\Routing\RouteCollector;
+
 $routes = (new RouteCollector())
     ->get('/articles/<id:\d+>', 'articles:show', id: 'article')
     ->collect();

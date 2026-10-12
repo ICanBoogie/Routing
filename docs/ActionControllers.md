@@ -45,7 +45,7 @@ final class ArticleController extends ControllerAbstract
 
     private function show(): string
     {
-        // …
+        return "Article";
     }
 }
 ```

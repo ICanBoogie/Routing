@@ -49,6 +49,7 @@ final class DeleteController extends ControllerAbstract
     protected function action(Request $request): Response|string|null
     {
         // Your code goes here and should return a string or a Response instance
+        return "Deleted";
     }
 }
 ```

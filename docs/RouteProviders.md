@@ -132,6 +132,8 @@ request and `Memoize` has to build its indexes again.
 A predicate is any `callable(Route): bool`:
 
 ```php
+use ICanBoogie\Routing\Route;
+
 $route = $routes->route_for_predicate(
     fn(Route $route) => str_starts_with($route->action, 'admin:')
 );

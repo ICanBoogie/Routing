@@ -46,3 +46,8 @@ benchmark: vendor
 lint:
 #	@XDEBUG_MODE=off phpcs -s
 	@XDEBUG_MODE=off vendor/bin/phpstan
+
+.PHONY: lint-docs
+lint-docs: vendor
+	@php scripts/extract-doc-examples.php
+	@XDEBUG_MODE=off vendor/bin/phpstan analyse -c phpstan-docs.neon

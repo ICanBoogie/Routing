@@ -3,6 +3,8 @@
 Middleware wraps a responder to run code before and/or after it.
 
 ```php
+use ICanBoogie\HTTP\Responder;
+
 interface Middleware
 {
     public function responder(Responder $next): Responder;

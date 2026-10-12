@@ -1,0 +1,16 @@
+# Analyses the PHP examples of README.md and docs/*.md, see `make lint-docs`.
+# Examples are fragments: they use variables defined elsewhere, and show methods without calling them.
+parameters:
+  level: 5
+  paths:
+    - build/docs-examples
+  scanFiles:
+    - scripts/docs-stubs.php
+  ignoreErrors:
+    - identifier: variable.undefined
+    - identifier: method.unused
+    - identifier: catch.neverThrown
+    - identifier: return.unusedType
+    # icanboogie/event types the sender of a hook as `object|null`, the examples narrow it to `Route`
+    - identifier: argument.type
+      path: build/docs-examples/Middleware_*.php

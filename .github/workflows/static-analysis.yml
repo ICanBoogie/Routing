@@ -30,3 +30,6 @@ jobs:
 
     - name: Analyze
       run: vendor/bin/phpstan
+
+    - name: Analyze documentation examples
+      run: make lint-docs

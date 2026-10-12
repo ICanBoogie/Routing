@@ -41,6 +41,8 @@ precedence over the generated one:
 ```php
 <?php
 
+use ICanBoogie\HTTP\Response;
+
 $router->get('/articles', fn() => new Response('Articles'), action: 'articles:list');
 
 $url_generator->generate_url('articles:list'); // /articles
