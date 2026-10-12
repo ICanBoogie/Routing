@@ -14,6 +14,7 @@ use ICanBoogie\Routing\RouteProvider\Immutable;
 use ICanBoogie\Routing\RouteProvider\Memoize;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Test\ICanBoogie\Routing\SetStateHelper;
 
 use function file_put_contents;
 use function iterator_to_array;
@@ -70,6 +71,26 @@ final class CompiledTest extends TestCase
         } finally {
             unlink($file);
         }
+    }
+
+    public function test_from_compiles_routes(): void
+    {
+        $this->assertEquals($this->routes, [ ...Compiled::from($this->routes) ]);
+    }
+
+    public function test_can_be_exported_as_a_configuration_value(): void
+    {
+        $compiled = Compiled::from($this->routes);
+        $imported = SetStateHelper::export_import($compiled);
+
+        $this->assertInstanceOf(Compiled::class, $imported);
+        $this->assertEquals($this->routes, [ ...$imported ]);
+
+        $route = $imported->route_for_predicate(new ByUri('/articles/123', RequestMethod::METHOD_GET));
+
+        $this->assertSame('articles:show', $route?->action);
+        $this->assertSame('articles:delete', $imported->route_for_predicate(new ByAction('articles:delete'))?->action);
+        $this->assertSame('home', $imported->route_for_predicate(new ById('home'))?->id);
     }
 
     public function test_iterator_preserves_routes_and_order(): void

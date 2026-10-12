@@ -11,7 +11,8 @@ PHP 8.4+
 - Added `RouteProvider\Compiled`, a route provider backed by plain data that can be exported to a PHP file
   and loaded through OPcache. It avoids creating routes and computing indexes on every request,
   which is what `Memoize` costs with PHP-FPM. Use `Compiled::dump()` to generate the file, see
-  [docs/RouteProviders.md](docs/RouteProviders.md).
+  [docs/RouteProviders.md](docs/RouteProviders.md). `Compiled::from()` compiles routes into an instance
+  that can be exported with `var_export()` (`__set_state()`), like `Mutable` and `Immutable`.
 
 - Added `Exception\PatternMissingValue`, thrown by `Pattern::format()` when a value is missing for a
   placeholder, instead of a PHP warning followed by a `TypeError`. It extends `PatternRequiresValues`.

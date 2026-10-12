@@ -61,6 +61,7 @@ final class Compiled implements RouteProvider
      */
     public static function compile(iterable $routes): array
     {
+        /** @var list<Route> $routes */
         $routes = [ ...$routes ];
         $data = [];
         $by_id = [];
@@ -100,6 +101,27 @@ final class Compiled implements RouteProvider
     }
 
     /**
+     * Compiles routes and returns a provider for them.
+     *
+     * The instance can be exported with `var_export()`, which makes it usable as a configuration
+     * value, see {@see __set_state()}.
+     *
+     * @param iterable<Route> $routes
+     */
+    public static function from(iterable $routes): self
+    {
+        return new self(self::compile($routes));
+    }
+
+    /**
+     * @param array{ 'data': CompiledData } $an_array
+     */
+    public static function __set_state(array $an_array): self
+    {
+        return new self($an_array['data']);
+    }
+
+    /**
      * Compiles routes and returns the PHP code of a file that returns the compiled data.
      *
      * **Note**: Route extensions must be exportable with `var_export()`, that is to say, they
@@ -118,7 +140,12 @@ final class Compiled implements RouteProvider
      */
     private array $instances = [];
 
-    private readonly ByUriIndex $index;
+    /**
+     * The index holds a closure, which cannot be exported. It is created on first use, and since an
+     * uninitialized property is ignored by `var_export()`, only {@see $data} is exported when the
+     * provider is exported before it has been used.
+     */
+    private ByUriIndex $index;
 
     /**
      * @param CompiledData $data
@@ -127,13 +154,12 @@ final class Compiled implements RouteProvider
     public function __construct(
         private readonly array $data,
     ) {
-        $this->index = new ByUriIndex($data['by_uri'], $this->route_at(...));
     }
 
     public function route_for_predicate(callable $predicate): ?Route
     {
         if ($predicate instanceof ByUri) {
-            return $this->index->find($predicate);
+            return $this->index()->find($predicate);
         }
 
         if ($predicate instanceof ById) {
@@ -158,6 +184,11 @@ final class Compiled implements RouteProvider
     public function getIterator(): Traversable
     {
         return new ArrayIterator(array_map($this->route_at(...), array_keys($this->data['routes'])));
+    }
+
+    private function index(): ByUriIndex
+    {
+        return $this->index ??= new ByUriIndex($this->data['by_uri'], $this->route_at(...));
     }
 
     private function route_at_or_null(int|null $position): ?Route

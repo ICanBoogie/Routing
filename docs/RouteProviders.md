@@ -121,6 +121,12 @@ $routes = new Compiled(require $file);
 with `var_export()`, they must implement `__set_state()`. The file has to be regenerated whenever
 routes change.
 
+`Compiled` also follows the same pattern as `Mutable` and `Immutable`: `Compiled::from($routes)`
+compiles routes, and the instance implements `__set_state()`, so it can be exported with
+`var_export()` and used as a configuration value, e.g. the result of a configuration builder, which
+the configuration cache then stores as a PHP file. Export the provider before using it: an instance
+that has already matched a URI holds an index that cannot be exported.
+
 Make sure OPcache is enabled. PHP-FPM also benefits from `pcre.jit=1`, which is the default.
 
 Both `Mutable` and `Immutable` also implement `__set_state()`, so they can be exported with
