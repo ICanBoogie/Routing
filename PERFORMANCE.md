@@ -336,6 +336,25 @@ at 1,000), so `Memoize` is already worth it. Numbers vary by machine; compare ru
 Static matching is now flat. Dynamic and no-match lookups also got cheaper because they no longer
 scan the static routes first; they are still linear (suggestion 3).
 
+### After PERF03 (chunked combined regex)
+
+`Memoize(Immutable)`, µs per call, with chunks of about 30 routes (measured since PERF01):
+
+| routes | dynamic, last | no match |
+|-------:|--------------:|---------:|
+|     10 | 0.84 (was 1.37) | 0.56 (was 1.24) |
+|    100 | 0.98 (was 7.22) | 0.69 (was 7.03) |
+|  1,000 | 5.30 (was 82.7) | 4.21 (was 78.3) |
+
+Chunk size was tried at 10, 30 and 100 routes: at 1,000 routes the last dynamic route takes 7.6, 5.1
+and 3.5 µs respectively, and cold start is the same for all (PCRE compiling the regexes dominates).
+30 was kept as a moderate value; if the regex of a chunk fails to run (e.g. JIT stack limit) the
+routes of the chunk are tried one by one instead of silently missing.
+
+Cold start with dynamic routes is dominated by regex compilation (about 2.5 ms for 500 dynamic
+routes, vs 3.4 ms before), which only a compiled/cached route table (suggestion 4) can avoid.
+The cold benchmark now uses unique patterns per iteration so PCRE's cache doesn't hide this.
+
 A good target to claim a success: matching a dynamic route among 1,000 routes should cost within a
 small constant of matching one among 10.
 

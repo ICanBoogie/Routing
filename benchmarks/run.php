@@ -27,9 +27,11 @@ $json = isset($options['json']);
 /**
  * Builds a table of $size routes, half static and half dynamic, spread over a few prefixes.
  *
+ * A different $salt yields different patterns, which defeats PCRE's cache of compiled regexes.
+ *
  * @return Route[]
  */
-function make_routes(int $size): array
+function make_routes(int $size, string $salt = ''): array
 {
     $routes = [];
     $prefixes = [ 'blog', 'users', 'shop', 'admin', 'api' ];
@@ -37,8 +39,8 @@ function make_routes(int $size): array
     for ($i = 0; $i < $size; $i++) {
         $prefix = $prefixes[$i % count($prefixes)];
         $pattern = $i % 2
-            ? "/$prefix/section-$i/<id:\d+>/:slug"
-            : "/$prefix/page-$i";
+            ? "/$prefix/section-$salt$i/<id:\d+>/:slug"
+            : "/$prefix/page-$salt$i";
 
         $routes[] = new Route(
             $pattern,
@@ -96,11 +98,28 @@ foreach ($sizes as $size) {
 
     foreach ($providers as $name => $factory) {
         // Cold: build the provider and resolve one URI, as the first request of a process would.
-        $cold_ns = measure(function () use ($factory, $uris) {
-            $factory()->route_for_predicate(new ByUri($uris['static, last']));
-        }, max(20, intdiv($iterations, 200)));
+        // Patterns are unique per iteration so that PCRE has to compile their regexes.
+        foreach ([ 'static, last' => 'cold: static', 'dynamic, last' => 'cold: dynamic' ] as $key => $label) {
+            $runs = max(20, intdiv($iterations, 200));
+            $total = 0;
 
-        $results[] = [ 'size' => $size, 'provider' => $name, 'scenario' => 'cold (build + 1 lookup)', 'ns' => $cold_ns ];
+            for ($k = 0; $k < $runs; $k++) {
+                $salt = "{$name}{$k}x";
+                $cold_routes = make_routes($size, $salt);
+                $uri = $key === 'static, last'
+                    ? "/{$p($last_static)}/page-$salt$last_static"
+                    : "/{$p($last_dynamic)}/section-$salt$last_dynamic/12/hello-world";
+                $cold_factory = $name === 'Immutable'
+                    ? fn() => new Immutable($cold_routes)
+                    : fn() => new Memoize(new Immutable($cold_routes));
+
+                $start = hrtime(true);
+                $cold_factory()->route_for_predicate(new ByUri($uri, RequestMethod::METHOD_GET));
+                $total += hrtime(true) - $start;
+            }
+
+            $results[] = [ 'size' => $size, 'provider' => $name, 'scenario' => "$label (build + 1 lookup)", 'ns' => $total / $runs ];
+        }
 
         $provider = $factory();
 
@@ -135,9 +154,9 @@ printf(
     $iterations,
     memory_get_peak_usage() / 1048576,
 );
-printf("%6s  %-20s  %-26s  %12s\n", 'routes', 'provider', 'scenario', 'µs / call');
+printf("%6s  %-20s  %-34s  %12s\n", 'routes', 'provider', 'scenario', 'µs / call');
 echo str_repeat('-', 70), "\n";
 
 foreach ($results as $r) {
-    printf("%6d  %-20s  %-26s  %12.2f\n", $r['size'], $r['provider'], $r['scenario'], $r['ns'] / 1000);
+    printf("%6d  %-20s  %-34s  %12.2f\n", $r['size'], $r['provider'], $r['scenario'], $r['ns'] / 1000);
 }

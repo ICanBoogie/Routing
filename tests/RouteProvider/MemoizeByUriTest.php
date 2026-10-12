@@ -197,4 +197,46 @@ final class MemoizeByUriTest extends TestCase
         $this->assertSame($get, $routes->route_for_predicate(new ByUri('/articles')));
         $this->assertNull($routes->route_for_predicate(new ByUri('/articles/')));
     }
+
+    public function test_dynamic_routes_across_chunks(): void
+    {
+        $routes = [];
+
+        for ($i = 0; $i < 100; $i++) {
+            $routes[$i] = new Route("/section-$i/<id:\d+>/:slug", "action:$i");
+        }
+
+        $provider = new MemoizeByUri(new Immutable($routes));
+
+        foreach ([ 0, 29, 30, 31, 57, 99 ] as $i) {
+            $this->assertSame(
+                $routes[$i],
+                $provider->route_for_predicate($p = new ByUri("/section-$i/12/hello-world?id=1&q=2")),
+            );
+            $this->assertSame([ 'id' => '12', 'slug' => 'hello-world' ], $p->path_params);
+            $this->assertSame([ 'q' => '2' ], $p->query_params);
+        }
+
+        $this->assertNull($provider->route_for_predicate(new ByUri('/section-100/12/hello-world')));
+        $this->assertNull($provider->route_for_predicate(new ByUri('/section-1/abc/hello-world')));
+    }
+
+    public function test_dynamic_routes_sharing_a_pattern_with_different_methods(): void
+    {
+        $routes = new MemoizeByUri(
+            new Immutable([
+                $get = new Route('/articles/<id:\d+>', 'articles:show', RequestMethod::METHOD_GET),
+                $delete = new Route('/articles/<id:\d+>', 'articles:delete', RequestMethod::METHOD_DELETE),
+                $any = new Route('/articles/:slug', 'articles:any'),
+            ])
+        );
+
+        $this->assertSame($get, $routes->route_for_predicate(new ByUri('/articles/1', RequestMethod::METHOD_GET)));
+        $this->assertSame($delete, $routes->route_for_predicate($p = new ByUri('/articles/1', RequestMethod::METHOD_DELETE)));
+        $this->assertSame([ 'id' => '1' ], $p->path_params);
+        $this->assertSame($any, $routes->route_for_predicate($p = new ByUri('/articles/1', RequestMethod::METHOD_PUT)));
+        $this->assertSame([ 'slug' => '1' ], $p->path_params);
+        $this->assertSame($any, $routes->route_for_predicate($p = new ByUri('/articles/abc', RequestMethod::METHOD_GET)));
+        $this->assertSame([ 'slug' => 'abc' ], $p->path_params);
+    }
 }

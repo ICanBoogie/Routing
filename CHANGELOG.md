@@ -22,7 +22,8 @@ None
 
 - `RouteNotFound` extends `NotFound`.
 - Improved route resolution performance: `MemoizeByUri` finds static routes with a single array
-  lookup instead of scanning them.
+  lookup instead of scanning them, and tests dynamic routes by chunks of about 30 with a single
+  regex per chunk instead of one regex per route.
 
 
 
