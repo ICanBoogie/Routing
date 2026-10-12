@@ -112,6 +112,7 @@ final class MemoizeByUri implements RouteProvider
      * routes of the chunk are tested one by one.
      *
      * @param array<int|string, string>|null $path_params
+     * @param-out  array<int|string, string> $path_params
      */
     private function route_for_dynamic_path(string $path, RequestMethod $method, array|null &$path_params): ?Route
     {
@@ -151,6 +152,8 @@ final class MemoizeByUri implements RouteProvider
                 }
             }
         }
+
+        $path_params = [];
 
         return null;
     }
