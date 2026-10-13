@@ -293,10 +293,17 @@ the body left out.
   runtime, a parameter whose placeholder is not in the matched route gets its default, or `null`.
   For example, `list(?int $page = null)` can serve both `/articles` and `/articles/:page`, whereas
   `list(int $page)` on both routes fails at configuration time instead of on the first request to
-  `/articles`. Anonymous placeholders (`<\d+>`) have no name and cannot be bound. The catch-all `*`
-  is named `all`.
-- Defaults must be exportable (scalars, enum cases, `null`, arrays of those). `new` in an
-  initializer is rejected at configuration time.
+  `/articles`. It must be a placeholder of at least one route even when it has a fallback, otherwise
+  a typo would leave it silently unbound. Anonymous placeholders (`<\d+>`) have no name and cannot
+  be bound. The catch-all `*` is named `all`.
+- Defaults are always exportable: the supported types are scalars and backed enums, so a default is
+  a scalar, `null`, or an enum case. Any other type is rejected, which also rules out `new` in an
+  initializer.
+- The same analysis checks the method: it must be public, non-static and non-abstract, and declare a
+  return type that is `Response`, or a class implementing `IntoResponse` (a union of those is
+  accepted; `static` and `self` are resolved against the declaring class; nullable types, `void`,
+  `mixed`, and anything else are rejected). Variadic parameters are rejected. All of these are
+  `ConfigNotValid` errors, naming the class, the method, and the parameter.
 - Services are not parameters. Plan entries are plain data objects that resolve themselves from the
   request and hold no services, which keeps the plan exportable and the dependency rule simple. A
   value that needs a service (an authenticated user, a record to load) is obtained by the controller

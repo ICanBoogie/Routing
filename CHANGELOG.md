@@ -38,6 +38,13 @@ PHP 8.4+
       the route `/photos/:id` with the action `photos:show` into `/cart/photos/:id` and
       `cart:photos:show`. The pattern of a shortcut is optional, it can be left empty when the
       `Prefix` defines the route.
+    - `PlanBuilder` analyzes a method with reflection, once, to build the plan of its parameters:
+      a parameter typed `Request` or `Route` receives them, any other parameter is a path parameter
+      found by its name in the patterns of the routes, so reordering placeholders can't pass the
+      wrong values. It also checks that the method is public and returns a `Response` or an
+      `IntoResponse`. Mistakes throw `ConfigNotValid` with the class, the method, and the parameter,
+      e.g. "`SkillController::show()` parameter `$slug`: no `:slug` in `/skills/:id`.", instead of
+      failing when a request is handled.
 
 ### Deprecated Features
 
