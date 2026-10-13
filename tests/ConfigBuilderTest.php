@@ -3,6 +3,7 @@
 namespace Test\ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\RequestMethod;
+use ICanBoogie\Routing\CacheStrategy;
 use ICanBoogie\Routing\Config;
 use ICanBoogie\Routing\Config\ActionDefinition;
 use ICanBoogie\Routing\Config\ControllerDefinition;
@@ -12,6 +13,9 @@ use ICanBoogie\Routing\Parameter\Path;
 use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteBuilder;
 use ICanBoogie\Routing\RouteProvider\ByAction;
+use ICanBoogie\Routing\RouteProvider\Compiled;
+use ICanBoogie\Routing\RouteProvider\Immutable;
+use ICanBoogie\Routing\RouteProvider\Memoize;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -45,6 +49,64 @@ final class ConfigBuilderTest extends TestCase
         $this->assertSame([], $config->controllers);
         $this->assertSame([], $config->controller_by_action);
         $this->assertSame([], iterator_to_array($config->routes));
+    }
+
+    public function test_cache_strategy_is_none_by_default(): void
+    {
+        $config = new ConfigBuilder()->add_responder(PhotosController::class)->build();
+
+        $this->assertInstanceOf(Immutable::class, $config->routes);
+    }
+
+    #[DataProvider('provide_cache_strategy')]
+    public function test_cache_strategy(CacheStrategy $strategy, string $expected): void
+    {
+        $config = new ConfigBuilder()
+            ->add_responder(PhotosController::class)
+            ->cache_strategy($strategy)
+            ->build();
+
+        $this->assertInstanceOf($expected, $config->routes);
+        $this->assertSame('photos:show', $config->routes->route_for_predicate(new ByAction('photos:show'))?->action);
+        $this->assertCount(3, iterator_to_array($config->routes));
+    }
+
+    /**
+     * @return array<string, array{ CacheStrategy, class-string }>
+     */
+    public static function provide_cache_strategy(): array
+    {
+        return [
+
+            'none' => [ CacheStrategy::NONE, Immutable::class ],
+            'memoize' => [ CacheStrategy::MEMOIZE, Memoize::class ],
+            'compile' => [ CacheStrategy::COMPILE, Compiled::class ],
+
+        ];
+    }
+
+    #[DataProvider('provide_exportable_cache_strategy')]
+    public function test_exported_config(CacheStrategy $strategy): void
+    {
+        $config = new ConfigBuilder()
+            ->add_responder(PhotosController::class)
+            ->cache_strategy($strategy)
+            ->build();
+
+        $this->assertEquals($config, eval('return ' . var_export($config, true) . ';'));
+    }
+
+    /**
+     * @return array<string, array{ CacheStrategy }>
+     */
+    public static function provide_exportable_cache_strategy(): array
+    {
+        return [
+
+            'none' => [ CacheStrategy::NONE ],
+            'compile' => [ CacheStrategy::COMPILE ],
+
+        ];
     }
 
     public function test_controller_from_attributes(): void

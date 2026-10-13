@@ -63,6 +63,11 @@ PHP 8.4+
       one `MethodResponder` per controller, created when one of its actions is first requested. The
       controllers are obtained through a closure, which is where services are wired. Use it with
       `RequestResponderProvider` and `Config::$routes`.
+    - `ConfigBuilder::cache_strategy()` defines how the routes of the `Config` are served, with
+      `CacheStrategy`: `NONE` (default) tests the routes one after the other; `MEMOIZE` uses
+      `RouteProvider\Memoize`, meant for development, where the configuration is built on each
+      request, the resulting `Config` can't be exported; `COMPILE` uses `RouteProvider\Compiled`,
+      meant for production.
 
 ### Deprecated Features
 

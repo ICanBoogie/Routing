@@ -49,6 +49,8 @@ final class ConfigBuilder
      */
     private array $controller_by_action = [];
 
+    private CacheStrategy $cache_strategy = CacheStrategy::NONE;
+
     public function __construct()
     {
         $this->routes = new RouteProvider\Mutable();
@@ -120,18 +122,44 @@ final class ConfigBuilder
     }
 
     /**
+     * Defines how the routes are served, {@see CacheStrategy::NONE} by default. Use
+     * {@see CacheStrategy::COMPILE} in production.
+     *
+     * Only a configuration built with {@see CacheStrategy::COMPILE} or {@see CacheStrategy::NONE}
+     * can be exported with `var_export()`.
+     *
+     * @return $this
+     */
+    public function cache_strategy(CacheStrategy $strategy): self
+    {
+        $this->cache_strategy = $strategy;
+
+        return $this;
+    }
+
+    /**
      * Builds the configuration.
      *
-     * The routes are compiled, which is meant for production. The configuration is cached as a PHP
-     * file, so the work is done once, when the configuration is built, and not by every request.
+     * In production, the routes are compiled and the configuration is cached as a PHP file, so the
+     * work is done once, when the configuration is built, and not by every request. See
+     * {@see cache_strategy()}.
      */
     public function build(): Config
     {
         return new Config(
-            new RouteProvider\Compiled($this->routes),
+            $this->build_routes(),
             $this->controllers,
             $this->controller_by_action,
         );
+    }
+
+    private function build_routes(): RouteProvider
+    {
+        return match ($this->cache_strategy) {
+            CacheStrategy::NONE => new RouteProvider\Immutable($this->routes),
+            CacheStrategy::MEMOIZE => new RouteProvider\Memoize(new RouteProvider\Immutable($this->routes)),
+            CacheStrategy::COMPILE => new RouteProvider\Compiled($this->routes),
+        };
     }
 
     /**
