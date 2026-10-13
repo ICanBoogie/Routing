@@ -241,7 +241,7 @@ the body left out.
 | `#[Path]` | `$request->path_params` | scalar or backed enum |
 | `#[Query]` | `$request->query_params` | scalar or backed enum |
 | `#[Part]` | a named piece of the body (`request_params`) | scalar or backed enum; files later |
-| `#[Body]` | the raw body, as a stream | a stream resource (`@param resource`) |
+| `#[Body]` | the raw body, as a file object | `SplFileObject` |
 
 - `Request` and `Route` parameters are claimed by type, with no attribute.
 - A scalar or enum parameter with no attribute is a `#[Path]` parameter: path is the one source the
@@ -254,18 +254,14 @@ the body left out.
   object, so it does not care about the encoding. The names `#[Get]` and `#[Post]` would echo
   `$_GET` and `$_POST`, but they are taken by the route shortcuts, and the source is not tied to the
   HTTP method: a `#[Put]` route reads its form data or JSON from the same `request_params`.
-- `#[Body]` is the raw body as a stream, a file pointer such as `fopen('php://input', 'r')`. Decoded
+- `#[Body]` is the raw body as a stream, `new SplFileObject('php://input', 'r')`. Decoded
   data is already available through `#[Part]`: PHP decodes `application/x-www-form-urlencoded` and
   `multipart/form-data`, and `Request` decodes `application/json`, all into `request_params`.
   `#[Body]` covers what `#[Part]` cannot, e.g. XML, a custom format, or a large upload to process
   without loading it in memory. At most one `#[Body]` per method is allowed.
-  - PHP has no `resource` type declaration, and no stream abstraction is imposed (no PSR-7
-    `StreamInterface`). `#[Body]` is the one parameter whose declaration is `mixed` or absent,
-    documented with `@param resource $body`; the build rejects any other declared type.
-  - `php://input` is empty for `multipart/form-data`, because PHP consumes the body. `#[Body]` is
-    meant for the other content types, and multipart goes through `#[Part]`.
-  - `Request` must expose the stream, opened lazily; tests can inject any stream (`php://memory`).
-    This needs a change in `icanboogie/http`.
+  - The parameter is declared `SplFileObject`: a proper object, and no stream abstraction is
+    imposed (no PSR-7 `StreamInterface`). The build rejects any other declared type. The file is
+    opened by the parameter, lazily, when the action is called.
 - **No hydration into classes.** `#[Part]` and `#[Body]` never produce classes: a class-typed
   parameter is rejected at configuration time. The library cannot impose a serialization package
   (PHP has no serde: Symfony Serializer, Valinor, JMS, and hand-written mapping all exist), and
@@ -274,7 +270,8 @@ the body left out.
   through its constructor. Axum offers `Json<T>` because serde is the Rust standard; its other
   extension point, the `FromRequest` trait, is the model for a possible future opt-in contract (a
   class that builds itself from the request, symmetrical with `IntoResponse`), which would need its
-  own ADR.
+  own ADR. That ADR is proposed in [ADR 0002](0002-decoders.md), which would let a parameter
+  declare a decoder.
 - Path values are read from `$request->path_params`, set by `RequestResponderProvider`. They are
   strings and are cast to the declared type: `int`, `float`, `string`, `bool`, and backed enums.
   Union types, intersection types, `array`, and untyped parameters are rejected at configuration
@@ -324,7 +321,7 @@ the body left out.
   runtime resolver registry that could hold services is not planned.
 
 Slices: first, `Request`, `Route`, and path parameters; second, `#[Path]`, `#[Query]`, and `#[Part]`
-as single values; later, `#[Body]` as a stream, once `Request` exposes the raw body.
+as single values; later, `#[Body]` as a file object.
 
 #### Configuration
 
@@ -517,8 +514,7 @@ response. Both ship side by side in 7.x through the `ActionResponderProvider` ch
 2. **Slice two**, implemented: `#[Path]`, `#[Query]`, `#[Part]`.
 3. **Other packages**, tracked separately: bind-routing (thin `Builder` adapter, controller
    registration from `Config`, attributes re-exported or deprecated in favor of this library's);
-   `icanboogie/view` and `bind-view` (`IntoResponse`, route-based templates); `icanboogie/http` (raw
-   body, needed by `#[Body]`).
+   `icanboogie/view` and `bind-view` (`IntoResponse`, route-based templates).
 4. **Later**: `#[Body]`, optional pattern segments, converters for bare return objects, events
    versus middleware, each with its own ADR.
 
@@ -578,11 +574,6 @@ belongs to a later major version.
   extension of the same plan, defined by its own ADR if the need arises.
 
 ## Open questions
-
-- `icanboogie/http` must expose the raw body as a stream for `#[Body]`, opened lazily and injectable
-  in tests. `Request::from_server()` currently reads `php://input` only for JSON and discards it.
-  The details (when the stream is opened, who closes it, how it relates to the JSON already decoded
-  into `request_params`) belong to that change.
 
 - Exporting a `Config` built with `CacheStrategy::MEMOIZE`. `ConfigBuilder::cache_strategy()`
   (`NONE`, the default, `MEMOIZE`, and `COMPILE` for production) decorates the routes when `build()`
