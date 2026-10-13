@@ -9,17 +9,29 @@ use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Config\ActionDefinition;
 use ICanBoogie\Routing\IntoResponse;
 use ICanBoogie\Routing\MethodResponder;
+use ICanBoogie\Routing\ParameterAbstract;
+use ICanBoogie\Routing\Parameter\Casting;
 use ICanBoogie\Routing\Parameter\CurrentRequest;
 use ICanBoogie\Routing\Parameter\MatchedRoute;
 use ICanBoogie\Routing\Parameter\Path;
+use ICanBoogie\Routing\Pattern;
 use ICanBoogie\Routing\Route;
 use LogicException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 
 #[CoversClass(MethodResponder::class)]
+#[UsesClass(ActionDefinition::class)]
+#[UsesClass(ParameterAbstract::class)]
+#[UsesClass(Casting::class)]
+#[UsesClass(CurrentRequest::class)]
+#[UsesClass(MatchedRoute::class)]
+#[UsesClass(Path::class)]
+#[UsesClass(Pattern::class)]
+#[UsesClass(Route::class)]
 final class MethodResponderTest extends TestCase
 {
     public function test_is_a_responder(): void

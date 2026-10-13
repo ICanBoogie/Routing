@@ -3,18 +3,21 @@
 namespace Test\ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\RequestMethod;
+use ICanBoogie\Routing\Attribute\Prefix;
 use ICanBoogie\Routing\Config\TransientRoute;
 use ICanBoogie\Routing\Exception\ConfigNotValid;
 use ICanBoogie\Routing\RouteBuilder;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 use function array_map;
 
 #[CoversClass(RouteBuilder::class)]
 #[CoversClass(TransientRoute::class)]
+#[UsesClass(Prefix::class)]
 final class RouteBuilderTest extends TestCase
 {
     public function test_empty(): void

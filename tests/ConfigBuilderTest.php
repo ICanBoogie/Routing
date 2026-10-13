@@ -3,22 +3,33 @@
 namespace Test\ICanBoogie\Routing;
 
 use ICanBoogie\HTTP\RequestMethod;
+use ICanBoogie\Routing\ActionResolver;
+use ICanBoogie\Routing\Attribute\Get;
+use ICanBoogie\Routing\Attribute\Post;
+use ICanBoogie\Routing\Attribute\Prefix;
 use ICanBoogie\Routing\CacheStrategy;
 use ICanBoogie\Routing\Config;
+use ICanBoogie\Routing\ConfigBuilder;
 use ICanBoogie\Routing\Config\ActionDefinition;
 use ICanBoogie\Routing\Config\ControllerDefinition;
-use ICanBoogie\Routing\ConfigBuilder;
+use ICanBoogie\Routing\Config\TransientRoute;
 use ICanBoogie\Routing\Exception\ConfigNotValid;
+use ICanBoogie\Routing\ParameterAbstract;
 use ICanBoogie\Routing\Parameter\Path;
+use ICanBoogie\Routing\Pattern;
+use ICanBoogie\Routing\PlanBuilder;
 use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteBuilder;
 use ICanBoogie\Routing\RouteProvider\ByAction;
 use ICanBoogie\Routing\RouteProvider\Compiled;
 use ICanBoogie\Routing\RouteProvider\Immutable;
 use ICanBoogie\Routing\RouteProvider\Memoize;
+use ICanBoogie\Routing\RouteProvider\MemoizeByAction;
+use ICanBoogie\Routing\RouteProvider\Mutable;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Test\ICanBoogie\Routing\ConfigBuilder\AbstractController;
 use Test\ICanBoogie\Routing\ConfigBuilder\ArticlesController;
@@ -42,6 +53,24 @@ use function iterator_to_array;
 #[CoversClass(ConfigBuilder::class)]
 #[CoversClass(Config::class)]
 #[CoversClass(ControllerDefinition::class)]
+#[UsesClass(ActionResolver::class)]
+#[UsesClass(Get::class)]
+#[UsesClass(Post::class)]
+#[UsesClass(Prefix::class)]
+#[UsesClass(\ICanBoogie\Routing\Attribute\Route::class)]
+#[UsesClass(ActionDefinition::class)]
+#[UsesClass(TransientRoute::class)]
+#[UsesClass(ParameterAbstract::class)]
+#[UsesClass(Pattern::class)]
+#[UsesClass(PlanBuilder::class)]
+#[UsesClass(Route::class)]
+#[UsesClass(RouteBuilder::class)]
+#[UsesClass(ByAction::class)]
+#[UsesClass(Compiled::class)]
+#[UsesClass(Immutable::class)]
+#[UsesClass(Mutable::class)]
+#[UsesClass(Memoize::class)]
+#[UsesClass(MemoizeByAction::class)]
 final class ConfigBuilderTest extends TestCase
 {
     public function test_empty(): void

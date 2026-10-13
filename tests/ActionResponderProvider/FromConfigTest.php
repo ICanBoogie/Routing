@@ -4,18 +4,64 @@ namespace Test\ICanBoogie\Routing\ActionResponderProvider;
 
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\RequestMethod;
+use ICanBoogie\Routing\ActionResolver;
 use ICanBoogie\Routing\ActionResponderProvider\FromConfig;
+use ICanBoogie\Routing\Attribute\Get;
+use ICanBoogie\Routing\Attribute\Part;
+use ICanBoogie\Routing\Attribute\Path;
+use ICanBoogie\Routing\Attribute\Post;
+use ICanBoogie\Routing\Attribute\Query;
+use ICanBoogie\Routing\Attribute\Route;
+use ICanBoogie\Routing\Config;
 use ICanBoogie\Routing\ConfigBuilder;
+use ICanBoogie\Routing\Config\ActionDefinition;
+use ICanBoogie\Routing\Config\ControllerDefinition;
+use ICanBoogie\Routing\Config\TransientRoute;
 use ICanBoogie\Routing\Exception\ParameterNotValid;
 use ICanBoogie\Routing\Exception\PathParameterNotValid;
 use ICanBoogie\Routing\MethodResponder;
+use ICanBoogie\Routing\ParameterAbstract;
+use ICanBoogie\Routing\Parameter\Casting;
+use ICanBoogie\Routing\Pattern;
+use ICanBoogie\Routing\PlanBuilder;
 use ICanBoogie\Routing\RequestResponderProvider;
+use ICanBoogie\Routing\RouteProvider\ByUri;
+use ICanBoogie\Routing\RouteProvider\Immutable;
+use ICanBoogie\Routing\RouteProvider\Mutable;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Test\ICanBoogie\Routing\ConfigBuilder\PhotosController;
 use Test\ICanBoogie\Routing\ConfigBuilder\SearchController;
 
 #[CoversClass(FromConfig::class)]
+#[UsesClass(ActionResolver::class)]
+#[UsesClass(Get::class)]
+#[UsesClass(Part::class)]
+#[UsesClass(Path::class)]
+#[UsesClass(Post::class)]
+#[UsesClass(Query::class)]
+#[UsesClass(Route::class)]
+#[UsesClass(Config::class)]
+#[UsesClass(ConfigBuilder::class)]
+#[UsesClass(ActionDefinition::class)]
+#[UsesClass(ControllerDefinition::class)]
+#[UsesClass(TransientRoute::class)]
+#[UsesClass(MethodResponder::class)]
+#[UsesClass(ParameterAbstract::class)]
+#[UsesClass(Casting::class)]
+#[UsesClass(\ICanBoogie\Routing\Parameter\Part::class)]
+#[UsesClass(\ICanBoogie\Routing\Parameter\Path::class)]
+#[UsesClass(\ICanBoogie\Routing\Parameter\Query::class)]
+#[UsesClass(Pattern::class)]
+#[UsesClass(PlanBuilder::class)]
+#[UsesClass(RequestResponderProvider::class)]
+#[UsesClass(\ICanBoogie\Routing\Route::class)]
+#[UsesClass(ByUri::class)]
+#[UsesClass(Immutable::class)]
+#[UsesClass(Mutable::class)]
+#[UsesClass(ParameterNotValid::class)]
+#[UsesClass(PathParameterNotValid::class)]
 final class FromConfigTest extends TestCase
 {
     private int $created = 0;

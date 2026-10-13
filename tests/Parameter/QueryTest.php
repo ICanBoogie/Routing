@@ -6,14 +6,17 @@ use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\RequestOptions;
 use ICanBoogie\Routing\Exception\ParameterNotValid;
 use ICanBoogie\Routing\ParameterAbstract;
+use ICanBoogie\Routing\Parameter\Casting;
 use ICanBoogie\Routing\Parameter\Query;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Test\ICanBoogie\Routing\SetStateHelper;
 
 #[CoversClass(Query::class)]
 #[CoversClass(ParameterAbstract::class)]
 #[CoversClass(ParameterNotValid::class)]
+#[UsesClass(Casting::class)]
 final class QueryTest extends TestCase
 {
     public function test_resolve_casts_to_the_type(): void

@@ -4,6 +4,7 @@ namespace Test\ICanBoogie\Routing;
 
 use ICanBoogie\Routing\Exception\ConfigNotValid;
 use ICanBoogie\Routing\Parameter;
+use ICanBoogie\Routing\ParameterAbstract;
 use ICanBoogie\Routing\Parameter\CurrentRequest;
 use ICanBoogie\Routing\Parameter\MatchedRoute;
 use ICanBoogie\Routing\Parameter\Part;
@@ -13,6 +14,7 @@ use ICanBoogie\Routing\Pattern;
 use ICanBoogie\Routing\PlanBuilder;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use Test\ICanBoogie\Routing\Parameter\IntBackedEnum;
@@ -23,6 +25,11 @@ use Test\ICanBoogie\Routing\PlanBuilder\Wrapper;
 use function array_map;
 
 #[CoversClass(PlanBuilder::class)]
+#[UsesClass(\ICanBoogie\Routing\Attribute\Part::class)]
+#[UsesClass(\ICanBoogie\Routing\Attribute\Path::class)]
+#[UsesClass(\ICanBoogie\Routing\Attribute\Query::class)]
+#[UsesClass(ParameterAbstract::class)]
+#[UsesClass(Pattern::class)]
 final class PlanBuilderTest extends TestCase
 {
     /**

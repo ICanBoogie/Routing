@@ -3,15 +3,20 @@
 namespace Test\ICanBoogie\Routing\Config;
 
 use ICanBoogie\Routing\Config\ActionDefinition;
+use ICanBoogie\Routing\ParameterAbstract;
 use ICanBoogie\Routing\Parameter\CurrentRequest;
 use ICanBoogie\Routing\Parameter\MatchedRoute;
 use ICanBoogie\Routing\Parameter\Path;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Test\ICanBoogie\Routing\Parameter\StringBackedEnum;
 use Test\ICanBoogie\Routing\SetStateHelper;
 
 #[CoversClass(ActionDefinition::class)]
+#[UsesClass(ParameterAbstract::class)]
+#[UsesClass(CurrentRequest::class)]
+#[UsesClass(MatchedRoute::class)]
 final class ActionDefinitionTest extends TestCase
 {
     public function test_properties(): void
