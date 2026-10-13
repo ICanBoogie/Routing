@@ -6,7 +6,9 @@ use ICanBoogie\Routing\Exception\ConfigNotValid;
 use ICanBoogie\Routing\Parameter;
 use ICanBoogie\Routing\Parameter\CurrentRequest;
 use ICanBoogie\Routing\Parameter\MatchedRoute;
+use ICanBoogie\Routing\Parameter\Part;
 use ICanBoogie\Routing\Parameter\Path;
+use ICanBoogie\Routing\Parameter\Query;
 use ICanBoogie\Routing\Pattern;
 use ICanBoogie\Routing\PlanBuilder;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -114,6 +116,35 @@ final class PlanBuilderTest extends TestCase
                 'with_default',
                 [ '/articles', '/articles/:page' ],
                 [ new Path('page', 'int', null, false, true, 1) ]
+            ],
+            'path attribute' => [ 'path_attribute', [ '/articles/:id' ], [ new Path('id', 'int') ] ],
+            'path attribute with a name' => [ 'path_renamed', [ '/articles/:id' ], [ new Path('id', 'int') ] ],
+            'query' => [ 'query_parameter', [ '/' ], [ new Query('page', 'int', null, false, true, 1) ] ],
+            'query with a name' => [ 'query_renamed', [ '/' ], [ new Query('q', 'string') ] ],
+            'query enum and nullable' => [
+                'query_enum',
+                [ '/' ],
+                [
+                    new Query('status', StringBackedEnum::class, 'string'),
+                    new Query('archived', 'bool', null, true),
+                ]
+            ],
+            'part' => [ 'part_parameter', [ '/' ], [ new Part('title', 'string') ] ],
+            'part with a name' => [ 'part_renamed', [ '/' ], [ new Part('author_name', 'string', null, true) ] ],
+            'all sources' => [
+                'all_sources',
+                [ '/articles/:id' ],
+                [
+                    new CurrentRequest(),
+                    new Path('id', 'int'),
+                    new Query('page', 'int', null, false, true, 1),
+                    new Part('title', 'string', null, false, true, ''),
+                ]
+            ],
+            'query is not looked up in the pattern' => [
+                'query_parameter',
+                [ '/articles/:id' ],
+                [ new Query('page', 'int', null, false, true, 1) ]
             ],
             'nullable, in some routes' => [
                 'nullable',
@@ -256,6 +287,45 @@ final class PlanBuilderTest extends TestCase
                 'variadic',
                 [ '/:ids' ],
                 "`$class::variadic()` parameter `\$ids`: variadic parameters are not supported."
+            ],
+            'two sources' => [
+                'two_sources',
+                [ '/:x' ],
+                "`$class::two_sources()` parameter `\$x`: a parameter is bound to a single source, found "
+                . "#[ICanBoogie\Routing\Attribute\Query], #[ICanBoogie\Routing\Attribute\Part]."
+            ],
+            'path and query' => [
+                'path_and_query',
+                [ '/:x' ],
+                "`$class::path_and_query()` parameter `\$x`: a parameter is bound to a single source, found "
+                . "#[ICanBoogie\Routing\Attribute\Path], #[ICanBoogie\Routing\Attribute\Query]."
+            ],
+            'attribute on the request' => [
+                'attribute_on_request',
+                [ '/' ],
+                "`$class::attribute_on_request()` parameter `\$request`: the parameter receives the request, "
+                . "it cannot have the attribute #[ICanBoogie\Routing\Attribute\Query]."
+            ],
+            'attribute on the route' => [
+                'attribute_on_route',
+                [ '/' ],
+                "`$class::attribute_on_route()` parameter `\$route`: the parameter receives the route, "
+                . "it cannot have the attribute #[ICanBoogie\Routing\Attribute\Part]."
+            ],
+            'query array' => [
+                'query_array',
+                [ '/' ],
+                "`$class::query_array()` parameter `\$tags`: the type `array` is not supported, $expected"
+            ],
+            'part class' => [
+                'part_class',
+                [ '/' ],
+                "`$class::part_class()` parameter `\$payload`: the type `stdClass` is not supported, $expected"
+            ],
+            'renamed placeholder is not in the pattern' => [
+                'path_renamed_missing',
+                [ '/articles/:id' ],
+                "`$class::path_renamed_missing()` parameter `\$id`: no `:slug` in `/articles/:id`."
             ],
             'not in the pattern' => [
                 'path_parameter',

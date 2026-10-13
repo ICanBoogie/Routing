@@ -5,8 +5,13 @@ namespace ICanBoogie\Routing\Parameter;
 use BackedEnum;
 
 use function filter_var;
+use function get_debug_type;
+use function is_bool;
 use function is_finite;
+use function is_float;
+use function is_int;
 use function is_numeric;
+use function is_string;
 use function ltrim;
 use function preg_match;
 use function str_starts_with;
@@ -40,6 +45,36 @@ final class Casting
             'float' => self::to_float($value),
             'bool' => self::to_bool($value),
             default => self::to_enum($type, $backing, $value),
+        };
+    }
+
+    /**
+     * Casts a value found in a request body, which unlike the other sources may already have the
+     * right type, e.g. the numbers and booleans of a JSON object. Strings are cast like path values.
+     *
+     * @param 'int'|'float'|'string'|'bool'|class-string<BackedEnum> $type
+     * @param 'int'|'string'|null $backing
+     *
+     * @throws NotCastable
+     */
+    public static function cast_input(string $type, ?string $backing, mixed $value): mixed
+    {
+        if (is_string($value)) {
+            return self::cast($type, $backing, $value);
+        }
+
+        $not_castable = new NotCastable("Not a $type: " . get_debug_type($value));
+
+        return match ($type) {
+            'int' => is_int($value) ? $value : throw $not_castable,
+            'float' => is_int($value) || is_float($value) && is_finite($value)
+                ? (float) $value
+                : throw $not_castable,
+            'bool' => is_bool($value) ? $value : throw $not_castable,
+            'string' => throw $not_castable,
+            default => $backing === 'int' && is_int($value)
+                ? self::to_enum($type, $backing, (string) $value)
+                : throw $not_castable,
         };
     }
 

@@ -8,7 +8,9 @@ use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Exception\ConfigNotValid;
 use ICanBoogie\Routing\Parameter\CurrentRequest;
 use ICanBoogie\Routing\Parameter\MatchedRoute;
+use ICanBoogie\Routing\Parameter\Part;
 use ICanBoogie\Routing\Parameter\Path;
+use ICanBoogie\Routing\Parameter\Query;
 use ReflectionEnum;
 use ReflectionMethod;
 use ReflectionNamedType;
@@ -35,8 +37,11 @@ use function sprintf;
  *
  * - A parameter typed {@see Request} receives the request.
  * - A parameter typed {@see Route} receives the route that matched the request.
- * - Any other parameter is a path parameter, found by its name in the pattern of the route, and
- *   cast to its type: `int`, `float`, `string`, `bool`, or a backed enum.
+ * - A parameter with the attribute {@see Attribute\Query} or {@see Attribute\Part} receives a value
+ *   of the query string or of the body, cast to its type.
+ * - Any other parameter is a path parameter, found by its name in the pattern of the route, or by
+ *   the name of {@see Attribute\Path}, and cast to its type: `int`, `float`, `string`, `bool`, or a
+ *   backed enum.
  */
 final readonly class PlanBuilder
 {
@@ -128,38 +133,117 @@ final readonly class PlanBuilder
             throw self::parameter_error($method, $parameter, "variadic parameters are not supported.");
         }
 
+        $attribute = self::find_source_attribute($method, $parameter);
         $type = $parameter->getType();
 
         if ($type instanceof ReflectionNamedType && !$type->isBuiltin()) {
-            if ($type->getName() === Request::class) {
-                return new CurrentRequest();
-            }
+            $claimed = match ($type->getName()) {
+                Request::class => new CurrentRequest(),
+                Route::class => new MatchedRoute(),
+                default => null,
+            };
 
-            if ($type->getName() === Route::class) {
-                return new MatchedRoute();
+            if ($claimed) {
+                return $attribute
+                    ? throw self::parameter_error(
+                        $method,
+                        $parameter,
+                        "the parameter receives the " . ($claimed instanceof CurrentRequest ? "request" : "route")
+                        . ", it cannot have the attribute #[" . $attribute::class . "]."
+                    )
+                    : $claimed;
             }
         }
 
-        return self::build_path_parameter($method, $parameter, $patterns);
+        return match (true) {
+            $attribute instanceof Attribute\Query => self::build_input_parameter(
+                $method,
+                $parameter,
+                $attribute->name,
+                Query::class
+            ),
+            $attribute instanceof Attribute\Part => self::build_input_parameter(
+                $method,
+                $parameter,
+                $attribute->name,
+                Part::class
+            ),
+            default => self::build_path_parameter($method, $parameter, $patterns, $attribute?->name),
+        };
+    }
+
+    /**
+     * @throws ConfigNotValid if the parameter has more than one attribute that binds it to a source.
+     */
+    private static function find_source_attribute(
+        ReflectionMethod $method,
+        ReflectionParameter $parameter
+    ): Attribute\Path|Attribute\Query|Attribute\Part|null {
+        $attributes = [
+            ...$parameter->getAttributes(Attribute\Path::class),
+            ...$parameter->getAttributes(Attribute\Query::class),
+            ...$parameter->getAttributes(Attribute\Part::class),
+        ];
+
+        if (count($attributes) > 1) {
+            throw self::parameter_error(
+                $method,
+                $parameter,
+                "a parameter is bound to a single source, found "
+                . implode(', ', array_map(fn($a) => "#[" . $a->getName() . "]", $attributes)) . "."
+            );
+        }
+
+        return $attributes ? $attributes[0]->newInstance() : null;
+    }
+
+    /**
+     * @param class-string<Query>|class-string<Part> $class
+     * @param non-empty-string|null $name
+     *     Name of the value in the source, defaults to the name of the parameter.
+     *
+     * @throws ConfigNotValid
+     */
+    private static function build_input_parameter(
+        ReflectionMethod $method,
+        ReflectionParameter $parameter,
+        ?string $name,
+        string $class
+    ): Query|Part {
+        [ $type, $backing ] = self::resolve_path_type($method, $parameter);
+
+        $has_default = $parameter->isDefaultValueAvailable();
+
+        return new $class(
+            name: $name ?? $parameter->getName(),
+            type: $type,
+            backing: $backing,
+            nullable: $parameter->allowsNull(),
+            has_default: $has_default,
+            default: $has_default ? $parameter->getDefaultValue() : null,
+        );
     }
 
     /**
      * @param list<Pattern> $patterns
+     * @param non-empty-string|null $name
+     *     Name of the placeholder, defaults to the name of the parameter.
      *
      * @throws ConfigNotValid
      */
     private static function build_path_parameter(
         ReflectionMethod $method,
         ReflectionParameter $parameter,
-        array $patterns
+        array $patterns,
+        ?string $name
     ): Path {
         [ $type, $backing ] = self::resolve_path_type($method, $parameter);
 
-        $name = $parameter->getName();
+        $name ??= $parameter->getName();
         $nullable = $parameter->allowsNull();
         $has_default = $parameter->isDefaultValueAvailable();
 
-        self::assert_in_patterns($method, $parameter, $patterns, $nullable || $has_default);
+        self::assert_in_patterns($method, $parameter, $name, $patterns, $nullable || $has_default);
 
         return new Path(
             name: $name,
@@ -217,6 +301,8 @@ final readonly class PlanBuilder
      * pattern, otherwise it would never be bound, and one of every pattern unless the parameter has
      * a fallback.
      *
+     * @param non-empty-string $name
+     *     Name of the placeholder.
      * @param list<Pattern> $patterns
      * @param bool $has_fallback
      *     Whether the parameter is nullable or has a default value.
@@ -226,10 +312,10 @@ final readonly class PlanBuilder
     private static function assert_in_patterns(
         ReflectionMethod $method,
         ReflectionParameter $parameter,
+        string $name,
         array $patterns,
         bool $has_fallback
     ): void {
-        $name = $parameter->getName();
         $missing = [];
 
         foreach ($patterns as $pattern) {

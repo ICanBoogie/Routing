@@ -59,6 +59,13 @@ PHP 8.4+
     - `ConfigBuilder::build()` returns a `Config`, a readonly object that holds the routes, and the
       controllers with their actions. It can be exported with `var_export()` and cached as a PHP
       file, so subsequent requests don't pay for reflecting or building it.
+    - `Query` and `Part` provide a value of the query string, or of the body, cast to the type of the
+      parameter. They are bound with the attributes `#[Query]` and `#[Part]` (a form field, or a
+      property of a JSON object), which take the name of the value when it is not the name of the
+      parameter: `#[Query('q')] string $search`. A missing value is the default, `null` if the
+      parameter is nullable, otherwise `ParameterNotValid` is thrown, as it is for a value that
+      can't be cast. `ParameterNotValid` is a `ClientError`, a 400. `#[Path]` is optional, it names
+      the placeholder when it is not the name of the parameter.
     - `ActionResponderProvider\FromConfig` provides the responders of the controllers of a `Config`:
       one `MethodResponder` per controller, created when one of its actions is first requested. The
       controllers are obtained through a closure, which is where services are wired. Use it with

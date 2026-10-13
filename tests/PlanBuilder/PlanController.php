@@ -5,6 +5,9 @@ namespace Test\ICanBoogie\Routing\PlanBuilder;
 use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
+use ICanBoogie\Routing\Attribute\Part;
+use ICanBoogie\Routing\Attribute\Path;
+use ICanBoogie\Routing\Attribute\Query;
 use ICanBoogie\Routing\IntoResponse;
 use ICanBoogie\Routing\Route;
 use Test\ICanBoogie\Routing\Parameter\IntBackedEnum;
@@ -72,6 +75,50 @@ final class PlanController
         return new Response();
     }
 
+    public function path_attribute(#[Path] int $id): Response
+    {
+        return new Response();
+    }
+
+    public function path_renamed(#[Path('id')] int $article_id): Response
+    {
+        return new Response();
+    }
+
+    public function query_parameter(#[Query] int $page = 1): Response
+    {
+        return new Response();
+    }
+
+    public function query_renamed(#[Query('q')] string $search): Response
+    {
+        return new Response();
+    }
+
+    public function query_enum(#[Query] StringBackedEnum $status, #[Query] ?bool $archived): Response
+    {
+        return new Response();
+    }
+
+    public function part_parameter(#[Part] string $title): Response
+    {
+        return new Response();
+    }
+
+    public function part_renamed(#[Part('author_name')] ?string $author): Response
+    {
+        return new Response();
+    }
+
+    public function all_sources(
+        Request $request,
+        #[Path] int $id,
+        #[Query] int $page = 1,
+        #[Part] string $title = ''
+    ): Response {
+        return new Response();
+    }
+
     public function returns_response_subclass(): RedirectResponse
     {
         return new RedirectResponse('/');
@@ -98,6 +145,41 @@ final class PlanController
     }
 
     // not valid methods
+
+    public function two_sources(#[Query] #[Part] int $x): Response
+    {
+        return new Response();
+    }
+
+    public function path_and_query(#[Path] #[Query] int $x): Response
+    {
+        return new Response();
+    }
+
+    public function attribute_on_request(#[Query] Request $request): Response
+    {
+        return new Response();
+    }
+
+    public function attribute_on_route(#[Part] Route $route): Response
+    {
+        return new Response();
+    }
+
+    public function query_array(#[Query] array $tags): Response
+    {
+        return new Response();
+    }
+
+    public function part_class(#[Part] \stdClass $payload): Response
+    {
+        return new Response();
+    }
+
+    public function path_renamed_missing(#[Path('slug')] int $id): Response
+    {
+        return new Response();
+    }
 
     private function not_public(): Response
     {

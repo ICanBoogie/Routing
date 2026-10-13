@@ -215,6 +215,53 @@ public function by_status(Status $status): Response
 
 The catch-all `*` of a pattern is a parameter named `all`.
 
+### Where values come from
+
+A parameter is bound to the part of the request it comes from, which is explicit in the signature:
+
+| Attribute  | Reads                                                        |
+|------------|--------------------------------------------------------------|
+| `#[Path]`  | A placeholder of the pattern (optional, it is the default)   |
+| `#[Query]` | A value of the query string                                  |
+| `#[Part]`  | A named piece of the body: a form field, or a property of a JSON object |
+
+The name of the value is the name of the parameter, give another one to the attribute when they
+differ. A parameter has a single source.
+
+```php
+<?php
+
+use ICanBoogie\Routing\Attribute\Get;
+use ICanBoogie\Routing\Attribute\Part;
+use ICanBoogie\Routing\Attribute\Path;
+use ICanBoogie\Routing\Attribute\Post;
+use ICanBoogie\Routing\Attribute\Query;
+
+#[Get('/search/:scope')]
+public function search(string $scope, #[Query('q')] string $term, #[Query] int $page = 1): Response
+{
+    // GET /search/books?q=php&page=2
+}
+
+#[Post('/invoices/:id/notes')]
+public function add_note(#[Path('id')] int $invoice_id, #[Part] string $text, #[Part] ?bool $public): Response
+{
+    // POST /invoices/12/notes, with text=… as a form, or as JSON {"text": "…", "public": true}
+}
+```
+
+Values are cast like path values. A JSON body also provides numbers and booleans, which are accepted
+when they have the type of the parameter. Arrays are not supported, a value is a single value.
+
+A value that is missing, or `null`, is the default value of the parameter, or `null` when it is
+nullable. Otherwise, the request is not valid. An empty string is a value, an `int` parameter
+doesn't accept it. A path parameter, unlike the others, is always checked against the pattern when
+the configuration is built, whereas a value of the query string or of the body is the client's to
+provide.
+
+`#[Query]` and `#[Part]` never read the path, and `#[Path]` never reads the query string, so
+`?id=2` can't take the place of a placeholder or fill in what the body left out.
+
 ### Optional parameters
 
 A path parameter must be a placeholder of every route of its method, unless it has a default value
@@ -412,8 +459,12 @@ Failures are reported by exceptions that the HTTP stack turns into responses.
 | Exception                                 | When                                           | Status |
 |-------------------------------------------|------------------------------------------------|--------|
 | `Exception\PathParameterNotValid`         | A path value cannot be cast to the type, e.g. `/invoices/abc` for an `int $id` | 404 |
+| `Exception\ParameterNotValid`             | A value of the query string or of the body is missing, or cannot be cast | 400 |
 | `Exception\ConfigNotValid`                | A mistake in the controllers, found when the configuration is built | none |
 
 A path value that cannot be cast designates a resource that doesn't exist, hence the 404.
 `PathParameterNotValid` extends `NotFound`, and tells the `name` and the `type` of the parameter.
+Any other value comes from the client and is not valid, hence the 400. `ParameterNotValid` extends
+`ClientError`, and tells the `source` (`query` or `part`), the `name`, the `type`, and whether the
+value was `missing`.
 `ConfigNotValid` is a `LogicException`, it is never thrown when handling requests.

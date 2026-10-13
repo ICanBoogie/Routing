@@ -6,12 +6,14 @@ use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\RequestOptions;
 use ICanBoogie\Routing\Exception\PathParameterNotValid;
 use ICanBoogie\Routing\Parameter\Path;
+use ICanBoogie\Routing\ParameterAbstract;
 use LogicException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Test\ICanBoogie\Routing\SetStateHelper;
 
 #[CoversClass(Path::class)]
+#[CoversClass(ParameterAbstract::class)]
 #[CoversClass(PathParameterNotValid::class)]
 final class PathTest extends TestCase
 {

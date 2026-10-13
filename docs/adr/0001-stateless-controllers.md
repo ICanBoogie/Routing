@@ -296,6 +296,19 @@ the body left out.
   `/articles`. It must be a placeholder of at least one route even when it has a fallback, otherwise
   a typo would leave it silently unbound. Anonymous placeholders (`<\d+>`) have no name and cannot
   be bound. The catch-all `*` is named `all`.
+- `#[Query]` and `#[Part]` single values follow the same casting. Details settled while implementing
+  them:
+  - A missing key, or a `null` value, is absent: the default, `null` if nullable, otherwise
+    `ParameterNotValid`, a 400 (`ClientError`) with the source, the name, and the type. A value that
+    can't be cast is the same exception.
+  - `request_params` may hold the native types of a JSON object. A value that already has the type
+    of the parameter is accepted (an `int` for `int` or `float`, a `bool` for `bool`, an `int` for
+    an int-backed enum); a string is cast as a path value; anything else, including arrays, is not
+    valid.
+  - An empty string is a value, not an absence.
+  - `#[Path]` is optional and only names the placeholder when it differs from the parameter.
+  - A parameter has a single source attribute, and a parameter typed `Request` or `Route` has none.
+  - Neither is checked against the patterns: the client provides them.
 - Defaults are always exportable: the supported types are scalars and backed enums, so a default is
   a scalar, `null`, or an enum case. Any other type is rejected, which also rules out `new` in an
   initializer.
@@ -501,7 +514,7 @@ response. Both ship side by side in 7.x through the `ActionResponderProvider` ch
    ported from bind-routing, `PlanBuilder`, the builder with `add_controller()`,
    `discover_controllers()`, `cache_strategy()` and `RouteBuilder`, `Config`, and
    `ActionResponderProvider\FromConfig`.
-2. **Slice two**: `#[Path]`, `#[Query]`, `#[Part]`.
+2. **Slice two**, implemented: `#[Path]`, `#[Query]`, `#[Part]`.
 3. **Other packages**, tracked separately: bind-routing (thin `Builder` adapter, controller
    registration from `Config`, attributes re-exported or deprecated in favor of this library's);
    `icanboogie/view` and `bind-view` (`IntoResponse`, route-based templates); `icanboogie/http` (raw

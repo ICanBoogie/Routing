@@ -26,6 +26,67 @@ final class CastingTest extends TestCase
     }
 
     /**
+     * @param 'int'|'float'|'string'|'bool'|class-string<BackedEnum> $type
+     * @param 'int'|'string'|null $backing
+     */
+    #[DataProvider('provide_cast_input')]
+    public function test_cast_input(string $type, ?string $backing, mixed $value, mixed $expected): void
+    {
+        $this->assertSame($expected, Casting::cast_input($type, $backing, $value));
+    }
+
+    /**
+     * @return array<string, array{ string, string|null, mixed, mixed }>
+     */
+    public static function provide_cast_input(): array
+    {
+        return [
+
+            'string is cast' => [ 'int', null, '123', 123 ],
+            'int' => [ 'int', null, 123, 123 ],
+            'float' => [ 'float', null, 1.5, 1.5 ],
+            'int as float' => [ 'float', null, 2, 2.0 ],
+            'bool' => [ 'bool', null, false, false ],
+            'int native' => [ 'int', null, 1, 1 ],
+            'int enum' => [ IntBackedEnum::class, 'int', 2, IntBackedEnum::TWO ],
+            'string enum' => [ StringBackedEnum::class, 'string', 'draft', StringBackedEnum::DRAFT ],
+
+        ];
+    }
+
+    /**
+     * @param 'int'|'float'|'string'|'bool'|class-string<BackedEnum> $type
+     * @param 'int'|'string'|null $backing
+     */
+    #[DataProvider('provide_cast_input_not_valid')]
+    public function test_cast_input_not_valid(string $type, ?string $backing, mixed $value): void
+    {
+        $this->expectException(NotCastable::class);
+
+        Casting::cast_input($type, $backing, $value);
+    }
+
+    /**
+     * @return array<string, array{ string, string|null, mixed }>
+     */
+    public static function provide_cast_input_not_valid(): array
+    {
+        return [
+
+            'int as float string' => [ 'int', null, 1.5 ],
+            'int as bool' => [ 'int', null, true ],
+            'float infinite' => [ 'float', null, INF ],
+            'float as bool' => [ 'float', null, true ],
+            'bool as int' => [ 'bool', null, 1 ],
+            'string as int' => [ 'string', null, 123 ],
+            'array' => [ 'string', null, [ 'a' ] ],
+            'string enum with an int' => [ StringBackedEnum::class, 'string', 1 ],
+            'int enum with an unknown case' => [ IntBackedEnum::class, 'int', 99 ],
+
+        ];
+    }
+
+    /**
      * @return array<string, array{ string, string|null, string, mixed }>
      */
     public static function provide_cast(): array
