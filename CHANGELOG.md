@@ -21,7 +21,7 @@ PHP 8.4+
 - Added stateless controllers, plain classes with a constructor for services and public methods for
   actions. They don't extend a base class and don't hold the request, so they can be shared across
   requests, see [docs/adr/0001-stateless-controllers.md](docs/adr/0001-stateless-controllers.md).
-  The building blocks are in place, registering controllers is yet to come:
+  The building blocks are in place:
     - `MethodResponder` is a `Responder` that calls the method of a controller. The method is found
       with the action of the route that matched the request, and its arguments are produced by the
       `Parameter`s of its plan. The method returns a `Response`, or an `IntoResponse`, an object that
@@ -59,6 +59,10 @@ PHP 8.4+
     - `ConfigBuilder::build()` returns a `Config`, a readonly object that holds the routes, and the
       controllers with their actions. It can be exported with `var_export()` and cached as a PHP
       file, so subsequent requests don't pay for reflecting or building it.
+    - `ActionResponderProvider\FromConfig` provides the responders of the controllers of a `Config`:
+      one `MethodResponder` per controller, created when one of its actions is first requested. The
+      controllers are obtained through a closure, which is where services are wired. Use it with
+      `RequestResponderProvider` and `Config::$routes`.
 
 ### Deprecated Features
 

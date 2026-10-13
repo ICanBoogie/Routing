@@ -556,3 +556,12 @@ belongs to a later major version.
   in tests. `Request::from_server()` currently reads `php://input` only for JSON and discards it.
   The details (when the stream is opened, who closes it, how it relates to the JSON already decoded
   into `request_params`) belong to that change.
+
+- Route cache strategy. `build()` always compiles the routes, so development, which builds the
+  configuration on each request and would rather use `Memoize`, has no way to choose. The idea is a
+  `CacheStrategy` enum (`NONE`, `MEMOIZE`, `COMPILE`) set with `ConfigBuilder::cache_strategy()`,
+  `COMPILE` being the default. `Memoize` can't be exported as is: its lazy indexes are exported
+  once initialized and have no `__set_state()`. So `Config` would keep the undecorated provider
+  and the strategy, and apply the decoration when it is constructed or loaded
+  (`Config::__set_state()`), which keeps the exported data stable and lets the same file serve
+  development and production. The alternative is to document `MEMOIZE` as not exportable.
