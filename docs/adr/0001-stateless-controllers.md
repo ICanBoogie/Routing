@@ -1,6 +1,6 @@
 # 1. Stateless controllers
 
-- Status: Proposed
+- Status: Accepted. Slice one is implemented, see Rollout.
 - Date: 2026-10-12
 - Deciders: Olivier Laviale
 
@@ -352,21 +352,28 @@ marked obsolete: they work the other way around, creating routes that nothing mi
 they keep working through the existing `ActionResponderProvider` implementations and their routes,
 chained next to the provider built from `Config`.
 
-`Config` holds a `RouteProvider\Compiled` for the routes, plus the data that bind-routing currently
-keeps in the Symfony container: which action maps to which controller (the
-`routing.action_responder.aliases` parameter). Here that is
-`array<class-string, ControllerDefinition>`, each with its `ActionDefinition`s (method and plan).
-The action identifier is computed once, in `add_controller()`, so routes and responders can't
-disagree. The container only needs to know how to produce a controller instance: bind-routing
-registers each class as a shared service from `Config` and feeds the provider's factory closure.
+`Config` holds the routes as a `RouteProvider`, plus the data that bind-routing currently keeps in
+the Symfony container: which action maps to which controller (the `routing.action_responder.aliases`
+parameter). Here that is `array<class-string, ControllerDefinition>`, each with its
+`ActionDefinition`s (method and plan). The action identifier is computed once, in
+`add_controller()`, so routes and responders can't disagree. The container only needs to know how to
+produce a controller instance: bind-routing registers each class as a shared service from `Config`
+and feeds the provider's factory closure.
 
 Like `ActiveRecord\Config`, `Config` and its builder belong to this library and do not depend on
 `icanboogie/config`; bind-routing only adapts the builder to that package, and keeps registering the
 controllers in the container from `Config`.
 
 In production the configuration is exported and `Config` is loaded as-is. In development nothing is
-exported: the configuration is built on each request, and routes are served through
-`RouteProvider\Memoize`, which indexes them in memory. There is no cache to invalidate.
+exported: the configuration is built on each request. How the routes are served is chosen with
+`ConfigBuilder::cache_strategy()` and `CacheStrategy`: `NONE` (the default) tests them one after the
+other, `MEMOIZE` indexes them in memory with `RouteProvider\Memoize` and is meant for development,
+and `COMPILE` uses `RouteProvider\Compiled` and is meant for production. There is no cache to
+invalidate.
+
+The controllers of a `Config` are served by `ActionResponderProvider\FromConfig`, which creates one
+`MethodResponder` per controller, lazily, and obtains the controllers through a closure. It is a
+plain `ActionResponderProvider`, so it composes with `Chain` and `WithMiddleware` like the others.
 
 Good: satisfies every driver; the router, providers, and middleware still see only a `Responder`;
 `ControllerAbstract` subclasses and hand-written responders keep working side by side, outside of
@@ -479,8 +486,9 @@ response. Both ship side by side in 7.x through the `ActionResponderProvider` ch
   plans plus routes are most of what an OpenAPI document needs.
 - Action methods must be public: they are entry points called from outside, and `private` plus
   `@uses` fights the tooling. The builder rejects non-public attributed methods.
-- `Config` is exported in production only. Development builds it on each request, with the routes
-  served through `Memoize`, so there is nothing to invalidate.
+- `Config` is exported in production only, with the routes compiled. Development builds it on each
+  request, with the routes served through `Memoize` or not cached, so there is nothing to
+  invalidate.
 - Documentation (`Controllers.md`, `ActionControllers.md`, `ActionResponders.md`) and `CHANGELOG.md`
   need updating once implemented, and `RouteProvider\Compiled` must stay in sync if `Route` or
   `Pattern` change.
@@ -488,10 +496,11 @@ response. Both ship side by side in 7.x through the `ActionResponderProvider` ch
 
 ## Rollout
 
-1. **Slice one**, in this library: `Parameter` (`Request`, `Route`, path), `IntoResponse`,
-   `MethodResponder`, `ActionDefinition`/`ControllerDefinition`, the attributes ported from
-   bind-routing, the builder with `add_controller()` and `RouteBuilder`, `Config`, and an
-   `ActionResponderProvider` built from `Config`.
+1. **Slice one**, in this library, implemented: `Parameter` (`Request`, `Route`, path),
+   `IntoResponse`, `MethodResponder`, `ActionDefinition`/`ControllerDefinition`, the attributes
+   ported from bind-routing, `PlanBuilder`, the builder with `add_controller()`,
+   `discover_controllers()`, `cache_strategy()` and `RouteBuilder`, `Config`, and
+   `ActionResponderProvider\FromConfig`.
 2. **Slice two**: `#[Path]`, `#[Query]`, `#[Part]`.
 3. **Other packages**, tracked separately: bind-routing (thin `Builder` adapter, controller
    registration from `Config`, attributes re-exported or deprecated in favor of this library's);
