@@ -440,7 +440,7 @@ final class PlanBuilderTest extends TestCase
             'class without a decoder points to decoders' => [
                 'unrelated_class',
                 [ '/:x' ],
-                "A class needs a decoder, see `ICanBoogie\\Routing\\Decoder`."
+                "To use a class, make it implement `ICanBoogie\\Routing\\Decoder`, or bind a decoder with `using: MyDecoder::class`."
             ],
 
             'two bodies' => [

@@ -359,7 +359,10 @@ final readonly class PlanBuilder
                 $method,
                 $parameter,
                 "the type `$name` is not supported, $expected"
-                . (class_exists($name) ? " A class needs a decoder, see `" . Decoder::class . "`." : "")
+                . (class_exists($name)
+                    ? " To use a class, make it implement `" . Decoder::class . "`, or bind a decoder"
+                    . " with `using: MyDecoder::class`."
+                    : "")
             ),
         };
     }
