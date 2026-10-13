@@ -6,7 +6,7 @@ use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Attribute\Get;
 use ICanBoogie\Routing\Attribute\Prefix;
 
-#[Prefix(route: '/cart', action: 'cart')]
+#[Prefix(pattern: '/cart', action: 'cart')]
 final class PhotosController
 {
     #[Get('/photos/:id')]

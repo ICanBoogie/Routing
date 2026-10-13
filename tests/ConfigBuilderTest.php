@@ -292,7 +292,7 @@ final class ConfigBuilderTest extends TestCase
                 PlainController::class,
                 fn(RouteBuilder $r) => $r
                     ->get('/:id', 'show')
-                    ->prefix(route: '/cart', action: 'cart')
+                    ->prefix(pattern: '/cart', action: 'cart')
             )
             ->build();
 
@@ -420,7 +420,7 @@ final class ConfigBuilderTest extends TestCase
                 EmptyPatternController::class,
                 null,
                 "`" . EmptyPatternController::class . "::index()` has a route with an empty pattern, "
-                . "define a prefix with a route using #[Prefix] or RouteBuilder::prefix()."
+                . "define a prefix with a pattern using #[Prefix] or RouteBuilder::prefix()."
             ],
             'placeholder missing, plan is validated' => [
                 MissingPlaceholderController::class,
@@ -434,7 +434,7 @@ final class ConfigBuilderTest extends TestCase
             ],
             'prefix from the attribute and the route builder' => [
                 Cart\PhotosController::class,
-                fn(RouteBuilder $r) => $r->prefix(route: '/other'),
+                fn(RouteBuilder $r) => $r->prefix(pattern: '/other'),
                 "`" . Cart\PhotosController::class . "` defines its prefix with both the attribute #[Prefix] "
                 . "and RouteBuilder::prefix()."
             ],
@@ -633,7 +633,7 @@ final class ConfigBuilderTest extends TestCase
         $config = new ConfigBuilder()
             ->add_controller(
                 InvoicesController::class,
-                fn(RouteBuilder $r) => $r->prefix(route: '/billing', action: 'billing')
+                fn(RouteBuilder $r) => $r->prefix(pattern: '/billing', action: 'billing')
             )
             ->discover_controllers()
             ->build();

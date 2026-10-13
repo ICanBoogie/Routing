@@ -322,12 +322,12 @@ final class ConfigBuilder
         $resolved = [];
 
         foreach ($routes as $route) {
-            $pattern = ($prefix->route ?? '') . $route->pattern;
+            $pattern = ($prefix->pattern ?? '') . $route->pattern;
 
             if ($pattern === '') {
                 throw new ConfigNotValid(
                     "`$class->name::$method()` has a route with an empty pattern, "
-                    . "define a prefix with a route using #[Prefix] or RouteBuilder::prefix()."
+                    . "define a prefix with a pattern using #[Prefix] or RouteBuilder::prefix()."
                 );
             }
 

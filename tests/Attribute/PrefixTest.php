@@ -15,17 +15,17 @@ final class PrefixTest extends TestCase
 {
     public function test_both(): void
     {
-        $prefix = new Prefix(route: '/cart', action: 'cart');
+        $prefix = new Prefix(pattern: '/cart', action: 'cart');
 
-        $this->assertSame('/cart', $prefix->route);
+        $this->assertSame('/cart', $prefix->pattern);
         $this->assertSame('cart', $prefix->action);
     }
 
-    public function test_route_only(): void
+    public function test_pattern_only(): void
     {
-        $prefix = new Prefix(route: '/cart');
+        $prefix = new Prefix(pattern: '/cart');
 
-        $this->assertSame('/cart', $prefix->route);
+        $this->assertSame('/cart', $prefix->pattern);
         $this->assertNull($prefix->action);
     }
 
@@ -33,25 +33,25 @@ final class PrefixTest extends TestCase
     {
         $prefix = new Prefix(action: 'cart');
 
-        $this->assertNull($prefix->route);
+        $this->assertNull($prefix->pattern);
         $this->assertSame('cart', $prefix->action);
     }
 
     public function test_at_least_one_is_required(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("At least one of `route` or `action` is required.");
+        $this->expectExceptionMessage("At least one of `pattern` or `action` is required.");
 
         new Prefix();
     }
 
     #[DataProvider('provide_blank')]
-    public function test_blank_is_not_allowed(?string $route, ?string $action): void
+    public function test_blank_is_not_allowed(?string $pattern, ?string $action): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("The `route` and the `action` cannot be blank.");
+        $this->expectExceptionMessage("The `pattern` and the `action` cannot be blank.");
 
-        new Prefix($route, $action);
+        new Prefix($pattern, $action);
     }
 
     /**
@@ -61,10 +61,10 @@ final class PrefixTest extends TestCase
     {
         return [
 
-            'blank route' => [ '', null ],
+            'blank pattern' => [ '', null ],
             'blank action' => [ null, '' ],
-            'blank route, action' => [ '', 'cart' ],
-            'route, blank action' => [ '/cart', '' ],
+            'blank pattern, action' => [ '', 'cart' ],
+            'pattern, blank action' => [ '/cart', '' ],
 
         ];
     }
@@ -81,22 +81,22 @@ final class PrefixTest extends TestCase
         $extension = new readonly class extends Prefix {
             public function __construct()
             {
-                parent::__construct(route: '/cart', action: 'cart');
+                parent::__construct(pattern: '/cart', action: 'cart');
             }
         };
 
-        $this->assertSame('/cart', $extension->route);
+        $this->assertSame('/cart', $extension->pattern);
         $this->assertSame('cart', $extension->action);
     }
 
     public function test_read_from_a_class(): void
     {
-        $controller = new #[Prefix(route: '/cart', action: 'cart')] class {
+        $controller = new #[Prefix(pattern: '/cart', action: 'cart')] class {
         };
 
         $attributes = new ReflectionClass($controller)->getAttributes(Prefix::class);
 
         $this->assertCount(1, $attributes);
-        $this->assertSame('/cart', $attributes[0]->newInstance()->route);
+        $this->assertSame('/cart', $attributes[0]->newInstance()->pattern);
     }
 }

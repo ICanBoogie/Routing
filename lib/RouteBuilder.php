@@ -14,7 +14,7 @@ use ICanBoogie\Routing\Exception\ConfigNotValid;
  * $builder->add_controller(
  *     PhotosController::class,
  *     route_builder: fn(RouteBuilder $r) => $r
- *         ->prefix(route: '/cart', action: 'cart')
+ *         ->prefix(pattern: '/cart', action: 'cart')
  *         ->get('/photos/:id', 'show'),
  * );
  * ```
@@ -37,20 +37,20 @@ final class RouteBuilder
      * Defines the prefixes of the routes of the controller, it applies to all of them wherever the
      * call sits. See {@see Prefix}.
      *
-     * @param non-empty-string|null $route
+     * @param non-empty-string|null $pattern
      * @param non-empty-string|null $action
      *
      * @return $this
      *
      * @throws ConfigNotValid if the prefix is already defined.
      */
-    public function prefix(?string $route = null, ?string $action = null): self
+    public function prefix(?string $pattern = null, ?string $action = null): self
     {
         if ($this->prefix) {
             throw new ConfigNotValid("The prefix is already defined.");
         }
 
-        $this->prefix = new Prefix($route, $action);
+        $this->prefix = new Prefix($pattern, $action);
 
         return $this;
     }

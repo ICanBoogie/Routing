@@ -403,7 +403,7 @@ inferred from the controller and the method, and `cart` is shared.
 A class-level `#[Prefix]` declares both:
 
 ```php
-#[Prefix(route: '/cart', action: 'cart')]
+#[Prefix(pattern: '/cart', action: 'cart')]
 final class PhotosController
 {
     #[Get('/photos/:id')]            // pattern /cart/photos/:id, action cart:photos:show
@@ -415,12 +415,12 @@ final class PhotosController
 ```
 
 - `Prefix` is class-level only. Both arguments are optional, and at least one is required.
-- `route:` is concatenated before each method's pattern. It may contain placeholders, which then
+- `pattern:` is concatenated before each method's pattern. It may contain placeholders, which then
   become path parameters of every method of the class.
 - `action:` is concatenated before each action, inferred or explicit, with `:` added automatically.
 - `Route` is method-level only. The class-level `#[Route('/cart')]` of bind-routing becomes
-  `#[Prefix(route: '/cart')]`. An empty method pattern is allowed when the class has a
-  `Prefix(route:)`.
+  `#[Prefix(pattern: '/cart')]`. An empty method pattern is allowed when the class has a
+  `Prefix(pattern:)`.
 - `Prefix` is not final. An application can extend it with fixed values (a `#[CartPrefix]`) to avoid
   repeating them on each controller; discovery by instance-of still finds it.
 - Prefixes are plain concatenation, so they stay predictable. Deriving them from the PHP namespace
@@ -428,14 +428,14 @@ final class PhotosController
   identifiers. A group argument on `add_controller()` was rejected because attribute discovery has
   no group to attach it to.
 - Route ids (`id:`) are not prefixed.
-- `RouteBuilder::prefix(route:, action:)` is the equivalent of `#[Prefix]` for controllers
+- `RouteBuilder::prefix(pattern:, action:)` is the equivalent of `#[Prefix]` for controllers
   registered without attributes, with the same argument names and the same concatenation rules:
 
   ```php
   $builder->add_controller(
       PhotosController::class,
       route_builder: fn(RouteBuilder $r) => $r
-          ->prefix(route: '/cart', action: 'cart')
+          ->prefix(pattern: '/cart', action: 'cart')
           ->get('/photos/:id', 'show'),   // /cart/photos/:id, action cart:photos:show
   );
   ```

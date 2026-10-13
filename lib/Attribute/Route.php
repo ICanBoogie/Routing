@@ -20,7 +20,7 @@ readonly class Route
      * @param string $pattern
      *     Pattern of the route.
      *     It's alright to have an _empty_ pattern as long as the controller has a {@link Prefix}
-     *     with a route to define the base pattern.
+     *     with a pattern to define the base pattern.
      * @param non-empty-string|null $action
      *     Identifier of a qualified action. e.g. 'articles:show'.
      *     If it is not defined, the action is inferred from the controller and the method.

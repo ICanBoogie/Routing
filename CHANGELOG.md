@@ -36,10 +36,10 @@ PHP 8.4+
     - Attributes define the routes of a controller, they are ported from icanboogie/bind-routing. The
       repeatable `Route` is for methods, with the shortcuts `Connect`, `Delete`, `Get`, `Head`,
       `Options`, `Patch`, `Post`, `Put`, and `Trace`. `Prefix` is for the controller class, it
-      defines the prefixes shared by its methods: `#[Prefix(route: '/cart', action: 'cart')]` turns
+      defines the prefixes shared by its methods: `#[Prefix(pattern: '/cart', action: 'cart')]` turns
       the route `/photos/:id` with the action `photos:show` into `/cart/photos/:id` and
       `cart:photos:show`. The pattern of a shortcut is optional, it can be left empty when the
-      `Prefix` defines the route.
+      `Prefix` defines the pattern.
     - `PlanBuilder` analyzes a method with reflection, once, to build the plan of its parameters:
       a parameter typed `Request` or `Route` receives them, any other parameter is a path parameter
       found by its name in the patterns of the routes, so reordering placeholders can't pass the
@@ -55,7 +55,7 @@ PHP 8.4+
       controller and the name of the method, used as is: `PhotosController::show` is `photos:show`,
       see `ActionResolver`.
     - `RouteBuilder` defines the routes and the prefix of a controller without attributes:
-      `add_controller(PhotosController::class, fn(RouteBuilder $r) => $r->prefix(route: '/cart',
+      `add_controller(PhotosController::class, fn(RouteBuilder $r) => $r->prefix(pattern: '/cart',
       action: 'cart')->get('/photos/:id', 'show'))`.
     - `ConfigBuilder::build()` returns a `Config`, a readonly object that holds the routes, and the
       controllers with their actions. It can be exported with `var_export()` and cached as a PHP

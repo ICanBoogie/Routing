@@ -6,7 +6,7 @@ use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Attribute\Get;
 use ICanBoogie\Routing\Attribute\Prefix;
 
-#[Prefix(route: '/reports', action: 'admin')]
+#[Prefix(pattern: '/reports', action: 'admin')]
 final class ReportsController
 {
     #[Get('/:id')]

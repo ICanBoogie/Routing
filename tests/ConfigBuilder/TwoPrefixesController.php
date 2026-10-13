@@ -6,7 +6,7 @@ use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Attribute\Get;
 use ICanBoogie\Routing\Attribute\Prefix;
 
-#[Prefix(route: '/a')]
+#[Prefix(pattern: '/a')]
 #[Prefix(action: 'b')]
 final class TwoPrefixesController
 {

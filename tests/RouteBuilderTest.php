@@ -105,8 +105,8 @@ final class RouteBuilderTest extends TestCase
     {
         $builder = new RouteBuilder();
 
-        $this->assertSame($builder, $builder->prefix(route: '/cart', action: 'cart'));
-        $this->assertSame('/cart', $builder->prefix?->route);
+        $this->assertSame($builder, $builder->prefix(pattern: '/cart', action: 'cart'));
+        $this->assertSame('/cart', $builder->prefix?->pattern);
         $this->assertSame('cart', $builder->prefix->action);
     }
 
@@ -119,7 +119,7 @@ final class RouteBuilderTest extends TestCase
 
     public function test_prefix_can_be_defined_once(): void
     {
-        $builder = new RouteBuilder()->prefix(route: '/cart');
+        $builder = new RouteBuilder()->prefix(pattern: '/cart');
 
         $this->expectException(ConfigNotValid::class);
         $this->expectExceptionMessage("The prefix is already defined.");
@@ -129,9 +129,9 @@ final class RouteBuilderTest extends TestCase
 
     public function test_prefix_applies_wherever_the_call_sits(): void
     {
-        $builder = new RouteBuilder()->get('/a', 'a')->prefix(route: '/cart')->get('/b', 'b');
+        $builder = new RouteBuilder()->get('/a', 'a')->prefix(pattern: '/cart')->get('/b', 'b');
 
-        $this->assertSame('/cart', $builder->prefix?->route);
+        $this->assertSame('/cart', $builder->prefix?->pattern);
         $this->assertCount(2, $builder->routes);
     }
 }

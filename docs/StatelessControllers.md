@@ -94,7 +94,7 @@ and `billing:invoices:show`.
 use ICanBoogie\Routing\Attribute\Get;
 use ICanBoogie\Routing\Attribute\Prefix;
 
-#[Prefix(route: '/billing', action: 'billing')]
+#[Prefix(pattern: '/billing', action: 'billing')]
 final class InvoiceController
 {
     #[Get('/invoices/:id')]
@@ -105,10 +105,10 @@ final class InvoiceController
 }
 ```
 
-The pattern of a shortcut can be empty when the prefix defines the route:
+The pattern of a shortcut can be empty when the prefix defines the pattern:
 
 ```php
-#[Prefix(route: '/invoices')]
+#[Prefix(pattern: '/invoices')]
 final class InvoiceController
 {
     #[Get('')]
@@ -123,7 +123,7 @@ final class InvoiceController
 }
 ```
 
-The prefix route may contain placeholders, they become path parameters of every method of the
+The prefix pattern may contain placeholders, they become path parameters of every method of the
 controller.
 
 ### Without attributes
@@ -140,7 +140,7 @@ use ICanBoogie\Routing\RouteBuilder;
 
 $builder = new ConfigBuilder()
     ->add_controller(InvoiceController::class, fn(RouteBuilder $r) => $r
-        ->prefix(route: '/billing', action: 'billing')
+        ->prefix(pattern: '/billing', action: 'billing')
         ->get('/invoices', 'list')
         ->get('/invoices/:id', 'show')
         ->post('/invoices', 'create'));
