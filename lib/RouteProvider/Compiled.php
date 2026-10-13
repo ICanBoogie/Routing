@@ -56,7 +56,7 @@ use function usort;
  *
  * @phpstan-type RouteData array{
  *     pattern: array{ pattern: string, interleaved: array<string|string[]>, params: array<int, int|string>, regex: string },
- *     action: string,
+ *     action: non-empty-string,
  *     methods: string|string[],
  *     id: string|null,
  *     extensions: object[],

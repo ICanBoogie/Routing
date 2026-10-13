@@ -15,6 +15,9 @@ class Router
 {
     private static int $anonymous_action_count = 0;
 
+    /**
+     * @return non-empty-string
+     */
     private static function generate_anonymous_action(): string
     {
         return '__anonymous_action_' . ++self::$anonymous_action_count;
