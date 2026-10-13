@@ -7,6 +7,11 @@ use ICanBoogie\Routing\RouteMaker\Options;
 
 /**
  * Collect routes to build a {@see RouteProvider}.
+ *
+ * @deprecated Obsolete. A route should exist because a controller defines it, with attributes or
+ *     a {@see RouteBuilder}, see {@see ConfigBuilder::add_controller()}, not because a collector
+ *     was told to create it, `resource()` being the clearest example of routes that a controller
+ *     might not implement.
  */
 class RouteCollector
 {
@@ -26,7 +31,7 @@ class RouteCollector
      * Add a route.
      *
      * @param string $pattern Pattern of the route.
-     * @param string $action Identifier of a qualified action; for example, 'articles:show'.
+     * @param non-empty-string $action Identifier of a qualified action; for example, 'articles:show'.
      * @param RequestMethod|RequestMethod[] $methods Request methods accepted by the route.
      *
      * @return $this
@@ -46,7 +51,7 @@ class RouteCollector
      * Add a route.
      *
      * @param string $pattern Pattern of the route.
-     * @param string $action Identifier of a qualified action; for example, 'articles:show'.
+     * @param non-empty-string $action Identifier of a qualified action; for example, 'articles:show'.
      *
      * @return $this
      */
@@ -61,7 +66,7 @@ class RouteCollector
      * Add a route.
      *
      * @param string $pattern Pattern of the route.
-     * @param string $action Identifier of a qualified action; for example, 'articles:show'.
+     * @param non-empty-string $action Identifier of a qualified action; for example, 'articles:show'.
      *
      * @return $this
      */
@@ -76,7 +81,7 @@ class RouteCollector
      * Add a route.
      *
      * @param string $pattern Pattern of the route.
-     * @param string $action Identifier of a qualified action; for example, 'articles:create'.
+     * @param non-empty-string $action Identifier of a qualified action; for example, 'articles:create'.
      *
      * @return $this
      */
@@ -91,7 +96,7 @@ class RouteCollector
      * Add a route.
      *
      * @param string $pattern Pattern of the route.
-     * @param string $action Identifier of a qualified action; for example, 'articles:update'.
+     * @param non-empty-string $action Identifier of a qualified action; for example, 'articles:update'.
      *
      * @return $this
      */
@@ -106,7 +111,7 @@ class RouteCollector
      * Add a route.
      *
      * @param string $pattern Pattern of the route.
-     * @param string $action Identifier of a qualified action; for example, 'articles:update'.
+     * @param non-empty-string $action Identifier of a qualified action; for example, 'articles:update'.
      *
      * @return $this
      */
@@ -121,7 +126,7 @@ class RouteCollector
      * Add a route.
      *
      * @param string $pattern Pattern of the route.
-     * @param string $action Identifier of a qualified action; for example, 'articles:delete'.
+     * @param non-empty-string $action Identifier of a qualified action; for example, 'articles:delete'.
      *
      * @return $this
      */
@@ -136,7 +141,7 @@ class RouteCollector
      * Add a route.
      *
      * @param string $pattern Pattern of the route.
-     * @param string $action Identifier of a qualified action; for example, 'articles:show'.
+     * @param non-empty-string $action Identifier of a qualified action; for example, 'articles:show'.
      *
      * @return $this
      */
@@ -151,7 +156,7 @@ class RouteCollector
      * Add a route.
      *
      * @param string $pattern Pattern of the route.
-     * @param string $action Identifier of a qualified action; for example, 'articles:show'.
+     * @param non-empty-string $action Identifier of a qualified action; for example, 'articles:show'.
      *
      * @return $this
      */

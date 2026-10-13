@@ -18,7 +18,7 @@ final class Route
     /**
      * @param array{
      *     'pattern': Pattern,
-     *     'action': string,
+     *     'action': non-empty-string,
      *     'methods': RequestMethod|RequestMethod[],
      *     'id': string,
      *     'extensions': object[]
@@ -39,7 +39,7 @@ final class Route
 
     /**
      * @param string|Pattern $pattern Pattern of the route.
-     * @param string $action Identifier of a qualified action; for example, 'articles:show'.
+     * @param non-empty-string $action Identifier of a qualified action; for example, 'articles:show'.
      * @param RequestMethod|RequestMethod[] $methods Request methods accepted by the route.
      * @param object[] $extensions
      *

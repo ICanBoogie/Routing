@@ -42,6 +42,10 @@ test-container-84:
 benchmark: vendor
 	@php -d opcache.enable_cli=1 -d pcre.jit=1 benchmarks/run.php $(ARGS)
 
+.PHONY: benchmark-dispatch
+benchmark-dispatch: vendor
+	@php -d opcache.enable_cli=1 -d pcre.jit=1 benchmarks/dispatch.php $(ARGS)
+
 .PHONY: lint
 lint:
 #	@XDEBUG_MODE=off phpcs -s

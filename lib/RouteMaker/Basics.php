@@ -6,6 +6,8 @@ use ICanBoogie\HTTP\RequestMethod;
 
 /**
  * Defines pattern and methods of an action.
+ *
+ * @deprecated Obsolete, see {@see \ICanBoogie\Routing\RouteMaker}.
  */
 final class Basics
 {

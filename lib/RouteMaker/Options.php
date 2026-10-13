@@ -2,6 +2,11 @@
 
 namespace ICanBoogie\Routing\RouteMaker;
 
+/**
+ * Options of {@see \ICanBoogie\Routing\RouteMaker::resource()}.
+ *
+ * @deprecated Obsolete, see {@see \ICanBoogie\Routing\RouteMaker}.
+ */
 final class Options
 {
     public const string DEFAULT_ID_NAME = 'id';
@@ -12,7 +17,7 @@ final class Options
      * @param string $id_regex Regex of the identifier value.
      * @param string[] $only Only the actions specified are included.
      * @param string[] $except The actions specified are excluded.
-     * @param array<string, string> $as
+     * @param array<string, non-empty-string> $as
      *   Overload names of actions. _key_ is an action, _value_ a name.
      * @param array<string, string> $ids
      *   Identifiers for the routes. _key_ is an action, _value_ an identifier.

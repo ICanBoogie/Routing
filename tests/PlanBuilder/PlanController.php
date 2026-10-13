@@ -1,0 +1,274 @@
+<?php
+
+namespace Test\ICanBoogie\Routing\PlanBuilder;
+
+use ICanBoogie\HTTP\RedirectResponse;
+use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\Response;
+use ICanBoogie\Routing\Attribute\Part;
+use ICanBoogie\Routing\Attribute\Path;
+use ICanBoogie\Routing\Attribute\Query;
+use ICanBoogie\Routing\IntoResponse;
+use ICanBoogie\Routing\Route;
+use Test\ICanBoogie\Routing\Parameter\IntBackedEnum;
+use Test\ICanBoogie\Routing\Parameter\StringBackedEnum;
+
+/**
+ * Each method is a case for the plan builder, the name of the method says what it is about.
+ */
+final class PlanController
+{
+    // valid
+
+    public function no_parameters(): Response
+    {
+        return new Response();
+    }
+
+    public function path_parameter(int $id): Response
+    {
+        return new Response();
+    }
+
+    public function all_scalars(int $a, float $b, string $c, bool $d): Response
+    {
+        return new Response();
+    }
+
+    public function request_and_route(Request $request, Route $route, string $slug): Response
+    {
+        return new Response();
+    }
+
+    public function nullable_request(?Request $request): Response
+    {
+        return new Response();
+    }
+
+    public function enums(StringBackedEnum $status, IntBackedEnum $rank): Response
+    {
+        return new Response();
+    }
+
+    public function enum_with_default(StringBackedEnum $status = StringBackedEnum::DRAFT): Response
+    {
+        return new Response();
+    }
+
+    public function with_default(int $page = 1): Response
+    {
+        return new Response();
+    }
+
+    public function nullable(?int $page): Response
+    {
+        return new Response();
+    }
+
+    public function nullable_with_default(?int $page = null): Response
+    {
+        return new Response();
+    }
+
+    public function catch_all(string $all): Response
+    {
+        return new Response();
+    }
+
+    public function path_attribute(#[Path] int $id): Response
+    {
+        return new Response();
+    }
+
+    public function path_renamed(#[Path('id')] int $article_id): Response
+    {
+        return new Response();
+    }
+
+    public function query_parameter(#[Query] int $page = 1): Response
+    {
+        return new Response();
+    }
+
+    public function query_renamed(#[Query('q')] string $search): Response
+    {
+        return new Response();
+    }
+
+    public function query_enum(#[Query] StringBackedEnum $status, #[Query] ?bool $archived): Response
+    {
+        return new Response();
+    }
+
+    public function part_parameter(#[Part] string $title): Response
+    {
+        return new Response();
+    }
+
+    public function part_renamed(#[Part('author_name')] ?string $author): Response
+    {
+        return new Response();
+    }
+
+    public function all_sources(
+        Request $request,
+        #[Path] int $id,
+        #[Query] int $page = 1,
+        #[Part] string $title = ''
+    ): Response {
+        return new Response();
+    }
+
+    public function returns_response_subclass(): RedirectResponse
+    {
+        return new RedirectResponse('/');
+    }
+
+    public function returns_into_response(): Wrapper
+    {
+        return new Wrapper();
+    }
+
+    public function returns_into_response_interface(): IntoResponse
+    {
+        return new Wrapper();
+    }
+
+    public function returns_union(): Response|IntoResponse
+    {
+        return new Response();
+    }
+
+    public function returns_static(): static
+    {
+        return $this;
+    }
+
+    // not valid methods
+
+    public function two_sources(#[Query] #[Part] int $x): Response
+    {
+        return new Response();
+    }
+
+    public function path_and_query(#[Path] #[Query] int $x): Response
+    {
+        return new Response();
+    }
+
+    public function attribute_on_request(#[Query] Request $request): Response
+    {
+        return new Response();
+    }
+
+    public function attribute_on_route(#[Part] Route $route): Response
+    {
+        return new Response();
+    }
+
+    public function query_array(#[Query] array $tags): Response
+    {
+        return new Response();
+    }
+
+    public function part_class(#[Part] \stdClass $payload): Response
+    {
+        return new Response();
+    }
+
+    public function path_renamed_missing(#[Path('slug')] int $id): Response
+    {
+        return new Response();
+    }
+
+    private function not_public(): Response
+    {
+        return new Response();
+    }
+
+    public static function is_static(): Response
+    {
+        return new Response();
+    }
+
+    public function no_return_type()
+    {
+        return new Response();
+    }
+
+    public function returns_void(): void
+    {
+    }
+
+    public function returns_string(): string
+    {
+        return '';
+    }
+
+    public function returns_mixed(): mixed
+    {
+        return new Response();
+    }
+
+    public function returns_nullable(): ?Response
+    {
+        return null;
+    }
+
+    public function returns_union_with_null(): Response|null
+    {
+        return null;
+    }
+
+    public function returns_union_with_string(): Response|string
+    {
+        return new Response();
+    }
+
+    public function returns_unrelated_class(): \stdClass
+    {
+        return new \stdClass();
+    }
+
+    public function returns_intersection(): Response&IntoResponse
+    {
+        throw new \LogicException();
+    }
+
+    // not valid parameters
+
+    public function untyped($x): Response
+    {
+        return new Response();
+    }
+
+    public function union_type(int|string $x): Response
+    {
+        return new Response();
+    }
+
+    public function array_type(array $x): Response
+    {
+        return new Response();
+    }
+
+    public function mixed_type(mixed $x): Response
+    {
+        return new Response();
+    }
+
+    public function unrelated_class(\stdClass $x): Response
+    {
+        return new Response();
+    }
+
+    public function unit_enum(PlainEnum $x): Response
+    {
+        return new Response();
+    }
+
+    public function variadic(int ...$ids): Response
+    {
+        return new Response();
+    }
+}

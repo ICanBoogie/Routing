@@ -1,5 +1,8 @@
 # Action controllers
 
+> [!TIP]
+> New controllers are best written as [stateless controllers](StatelessControllers.md).
+
 Action controllers are used to group related HTTP request handling logic into a class and use HTTP
 methods to separate concerns. An action controller can be created easily by extending
 [ControllerAbstract][] and using the trait [ActionTrait][].
@@ -51,6 +54,9 @@ final class ArticleController extends ControllerAbstract
 ```
 
 ## Resource controllers
+
+> **Warning:** [RouteMaker][] is obsolete. A route should exist because a controller defines it,
+> see [Creating routes](CreatingRoutes.md).
 
 With [ActionTrait][] and [RouteMaker][] resource controllers can be created with a minimum
 boilerplate.

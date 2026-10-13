@@ -30,9 +30,9 @@ A string is resolved with [RouteProvider\ByIdOrAction][]: a route `id` wins over
 routes an explicit `id` is a good way to keep URL generation stable if actions are renamed:
 
 ```php
-$routes = (new RouteCollector())
-    ->get('/articles/<id:\d+>', 'articles:show', id: 'article')
-    ->collect();
+$routes = new Immutable([
+    new Route('/articles/<id:\d+>', 'articles:show', id: 'article'),
+]);
 ```
 
 ## Path parameters

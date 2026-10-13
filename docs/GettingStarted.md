@@ -48,8 +48,8 @@ $router
     ->get('/articles/<id:\d+>', fn(Request $request) => new Response("Article {$request->path_params['id']}"));
 ```
 
-See [Using the Router](Router.md). When your application grows, define routes with the
-[route collector](CreatingRoutes.md) and use [controllers](Controllers.md) as responders.
+See [Using the Router](Router.md). When your application grows, write [stateless controllers](StatelessControllers.md): their routes are
+defined by attributes, and their actions receive what they need from the request.
 
 ## Step 2: dispatch the request
 
@@ -88,8 +88,8 @@ See [URL generation](UrlGeneration.md).
 | I want to…                                      | Read                                          |
 |-------------------------------------------------|-----------------------------------------------|
 | Understand the pattern syntax                   | [Route patterns](RoutePatterns.md)            |
-| Define many routes, or REST resources           | [Defining routes](CreatingRoutes.md)          |
-| Organize handlers in classes                    | [Controllers](Controllers.md)                 |
+| Define many routes                              | [Defining routes](CreatingRoutes.md)          |
+| Organize handlers in classes                    | [Stateless controllers](StatelessControllers.md) |
 | Resolve responders from a DI container          | [Action responders](ActionResponders.md)      |
 | Run code around every route (cache, redirects)  | [Middleware and events](Middleware.md)        |
 | Make route lookup faster in production          | [Route providers](RouteProviders.md)          |

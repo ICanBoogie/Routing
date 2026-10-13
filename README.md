@@ -51,7 +51,8 @@ New to the package? Follow [Getting started](docs/GettingStarted.md). The full i
 - **Handling requests**: [Using the Router](docs/Router.md) ·
   [Responding to a request](docs/RespondingToRequests.md) ·
   [Action responders](docs/ActionResponders.md) · [Middleware and events](docs/Middleware.md)
-- **Controllers**: [Controllers](docs/Controllers.md) · [Action controllers](docs/ActionControllers.md)
+- **Controllers**: [Stateless controllers](docs/StatelessControllers.md) ·
+  [Controllers](docs/Controllers.md) · [Action controllers](docs/ActionControllers.md)
 - **Reference**: [Exceptions](docs/Exceptions.md)
 
 

@@ -6,6 +6,8 @@
 
 PHP 8.4+
 
+[icanboogie/inflector](https://github.com/ICanBoogie/Inflector), to infer the actions of controllers.
+
 ### New features
 
 - Added `RouteProvider\Chain`, which asks a list of route providers in turn, the first route found wins.
@@ -16,10 +18,76 @@ PHP 8.4+
   `Immutable`, so it can be exported with `var_export()` and cached as a PHP file loaded through
   OPcache. It avoids creating routes and computing indexes on every request, which is what `Memoize`
   costs with PHP-FPM, see [docs/RouteProviders.md](docs/RouteProviders.md).
+- Added stateless controllers, plain classes with a constructor for services and public methods for
+  actions. They don't extend a base class and don't hold the request, so they can be shared across
+  requests, see [docs/adr/0001-stateless-controllers.md](docs/adr/0001-stateless-controllers.md).
+  The building blocks are in place:
+    - `MethodResponder` is a `Responder` that calls the method of a controller. The method is found
+      with the action of the route that matched the request, and its arguments are produced by the
+      `Parameter`s of its plan. The method returns a `Response`, or an `IntoResponse`, an object that
+      knows how to turn itself into one; anything else is a `TypeError`.
+    - `Parameter` produces the value of an action's parameter from the request. `CurrentRequest`
+      provides the request, `MatchedRoute` the route, and `Path` a path parameter, found by its name
+      in the pattern and not by its position, and cast to the declared type (`int`, `float`, `string`,
+      `bool`, or a backed enum). A path value that can't be cast, such as `/articles/abc` for an
+      `int $id`, throws `PathParameterNotValid`, which is a `NotFound`.
+    - `Config\ActionDefinition` defines how to invoke an action: the method and the plan of its
+      parameters. Parameters and definitions can be exported with `var_export()`.
+    - Attributes define the routes of a controller, they are ported from icanboogie/bind-routing. The
+      repeatable `Route` is for methods, with the shortcuts `Connect`, `Delete`, `Get`, `Head`,
+      `Options`, `Patch`, `Post`, `Put`, and `Trace`. `Prefix` is for the controller class, it
+      defines the prefixes shared by its methods: `#[Prefix(route: '/cart', action: 'cart')]` turns
+      the route `/photos/:id` with the action `photos:show` into `/cart/photos/:id` and
+      `cart:photos:show`. The pattern of a shortcut is optional, it can be left empty when the
+      `Prefix` defines the route.
+    - `PlanBuilder` analyzes a method with reflection, once, to build the plan of its parameters:
+      a parameter typed `Request` or `Route` receives them, any other parameter is a path parameter
+      found by its name in the patterns of the routes, so reordering placeholders can't pass the
+      wrong values. It also checks that the method is public and returns a `Response` or an
+      `IntoResponse`. Mistakes throw `ConfigNotValid` with the class, the method, and the parameter,
+      e.g. "`SkillController::show()` parameter `$slug`: no `:slug` in `/skills/:id`.", instead of
+      failing when a request is handled.
+    - `ConfigBuilder::add_controller()` adds a controller: it reads the attributes of its methods,
+      applies the `Prefix`, infers the actions that are not specified, builds the plan of each
+      method, and defines the routes. Everything is validated right away, and nothing is registered
+      when the controller is not valid. The action is inferred from the name of the
+      controller and the name of the method, used as is: `PhotosController::show` is `photos:show`,
+      see `ActionResolver`.
+    - `RouteBuilder` defines the routes and the prefix of a controller without attributes:
+      `add_controller(PhotosController::class, fn(RouteBuilder $r) => $r->prefix(route: '/cart',
+      action: 'cart')->get('/photos/:id', 'show'))`.
+    - `ConfigBuilder::build()` returns a `Config`, a readonly object that holds the routes, and the
+      controllers with their actions. It can be exported with `var_export()` and cached as a PHP
+      file, so subsequent requests don't pay for reflecting or building it.
+    - `Query` and `Part` provide a value of the query string, or of the body, cast to the type of the
+      parameter. They are bound with the attributes `#[Query]` and `#[Part]` (a form field, or a
+      property of a JSON object), which take the name of the value when it is not the name of the
+      parameter: `#[Query('q')] string $search`. A missing value is the default, `null` if the
+      parameter is nullable, otherwise `ParameterNotValid` is thrown, as it is for a value that
+      can't be cast. `ParameterNotValid` is a `ClientError`, a 400. `#[Path]` is optional, it names
+      the placeholder when it is not the name of the parameter.
+    - `ActionResponderProvider\FromConfig` provides the responders of the controllers of a `Config`:
+      one `MethodResponder` per controller, created when one of its actions is first requested. The
+      controllers are obtained through a closure, which is where services are wired. Use it with
+      `RequestResponderProvider` and `Config::$routes`.
+    - `ConfigBuilder::cache_strategy()` defines how the routes of the `Config` are served, with
+      `CacheStrategy`: `NONE` (default) tests the routes one after the other; `MEMOIZE` uses
+      `RouteProvider\Memoize`, meant for development, where the configuration is built on each
+      request, the resulting `Config` can't be exported; `COMPILE` uses `RouteProvider\Compiled`,
+      meant for production.
+    - `ConfigBuilder::discover_controllers()` adds the controllers found through the `Route`
+      attributes of their methods, so they don't have to be listed. Discovery relies on
+      [olvlvl/composer-attribute-collector](https://github.com/olvlvl/composer-attribute-collector),
+      which the application decides to require; it is not a requirement of the library. Controllers
+      already added with `add_controller()` are skipped.
 
 ### Deprecated Features
 
-None
+- `RouteCollector`, `RouteMaker`, `RouteMaker\Options`, and `RouteMaker\Basics` are obsolete. A route
+  should exist because a controller defines it, not because a collector was told to create it or a
+  resource name implies routes that a controller might not implement, `resource()` being the
+  clearest example. Define routes with attributes or a `RouteBuilder`, see
+  `ConfigBuilder::add_controller()`.
 
 ### Backward Incompatible Changes
 

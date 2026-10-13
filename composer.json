@@ -21,7 +21,10 @@
         "source": "https://github.com/ICanBoogie/Routing"
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "olvlvl/composer-attribute-collector": true
+        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -29,9 +32,11 @@
     "require": {
         "php": ">=8.4",
         "ext-json": "*",
-        "icanboogie/http": "^7.0"
+        "icanboogie/http": "^7.0",
+        "icanboogie/inflector": "^4.0"
     },
     "require-dev": {
+        "olvlvl/composer-attribute-collector": "^3.0",
         "olvlvl/phpunit-given": "^11.0",
         "phpstan/phpstan": "^2.0",
         "phpunit/phpunit": "^11.4",
@@ -45,6 +50,16 @@
     "autoload-dev": {
         "psr-4": {
             "Test\\ICanBoogie\\Routing\\": "tests/"
+        },
+        "files": [
+            "vendor/attributes.php"
+        ]
+    },
+    "extra": {
+        "composer-attribute-collector": {
+            "include": [
+                "tests/Discovery"
+            ]
         }
     }
 }
