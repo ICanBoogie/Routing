@@ -175,6 +175,30 @@ and `Prefix` to prepend a namespace.
 An action belongs to a single method of a single controller. Two methods with the same action are an
 error.
 
+### Route identifiers
+
+A method can be reached through multiple routes, and they all share its action. The action says what
+answers the request, it can't tell the routes apart, so generating a URL from `invoices:list` always
+gives the first route. Give the routes an `id` to ask for a specific one:
+
+```php
+<?php
+
+#[Get('/invoices', id: 'invoices')]
+#[Get('/invoices/page/:page', id: 'invoices-page')]
+public function list(int $page = 1): Response
+```
+
+```php
+$url_generator->generate_url('invoices');                         // "/invoices"
+$url_generator->generate_url('invoices-page', [ 'page' => 2 ]);   // "/invoices/page/2"
+```
+
+The `id` is optional and only used to find a route, see [URL generation](UrlGeneration.md). It also
+keeps generated URLs stable when an action is renamed. Keep identifiers unique, and distinct from the
+actions: when a string is both the `id` of a route and the action of another, `Memoize` and
+`Compiled` choose the `id`, whereas a plain provider chooses the first route that matches either.
+
 
 
 ## Parameters

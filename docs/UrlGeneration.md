@@ -26,8 +26,12 @@ $url_generator->generate_url(fn($route) => $route->action === 'articles:edit', [
 // "/articles/123/edit"
 ```
 
-A string is resolved with [RouteProvider\ByIdOrAction][]: a route `id` wins over an `action`. Giving
-routes an explicit `id` is a good way to keep URL generation stable if actions are renamed:
+A string is resolved with [RouteProvider\ByIdOrAction][]: with `Memoize` and `Compiled`, a route `id`
+wins over an `action`, whereas a plain provider returns the first route that matches either, so
+keep identifiers unique and distinct from the actions. An
+action can be shared by multiple routes, e.g. a method reached through two patterns, in which case the
+first route found is used. Giving routes an explicit `id` lets you pick one, and is a good way to keep
+URL generation stable if actions are renamed:
 
 ```php
 $routes = new Immutable([
