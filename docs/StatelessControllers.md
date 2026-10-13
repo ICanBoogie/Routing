@@ -195,9 +195,11 @@ $url_generator->generate_url('invoices-page', [ 'page' => 2 ]);   // "/invoices/
 ```
 
 The `id` is optional and only used to find a route, see [URL generation](UrlGeneration.md). It also
-keeps generated URLs stable when an action is renamed. Keep identifiers unique, and distinct from the
-actions: when a string is both the `id` of a route and the action of another, `Memoize` and
-`Compiled` choose the `id`, whereas a plain provider chooses the first route that matches either.
+keeps generated URLs stable when an action is renamed. `ConfigBuilder` rejects an `id`
+that another route already uses, or that is the action of another route, with a `ConfigNotValid`,
+because a string that is both would be ambiguous: `Memoize` and `Compiled` choose the `id`, whereas a
+plain provider chooses the first route that matches either. It can only check the routes it defines,
+not the ones added by hand to a provider chained next to `$config->routes`.
 
 
 

@@ -54,6 +54,12 @@ final class ConfigBuilder
 
     private CacheStrategy $cache_strategy = CacheStrategy::NONE;
 
+    /**
+     * @var array<string, string>
+     *     Where _key_ is the id of a route and _value_ the controller and the method it leads to.
+     */
+    private array $route_ids = [];
+
     public function __construct()
     {
         $this->routes = new RouteProvider\Mutable();
@@ -94,6 +100,7 @@ final class ConfigBuilder
         }
 
         $routes = [];
+        $origins = [];
         $actions = [];
 
         // Nothing is registered before everything is valid.
@@ -110,10 +117,14 @@ final class ConfigBuilder
 
                 $actions[$route->action] = new ActionDefinition($method_name, $plan);
                 $routes[] = $route;
+                $origins[] = "$class->name::$method_name()";
             }
         }
 
+        $ids = $this->assert_ids_available($routes, $origins);
+
         $this->routes->add_routes(...$routes);
+        $this->route_ids += $ids;
 
         $this->controllers[$class->name] = new ControllerDefinition($actions);
 
@@ -334,6 +345,67 @@ final class ConfigBuilder
         }
 
         return $resolved;
+    }
+
+    /**
+     * The id of a route is unique, and distinct from the action of the other routes, otherwise
+     * finding a route with an id or an action is ambiguous. Routes created by hand, outside of the
+     * builder, are not known.
+     *
+     * @param list<Route> $routes
+     *     The routes of the controller being added.
+     * @param list<string> $origins
+     *     The method that each route of `$routes` leads to, at the same position.
+     *
+     * @return array<string, string>
+     *     The ids of the routes, with the method they lead to.
+     *
+     * @throws ConfigNotValid
+     */
+    private function assert_ids_available(array $routes, array $origins): array
+    {
+        $ids = [];
+
+        foreach ($routes as $i => $route) {
+            if ($route->id === null) {
+                continue;
+            }
+
+            $id = $route->id;
+            $other = $ids[$id] ?? $this->route_ids[$id] ?? null;
+
+            if ($other !== null) {
+                throw new ConfigNotValid("The id `$id` of `$origins[$i]` is already used by `$other`.");
+            }
+
+            $ids[$id] = $origins[$i];
+
+            foreach ($routes as $j => $other_route) {
+                if ($j !== $i && $other_route->action === $id) {
+                    throw new ConfigNotValid(
+                        "The id `$id` of `$origins[$i]` is also the action of `$origins[$j]`."
+                    );
+                }
+            }
+
+            $controller = $this->controller_by_action[$id] ?? null;
+
+            if ($controller !== null) {
+                throw new ConfigNotValid("The id `$id` of `$origins[$i]` is also an action of `$controller`.");
+            }
+        }
+
+        foreach ($routes as $i => $route) {
+            $other = $this->route_ids[$route->action] ?? null;
+
+            if ($other !== null) {
+                throw new ConfigNotValid(
+                    "The action `$route->action` of `$origins[$i]` is also the id of `$other`."
+                );
+            }
+        }
+
+        return $ids;
     }
 
     /**

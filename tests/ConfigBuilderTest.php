@@ -21,6 +21,7 @@ use ICanBoogie\Routing\PlanBuilder;
 use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteBuilder;
 use ICanBoogie\Routing\RouteProvider\ByAction;
+use ICanBoogie\Routing\RouteProvider\ById;
 use ICanBoogie\Routing\RouteProvider\Compiled;
 use ICanBoogie\Routing\RouteProvider\Immutable;
 use ICanBoogie\Routing\RouteProvider\Memoize;
@@ -31,22 +32,29 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
+
 use Test\ICanBoogie\Routing\ConfigBuilder\AbstractController;
+use Test\ICanBoogie\Routing\ConfigBuilder\ActionOfAnIdController;
 use Test\ICanBoogie\Routing\ConfigBuilder\ArticlesController;
 use Test\ICanBoogie\Routing\ConfigBuilder\Cart;
 use Test\ICanBoogie\Routing\ConfigBuilder\ConflictingActionController;
 use Test\ICanBoogie\Routing\ConfigBuilder\DuplicateActionController;
 use Test\ICanBoogie\Routing\ConfigBuilder\EmptyPatternController;
+use Test\ICanBoogie\Routing\ConfigBuilder\FirstIdController;
+use Test\ICanBoogie\Routing\ConfigBuilder\IdIsActionController;
+use Test\ICanBoogie\Routing\ConfigBuilder\IdOfAnActionController;
 use Test\ICanBoogie\Routing\ConfigBuilder\MissingPlaceholderController;
 use Test\ICanBoogie\Routing\ConfigBuilder\NoRoutesController;
+use Test\ICanBoogie\Routing\ConfigBuilder\OwnActionIdController;
 use Test\ICanBoogie\Routing\ConfigBuilder\PhotosController;
 use Test\ICanBoogie\Routing\ConfigBuilder\PlainController;
 use Test\ICanBoogie\Routing\ConfigBuilder\PrivateRouteController;
+use Test\ICanBoogie\Routing\ConfigBuilder\SameIdController;
+use Test\ICanBoogie\Routing\ConfigBuilder\SecondIdController;
 use Test\ICanBoogie\Routing\ConfigBuilder\TwoPrefixesController;
 use Test\ICanBoogie\Routing\ConfigBuilder\UserPostsController;
 use Test\ICanBoogie\Routing\Discovery\InvoicesController;
 use Test\ICanBoogie\Routing\Discovery\ReportsController;
-
 use function array_map;
 use function iterator_to_array;
 
@@ -71,6 +79,7 @@ use function iterator_to_array;
 #[UsesClass(Mutable::class)]
 #[UsesClass(Memoize::class)]
 #[UsesClass(MemoizeByAction::class)]
+#[UsesClass(ById::class)]
 final class ConfigBuilderTest extends TestCase
 {
     public function test_empty(): void
@@ -451,6 +460,91 @@ final class ConfigBuilderTest extends TestCase
         );
 
         $builder->add_controller(ConflictingActionController::class);
+    }
+
+    public function test_id_defined_by_two_controllers(): void
+    {
+        $builder = new ConfigBuilder()->add_controller(FirstIdController::class);
+
+        $this->expectException(ConfigNotValid::class);
+        $this->expectExceptionMessage(
+            "The id `first-route` of `" . SecondIdController::class . "::show()` is already used by `"
+            . FirstIdController::class . "::show()`."
+        );
+
+        $builder->add_controller(SecondIdController::class);
+    }
+
+    public function test_id_defined_by_two_methods(): void
+    {
+        $this->expectException(ConfigNotValid::class);
+        $this->expectExceptionMessage(
+            "The id `same` of `" . SameIdController::class . "::b()` is already used by `"
+            . SameIdController::class . "::a()`."
+        );
+
+        new ConfigBuilder()->add_controller(SameIdController::class);
+    }
+
+    public function test_id_is_the_action_of_another_route(): void
+    {
+        $this->expectException(ConfigNotValid::class);
+        $this->expectExceptionMessage(
+            "The id `id-action:b` of `" . IdIsActionController::class . "::a()` is also the action of `"
+            . IdIsActionController::class . "::b()`."
+        );
+
+        new ConfigBuilder()->add_controller(IdIsActionController::class);
+    }
+
+    public function test_id_is_an_action_of_another_controller(): void
+    {
+        $builder = new ConfigBuilder()->add_controller(FirstIdController::class);
+
+        $this->expectException(ConfigNotValid::class);
+        $this->expectExceptionMessage(
+            "The id `first-ids:show` of `" . IdOfAnActionController::class . "::show()` is also an action of `"
+            . FirstIdController::class . "`."
+        );
+
+        $builder->add_controller(IdOfAnActionController::class);
+    }
+
+    public function test_action_is_the_id_of_another_controller(): void
+    {
+        $builder = new ConfigBuilder()->add_controller(FirstIdController::class);
+
+        $this->expectException(ConfigNotValid::class);
+        $this->expectExceptionMessage(
+            "The action `first-route` of `" . ActionOfAnIdController::class . "::show()` is also the id of `"
+            . FirstIdController::class . "::show()`."
+        );
+
+        $builder->add_controller(ActionOfAnIdController::class);
+    }
+
+    public function test_id_can_be_the_action_of_its_own_route(): void
+    {
+        $config = new ConfigBuilder()->add_controller(OwnActionIdController::class)->build();
+
+        $this->assertSame('own:action', $config->routes->route_for_predicate(new ById('own:action'))?->id);
+    }
+
+    public function test_ids_are_not_registered_when_a_controller_is_not_valid(): void
+    {
+        $builder = new ConfigBuilder();
+
+        try {
+            $builder->add_controller(SameIdController::class);
+            $this->fail("Expected exception");
+        } catch (ConfigNotValid) {
+            // expected
+        }
+
+        $config = $builder->add_controller(FirstIdController::class)->build();
+
+        $this->assertSame([ FirstIdController::class ], array_keys($config->controllers));
+        $this->assertNotNull($config->routes->route_for_predicate(new ById('first-route')));
     }
 
     public function test_controller_can_only_be_added_once(): void

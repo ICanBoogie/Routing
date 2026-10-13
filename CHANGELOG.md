@@ -50,7 +50,8 @@ PHP 8.4+
     - `ConfigBuilder::add_controller()` adds a controller: it reads the attributes of its methods,
       applies the `Prefix`, infers the actions that are not specified, builds the plan of each
       method, and defines the routes. Everything is validated right away, and nothing is registered
-      when the controller is not valid. The action is inferred from the name of the
+      when the controller is not valid, for instance when the `id` of a route is used by another route
+      or is the action of another. The action is inferred from the name of the
       controller and the name of the method, used as is: `PhotosController::show` is `photos:show`,
       see `ActionResolver`.
     - `RouteBuilder` defines the routes and the prefix of a controller without attributes:
