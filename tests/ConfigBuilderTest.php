@@ -33,6 +33,8 @@ use Test\ICanBoogie\Routing\ConfigBuilder\PlainController;
 use Test\ICanBoogie\Routing\ConfigBuilder\PrivateRouteController;
 use Test\ICanBoogie\Routing\ConfigBuilder\TwoPrefixesController;
 use Test\ICanBoogie\Routing\ConfigBuilder\UserPostsController;
+use Test\ICanBoogie\Routing\Discovery\InvoicesController;
+use Test\ICanBoogie\Routing\Discovery\ReportsController;
 
 use function array_map;
 use function iterator_to_array;
@@ -53,7 +55,7 @@ final class ConfigBuilderTest extends TestCase
 
     public function test_cache_strategy_is_none_by_default(): void
     {
-        $config = new ConfigBuilder()->add_responder(PhotosController::class)->build();
+        $config = new ConfigBuilder()->add_controller(PhotosController::class)->build();
 
         $this->assertInstanceOf(Immutable::class, $config->routes);
     }
@@ -62,7 +64,7 @@ final class ConfigBuilderTest extends TestCase
     public function test_cache_strategy(CacheStrategy $strategy, string $expected): void
     {
         $config = new ConfigBuilder()
-            ->add_responder(PhotosController::class)
+            ->add_controller(PhotosController::class)
             ->cache_strategy($strategy)
             ->build();
 
@@ -89,7 +91,7 @@ final class ConfigBuilderTest extends TestCase
     public function test_exported_config(CacheStrategy $strategy): void
     {
         $config = new ConfigBuilder()
-            ->add_responder(PhotosController::class)
+            ->add_controller(PhotosController::class)
             ->cache_strategy($strategy)
             ->build();
 
@@ -111,7 +113,7 @@ final class ConfigBuilderTest extends TestCase
 
     public function test_controller_from_attributes(): void
     {
-        $config = new ConfigBuilder()->add_responder(PhotosController::class)->build();
+        $config = new ConfigBuilder()->add_controller(PhotosController::class)->build();
 
         $this->assertEquals(
             [
@@ -144,14 +146,14 @@ final class ConfigBuilderTest extends TestCase
 
     public function test_methods_without_routes_are_not_actions(): void
     {
-        $config = new ConfigBuilder()->add_responder(PhotosController::class)->build();
+        $config = new ConfigBuilder()->add_controller(PhotosController::class)->build();
 
         $this->assertCount(3, $config->controllers[PhotosController::class]->actions);
     }
 
     public function test_method_with_multiple_routes(): void
     {
-        $config = new ConfigBuilder()->add_responder(ArticlesController::class)->build();
+        $config = new ConfigBuilder()->add_controller(ArticlesController::class)->build();
         $routes = array_filter(
             iterator_to_array($config->routes),
             fn(Route $route) => $route->action === 'articles:index'
@@ -171,7 +173,7 @@ final class ConfigBuilderTest extends TestCase
 
     public function test_method_with_multiple_actions(): void
     {
-        $config = new ConfigBuilder()->add_responder(ArticlesController::class)->build();
+        $config = new ConfigBuilder()->add_controller(ArticlesController::class)->build();
         $actions = $config->controllers[ArticlesController::class]->actions;
 
         $this->assertEquals(new ActionDefinition('legacy'), $actions['articles:old']);
@@ -182,7 +184,7 @@ final class ConfigBuilderTest extends TestCase
 
     public function test_prefix_from_attribute(): void
     {
-        $config = new ConfigBuilder()->add_responder(Cart\PhotosController::class)->build();
+        $config = new ConfigBuilder()->add_controller(Cart\PhotosController::class)->build();
 
         $route = $config->routes->route_for_predicate(new ByAction('cart:photos:show'));
 
@@ -202,7 +204,7 @@ final class ConfigBuilderTest extends TestCase
 
     public function test_placeholders_of_the_prefix_are_path_parameters(): void
     {
-        $config = new ConfigBuilder()->add_responder(UserPostsController::class)->build();
+        $config = new ConfigBuilder()->add_controller(UserPostsController::class)->build();
 
         $this->assertEquals(
             [ 'user-posts:list' => new ActionDefinition('list', [ new Path('user_id', 'int') ]) ],
@@ -217,7 +219,7 @@ final class ConfigBuilderTest extends TestCase
     public function test_controller_from_route_builder(): void
     {
         $config = new ConfigBuilder()
-            ->add_responder(
+            ->add_controller(
                 PlainController::class,
                 fn(RouteBuilder $r) => $r
                     ->get('/plain', 'list')
@@ -248,7 +250,7 @@ final class ConfigBuilderTest extends TestCase
     public function test_prefix_from_route_builder(): void
     {
         $config = new ConfigBuilder()
-            ->add_responder(
+            ->add_controller(
                 PlainController::class,
                 fn(RouteBuilder $r) => $r
                     ->get('/:id', 'show')
@@ -269,7 +271,7 @@ final class ConfigBuilderTest extends TestCase
     public function test_attributes_and_route_builder_are_merged(): void
     {
         $config = new ConfigBuilder()
-            ->add_responder(
+            ->add_controller(
                 PhotosController::class,
                 fn(RouteBuilder $r) => $r->delete('/photos/:id', 'show', action: 'photos:delete')
             )
@@ -284,7 +286,7 @@ final class ConfigBuilderTest extends TestCase
 
     public function test_a_route_exists_because_of_its_controller(): void
     {
-        $config = new ConfigBuilder()->add_responder(PhotosController::class)->build();
+        $config = new ConfigBuilder()->add_controller(PhotosController::class)->build();
 
         $routes = iterator_to_array($config->routes);
 
@@ -297,8 +299,8 @@ final class ConfigBuilderTest extends TestCase
     public function test_multiple_controllers(): void
     {
         $config = new ConfigBuilder()
-            ->add_responder(PhotosController::class)
-            ->add_responder(Cart\PhotosController::class)
+            ->add_controller(PhotosController::class)
+            ->add_controller(Cart\PhotosController::class)
             ->build();
 
         $this->assertSame(
@@ -312,9 +314,9 @@ final class ConfigBuilderTest extends TestCase
     public function test_export(): void
     {
         $config = new ConfigBuilder()
-            ->add_responder(PhotosController::class)
-            ->add_responder(ArticlesController::class)
-            ->add_responder(Cart\PhotosController::class)
+            ->add_controller(PhotosController::class)
+            ->add_controller(ArticlesController::class)
+            ->add_controller(Cart\PhotosController::class)
             ->build();
 
         $actual = SetStateHelper::export_import($config);
@@ -335,7 +337,7 @@ final class ConfigBuilderTest extends TestCase
         $this->expectException(ConfigNotValid::class);
         $this->expectExceptionMessage($message);
 
-        new ConfigBuilder()->add_responder($controller, $route_builder);
+        new ConfigBuilder()->add_controller($controller, $route_builder);
     }
 
     /**
@@ -406,12 +408,12 @@ final class ConfigBuilderTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        new ConfigBuilder()->add_responder(PlainController::class, fn(RouteBuilder $r) => $r->prefix());
+        new ConfigBuilder()->add_controller(PlainController::class, fn(RouteBuilder $r) => $r->prefix());
     }
 
     public function test_action_defined_by_another_controller(): void
     {
-        $builder = new ConfigBuilder()->add_responder(PhotosController::class);
+        $builder = new ConfigBuilder()->add_controller(PhotosController::class);
 
         $this->expectException(ConfigNotValid::class);
         $this->expectExceptionMessage(
@@ -419,17 +421,17 @@ final class ConfigBuilderTest extends TestCase
             . "::show()` is already defined by `" . PhotosController::class . "`."
         );
 
-        $builder->add_responder(ConflictingActionController::class);
+        $builder->add_controller(ConflictingActionController::class);
     }
 
     public function test_controller_can_only_be_added_once(): void
     {
-        $builder = new ConfigBuilder()->add_responder(PhotosController::class);
+        $builder = new ConfigBuilder()->add_controller(PhotosController::class);
 
         $this->expectException(ConfigNotValid::class);
         $this->expectExceptionMessage("`" . PhotosController::class . "` is already added.");
 
-        $builder->add_responder(PhotosController::class);
+        $builder->add_controller(PhotosController::class);
     }
 
     public function test_nothing_is_registered_when_a_controller_is_not_valid(): void
@@ -437,7 +439,7 @@ final class ConfigBuilderTest extends TestCase
         $builder = new ConfigBuilder();
 
         try {
-            $builder->add_responder(MissingPlaceholderController::class);
+            $builder->add_controller(MissingPlaceholderController::class);
             $this->fail("Expected an exception");
         } catch (ConfigNotValid) {
             // expected
@@ -455,7 +457,7 @@ final class ConfigBuilderTest extends TestCase
         $builder = new ConfigBuilder();
 
         try {
-            $builder->add_responder(
+            $builder->add_controller(
                 PlainController::class,
                 fn(RouteBuilder $r) => $r->get('/plain', 'list')->get('/plain/:id', 'show', action: '')
             );
@@ -478,15 +480,43 @@ final class ConfigBuilderTest extends TestCase
         $builder = new ConfigBuilder();
 
         try {
-            $builder->add_responder(PlainController::class, fn(RouteBuilder $r) => $r->get('/', 'nope'));
+            $builder->add_controller(PlainController::class, fn(RouteBuilder $r) => $r->get('/', 'nope'));
         } catch (ConfigNotValid) {
             // expected
         }
 
         $config = $builder
-            ->add_responder(PlainController::class, fn(RouteBuilder $r) => $r->get('/plain', 'list'))
+            ->add_controller(PlainController::class, fn(RouteBuilder $r) => $r->get('/plain', 'list'))
             ->build();
 
         $this->assertArrayHasKey('plains:list', $config->controller_by_action);
+    }
+
+    public function test_discover_controllers(): void
+    {
+        $config = new ConfigBuilder()->discover_controllers()->build();
+
+        $this->assertEqualsCanonicalizing(
+            [ InvoicesController::class, ReportsController::class ],
+            array_keys($config->controllers)
+        );
+        $this->assertSame(InvoicesController::class, $config->controller_by_action['invoices:list']);
+        $this->assertSame(InvoicesController::class, $config->controller_by_action['invoices:create']);
+        $this->assertSame(ReportsController::class, $config->controller_by_action['admin:reports:show']);
+    }
+
+    public function test_discover_controllers_skips_the_controllers_already_added(): void
+    {
+        $config = new ConfigBuilder()
+            ->add_controller(
+                InvoicesController::class,
+                fn(RouteBuilder $r) => $r->prefix(route: '/billing', action: 'billing')
+            )
+            ->discover_controllers()
+            ->build();
+
+        $this->assertSame(InvoicesController::class, $config->controller_by_action['billing:invoices:list']);
+        $this->assertArrayNotHasKey('invoices:list', $config->controller_by_action);
+        $this->assertArrayHasKey('admin:reports:show', $config->controller_by_action);
     }
 }

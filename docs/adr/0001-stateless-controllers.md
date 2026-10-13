@@ -327,7 +327,7 @@ while it runs, and `build()` returns a `final readonly class Config` of plain de
 `__set_state`, so it can be exported with `var_export` and loaded on subsequent requests at no cost.
 
 ```php
-$builder->add_responder(
+$builder->add_controller(
     ArticleController::class,   // attributes on the class and its methods are read here
     route_builder: fn(RouteBuilder $r) => $r   // optional, for people not using attributes
         ->get('/articles/:id', 'show')
@@ -335,14 +335,15 @@ $builder->add_responder(
 );
 ```
 
-`add_responder()` reflects the class once, merges attribute routes with those from the
+`add_controller()` reflects the class once, merges attribute routes with those from the
 `RouteBuilder`, computes the action identifiers (an explicit `action:` is used as-is; when it is
 omitted, it is inferred from the controller's name and the method's name, which is used as is, e.g.
 `PhotosController::show` is `photos:show`), computes each method's parameter plan, and validates it
 against the patterns. Mistakes fail there with a clear message, and nothing is registered when a
-controller is not valid. `use_attributes()`-style discovery is a loop that calls `add_responder()`.
+controller is not valid. Discovery, `discover_controllers()`, is a loop that calls
+`add_controller()`.
 
-A route exists because a controller defines it, so `add_responder()` is the only way to add routes
+A route exists because a controller defines it, so `add_controller()` is the only way to add routes
 to the `ConfigBuilder`, which doesn't build on `RouteCollector`. The collector and `RouteMaker` are
 marked obsolete: they work the other way around, creating routes that nothing might answer,
 `resource()` being the clearest case. Routes can still be created by hand with
@@ -353,9 +354,9 @@ chained next to the provider built from `Config`.
 
 `Config` holds a `RouteProvider\Compiled` for the routes, plus the data that bind-routing currently
 keeps in the Symfony container: which action maps to which controller (the
-`routing.action_responder.aliases` parameter). Here that is `array<class-string,
-ControllerDefinition>`, each with its `ActionDefinition`s (method and plan).
-The action identifier is computed once, in `add_responder()`, so routes and responders can't
+`routing.action_responder.aliases` parameter). Here that is
+`array<class-string, ControllerDefinition>`, each with its `ActionDefinition`s (method and plan).
+The action identifier is computed once, in `add_controller()`, so routes and responders can't
 disagree. The container only needs to know how to produce a controller instance: bind-routing
 registers each class as a shared service from `Config` and feeds the provider's factory closure.
 
@@ -369,8 +370,8 @@ exported: the configuration is built on each request, and routes are served thro
 
 Good: satisfies every driver; the router, providers, and middleware still see only a `Responder`;
 `ControllerAbstract` subclasses and hand-written responders keep working side by side, outside of
-`Config`.
-Bad: two ways to write controllers during the transition; a build step and cache to maintain.
+`Config`. Bad: two ways to write controllers during the transition; a build step and cache to
+maintain.
 
 #### Prefixes
 
@@ -404,14 +405,14 @@ final class PhotosController
   repeating them on each controller; discovery by instance-of still finds it.
 - Prefixes are plain concatenation, so they stay predictable. Deriving them from the PHP namespace
   or directory was rejected: moving a class would silently change action ids, which are public
-  identifiers. A group argument on `add_responder()` was rejected because attribute discovery has no
-  group to attach it to.
+  identifiers. A group argument on `add_controller()` was rejected because attribute discovery has
+  no group to attach it to.
 - Route ids (`id:`) are not prefixed.
 - `RouteBuilder::prefix(route:, action:)` is the equivalent of `#[Prefix]` for controllers
   registered without attributes, with the same argument names and the same concatenation rules:
 
   ```php
-  $builder->add_responder(
+  $builder->add_controller(
       PhotosController::class,
       route_builder: fn(RouteBuilder $r) => $r
           ->prefix(route: '/cart', action: 'cart')
@@ -489,7 +490,7 @@ response. Both ship side by side in 7.x through the `ActionResponderProvider` ch
 
 1. **Slice one**, in this library: `Parameter` (`Request`, `Route`, path), `IntoResponse`,
    `MethodResponder`, `ActionDefinition`/`ControllerDefinition`, the attributes ported from
-   bind-routing, the builder with `add_responder()` and `RouteBuilder`, `Config`, and an
+   bind-routing, the builder with `add_controller()` and `RouteBuilder`, `Config`, and an
    `ActionResponderProvider` built from `Config`.
 2. **Slice two**: `#[Path]`, `#[Query]`, `#[Part]`.
 3. **Other packages**, tracked separately: bind-routing (thin `Builder` adapter, controller
@@ -557,11 +558,11 @@ belongs to a later major version.
   into `request_params`) belong to that change.
 
 - Exporting a `Config` built with `CacheStrategy::MEMOIZE`. `ConfigBuilder::cache_strategy()`
-  (`NONE`, the default, `MEMOIZE`, and `COMPILE` for production) decorates the routes when
-  `build()` is called, so a `MEMOIZE` configuration can't be exported: the lazy indexes of
-  `Memoize` are exported once initialized and have no `__set_state()`. That is fine while
-  development builds the configuration on each request. Letting the same exported file serve
-  development and production would mean keeping the undecorated provider and the strategy in
-  `Config`, and applying the decoration when it is loaded; `var_export()` can't be customized and
-  readonly classes can't have hooked properties, so `routes` would no longer be a plain property.
-  It is not worth it until needed.
+  (`NONE`, the default, `MEMOIZE`, and `COMPILE` for production) decorates the routes when `build()`
+  is called, so a `MEMOIZE` configuration can't be exported: the lazy indexes of `Memoize` are
+  exported once initialized and have no `__set_state()`. That is fine while development builds the
+  configuration on each request. Letting the same exported file serve development and production
+  would mean keeping the undecorated provider and the strategy in `Config`, and applying the
+  decoration when it is loaded; `var_export()` can't be customized and readonly classes can't have
+  hooked properties, so `routes` would no longer be a plain property. It is not worth it until
+  needed.

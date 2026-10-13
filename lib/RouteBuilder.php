@@ -11,7 +11,7 @@ use ICanBoogie\Routing\Exception\ConfigNotValid;
  * Defines the routes of a controller, and their prefixes, for people who don't use attributes.
  *
  * ```php
- * $builder->add_responder(
+ * $builder->add_controller(
  *     PhotosController::class,
  *     route_builder: fn(RouteBuilder $r) => $r
  *         ->prefix(route: '/cart', action: 'cart')

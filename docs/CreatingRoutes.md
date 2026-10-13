@@ -34,8 +34,8 @@ final class PhotosController
 }
 
 $config = new ConfigBuilder()
-    ->add_responder(PhotosController::class)
-    ->add_responder(ContactController::class, fn(RouteBuilder $r) => $r
+    ->add_controller(PhotosController::class)
+    ->add_controller(ContactController::class, fn(RouteBuilder $r) => $r
         ->get('/contact.html', 'new')
         ->post('/contact.html', 'create'))
     ->build();

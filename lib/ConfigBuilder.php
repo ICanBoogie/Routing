@@ -8,17 +8,20 @@ use ICanBoogie\Routing\Config\ActionDefinition;
 use ICanBoogie\Routing\Config\ControllerDefinition;
 use ICanBoogie\Routing\Config\TransientRoute;
 use ICanBoogie\Routing\Exception\ConfigNotValid;
+use LogicException;
+use olvlvl\ComposerAttributeCollector\Attributes;
 use ReflectionAttribute;
 use ReflectionClass;
 
 use function array_map;
 use function class_exists;
 use function count;
+use function sprintf;
 
 /**
  * Builds the routing {@see Config}.
  *
- * Controllers are plain classes, they are added with {@see add_responder()}, which reads the
+ * Controllers are plain classes, they are added with {@see add_controller()}, which reads the
  * attributes of the class and its methods, and optionally a {@see RouteBuilder}. Everything is
  * validated and resolved right away, so that mistakes are reported when the configuration is built,
  * not when requests are handled.
@@ -28,8 +31,8 @@ use function count;
  *
  * ```php
  * $config = new ConfigBuilder()
- *     ->add_responder(PhotosController::class)
- *     ->add_responder(ContactController::class, fn(RouteBuilder $r) => $r
+ *     ->add_controller(PhotosController::class)
+ *     ->add_controller(ContactController::class, fn(RouteBuilder $r) => $r
  *         ->get('/contact.html', 'new')
  *         ->post('/contact.html', 'create'))
  *     ->build();
@@ -74,7 +77,7 @@ final class ConfigBuilder
      *
      * @throws ConfigNotValid
      */
-    public function add_responder(string $controller, ?Closure $route_builder = null): self
+    public function add_controller(string $controller, ?Closure $route_builder = null): self
     {
         $class = $this->reflect($controller);
         $builder = new RouteBuilder();
@@ -116,6 +119,44 @@ final class ConfigBuilder
 
         foreach ($actions as $action => $_) {
             $this->controller_by_action[$action] = $class->name;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Adds the controllers found with the {@see Attribute\Route} attributes of their methods.
+     *
+     * The controllers are discovered by `olvlvl/composer-attribute-collector`, which is up to the
+     * application to require. The controllers already added with {@see add_controller()} are
+     * skipped, so a controller can be added by hand, e.g. with a {@see RouteBuilder}, before or
+     * after discovery.
+     *
+     * @return $this
+     *
+     * @throws ConfigNotValid
+     * @throws LogicException if the attribute collector is not available.
+     */
+    public function discover_controllers(): self
+    {
+        if (!class_exists(Attributes::class)) {
+            throw new LogicException(
+                sprintf(
+                    "Unable to configure using attributes, the class %s is not available, "
+                    . "require olvlvl/composer-attribute-collector.",
+                    Attributes::class
+                )
+            );
+        }
+
+        foreach (Attributes::filterTargetMethods(
+            Attributes::predicateForAttributeInstanceOf(Attribute\Route::class)
+        ) as $target) {
+            $class = $target->class;
+
+            if (!isset($this->controllers[$class])) {
+                $this->add_controller($class);
+            }
         }
 
         return $this;

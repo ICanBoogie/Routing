@@ -66,7 +66,7 @@ final class FromConfigTest extends TestCase
     private function provider(): FromConfig
     {
         return new FromConfig(
-            new ConfigBuilder()->add_responder(PhotosController::class)->build(),
+            new ConfigBuilder()->add_controller(PhotosController::class)->build(),
             function (string $class): object {
                 $this->created++;
 
@@ -77,7 +77,7 @@ final class FromConfigTest extends TestCase
 
     private function request_provider(): RequestResponderProvider
     {
-        $config = new ConfigBuilder()->add_responder(PhotosController::class)->build();
+        $config = new ConfigBuilder()->add_controller(PhotosController::class)->build();
 
         return new RequestResponderProvider(
             $config->routes,

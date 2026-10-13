@@ -15,7 +15,7 @@ use function strtr;
  * Makes route definitions.
  *
  * @deprecated Obsolete. A route should exist because a controller defines it, with attributes or
- *     a {@see RouteBuilder}, see {@see ConfigBuilder::add_responder()}, not because a resource
+ *     a {@see RouteBuilder}, see {@see ConfigBuilder::add_controller()}, not because a resource
  *     name implies routes that a controller might not implement.
  */
 final class RouteMaker
