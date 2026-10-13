@@ -14,6 +14,7 @@ use ICanBoogie\Routing\Config\ActionDefinition;
 use ICanBoogie\Routing\Config\ControllerDefinition;
 use ICanBoogie\Routing\Config\TransientRoute;
 use ICanBoogie\Routing\Exception\ConfigNotValid;
+use ICanBoogie\Routing\Exception\InvalidPattern;
 use ICanBoogie\Routing\ParameterAbstract;
 use ICanBoogie\Routing\Parameter\Path;
 use ICanBoogie\Routing\Pattern;
@@ -439,6 +440,38 @@ final class ConfigBuilderTest extends TestCase
                 . "and RouteBuilder::prefix()."
             ],
 
+        ];
+    }
+
+    #[DataProvider('provide_invalid_patterns')]
+    public function test_invalid_pattern_is_reported_with_its_method(string $pattern, string $reason): void
+    {
+        try {
+            new ConfigBuilder()->add_controller(
+                PlainController::class,
+                fn(RouteBuilder $r) => $r->get($pattern, 'show')
+            );
+            $this->fail("Expected an exception");
+        } catch (ConfigNotValid $e) {
+            $this->assertStringStartsWith(
+                "`" . PlainController::class . "::show()` has an invalid pattern `$pattern`: ",
+                $e->getMessage()
+            );
+            $this->assertStringContainsString($reason, $e->getMessage());
+            $this->assertInstanceOf(InvalidPattern::class, $e->getPrevious());
+        }
+    }
+
+    /**
+     * @return array<string, array{ string, string }>
+     */
+    public static function provide_invalid_patterns(): array
+    {
+        return [
+            'capturing group' => [ '/plain/<id:(\\d+)>', "parameter 'id'" ],
+            'duplicate parameter' => [ '/plain/:id/:id', "Parameter 'id' is defined twice" ],
+            'invalid constraint' => [ '/plain/<id:[>', "parameter 'id'" ],
+            'blank' => [ '  ', 'blank' ],
         ];
     }
 

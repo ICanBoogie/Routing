@@ -107,6 +107,20 @@ abstract class RouteProviderTestCase extends TestCase
                 [ 'nid' => '123' ],
                 [ 'q' => '1' ]
             ],
+            'dynamic, path params are percent-decoded' => [
+                '/articles/caf%C3%A9%2Fx',
+                RequestMethod::METHOD_PUT,
+                'articles:any',
+                [ 'slug' => 'café/x' ],
+                []
+            ],
+            'catch-all, path params are percent-decoded' => [
+                '/files/a%20b/c',
+                RequestMethod::METHOD_GET,
+                'files:serve',
+                [ 'all' => 'a b/c' ],
+                []
+            ],
             'dynamic, method mismatch' => [ '/articles/123', RequestMethod::METHOD_POST, null, [], [] ],
             'dynamic, next route' => [
                 '/articles/hello-world',

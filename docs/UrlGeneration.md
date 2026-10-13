@@ -42,7 +42,7 @@ $routes = new Immutable([
 ## Path parameters
 
 `path_params` is an array or an object whose keys/properties match the placeholders of the pattern.
-Values are URL-encoded. An object implementing [ToSlug][] is turned into its slug:
+Values are percent-encoded with `rawurlencode()`, and decoded again when the URL is matched. An object implementing [ToSlug][] is turned into its slug:
 
 ```php
 <?php
@@ -71,6 +71,8 @@ Anonymous placeholders (`<\d+>`) are addressed by index (`[ 0 => 123 ]`).
 
 - `RouteNotFound` — no route matches. The failing predicate is available as `$e->predicate`.
 - `PatternRequiresValues` — the route has placeholders but no `path_params` were provided.
+- `PatternValueMissing` — a `path_params` value is missing for one of the placeholders.
+- `PatternValueNotValid` — a `path_params` value doesn't satisfy the constraint of its placeholder.
 
 Both implement `ICanBoogie\Routing\Exception`, see [Exceptions](Exceptions.md).
 

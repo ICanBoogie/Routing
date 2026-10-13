@@ -8,6 +8,7 @@ use ICanBoogie\Routing\Config\ActionDefinition;
 use ICanBoogie\Routing\Config\ControllerDefinition;
 use ICanBoogie\Routing\Config\TransientRoute;
 use ICanBoogie\Routing\Exception\ConfigNotValid;
+use ICanBoogie\Routing\Exception\InvalidPattern;
 use LogicException;
 use olvlvl\ComposerAttributeCollector\Attributes;
 use ReflectionAttribute;
@@ -341,7 +342,14 @@ final class ConfigBuilder
                 $action = $prefix->action . Route::ACTION_SEPARATOR . $action;
             }
 
-            $resolved[] = new Route($pattern, $action, $route->methods, $route->id);
+            try {
+                $resolved[] = new Route($pattern, $action, $route->methods, $route->id);
+            } catch (InvalidPattern $e) {
+                throw new ConfigNotValid(
+                    "`$class->name::$method()` has an invalid pattern `$pattern`: {$e->getMessage()}",
+                    previous: $e
+                );
+            }
         }
 
         return $resolved;

@@ -132,8 +132,7 @@ final class MemoizeByUri implements RouteProvider
                 $route = $routes[$mark];
 
                 if ($route->method_matches($method)) {
-                    $path_params = array_combine(
-                        $route->pattern->params,
+                    $path_params = $route->pattern->captured(
                         array_slice($matches, 1, count($route->pattern->params))
                     );
 

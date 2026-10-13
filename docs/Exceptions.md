@@ -25,6 +25,8 @@ The following exceptions are defined:
 - [ActionNotDefined][]: Thrown in an attempt to handle a route without action.
 - [InvalidPattern][]: Thrown when a pattern is blank or cannot be parsed.
 - [PatternRequiresValues][]: Thrown when formatting a pattern that has placeholders without values.
+- [PatternValueNotValid][]: Thrown when formatting a pattern with a value that doesn't satisfy the constraint of its placeholder.
+- [PatternValueMissing][]: Thrown when formatting a pattern without a value for one of its placeholders.
 - [ConfigNotValid][]: Thrown when building the configuration of [stateless controllers](StatelessControllers.md)
   finds a mistake, for instance a parameter that is not in the pattern. It is a `LogicException`.
 - [ParameterNotValid][]: Thrown when a value of the query string or of the body, bound to a parameter,
@@ -43,4 +45,6 @@ The following exceptions are defined:
 [ParameterNotValid]: ../lib/Exception/ParameterNotValid.php
 [PathParameterNotValid]: ../lib/Exception/PathParameterNotValid.php
 [PatternRequiresValues]: ../lib/PatternRequiresValues.php
+[PatternValueMissing]: ../lib/PatternValueMissing.php
+[PatternValueNotValid]: ../lib/PatternValueNotValid.php
 [RouteNotFound]:   ../lib/Exception/RouteNotFound.php

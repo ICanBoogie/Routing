@@ -8,7 +8,9 @@ A pattern is used to match a URL with a route. Placeholders may be used to match
 single route and extract its parameters. Three types of placeholder are available:
 
 - Relaxed placeholder: Only the name of the parameter is specified, it matches anything until
-  the following part. e.g. `/articles/:id/edit`.
+  the following part. e.g. `/articles/:id/edit`. The character that follows ends the capture, so
+  it can't appear in the value: in `/:category-:slug` a category can't contain `-`, and `/` always
+  ends a capture. Choose a separator your values never contain, or use a constrained placeholder.
 
 - Constrained placeholder: A regular expression is used to match the parameter value.
   e.g. `/articles/<id:\d+>/edit` where `<id:\d+>` is the placeholder for the `id` parameter which
@@ -35,8 +37,10 @@ You can use them in any combination:
 
 ## Matching and formatting
 
-A [Pattern][] works in both directions. `Pattern::from()` parses a string (results are cached),
-`matches()` extracts the parameters, and `format()` builds a URL. See
+A [Pattern][] works in both directions. `Pattern::from()` parses a string (results are shared while something holds them, e.g. a route),
+`matches()` extracts the parameters, and `format()` builds a URL. Values are percent-encoded by
+`format()` and percent-decoded by `matches()`, after the regex ran: constraints see the raw path, and an
+encoded `/` (`%2F`) stays inside its segment. See
 [URL generation](UrlGeneration.md) for the higher-level API.
 
 ```php
@@ -54,7 +58,18 @@ $pattern->format([ 'year' => '2013', 'month' => '07', 'slug' => 'this-is-a-test'
 ```
 
 Patterns without placeholder are compared as plain strings, which is what makes them fast to match.
-Formatting a pattern that has placeholders without values throws `PatternRequiresValues`.
+Formatting a pattern that has placeholders without values throws `PatternRequiresValues`, and a missing
+(or `null`) value for one of them throws `PatternValueMissing`. The joker `*` captures a parameter named
+`all`; when formatting, its `/` are kept. A parameter name can only be used once in a pattern.
+
+A value must satisfy the constraint of its parameter, otherwise `format()` throws
+`PatternValueNotValid`: the URL would not match the pattern. The constraint is tested against the
+encoded value, because that is what the matcher sees. The character after a relaxed placeholder ends
+its capture, so a value that contains it is rejected: with `/blog/:slug.html`, the value `v1.2` is
+refused, and with `/:category-:slug`, so is the category `foo-bar`. (Formatting it would give
+`/foo-bar-x`, which matches as `foo` and `bar-x`.) Only characters that stay unencoded
+(`- _ . ~`) can clash, the others are percent-encoded. An empty value is refused too. To allow such
+a value, use a constrained placeholder such as `<slug:[^/]+>.html`.
 
 ## Tips
 

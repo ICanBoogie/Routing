@@ -92,10 +92,35 @@ PHP 8.4+
 
 ### Backward Incompatible Changes
 
-None
+- `Pattern::from()` throws `InvalidPattern` when a constraint has a capturing group, e.g. `<id:(\d+)>`,
+  which used to fail with a `ValueError` on the first matching request. Use `(?:...)` instead.
+- `Pattern::format()` encodes values with `rawurlencode()` instead of `urlencode()`: a space is `%20`
+  and a `+` is `%2B`, which is correct in a path segment.
+- `Pattern::matches()` percent-decodes the captured values, so `/a/caf%C3%A9` captures `café` and
+  generated URLs round-trip. Decoding happens after matching: constraints are tested against the raw
+  path, and `%2F` stays inside its segment. `path_params` are therefore decoded, remove any
+  `rawurldecode()` applied to them.
+- `Pattern::format()` throws `PatternValueNotValid` when a value does not satisfy the constraint of
+  its parameter, e.g. `'x'` for `<id:\d+>`, instead of returning a URL that no route matches. The
+  encoded value is tested, like the matcher tests the path, so `<slug:[\w-]+>` rejects `café`. The
+  `:name` shorthand is tested too: `[^/]+` rejects an empty value, and `:slug.html` rejects `v1.2`.
+  The catch-all accepts anything.
+- `ConfigBuilder::add_controller()` reports an invalid pattern as a `ConfigNotValid` that names the
+  controller method and the pattern, with the `InvalidPattern` as previous exception.
+- `Pattern::from()` throws `InvalidPattern` when a parameter name is used twice, e.g. `/:a/:a`; the
+  last value used to win silently.
+- `Pattern::format()` throws `PatternValueMissing` when a value is missing or `null`, instead of a PHP
+  warning followed by a `TypeError`. A value that cannot be turned into a string throws an
+  `InvalidArgumentException`.
 
 ### Other changes
 
+- `Pattern` keeps the `*` of a catch-all pattern: `/files/*` was exposed as `/files/`, and `format()`
+  ignored the `all` value. It now formats it, keeping the `/` between segments.
+- Added `Pattern::captured()`, which pairs and decodes captured values. Route providers use it, so
+  every one of them returns decoded `path_params`.
+- `Pattern::from()` caches patterns with weak references, a pattern that nothing holds is freed instead
+  of staying in memory for the life of the process.
 - `RouteNotFound` extends `NotFound`.
 - Improved route resolution performance: `MemoizeByUri` finds static routes with a single array
   lookup instead of scanning them, and tests dynamic routes by chunks of about 30 with a single
