@@ -310,6 +310,10 @@ Do this before and after any change, otherwise the suggestions above are guesses
   Run it with `make benchmark`, or
   `php -d opcache.enable_cli=1 benchmarks/run.php --iterations=20000`.
   `--sizes=10,100` and `--json` are available to focus or to diff two runs.
+- `benchmarks/dispatch.php` times the dispatch of an action, once the route is known: the
+  controllers that extend `ControllerAbstract` (a new instance per request, with and without
+  `ActionTrait`) against `MethodResponder` calling a shared stateless controller. Run it with
+  `make benchmark-dispatch`. `--iterations=N` and `--json` are available.
 - Cold numbers matter for PHP-FPM, where each request rebuilds the maps; warm numbers matter for
   long-running runtimes (RoadRunner, Swoole, FrankenPHP).
 - Record `memory_get_peak_usage()` too: compiled arrays in OPcache should lower per-request memory
