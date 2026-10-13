@@ -14,6 +14,7 @@ Several implementations are provided, and they compose.
 | `ActionResponderProvider\Mutable`     | Register responders at runtime with `add_responder()`        |
 | `ActionResponderProvider\Immutable`   | Provide a fixed `action => Responder` array                   |
 | `ActionResponderProvider\Container`   | Resolve responders from a PSR-11 container                    |
+| `ActionResponderProvider\FromConfig`  | Respond with the [stateless controllers](StatelessControllers.md#responding-to-requests) of a `Config` |
 | `ActionResponderProvider\Chain`       | Try several providers in order, first match wins              |
 | `ActionResponderProvider\WithMiddleware` | Decorate every responder with [middleware](Middleware.md)  |
 

@@ -1,5 +1,8 @@
 # Action controllers
 
+> [!TIP]
+> New controllers are best written as [stateless controllers](StatelessControllers.md).
+
 Action controllers are used to group related HTTP request handling logic into a class and use HTTP
 methods to separate concerns. An action controller can be created easily by extending
 [ControllerAbstract][] and using the trait [ActionTrait][].

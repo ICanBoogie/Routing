@@ -1,5 +1,10 @@
 # Controllers
 
+> [!TIP]
+> New controllers are best written as [stateless controllers](StatelessControllers.md): plain
+> classes that don't extend a base class and can serve any number of requests. This page describes
+> the controllers that extend `ControllerAbstract`.
+
 Previous examples demonstrated how closures could be used to handle routes. Closures are
 perfectly fine when you start building your application, but as soon as it grows, you might want
 to use controller classes instead to better organize your application. You can map each route to

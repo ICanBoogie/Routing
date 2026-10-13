@@ -1,0 +1,419 @@
+# Stateless controllers
+
+A controller is a plain class: a constructor for the services it needs, and public methods for its
+actions. It doesn't extend a base class, doesn't implement an interface, and doesn't hold the
+request, so a single instance can serve any number of requests.
+
+```php
+<?php
+
+namespace App\Billing;
+
+use ICanBoogie\HTTP\Response;
+use ICanBoogie\Routing\Attribute\Get;
+use ICanBoogie\Routing\Attribute\Post;
+
+final class InvoiceController
+{
+    public function __construct(
+        private readonly InvoiceRepository $invoices,
+    ) {
+    }
+
+    #[Get('/invoices')]
+    public function list(): Response
+    {
+        // ...
+    }
+
+    #[Get('/invoices/:id')]
+    public function show(int $id): Response
+    {
+        $invoice = $this->invoices->find($id);
+
+        // ...
+    }
+
+    #[Post('/invoices')]
+    public function create(): Response
+    {
+        // ...
+    }
+}
+```
+
+The routes come from the attributes, the arguments of `show()` come from the request, and the
+actions are inferred: `invoices:list`, `invoices:show`, and `invoices:create`. Everything is
+analyzed once, when the configuration is built, so that mistakes are reported right away and nothing
+is reflected when requests are handled.
+
+> [!NOTE]
+> This is the way to write new controllers. [ControllerAbstract](Controllers.md) and
+> [action controllers](ActionControllers.md) keep working, they are described in their own pages. The
+> design is explained in [ADR 0001](adr/0001-stateless-controllers.md).
+
+- [Defining routes](#defining-routes)
+- [Actions](#actions)
+- [Parameters](#parameters)
+- [Return values](#return-values)
+- [Building the configuration](#building-the-configuration)
+- [Responding to requests](#responding-to-requests)
+- [Failures](#failures)
+
+
+
+## Defining routes
+
+Routes are defined by the `Route` attribute on the methods of the controller. It is repeatable, a
+method can be reached through multiple routes. A shortcut exists for each request method: `Get`,
+`Post`, `Put`, `Patch`, `Delete`, `Head`, `Options`, `Connect`, and `Trace`. Patterns follow the
+[usual syntax](RoutePatterns.md).
+
+```php
+<?php
+
+use ICanBoogie\HTTP\RequestMethod;
+use ICanBoogie\Routing\Attribute\Get;
+use ICanBoogie\Routing\Attribute\Route;
+
+#[Get('/invoices/:id', id: 'invoice')]
+#[Route('/factures/:id', methods: [ RequestMethod::METHOD_GET, RequestMethod::METHOD_HEAD ])]
+public function show(int $id): Response
+```
+
+### Prefixes
+
+The `Prefix` attribute of the class defines what the routes of a controller share. Both arguments
+are optional, but at least one is required. They are concatenated before the pattern and the action
+of each route, so `/invoices/:id` with the action `invoices:show` becomes `/billing/invoices/:id`
+and `billing:invoices:show`.
+
+```php
+<?php
+
+use ICanBoogie\Routing\Attribute\Get;
+use ICanBoogie\Routing\Attribute\Prefix;
+
+#[Prefix(route: '/billing', action: 'billing')]
+final class InvoiceController
+{
+    #[Get('/invoices/:id')]
+    public function show(int $id): Response
+    {
+        // ...
+    }
+}
+```
+
+The pattern of a shortcut can be empty when the prefix defines the route:
+
+```php
+#[Prefix(route: '/invoices')]
+final class InvoiceController
+{
+    #[Get('')]
+    public function list(): Response // GET /invoices
+    {
+    }
+
+    #[Get('/:id')]
+    public function show(int $id): Response // GET /invoices/:id
+    {
+    }
+}
+```
+
+The prefix route may contain placeholders, they become path parameters of every method of the
+controller.
+
+### Without attributes
+
+A `RouteBuilder` defines the same things in code, it is the second argument of
+`ConfigBuilder::add_controller()`. It offers `prefix()`, `route()`, and a method for each request
+method. Define the prefix with the attribute or with the builder, not both.
+
+```php
+<?php
+
+use ICanBoogie\Routing\ConfigBuilder;
+use ICanBoogie\Routing\RouteBuilder;
+
+$builder = new ConfigBuilder()
+    ->add_controller(InvoiceController::class, fn(RouteBuilder $r) => $r
+        ->prefix(route: '/billing', action: 'billing')
+        ->get('/invoices', 'list')
+        ->get('/invoices/:id', 'show')
+        ->post('/invoices', 'create'));
+```
+
+Attributes and the builder can be mixed, their routes are merged.
+
+
+
+## Actions
+
+The action of a route identifies it, and is what the `UrlGenerator` and the
+[action responder providers](ActionResponders.md) work with. When a route doesn't specify one, it is
+inferred from the name of the controller and the name of the method, used as is:
+
+| Controller            | Method      | Action               |
+|-----------------------|-------------|----------------------|
+| `InvoiceController`   | `show`      | `invoices:show`      |
+| `InvoicesController`  | `show`      | `invoices:show`      |
+| `UserPostController`  | `show`      | `user-posts:show`    |
+| `PersonController`    | `list`      | `people:list`        |
+| `InvoiceController`   | `by_status` | `invoices:by_status` |
+
+The name of the controller loses its `Controller` suffix, is hyphenated, and pluralized, so the
+singular and the plural form of a name give the same actions. Use `action:` to choose another one,
+and `Prefix` to prepend a namespace.
+
+```php
+#[Get('/invoices/:id', action: 'invoice:display')]
+```
+
+An action belongs to a single method of a single controller. Two methods with the same action are an
+error.
+
+
+
+## Parameters
+
+The arguments of an action are produced from the request, by name and by type. A parameter typed
+`Request` receives the request, a parameter typed `Route` receives the route that matched, and any
+other parameter is a path parameter.
+
+```php
+<?php
+
+public function show(Request $request, Route $route, int $id): Response
+```
+
+A path parameter is found by its name in the pattern, not by its position, and cast to its type: `int`,
+`float`, `string`, `bool`, or a backed enum. Reordering the placeholders can't pass the wrong values.
+
+| Type     | Accepts                                                       |
+|----------|---------------------------------------------------------------|
+| `int`    | An integer, leading zeros included (`007` is `7`), within range |
+| `float`  | A finite number                                               |
+| `string` | Anything                                                      |
+| `bool`   | `1`, `0`, `true`, or `false`                                  |
+| enum     | A backing value of a `BackedEnum`, e.g. `draft`               |
+
+```php
+<?php
+
+enum Status: string
+{
+    case DRAFT = 'draft';
+    case PUBLISHED = 'published';
+}
+
+#[Get('/invoices/status/:status')]
+public function by_status(Status $status): Response
+```
+
+The catch-all `*` of a pattern is a parameter named `all`.
+
+### Optional parameters
+
+A path parameter must be a placeholder of every route of its method, unless it has a default value
+or is nullable, in which case the value is the default, or `null`, when the placeholder is not part
+of the route that matched. It must be a placeholder of at least one route.
+
+```php
+<?php
+
+#[Get('/invoices')]
+#[Get('/invoices/page/:page')]
+public function list(int $page = 1): Response
+```
+
+A parameter that cannot be bound fails when the configuration is built, with the class, the method,
+and the parameter in the message, e.g.
+"`InvoiceController::show()` parameter `$slug`: no `:slug` in `/invoices/:id`."
+
+
+
+## Return values
+
+An action returns a `Response`, or an `IntoResponse`, an object that knows how to turn itself into
+one. It must be declared as the return type of the method, `string`, `null`, and `void` are
+rejected when the configuration is built.
+
+```php
+<?php
+
+use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\Response;
+use ICanBoogie\Routing\IntoResponse;
+
+final readonly class Json implements IntoResponse
+{
+    public function __construct(private mixed $data)
+    {
+    }
+
+    public function into_response(Request $request): Response
+    {
+        return new Response(json_encode($this->data), headers: [ 'Content-Type' => 'application/json' ]);
+    }
+}
+
+#[Get('/invoices/:id')]
+public function show(int $id): Json
+{
+    return new Json($this->invoices->find($id));
+}
+```
+
+It is how wrappers such as views or payloads can be returned by actions that don't need to know
+about HTTP.
+
+
+
+## Building the configuration
+
+`ConfigBuilder` collects the controllers and builds a readonly `Config`. It validates and resolves
+everything as it goes, and nothing is registered when a controller is not valid.
+
+```php
+<?php
+
+use ICanBoogie\Routing\ConfigBuilder;
+
+$config = new ConfigBuilder()
+    ->add_controller(InvoiceController::class)
+    ->add_controller(ContactController::class, fn(RouteBuilder $r) => $r
+        ->get('/contact.html', 'new')
+        ->post('/contact.html', 'create'))
+    ->build();
+
+$config->routes; // a RouteProvider
+```
+
+### Discovering controllers
+
+Instead of listing the controllers, `discover_controllers()` adds the ones that have methods with a
+`Route` attribute. It relies on
+[olvlvl/composer-attribute-collector](https://github.com/olvlvl/composer-attribute-collector), which
+you decide to require. Load the `vendor/attributes.php` file it generates before building the
+configuration, see its documentation. Controllers already added with `add_controller()` are skipped,
+so a controller can be added by hand, to use a `RouteBuilder` for instance, before or after
+discovery.
+
+```php
+<?php
+
+$config = new ConfigBuilder()
+    ->discover_controllers()
+    ->build();
+```
+
+### Serving routes
+
+`cache_strategy()` defines how the routes are served:
+
+| `CacheStrategy` | Routes are…                                               | Use it for  |
+|-----------------|-----------------------------------------------------------|-------------|
+| `NONE`          | Tested one after the other (default)                      | Tests       |
+| `MEMOIZE`       | Indexed in memory by `RouteProvider\Memoize`              | Development |
+| `COMPILE`       | Compiled by `RouteProvider\Compiled`                      | Production  |
+
+See [Route providers](RouteProviders.md) for what they do.
+
+### Exporting the configuration
+
+In production, the configuration is built once and exported, so that requests don't pay for
+reflecting the controllers or building the routes. `Config` and everything it holds implement
+`__set_state()`, they can be exported with `var_export()` and loaded from a PHP file, which OPcache
+keeps in memory.
+
+```php
+<?php
+
+use ICanBoogie\Routing\CacheStrategy;
+use ICanBoogie\Routing\ConfigBuilder;
+
+$config = new ConfigBuilder()
+    ->discover_controllers()
+    ->cache_strategy(CacheStrategy::COMPILE)
+    ->build();
+
+$tmp = 'config.php.' . uniqid();
+file_put_contents($tmp, '<?php return ' . var_export($config, true) . ';');
+rename($tmp, 'config.php');
+
+$config = require 'config.php';
+```
+
+> [!NOTE]
+> A configuration built with `CacheStrategy::MEMOIZE` can't be exported. In development, build the
+> configuration on each request instead, there is nothing to invalidate.
+
+
+
+## Responding to requests
+
+`ActionResponderProvider\FromConfig` provides the responders of the controllers of a `Config`. It
+creates one `MethodResponder` per controller, when one of its actions is first requested. The
+responder finds the method with the action of the matched route, produces the arguments from the
+request, and returns the response of the method.
+
+The controllers are obtained through a closure. It is where services are wired, and where you decide
+whether a controller is shared or created for the occasion.
+
+```php
+<?php
+
+use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\Responder\DelegateToProvider;
+use ICanBoogie\Routing\ActionResponderProvider\FromConfig;
+use ICanBoogie\Routing\RequestResponderProvider;
+
+/* @var \ICanBoogie\Routing\Config $config */
+/* @var \Psr\Container\ContainerInterface $container */
+
+$responders = new FromConfig($config, fn(string $class): object => $container->get($class));
+
+$application = new DelegateToProvider(new RequestResponderProvider($config->routes, $responders));
+
+$response = $application->respond(Request::from($_SERVER));
+$response();
+```
+
+`FromConfig` is an [ActionResponderProvider](ActionResponders.md) like the others, so it composes
+with `Chain`, to serve the actions of legacy controllers or closures next to the new ones, and with
+`WithMiddleware`, to wrap every action in [middleware](Middleware.md).
+
+```php
+<?php
+
+use ICanBoogie\Routing\ActionResponderProvider\Chain;
+use ICanBoogie\Routing\ActionResponderProvider\FromConfig;
+use ICanBoogie\Routing\ActionResponderProvider\WithMiddleware;
+
+$responders = new WithMiddleware(
+    new Chain(new FromConfig($config, $factory), $legacy),
+    $middleware
+);
+```
+
+> [!NOTE]
+> Routes of legacy responders are not defined by `ConfigBuilder`, add them to a `RouteProvider\Mutable`
+> or `Immutable` and put it in a `RouteProvider\Chain` next to `$config->routes`.
+
+
+
+## Failures
+
+Failures are reported by exceptions that the HTTP stack turns into responses.
+
+| Exception                                 | When                                           | Status |
+|-------------------------------------------|------------------------------------------------|--------|
+| `Exception\PathParameterNotValid`         | A path value cannot be cast to the type, e.g. `/invoices/abc` for an `int $id` | 404 |
+| `Exception\ConfigNotValid`                | A mistake in the controllers, found when the configuration is built | none |
+
+A path value that cannot be cast designates a resource that doesn't exist, hence the 404.
+`PathParameterNotValid` extends `NotFound`, and tells the `name` and the `type` of the parameter.
+`ConfigNotValid` is a `LogicException`, it is never thrown when handling requests.

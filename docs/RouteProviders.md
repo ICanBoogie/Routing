@@ -166,6 +166,10 @@ and no request ever compiles. In development, where routes change often, a plain
 
 Make sure OPcache is enabled. PHP-FPM also benefits from `pcre.jit=1`, which is the default.
 
+With [stateless controllers](StatelessControllers.md#serving-routes), you don't wire these providers
+yourself: `ConfigBuilder::cache_strategy()` picks `Memoize` for development or `Compiled` for
+production, and the exported `Config` holds the result.
+
 ## Writing a custom predicate
 
 A predicate is any `callable(Route): bool`:

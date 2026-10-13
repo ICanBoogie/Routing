@@ -44,8 +44,8 @@ $config->routes; // a RouteProvider
 ```
 
 The action of a route, e.g. `photos:show`, is inferred from the name of the controller and the name of
-the method, unless the route specifies one. See
-[Stateless controllers](adr/0001-stateless-controllers.md) for the design.
+the method, unless the route specifies one. See [Stateless controllers](StatelessControllers.md) for
+prefixes, parameters, and the rest, and [the ADR](adr/0001-stateless-controllers.md) for the design.
 
 ## Creating routes using the collector
 

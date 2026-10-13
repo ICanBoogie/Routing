@@ -6,7 +6,7 @@
 ## Routes
 
 - [Route patterns](RoutePatterns.md): placeholders, constraints, matching and formatting.
-- [Defining routes](CreatingRoutes.md): the collector, by hand, and REST resources.
+- [Defining routes](CreatingRoutes.md): with controllers, by hand, and the obsolete collector.
 - [Route providers](RouteProviders.md): finding routes, predicates, performance.
 - [URL generation](UrlGeneration.md): from an action or identifier to a URL.
 
@@ -19,6 +19,8 @@
 
 ## Controllers
 
+- [Stateless controllers](StatelessControllers.md): plain classes, routes with attributes, parameters
+  from the request, the exportable configuration.
 - [Controllers](Controllers.md): basic controllers, events.
 - [Action controllers](ActionControllers.md): one class, many actions; resource controllers.
 
