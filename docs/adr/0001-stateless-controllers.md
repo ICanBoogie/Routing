@@ -505,6 +505,25 @@ belongs to a later major version.
   own ADR and benchmark.
 - Replacing `BeforeActionEvent` / `ActionEvent` with middleware, or the reverse. These overlap, but
   it is a separate decision for its own ADR.
+- Value objects as scalar parameters (`Id $id`, `Slug $slug`). A `#[Parse]` attribute on a public
+  static method of the class would mark its factory:
+
+  ```php
+  final class ArticleId
+  {
+      #[Parse]
+      public static function from_string(string $value): self { /* ... */ }
+  }
+  ```
+
+  The build verifies the method (public, static, one `string` parameter, returns `self` or `static`)
+  and stores `[class, method]` in the plan, so nothing is reflected at runtime. The invalid-value
+  failure maps like any other cast: 404 for a path value, 400 otherwise. Alternatives were rejected:
+  a `from()` convention would match unrelated factories such as `Pattern::from()` and
+  `Request::from()`; an interface (the counterpart of `ToSlug`) couples the class to the library; a
+  closure in the attribute is not exportable, and only first-class callables are accepted in
+  attributes, which needs PHP 8.5. Third-party classes cannot be annotated; the controller builds
+  them from a `string`.
 - Hydrating parameters into classes (`#[Part]`, `#[Body]`), with or without validation. The options
   are an opt-in contract implemented by the class (like `FromRequest` in Axum), or a hydrator
   service, which would require a service-holding parameter. Either needs its own ADR, and the status
