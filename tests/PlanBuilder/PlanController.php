@@ -10,6 +10,12 @@ use ICanBoogie\Routing\Attribute\Path;
 use ICanBoogie\Routing\Attribute\Query;
 use ICanBoogie\Routing\IntoResponse;
 use ICanBoogie\Routing\Route;
+use Test\ICanBoogie\Routing\Decoder\Article;
+use Test\ICanBoogie\Routing\Decoder\NotADecoder;
+use Test\ICanBoogie\Routing\Decoder\Slug;
+use Test\ICanBoogie\Routing\Decoder\SlugDecoder;
+use Test\ICanBoogie\Routing\Decoder\Unrelated;
+use Test\ICanBoogie\Routing\Decoder\Wide;
 use Test\ICanBoogie\Routing\Parameter\IntBackedEnum;
 use Test\ICanBoogie\Routing\Parameter\StringBackedEnum;
 
@@ -116,6 +122,88 @@ final class PlanController
         #[Query] int $page = 1,
         #[Part] string $title = ''
     ): Response {
+        return new Response();
+    }
+
+    // decoders
+
+    public function decoded_path(#[Path(using: SlugDecoder::class)] Slug $slug): Response
+    {
+        return new Response();
+    }
+
+    public function decoded_path_renamed(#[Path('slug', using: SlugDecoder::class)] Slug $article_slug): Response
+    {
+        return new Response();
+    }
+
+    public function decoded_implicit_path(Article $article): Response
+    {
+        return new Response();
+    }
+
+    public function decoded_query(#[Query(using: SlugDecoder::class)] ?Slug $slug): Response
+    {
+        return new Response();
+    }
+
+    public function decoded_part(#[Part('s', using: SlugDecoder::class)] Slug $slug): Response
+    {
+        return new Response();
+    }
+
+    public function decoded_self_query(#[Query] Article $article): Response
+    {
+        return new Response();
+    }
+
+    public function decoded_object(#[Query(using: Wide::class)] object $value): Response
+    {
+        return new Response();
+    }
+
+    public function decoded_with_default(#[Query(using: SlugDecoder::class)] ?Slug $slug = null): Response
+    {
+        return new Response();
+    }
+
+    public function decoded_not_a_decoder(#[Query(using: NotADecoder::class)] Slug $slug): Response
+    {
+        return new Response();
+    }
+
+    public function decoded_not_a_class(#[Query(using: 'Nope\\Missing')] Slug $slug): Response
+    {
+        return new Response();
+    }
+
+    public function decoded_wide(#[Query(using: Wide::class)] Slug $slug): Response
+    {
+        return new Response();
+    }
+
+    public function decoded_unrelated(#[Query(using: Unrelated::class)] Slug $slug): Response
+    {
+        return new Response();
+    }
+
+    public function decoded_scalar(#[Query(using: SlugDecoder::class)] string $slug): Response
+    {
+        return new Response();
+    }
+
+    public function decoded_union(#[Query(using: SlugDecoder::class)] Slug|Article $slug): Response
+    {
+        return new Response();
+    }
+
+    public function decoded_object_default(#[Query(using: SlugDecoder::class)] Slug $slug = new Slug('x')): Response
+    {
+        return new Response();
+    }
+
+    public function decoded_missing_placeholder(#[Path(using: SlugDecoder::class)] Slug $slug): Response
+    {
         return new Response();
     }
 

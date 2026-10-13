@@ -262,7 +262,8 @@ the body left out.
   - The parameter is declared `SplFileObject`: a proper object, and no stream abstraction is
     imposed (no PSR-7 `StreamInterface`). The build rejects any other declared type. The file is
     opened by the parameter, lazily, when the action is called.
-- **No hydration into classes.** `#[Part]` and `#[Body]` never produce classes: a class-typed
+- **No hydration into classes, unless the parameter has a decoder** ([ADR 0002](0002-decoders.md)).
+  `#[Part]` and `#[Body]` don't produce classes by themselves: a class-typed
   parameter is rejected at configuration time. The library cannot impose a serialization package
   (PHP has no serde: Symfony Serializer, Valinor, JMS, and hand-written mapping all exist), and
   hydration needs a service, which a plan entry cannot hold. It follows the dependency rule instead:

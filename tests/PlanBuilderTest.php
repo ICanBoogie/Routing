@@ -6,17 +6,23 @@ use ICanBoogie\Routing\Exception\ConfigNotValid;
 use ICanBoogie\Routing\Parameter;
 use ICanBoogie\Routing\ParameterAbstract;
 use ICanBoogie\Routing\Parameter\CurrentRequest;
+use ICanBoogie\Routing\Parameter\Decoded;
 use ICanBoogie\Routing\Parameter\MatchedRoute;
 use ICanBoogie\Routing\Parameter\Part;
 use ICanBoogie\Routing\Parameter\Path;
 use ICanBoogie\Routing\Parameter\Query;
 use ICanBoogie\Routing\Pattern;
 use ICanBoogie\Routing\PlanBuilder;
+use ICanBoogie\Routing\PlanBuilder\DecodedParameterBuilder;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
+use Test\ICanBoogie\Routing\Decoder\Article;
+use Test\ICanBoogie\Routing\Decoder\Slug;
+use Test\ICanBoogie\Routing\Decoder\SlugDecoder;
+use Test\ICanBoogie\Routing\Decoder\Wide;
 use Test\ICanBoogie\Routing\Parameter\IntBackedEnum;
 use Test\ICanBoogie\Routing\Parameter\StringBackedEnum;
 use Test\ICanBoogie\Routing\PlanBuilder\PlanController;
@@ -25,10 +31,12 @@ use Test\ICanBoogie\Routing\PlanBuilder\Wrapper;
 use function array_map;
 
 #[CoversClass(PlanBuilder::class)]
+#[CoversClass(DecodedParameterBuilder::class)]
 #[UsesClass(\ICanBoogie\Routing\Attribute\Part::class)]
 #[UsesClass(\ICanBoogie\Routing\Attribute\Path::class)]
 #[UsesClass(\ICanBoogie\Routing\Attribute\Query::class)]
 #[UsesClass(ParameterAbstract::class)]
+#[UsesClass(Decoded::class)]
 #[UsesClass(Pattern::class)]
 final class PlanBuilderTest extends TestCase
 {
@@ -153,6 +161,52 @@ final class PlanBuilderTest extends TestCase
                 [ '/articles/:id' ],
                 [ new Query('page', 'int', null, false, true, 1) ]
             ],
+            'decoded path' => [
+                'decoded_path',
+                [ '/articles/:slug' ],
+                [ new Decoded('path', 'slug', SlugDecoder::class, Slug::class) ]
+            ],
+            'decoded path with a name' => [
+                'decoded_path_renamed',
+                [ '/articles/:slug' ],
+                [ new Decoded('path', 'slug', SlugDecoder::class, Slug::class) ]
+            ],
+            'decoded by its type, no attribute' => [
+                'decoded_implicit_path',
+                [ '/articles/:article' ],
+                [ new Decoded('path', 'article', Article::class, Article::class) ]
+            ],
+            'decoded query' => [
+                'decoded_query',
+                [ '/' ],
+                [ new Decoded('query', 'slug', SlugDecoder::class, Slug::class, true) ]
+            ],
+            'decoded part' => [
+                'decoded_part',
+                [ '/' ],
+                [ new Decoded('part', 's', SlugDecoder::class, Slug::class) ]
+            ],
+            'decoded by its type, with an attribute' => [
+                'decoded_self_query',
+                [ '/' ],
+                [ new Decoded('query', 'article', Article::class, Article::class) ]
+            ],
+            'decoded object' => [
+                'decoded_object',
+                [ '/' ],
+                [ new Decoded('query', 'value', Wide::class, 'object') ]
+            ],
+            'decoded with a default' => [
+                'decoded_with_default',
+                [ '/' ],
+                [ new Decoded('query', 'slug', SlugDecoder::class, Slug::class, true, true, null) ]
+            ],
+            'decoded query is not looked up in the pattern' => [
+                'decoded_query',
+                [ '/articles/:id' ],
+                [ new Decoded('query', 'slug', SlugDecoder::class, Slug::class, true) ]
+            ],
+
             'nullable, in some routes' => [
                 'nullable',
                 [ '/articles', '/articles/:page' ],
@@ -319,6 +373,56 @@ final class PlanBuilderTest extends TestCase
                 "`$class::attribute_on_route()` parameter `\$route`: the parameter receives the route, "
                 . "it cannot have the attribute #[ICanBoogie\Routing\Attribute\Part]."
             ],
+            'decoder is not a decoder' => [
+                'decoded_not_a_decoder',
+                [ '/' ],
+                "`$class::decoded_not_a_decoder()` parameter `\$slug`: `Test\\ICanBoogie\\Routing\\Decoder\\NotADecoder` "
+                . "is not a decoder, it must implement ICanBoogie\\Routing\\Decoder."
+            ],
+            'decoder is not a class' => [
+                'decoded_not_a_class',
+                [ '/' ],
+                "`$class::decoded_not_a_class()` parameter `\$slug`: `Nope\\Missing` is not a decoder"
+            ],
+            'decoder does not narrow its return type' => [
+                'decoded_wide',
+                [ '/' ],
+                "`$class::decoded_wide()` parameter `\$slug`: `Test\\ICanBoogie\\Routing\\Decoder\\Wide::decode()` "
+                . "returns `object`, which is not assignable to `Test\\ICanBoogie\\Routing\\Decoder\\Slug`"
+            ],
+            'decoder returns another type' => [
+                'decoded_unrelated',
+                [ '/' ],
+                "`$class::decoded_unrelated()` parameter `\$slug`: "
+                . "`Test\\ICanBoogie\\Routing\\Decoder\\Unrelated::decode()` returns `stdClass`, which is not assignable to"
+            ],
+            'decoded scalar' => [
+                'decoded_scalar',
+                [ '/' ],
+                "`$class::decoded_scalar()` parameter `\$slug`: the type `string` cannot be decoded"
+            ],
+            'decoded union' => [
+                'decoded_union',
+                [ '/' ],
+                "`$class::decoded_union()` parameter `\$slug`: the type `Test\\ICanBoogie\\Routing\\Decoder\\Slug|"
+                . "Test\\ICanBoogie\\Routing\\Decoder\\Article` cannot be decoded"
+            ],
+            'decoded default that cannot be exported' => [
+                'decoded_object_default',
+                [ '/' ],
+                "`$class::decoded_object_default()` parameter `\$slug`: the default value cannot be exported"
+            ],
+            'decoded path not in the pattern' => [
+                'decoded_missing_placeholder',
+                [ '/articles/:id' ],
+                "`$class::decoded_missing_placeholder()` parameter `\$slug`: no `:slug` in `/articles/:id`."
+            ],
+            'class without a decoder points to decoders' => [
+                'unrelated_class',
+                [ '/:x' ],
+                "A class needs a decoder, see `ICanBoogie\\Routing\\Decoder`."
+            ],
+
             'query array' => [
                 'query_array',
                 [ '/' ],

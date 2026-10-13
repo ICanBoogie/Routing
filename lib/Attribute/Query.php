@@ -3,6 +3,7 @@
 namespace ICanBoogie\Routing\Attribute;
 
 use Attribute;
+use ICanBoogie\Routing\Decoder;
 
 /**
  * Binds a parameter of an action to a value of the query string.
@@ -17,9 +18,13 @@ final readonly class Query
     /**
      * @param non-empty-string|null $name
      *     Name of the value in the query string, defaults to the name of the parameter.
+     * @param class-string<Decoder>|null $using
+     *     A {@see Decoder} that turns the value into an object. It is optional when the type of the
+     *     parameter is a {@see Decoder} itself.
      */
     public function __construct(
         public ?string $name = null,
+        public ?string $using = null,
     ) {
     }
 }

@@ -288,6 +288,64 @@ provide.
 `#[Query]` and `#[Part]` never read the path, and `#[Path]` never reads the query string, so
 `?id=2` can't take the place of a placeholder or fill in what the body left out.
 
+### Decoders
+
+A parameter can be an object, made from the value by a decoder: a class that implements
+`ICanBoogie\Routing\Decoder`, with a static `decode()` method. Give it to the attribute with `using`.
+
+```php
+<?php
+
+use ICanBoogie\Routing\Decoder;
+use ICanBoogie\Routing\EncodedValue;
+use ICanBoogie\Routing\Exception\NotDecodable;
+
+final class SlugDecoder implements Decoder
+{
+    public static function decode(EncodedValue $value): Slug
+    {
+        return is_string($value->value) && preg_match('/^[a-z0-9-]+$/', $value->value)
+            ? new Slug($value->value)
+            : throw new NotDecodable("Not a slug");
+    }
+}
+
+#[Get('/articles/:slug')]
+public function show(#[Path(using: SlugDecoder::class)] Slug $slug): Response
+```
+
+`using` works with `#[Path]`, `#[Query]`, and `#[Part]`. It is optional when the type of the parameter
+is a decoder itself, a class that decodes itself:
+
+```php
+<?php
+
+final readonly class Slug implements Decoder
+{
+    public static function decode(EncodedValue $value): self { /* … */ }
+}
+
+#[Get('/articles/:slug')]
+public function show(Slug $slug): Response
+```
+
+- The return type of `decode()` must be a class assignable to the type of the parameter, `object` is
+  not enough, narrow it. Mistakes are found when the configuration is built.
+- Decoders are static: pure functions of their input, without services. When the object needs a
+  service, read the value and use the service in the action.
+- `EncodedValue` tells the `value`, the `source` (`path`, `query`, or `part`), and the `name`. The
+  value is a string for a path parameter. For the query string and the body it is whatever the client
+  provided under the name: a string, a number or a boolean in JSON, or an array. The decoder checks
+  and casts it as it needs.
+- A decoder is never called for a missing value, or a `null`. The parameter gets its default value
+  or `null` when nullable, and the request is not valid otherwise. The default must be `null`, a
+  scalar, an array, or an enum case, so that the configuration can be exported; make the parameter
+  nullable and apply an object default in the action.
+- A decoder rejects a value by throwing `Exception\NotDecodable`. `InvalidArgumentException` and
+  `ValueError`, e.g. thrown by `Status::from()`, are treated the same way, so a method that already
+  throws them can be used as is. They are reported like a value that cannot be cast: a 404 for a path
+  value, a 400 otherwise. Any other exception is a bug and propagates.
+
 ### Optional parameters
 
 A path parameter must be a placeholder of every route of its method, unless it has a default value
@@ -484,8 +542,8 @@ Failures are reported by exceptions that the HTTP stack turns into responses.
 
 | Exception                                 | When                                           | Status |
 |-------------------------------------------|------------------------------------------------|--------|
-| `Exception\PathParameterNotValid`         | A path value cannot be cast to the type, e.g. `/invoices/abc` for an `int $id` | 404 |
-| `Exception\ParameterNotValid`             | A value of the query string or of the body is missing, or cannot be cast | 400 |
+| `Exception\PathParameterNotValid`         | A path value cannot be cast or decoded, e.g. `/invoices/abc` for an `int $id` | 404 |
+| `Exception\ParameterNotValid`             | A value of the query string or of the body is missing, or cannot be cast or decoded | 400 |
 | `Exception\ConfigNotValid`                | A mistake in the controllers, found when the configuration is built | none |
 
 A path value that cannot be cast designates a resource that doesn't exist, hence the 404.

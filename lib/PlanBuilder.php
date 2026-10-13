@@ -11,6 +11,7 @@ use ICanBoogie\Routing\Parameter\MatchedRoute;
 use ICanBoogie\Routing\Parameter\Part;
 use ICanBoogie\Routing\Parameter\Path;
 use ICanBoogie\Routing\Parameter\Query;
+use ICanBoogie\Routing\PlanBuilder\DecodedParameterBuilder;
 use ReflectionEnum;
 use ReflectionMethod;
 use ReflectionNamedType;
@@ -18,6 +19,7 @@ use ReflectionParameter;
 use ReflectionUnionType;
 
 use function array_map;
+use function class_exists;
 use function count;
 use function enum_exists;
 use function implode;
@@ -37,6 +39,8 @@ use function sprintf;
  *
  * - A parameter typed {@see Request} receives the request.
  * - A parameter typed {@see Route} receives the route that matched the request.
+ * - A parameter with a {@see Decoder}, from the `using` argument of its attribute or because its
+ *   type is a decoder itself, receives the object the decoder makes from the value.
  * - A parameter with the attribute {@see Attribute\Query} or {@see Attribute\Part} receives a value
  *   of the query string or of the body, cast to its type.
  * - Any other parameter is a path parameter, found by its name in the pattern of the route, or by
@@ -60,7 +64,7 @@ final readonly class PlanBuilder
     public static function build(ReflectionMethod $method, array $patterns): array
     {
         if (!$patterns) {
-            throw new ConfigNotValid(self::signature($method) . " has no route.");
+            throw ConfigNotValid::for_method($method, "has no route.");
         }
 
         self::assert_invocable($method);
@@ -81,9 +85,7 @@ final readonly class PlanBuilder
     private static function assert_invocable(ReflectionMethod $method): void
     {
         if (!$method->isPublic() || $method->isStatic() || $method->isAbstract()) {
-            throw new ConfigNotValid(
-                self::signature($method) . " must be a public, non-static, non-abstract method."
-            );
+            throw ConfigNotValid::for_method($method, "must be a public, non-static, non-abstract method.");
         }
     }
 
@@ -95,16 +97,15 @@ final readonly class PlanBuilder
     private static function assert_returns_response(ReflectionMethod $method): void
     {
         $type = $method->getReturnType();
-        $message = self::signature($method) . " must declare a return type of " . Response::class
-            . " or " . IntoResponse::class . ".";
+        $reason = "must declare a return type of " . Response::class . " or " . IntoResponse::class . ".";
 
         if (!$type || $type->allowsNull()) {
-            throw new ConfigNotValid($message);
+            throw ConfigNotValid::for_method($method, $reason);
         }
 
         foreach ($type instanceof ReflectionUnionType ? $type->getTypes() : [ $type ] as $named_type) {
             if (!$named_type instanceof ReflectionNamedType || $named_type->isBuiltin()) {
-                throw new ConfigNotValid($message);
+                throw ConfigNotValid::for_method($method, $reason);
             }
 
             $name = $named_type->getName();
@@ -114,7 +115,7 @@ final readonly class PlanBuilder
             }
 
             if (!is_a($name, Response::class, true) && !is_a($name, IntoResponse::class, true)) {
-                throw new ConfigNotValid($message);
+                throw ConfigNotValid::for_method($method, $reason);
             }
         }
     }
@@ -130,7 +131,7 @@ final readonly class PlanBuilder
         array $patterns
     ): Parameter {
         if ($parameter->isVariadic()) {
-            throw self::parameter_error($method, $parameter, "variadic parameters are not supported.");
+            throw ConfigNotValid::for_parameter($method, $parameter, "variadic parameters are not supported.");
         }
 
         $attribute = self::find_source_attribute($method, $parameter);
@@ -145,7 +146,7 @@ final readonly class PlanBuilder
 
             if ($claimed) {
                 return $attribute
-                    ? throw self::parameter_error(
+                    ? throw ConfigNotValid::for_parameter(
                         $method,
                         $parameter,
                         "the parameter receives the " . ($claimed instanceof CurrentRequest ? "request" : "route")
@@ -153,6 +154,22 @@ final readonly class PlanBuilder
                     )
                     : $claimed;
             }
+        }
+
+        $decoded = DecodedParameterBuilder::try_build_decoded_parameter($method, $parameter, $attribute);
+
+        if ($decoded) {
+            if ($decoded->source === 'path') {
+                self::assert_in_patterns(
+                    $method,
+                    $parameter,
+                    $decoded->name,
+                    $patterns,
+                    $decoded->nullable || $decoded->has_default
+                );
+            }
+
+            return $decoded;
         }
 
         return match (true) {
@@ -186,7 +203,7 @@ final readonly class PlanBuilder
         ];
 
         if (count($attributes) > 1) {
-            throw self::parameter_error(
+            throw ConfigNotValid::for_parameter(
                 $method,
                 $parameter,
                 "a parameter is bound to a single source, found "
@@ -268,11 +285,11 @@ final readonly class PlanBuilder
             . Request::class . ", or " . Route::class . ".";
 
         if (!$type) {
-            throw self::parameter_error($method, $parameter, "the type is missing, $expected");
+            throw ConfigNotValid::for_parameter($method, $parameter, "the type is missing, $expected");
         }
 
         if (!$type instanceof ReflectionNamedType) {
-            throw self::parameter_error($method, $parameter, "the type `$type` is not supported, $expected");
+            throw ConfigNotValid::for_parameter($method, $parameter, "the type `$type` is not supported, $expected");
         }
 
         $name = $type->getName();
@@ -288,10 +305,11 @@ final readonly class PlanBuilder
             'float' => [ 'float', null ],
             'string' => [ 'string', null ],
             'bool' => [ 'bool', null ],
-            default => throw self::parameter_error(
+            default => throw ConfigNotValid::for_parameter(
                 $method,
                 $parameter,
                 "the type `$name` is not supported, $expected"
+                . (class_exists($name) ? " A class needs a decoder, see `" . Decoder::class . "`." : "")
             ),
         };
     }
@@ -325,7 +343,7 @@ final readonly class PlanBuilder
         }
 
         if (count($missing) === count($patterns)) {
-            throw self::parameter_error(
+            throw ConfigNotValid::for_parameter(
                 $method,
                 $parameter,
                 sprintf("no `:%s` in %s.", $name, self::format_patterns($patterns))
@@ -333,7 +351,7 @@ final readonly class PlanBuilder
         }
 
         if ($missing && !$has_fallback) {
-            throw self::parameter_error(
+            throw ConfigNotValid::for_parameter(
                 $method,
                 $parameter,
                 sprintf(
@@ -353,20 +371,5 @@ final readonly class PlanBuilder
         $formatted = implode(', ', array_map(fn(Pattern $p) => "`$p`", $patterns));
 
         return count($patterns) === 1 ? $formatted : "any of $formatted";
-    }
-
-    private static function parameter_error(
-        ReflectionMethod $method,
-        ReflectionParameter $parameter,
-        string $reason
-    ): ConfigNotValid {
-        return new ConfigNotValid(
-            sprintf("%s parameter `$%s`: %s", self::signature($method), $parameter->getName(), $reason)
-        );
-    }
-
-    private static function signature(ReflectionMethod $method): string
-    {
-        return sprintf("`%s::%s()`", $method->class, $method->name);
     }
 }

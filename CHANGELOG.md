@@ -67,10 +67,13 @@ PHP 8.4+
       parameter is nullable, otherwise `ParameterNotValid` is thrown, as it is for a value that
       can't be cast. `ParameterNotValid` is a `ClientError`, a 400. `#[Path]` is optional, it names
       the placeholder when it is not the name of the parameter.
-    - `Decoder`, `EncodedValue`, and `Exception\NotDecodable` are the contract of decoders, which will
-      turn the value of a path, query, part, or body into an object, see
-      [docs/adr/0002-decoders.md](docs/adr/0002-decoders.md). A decoder is a class with a static
-      `decode(EncodedValue): object` method. They can't be used yet.
+    - Decoders turn a value of the path, the query string, or the body into an object, see
+      [docs/adr/0002-decoders.md](docs/adr/0002-decoders.md). A decoder is a class that implements
+      `Decoder`, with a static `decode(EncodedValue): object` method, and throws `NotDecodable` to
+      reject a value. It is bound with `#[Path(using: SlugDecoder::class)]`, and likewise for `#[Query]`
+      and `#[Part]`; `using` is optional when the type of the parameter is a decoder itself. The
+      `Decoded` parameter reports a value that can't be decoded like one that can't be cast, and
+      `PlanBuilder` checks the decoder and its return type when the configuration is built.
     - `ActionResponderProvider\FromConfig` provides the responders of the controllers of a `Config`:
       one `MethodResponder` per controller, created when one of its actions is first requested. The
       controllers are obtained through a closure, which is where services are wired. Use it with
