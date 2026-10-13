@@ -44,8 +44,8 @@ final class InvoiceController
 
 The routes come from the attributes, the arguments of `show()` come from the request, and the
 actions are inferred: `invoices:list`, `invoices:show`, and `invoices:create`. Everything is
-analyzed once, when the configuration is built, so that mistakes are reported right away and nothing
-is reflected when requests are handled.
+analyzed once, when the configuration is built, so that mistakes are reported right away and
+nothing is reflected when requests are handled.
 
 > [!NOTE]
 > This is the way to write new controllers. [ControllerAbstract](Controllers.md) and
@@ -197,9 +197,9 @@ $url_generator->generate_url('invoices-page', [ 'page' => 2 ]);   // "/invoices/
 The `id` is optional and only used to find a route, see [URL generation](UrlGeneration.md). It also
 keeps generated URLs stable when an action is renamed. `ConfigBuilder` rejects an `id`
 that another route already uses, or that is the action of another route, with a `ConfigNotValid`,
-because a string that is both would be ambiguous: `Memoize` and `Compiled` choose the `id`, whereas a
-plain provider chooses the first route that matches either. It can only check the routes it defines,
-not the ones added by hand to a provider chained next to `$config->routes`.
+because a string that is both would be ambiguous: `Memoize` and `Compiled` choose the `id`, whereas
+a plain provider chooses the first route that matches either. It can only check the routes it
+defines, not the ones added by hand to a provider chained next to `$config->routes`.
 
 
 
@@ -215,16 +215,17 @@ other parameter is a path parameter.
 public function show(Request $request, Route $route, int $id): Response
 ```
 
-A path parameter is found by its name in the pattern, not by its position, and cast to its type: `int`,
-`float`, `string`, `bool`, or a backed enum. Reordering the placeholders can't pass the wrong values.
+A path parameter is found by its name in the pattern, not by its position, and cast to its
+type: `int`, `float`, `string`, `bool`, or a backed enum. Reordering the placeholders can't pass
+the wrong values.
 
-| Type     | Accepts                                                       |
-|----------|---------------------------------------------------------------|
+| Type     | Accepts                                                         |
+|----------|-----------------------------------------------------------------|
 | `int`    | An integer, leading zeros included (`007` is `7`), within range |
-| `float`  | A finite number                                               |
-| `string` | Anything                                                      |
-| `bool`   | `1`, `0`, `true`, or `false`                                  |
-| enum     | A backing value of a `BackedEnum`, e.g. `draft`               |
+| `float`  | A finite number                                                 |
+| `string` | Anything                                                        |
+| `bool`   | `1`, `0`, `true`, or `false`                                    |
+| enum     | A backing value of a `BackedEnum`, e.g. `draft`                 |
 
 ```php
 <?php
@@ -245,12 +246,12 @@ The catch-all `*` of a pattern is a parameter named `all`.
 
 A parameter is bound to the part of the request it comes from, which is explicit in the signature:
 
-| Attribute  | Reads                                                        |
-|------------|--------------------------------------------------------------|
-| `#[Path]`  | A placeholder of the pattern (optional, it is the default)   |
-| `#[Query]` | A value of the query string                                  |
+| Attribute  | Reads                                                                   |
+|------------|-------------------------------------------------------------------------|
+| `#[Path]`  | A placeholder of the pattern (optional, it is the default)              |
+| `#[Query]` | A value of the query string                                             |
 | `#[Part]`  | A named piece of the body: a form field, or a property of a JSON object |
-| `#[Body]`  | The raw body, the `SplFileObject` of `Request::$body_stream` |
+| `#[Body]`  | The raw body, the `SplFileObject` of `Request::$body_stream`            |
 
 The name of the value is the name of the parameter, give another one to the attribute when they
 differ. A parameter has a single source.
@@ -309,7 +310,8 @@ public function import(int $id, #[Body] SplFileObject $body): Response
 ### Decoders
 
 A parameter can be an object, made from the value by a decoder: a class that implements
-`ICanBoogie\Routing\Decoder`, with a static `decode()` method. Give it to the attribute with `using`.
+`ICanBoogie\Routing\Decoder`, with a static `decode()` method. Give it to the attribute
+with `using`.
 
 ```php
 <?php
@@ -332,8 +334,8 @@ final class SlugDecoder implements Decoder
 public function show(#[Path(using: SlugDecoder::class)] Slug $slug): Response
 ```
 
-`using` works with `#[Path]`, `#[Query]`, `#[Part]`, and `#[Body]`. It is optional when the type of the parameter
-is a decoder itself, a class that decodes itself:
+`using` works with `#[Path]`, `#[Query]`, `#[Part]`, and `#[Body]`. It is optional when the type
+of the parameter is a decoder itself, a class that decodes itself:
 
 ```php
 <?php
@@ -351,20 +353,20 @@ public function show(Slug $slug): Response
   not enough, narrow it. Mistakes are found when the configuration is built.
 - Decoders are static: pure functions of their input, without services. When the object needs a
   service, read the value and use the service in the action.
-- `EncodedValue` tells the `value`, the `source` (`path`, `query`, `part`, or `body`), and the `name`,
-  `null` for the body. The value is a string for a path parameter. For the query string and the form
-  or JSON body it is whatever the client provided under the name: a string, a number or a boolean in
-  JSON, or an array. For `#[Body]` it is the `SplFileObject` of the raw body, and the decoder reads
-  it as it needs, e.g. `#[Body(using: ImportDecoder::class)] Import $import`. The decoder checks and
-  casts the value as it needs.
+- `EncodedValue` tells the `value`, the `source` (`path`, `query`, `part`, or `body`), and the
+  `name`, `null` for the body. The value is a string for a path parameter. For the query string and
+  the form or JSON body it is whatever the client provided under the name: a string, a number or a
+  boolean in JSON, or an array. For `#[Body]` it is the `SplFileObject` of the raw body, and the
+  decoder reads it as it needs, e.g. `#[Body(using: ImportDecoder::class)] Import $import`. The
+  decoder checks and casts the value as it needs.
 - A decoder is never called for a missing value, or a `null`. The parameter gets its default value
   or `null` when nullable, and the request is not valid otherwise. The default must be `null`, a
   scalar, an array, or an enum case, so that the configuration can be exported; make the parameter
   nullable and apply an object default in the action.
 - A decoder rejects a value by throwing `Exception\NotDecodable`. `InvalidArgumentException` and
   `ValueError`, e.g. thrown by `Status::from()`, are treated the same way, so a method that already
-  throws them can be used as is. They are reported like a value that cannot be cast: a 404 for a path
-  value, a 400 otherwise. Any other exception is a bug and propagates.
+  throws them can be used as is. They are reported like a value that cannot be cast: a 404 for a
+  path value, a 400 otherwise. Any other exception is a bug and propagates.
 
 ### Optional parameters
 
@@ -395,21 +397,7 @@ rejected when the configuration is built.
 ```php
 <?php
 
-use ICanBoogie\HTTP\Request;
-use ICanBoogie\HTTP\Response;
-use ICanBoogie\Routing\IntoResponse;
-
-final readonly class Json implements IntoResponse
-{
-    public function __construct(private mixed $data)
-    {
-    }
-
-    public function into_response(Request $request): Response
-    {
-        return new Response(json_encode($this->data), headers: [ 'Content-Type' => 'application/json' ]);
-    }
-}
+use ICanBoogie\Routing\IntoResponse\Json;
 
 #[Get('/invoices/:id')]
 public function show(int $id): Json
@@ -420,6 +408,92 @@ public function show(int $id): Json
 
 It is how wrappers such as views or payloads can be returned by actions that don't need to know
 about HTTP.
+
+### JSON responses
+
+`IntoResponse\Json` turns data into an `application/json` response.
+
+```php
+<?php
+
+use ICanBoogie\Routing\IntoResponse\Json;
+
+new Json([ 'id' => 1 ], status: 201);
+```
+
+By default, arrays and scalars are encoded with `json_encode()`. Objects, even nested in an array,
+must implement `JsonSerializable`, otherwise an `InvalidArgumentException` is thrown, so that the
+public properties of an entity are never exposed by accident. A class decides what it exposes in
+`jsonSerialize()`.
+
+#### Using a serializer
+
+Provide `encode`, a closure that turns a value into a JSON string, to use a serializer such as
+[Crell/Serde](https://github.com/Crell/Serde) or the Symfony Serializer. The library doesn't depend
+on any of them. With a custom encoder, you decide what is encoded, objects don't have to implement
+`JsonSerializable`.
+
+```php
+<?php
+
+use ICanBoogie\Routing\IntoResponse\Json;
+
+new Json($invoice, encode: fn(object $o): string => $serde->serialize($o, format: 'json'));
+```
+
+You can also use a static helper:
+
+```php
+<?php
+
+use Crell\Serde\SerdeCommon;
+use ICanBoogie\Routing\IntoResponse\Json;
+
+final class JsonEncoder
+{
+    private static ?SerdeCommon $serde = null;
+
+    /**
+     * Encodes a single value into JSON.
+     */
+    public static function encode(mixed $value): string
+    {
+        self::$serde ??= new SerdeCommon();
+
+        return self::$serde->serialize($value, format: 'json');
+    }
+}
+
+// ...
+
+new Json($invoice, encode: JsonEncoder::encode(...));
+```
+
+A list is encoded item by item: the encoder is called for each item and the results are joined, so
+it only ever deals with one value, e.g. one object. A keyed array is passed to the encoder as a
+whole.
+
+```php
+<?php
+
+// $serde->serialize() is called for each invoice, the response body is "[{…},{…}]"
+new Json($invoices, encode: fn(object $o): string => $serde->serialize($o, format: 'json'));
+```
+
+#### Tweaking the response
+
+Provide `tweak`, a closure that receives the response, to change what `Json` sets by default,
+e.g. the `Cache-Control` header. It is called last, after the status and `Content-Type` are set,
+so it has the last word.
+
+```php
+<?php
+
+use ICanBoogie\HTTP\Response;
+use ICanBoogie\Routing\IntoResponse\Json;
+
+new Json($invoices, tweak: fn(Response $r) => $r->headers->cache_control->max_age = 60);
+```
 
 
 
@@ -465,11 +539,11 @@ $config = new ConfigBuilder()
 
 `cache_strategy()` defines how the routes are served:
 
-| `CacheStrategy` | Routes are…                                               | Use it for  |
-|-----------------|-----------------------------------------------------------|-------------|
-| `NONE`          | Tested one after the other (default)                      | Tests       |
-| `MEMOIZE`       | Indexed in memory by `RouteProvider\Memoize`              | Development |
-| `COMPILE`       | Compiled by `RouteProvider\Compiled`                      | Production  |
+| `CacheStrategy` | Routes are…                                  | Use it for  |
+|-----------------|----------------------------------------------|-------------|
+| `NONE`          | Tested one after the other (default)         | Tests       |
+| `MEMOIZE`       | Indexed in memory by `RouteProvider\Memoize` | Development |
+| `COMPILE`       | Compiled by `RouteProvider\Compiled`         | Production  |
 
 See [Route providers](RouteProviders.md) for what they do.
 
@@ -551,8 +625,9 @@ $responders = new WithMiddleware(
 ```
 
 > [!NOTE]
-> Routes of legacy responders are not defined by `ConfigBuilder`, add them to a `RouteProvider\Mutable`
-> or `Immutable` and put it in a `RouteProvider\Chain` next to `$config->routes`.
+> Routes of legacy responders are not defined by `ConfigBuilder`, add them to a
+> `RouteProvider\Mutable` or `Immutable` and put it in a `RouteProvider\Chain` next
+> to `$config->routes`.
 
 
 
@@ -560,15 +635,16 @@ $responders = new WithMiddleware(
 
 Failures are reported by exceptions that the HTTP stack turns into responses.
 
-| Exception                                 | When                                           | Status |
-|-------------------------------------------|------------------------------------------------|--------|
-| `Exception\PathParameterNotValid`         | A path value cannot be cast or decoded, e.g. `/invoices/abc` for an `int $id` | 404 |
-| `Exception\ParameterNotValid`             | A value of the query string or of the body is missing, or cannot be cast or decoded | 400 |
-| `Exception\ConfigNotValid`                | A mistake in the controllers, found when the configuration is built | none |
+| Exception                         | When                                                                                | Status |
+|-----------------------------------|-------------------------------------------------------------------------------------|--------|
+| `Exception\PathParameterNotValid` | A path value cannot be cast or decoded, e.g. `/invoices/abc` for an `int $id`       | 404    |
+| `Exception\ParameterNotValid`     | A value of the query string or of the body is missing, or cannot be cast or decoded | 400    |
+| `Exception\ConfigNotValid`        | A mistake in the controllers, found when the configuration is built                 | none   |
 
 A path value that cannot be cast designates a resource that doesn't exist, hence the 404.
 `PathParameterNotValid` extends `NotFound`, and tells the `name` and the `type` of the parameter.
 Any other value comes from the client and is not valid, hence the 400. `ParameterNotValid` extends
-`ClientError`, and tells the `source` (`query`, `part`, or `body`), the `name`, the `type`, and whether the
-value was `missing`.
+`ClientError`, and tells the `source` (`query`, `part`, or `body`), the `name`, the `type`, and
+whether the value was `missing`.
+
 `ConfigNotValid` is a `LogicException`, it is never thrown when handling requests.

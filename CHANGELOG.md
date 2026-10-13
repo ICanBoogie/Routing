@@ -93,6 +93,11 @@ PHP 8.4+
       [olvlvl/composer-attribute-collector](https://github.com/olvlvl/composer-attribute-collector),
       which the application decides to require; it is not a requirement of the library. Controllers
       already added with `add_controller()` are skipped.
+- Added `IntoResponse\Json`, an `IntoResponse` that encodes data as a JSON response. Arrays and scalars
+  are encoded as they are, objects, even nested, must implement `JsonSerializable` so that nothing is
+  exposed by accident. A list is encoded item by item. Use `encode` to plug a
+  serializer, and `tweak` to alter the response (e.g. `Cache-Control`), see
+  [docs/StatelessControllers.md](docs/StatelessControllers.md).
 
 ### Deprecated Features
 
