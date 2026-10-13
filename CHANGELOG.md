@@ -16,6 +16,21 @@ PHP 8.4+
   `Immutable`, so it can be exported with `var_export()` and cached as a PHP file loaded through
   OPcache. It avoids creating routes and computing indexes on every request, which is what `Memoize`
   costs with PHP-FPM, see [docs/RouteProviders.md](docs/RouteProviders.md).
+- Added stateless controllers, plain classes with a constructor for services and public methods for
+  actions. They don't extend a base class and don't hold the request, so they can be shared across
+  requests, see [docs/adr/0001-stateless-controllers.md](docs/adr/0001-stateless-controllers.md).
+  The building blocks are in place, registering controllers is yet to come:
+    - `MethodResponder` is a `Responder` that calls the method of a controller. The method is found
+      with the action of the route that matched the request, and its arguments are produced by the
+      `Parameter`s of its plan. The method returns a `Response`, or an `IntoResponse`, an object that
+      knows how to turn itself into one; anything else is a `TypeError`.
+    - `Parameter` produces the value of an action's parameter from the request. `CurrentRequest`
+      provides the request, `MatchedRoute` the route, and `Path` a path parameter, found by its name
+      in the pattern and not by its position, and cast to the declared type (`int`, `float`, `string`,
+      `bool`, or a backed enum). A path value that can't be cast, such as `/articles/abc` for an
+      `int $id`, throws `PathParameterNotValid`, which is a `NotFound`.
+    - `Config\ActionDefinition` defines how to invoke an action: the method and the plan of its
+      parameters. Parameters and definitions can be exported with `var_export()`.
 
 ### Deprecated Features
 

@@ -485,9 +485,11 @@ response. Both ship side by side in 7.x through the `ActionResponderProvider` ch
 4. **Later**: `#[Body]`, optional pattern segments, converters for bare return objects, events
    versus middleware, each with its own ADR.
 
-Each step is a commit with its tests and documentation, and the documentation (`Controllers.md`,
-`ActionControllers.md`, `ActionResponders.md`) and `CHANGELOG.md` are updated with it. These changes
-are justified by correctness and architecture rather than speed, so they are not `PERF` commits, but
+Each step is a commit with its tests and its `CHANGELOG.md` entry. The user documentation
+(`Controllers.md`, `ActionControllers.md`, `ActionResponders.md`, and a new page) is written once
+the API is usable and stable, with the provider built from `Config`, so that it is not rewritten
+each time a name changes; the code is documented with PHPDoc as it goes. These changes are justified
+by correctness and architecture rather than speed, so they are not `PERF` commits, but
 `make benchmark` is run before and after to confirm that `MethodResponder` is no slower than
 `ControllerAbstract` in dispatch. `ControllerAbstract` and `ActionTrait` stay through 7.x; their
 deprecation is announced in the documentation once the new path is released, and their removal
