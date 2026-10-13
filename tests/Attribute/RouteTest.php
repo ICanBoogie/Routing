@@ -75,7 +75,7 @@ final class RouteTest extends TestCase
     /**
      * @param class-string<Route> $class
      */
-    #[DataProvider('provide_shortcuts')]
+    #[DataProvider('provide_shortcut_classes')]
     public function test_shortcut_pattern_is_optional(string $class): void
     {
         $route = new $class();
@@ -83,6 +83,14 @@ final class RouteTest extends TestCase
         $this->assertSame('', $route->pattern);
         $this->assertNull($route->action);
         $this->assertNull($route->id);
+    }
+
+    /**
+     * @return array<string, array{ class-string<Route> }>
+     */
+    public static function provide_shortcut_classes(): array
+    {
+        return array_map(fn(array $args): array => [ $args[0] ], self::provide_shortcuts());
     }
 
     /**

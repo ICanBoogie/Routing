@@ -30,17 +30,29 @@ final class CompiledTest extends RouteProviderTestCase
         $compiled = new Compiled(new Immutable([ new Route('/articles/<id:\d+>', 'articles:show') ]));
         $data = new ReflectionProperty($compiled, 'routes')->getValue($compiled)[0];
 
-        $this->assertEqualsCanonicalizing(
+        $this->assertSame(
             self::property_names(Route::class),
-            array_keys($data),
+            self::sorted(array_keys($data)),
             'Compiled does not store the state of Route, update Compiled::__construct() and make_route().'
         );
 
-        $this->assertEqualsCanonicalizing(
+        $this->assertSame(
             self::property_names(Pattern::class),
-            array_keys($data['pattern']),
+            self::sorted(array_keys($data['pattern'])),
             'Compiled does not store the state of Pattern, update Compiled::__construct() and make_route().'
         );
+    }
+
+    /**
+     * @param string[] $names
+     *
+     * @return string[]
+     */
+    private static function sorted(array $names): array
+    {
+        sort($names);
+
+        return $names;
     }
 
     /**
@@ -50,12 +62,12 @@ final class CompiledTest extends RouteProviderTestCase
      */
     private static function property_names(string $class): array
     {
-        return array_map(
+        return self::sorted(array_map(
             fn(ReflectionProperty $property): string => $property->getName(),
             array_filter(
                 new ReflectionClass($class)->getProperties(),
                 fn(ReflectionProperty $property): bool => !$property->isStatic()
             )
-        );
+        ));
     }
 }

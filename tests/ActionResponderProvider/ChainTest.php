@@ -13,19 +13,23 @@ final class ChainTest extends TestCase
     public function test_responder_for_action(): void
     {
         $action = 'article:show';
-        $responder = $this->createMock(Responder::class);
+        $responder = $this->createStub(Responder::class);
 
         $rp1 = $this->createMock(ActionResponderProvider::class);
-        $rp1->method('responder_for_action')->with($action)->willReturn(null);
+        $rp1->expects($this->once())->method('responder_for_action')->with($action)
+            ->willReturn(null);
 
         $rp2 = $this->createMock(ActionResponderProvider::class);
-        $rp2->method('responder_for_action')->with($action)->willReturn(null);
+        $rp2->expects($this->once())->method('responder_for_action')->with($action)
+            ->willReturn(null);
 
         $rp3 = $this->createMock(ActionResponderProvider::class);
-        $rp3->method('responder_for_action')->with($action)->willReturn($responder);
+        $rp3->expects($this->once())->method('responder_for_action')->with($action)
+            ->willReturn($responder);
 
         $rp4 = $this->createMock(ActionResponderProvider::class);
-        $rp4->expects($this->never())->method('responder_for_action')->with($action)->willThrowException(new Exception("madonna"));
+        $rp4->expects($this->never())->method('responder_for_action')->with($action)
+            ->willThrowException(new Exception("madonna"));
 
         $chain = new Chain(
             $rp1,

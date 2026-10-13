@@ -4,28 +4,25 @@ namespace Test\ICanBoogie\Routing\ActionResponderProvider;
 
 use ICanBoogie\HTTP\Responder;
 use ICanBoogie\Routing\ActionResponderProvider\Container;
-use olvlvl\Given\GivenTrait;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
 final class ContainerTest extends TestCase
 {
-    use GivenTrait;
-
     public function test_provides_responder(): void
     {
-        $responder = $this->createMock(Responder::class);
+        $responder = $this->createStub(Responder::class);
+
+        $action_ok = 'article:list';
+        $action_ko = 'article:show';
 
         $container = $this->createMock(ContainerInterface::class);
         $container
             ->method('has')
-            ->will(
-                $this
-                    ->given($action_ok = 'article:list')->return(true)
-                    ->given($action_ko = 'article:show')->return(false)
-            );
+            ->willReturnCallback(fn(string $id): bool => $id === $action_ok);
 
         $container
+            ->expects($this->once())
             ->method('get')
             ->with($action_ok)
             ->willReturn($responder);
@@ -38,17 +35,17 @@ final class ContainerTest extends TestCase
 
     public function test_provides_responder_with_aliases(): void
     {
-        $responder = $this->createMock(Responder::class);
+        $responder = $this->createStub(Responder::class);
+
+        $idOk = 'controller.articles';
+        $idKo = 'something:else';
 
         $container = $this->createMock(ContainerInterface::class);
         $container
             ->method('has')
-            ->will(
-                $this
-                    ->given($idOk = 'controller.articles')->return(true)
-                    ->given($idKo = 'something:else')->return(false)
-            );
+            ->willReturnCallback(fn(string $id): bool => $id === $idOk);
         $container
+            ->expects($this->exactly(2))
             ->method('get')
             ->with($idOk)
             ->willReturn($responder);

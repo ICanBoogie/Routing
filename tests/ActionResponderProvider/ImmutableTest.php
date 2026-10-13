@@ -44,6 +44,6 @@ final class ImmutableTest extends TestCase
 
     private function mockResponder(): Responder
     {
-        return $this->createMock(Responder::class);
+        return $this->createStub(Responder::class);
     }
 }

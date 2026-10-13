@@ -37,9 +37,8 @@
     },
     "require-dev": {
         "olvlvl/composer-attribute-collector": "^3.0",
-        "olvlvl/phpunit-given": "^11.0",
-        "phpstan/phpstan": "^2.0",
-        "phpunit/phpunit": "^11.4",
+        "phpstan/phpstan": "^2.3",
+        "phpunit/phpunit": "^13.4",
         "psr/container": "^2.0"
     },
     "autoload": {

@@ -15,17 +15,16 @@ use ICanBoogie\Routing\RequestResponderProvider;
 use ICanBoogie\Routing\Route;
 use ICanBoogie\Routing\RouteProvider;
 use ICanBoogie\Routing\RouteProvider\ByUri;
-use olvlvl\Given\GivenTrait;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Throwable;
 
 use function uniqid;
 
+#[AllowMockObjectsWithoutExpectations]
 final class RequestResponderProviderTest extends TestCase
 {
-    use GivenTrait;
-
     /**
      * @var MockObject&RouteProvider
      */
@@ -55,10 +54,10 @@ final class RequestResponderProviderTest extends TestCase
 
         $this->routes
             ->method('route_for_predicate')
-            ->will(
-                $this
-                    ->given(new ByUri($request->uri, $request->method))->return(null)
-                    ->given(new ByUri($request->uri))->return(new Route('/', 'action'))
+            ->willReturnCallback(
+                fn(ByUri $predicate): ?Route => $predicate == new ByUri($request->uri)
+                    ? new Route('/', 'action')
+                    : null
             );
 
         $stu = $this->makeSTU();
@@ -75,11 +74,7 @@ final class RequestResponderProviderTest extends TestCase
 
         $this->routes
             ->method('route_for_predicate')
-            ->will(
-                $this
-                    ->given(new ByUri($request->uri, $request->method))->return(null)
-                    ->given(new ByUri($request->uri))->return(null)
-            );
+            ->willReturn(null);
 
         $stu = $this->makeSTU();
 
@@ -91,11 +86,13 @@ final class RequestResponderProviderTest extends TestCase
         $request = $this->request;
 
         $this->routes
+            ->expects($this->once())
             ->method('route_for_predicate')
             ->with(new ByUri($request->uri, $request->method))
             ->willReturn(new Route('/', $action = 'articles:create'));
 
         $this->responders
+            ->expects($this->once())
             ->method('responder_for_action')
             ->with($action)
             ->willReturn(null);
@@ -137,6 +134,7 @@ final class RequestResponderProviderTest extends TestCase
             });
 
         $this->responders
+            ->expects($this->once())
             ->method('responder_for_action')
             ->with($action)
             ->willReturn($responder);

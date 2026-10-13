@@ -43,6 +43,7 @@ final class AlterTest extends TestCase
     public function test_response_from_next(): void
     {
         $this->next
+            ->expects($this->once())
             ->method('respond')
             ->with($request = $this->request)
             ->willReturn($response = $this->response);
@@ -67,6 +68,7 @@ final class AlterTest extends TestCase
     public function test_response_from_after_event(): void
     {
         $this->next
+            ->expects($this->once())
             ->method('respond')
             ->with($request = $this->request)
             ->willReturn($this->response);
