@@ -74,10 +74,11 @@ PHP 8.4+
       and `#[Part]`; `using` is optional when the type of the parameter is a decoder itself. The
       `Decoded` parameter reports a value that can't be decoded like one that can't be cast, and
       `PlanBuilder` checks the decoder and its return type when the configuration is built.
-    - `Body` provides the raw body of the request, a `SplFileObject` opened on `php://input`. It is
-      bound with `#[Body]`, for what `#[Part]` can't provide, e.g. XML or a large upload. With a
-      decoder, `#[Body(using: ImportDecoder::class)]` is the object the decoder makes from the file
-      object. A method has at most one `#[Body]`.
+    - `Body` provides the raw body of the request, the `SplFileObject` found in
+      `Request::$body_stream`, which `Request::from_server()` opens on `php://input`. It is bound with
+      `#[Body]`, for what `#[Part]` can't provide, e.g. XML or a large upload. With a decoder,
+      `#[Body(using: ImportDecoder::class)]` is the object the decoder makes from the file object. A
+      method has at most one `#[Body]`.
     - `ActionResponderProvider\FromConfig` provides the responders of the controllers of a `Config`:
       one `MethodResponder` per controller, created when one of its actions is first requested. The
       controllers are obtained through a closure, which is where services are wired. Use it with

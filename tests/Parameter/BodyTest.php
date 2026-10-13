@@ -13,11 +13,27 @@ use Test\ICanBoogie\Routing\SetStateHelper;
 #[CoversClass(Body::class)]
 final class BodyTest extends TestCase
 {
-    public function test_resolve_is_a_file_object_on_the_input(): void
+    public function test_resolve_is_the_body_stream_of_the_request(): void
+    {
+        $stream = new SplFileObject('php://memory', 'w+');
+        $stream->fwrite('<xml/>');
+        $stream->rewind();
+
+        $request = Request::from([
+            RequestOptions::OPTION_URI => '/',
+            RequestOptions::OPTION_BODY_STREAM => $stream,
+        ]);
+
+        $this->assertSame($stream, new Body()->resolve($request));
+        $this->assertSame('<xml/>', $stream->fgets());
+    }
+
+    public function test_a_request_without_a_stream_has_an_empty_body(): void
     {
         $file = new Body()->resolve(Request::from([ RequestOptions::OPTION_URI => '/' ]));
 
-        $this->assertSame('php://input', $file->getPathname());
+        $this->assertInstanceOf(SplFileObject::class, $file);
+        $this->assertTrue($file->eof() || $file->fgets() === '');
     }
 
     public function test_export(): void

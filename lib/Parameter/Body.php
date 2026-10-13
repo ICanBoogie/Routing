@@ -7,9 +7,10 @@ use ICanBoogie\Routing\Parameter;
 use SplFileObject;
 
 /**
- * Provides the raw body of the request, as a file object opened on `php://input`.
+ * Provides the raw body of the request, the file object found in {@see Request::$body_stream}.
  *
- * The body is never missing, an empty body is an empty file.
+ * The body is never missing, an empty body is an empty file: a request without a stream, e.g. one
+ * created by a test, provides an empty file object.
  */
 final readonly class Body implements Parameter
 {
@@ -23,6 +24,16 @@ final readonly class Body implements Parameter
 
     public function resolve(Request $request): SplFileObject
     {
-        return new SplFileObject('php://input', 'r');
+        return self::of($request);
+    }
+
+    /**
+     * Returns the body of the request.
+     *
+     * @internal
+     */
+    public static function of(Request $request): SplFileObject
+    {
+        return $request->body_stream ?? new SplFileObject('php://memory', 'r');
     }
 }

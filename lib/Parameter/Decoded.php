@@ -11,12 +11,11 @@ use ICanBoogie\Routing\Exception\PathParameterNotValid;
 use ICanBoogie\Routing\Parameter;
 use InvalidArgumentException;
 use LogicException;
-use SplFileObject;
 use ValueError;
 
 /**
  * Provides an object, made by a {@see Decoder} from a value of the path, the query string, or the
- * body, or from the raw body, a `SplFileObject` opened on `php://input`.
+ * body, or from the raw body, the `SplFileObject` of {@see Request::$body_stream}.
  *
  * The decoder is never called for a missing value, a key that is absent or `null`: the value is the
  * default value, or `null` if the parameter is nullable, otherwise the request is not valid. The
@@ -81,7 +80,7 @@ final readonly class Decoded implements Parameter
             'path' => $request->path_params[$this->name] ?? null,
             'query' => $request->query_params[$this->name] ?? null,
             'part' => $request->request_params[$this->name] ?? null,
-            'body' => new SplFileObject('php://input', 'r'),
+            'body' => Body::of($request),
         };
 
         if ($value === null) {

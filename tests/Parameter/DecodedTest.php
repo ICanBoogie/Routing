@@ -8,12 +8,14 @@ use ICanBoogie\Routing\EncodedValue;
 use ICanBoogie\Routing\Exception\NotDecodable;
 use ICanBoogie\Routing\Exception\ParameterNotValid;
 use ICanBoogie\Routing\Exception\PathParameterNotValid;
+use ICanBoogie\Routing\Parameter\Body;
 use ICanBoogie\Routing\Parameter\Decoded;
 use LogicException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
+use SplFileObject;
 use Test\ICanBoogie\Routing\Decoder\Article;
 use Test\ICanBoogie\Routing\Decoder\Probe;
 use Test\ICanBoogie\Routing\Decoder\Rejecting;
@@ -22,6 +24,7 @@ use Test\ICanBoogie\Routing\Decoder\SlugDecoder;
 use Test\ICanBoogie\Routing\SetStateHelper;
 
 #[CoversClass(Decoded::class)]
+#[UsesClass(Body::class)]
 #[UsesClass(EncodedValue::class)]
 #[UsesClass(NotDecodable::class)]
 #[UsesClass(ParameterNotValid::class)]
@@ -65,7 +68,19 @@ final class DecodedTest extends TestCase
         $parameter = new Decoded('body', 'payload', Probe::class, Slug::class);
         $slug = $parameter->resolve($this->request());
 
-        $this->assertSame('body|NULL|SplFileObject|php://input', $slug->value);
+        $this->assertSame('body|NULL|SplFileObject|php://memory', $slug->value);
+    }
+
+    public function test_resolve_body_is_the_body_stream_of_the_request(): void
+    {
+        $stream = new SplFileObject('php://temp', 'w+');
+        $parameter = new Decoded('body', 'payload', Probe::class, Slug::class);
+        $slug = $parameter->resolve(Request::from([
+            RequestOptions::OPTION_URI => '/',
+            RequestOptions::OPTION_BODY_STREAM => $stream,
+        ]));
+
+        $this->assertSame('body|NULL|SplFileObject|php://temp', $slug->value);
     }
 
     public function test_body_is_never_missing(): void

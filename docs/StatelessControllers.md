@@ -250,7 +250,7 @@ A parameter is bound to the part of the request it comes from, which is explicit
 | `#[Path]`  | A placeholder of the pattern (optional, it is the default)   |
 | `#[Query]` | A value of the query string                                  |
 | `#[Part]`  | A named piece of the body: a form field, or a property of a JSON object |
-| `#[Body]`  | The raw body, as a `SplFileObject` opened on `php://input` |
+| `#[Body]`  | The raw body, the `SplFileObject` of `Request::$body_stream` |
 
 The name of the value is the name of the parameter, give another one to the attribute when they
 differ. A parameter has a single source.
@@ -287,7 +287,8 @@ the configuration is built, whereas a value of the query string or of the body i
 provide.
 
 `#[Body]` is for what `#[Part]` can't provide: XML, a custom format, or a large upload to process
-without loading it in memory. The parameter is a `SplFileObject`, a method has at most one, and the
+without loading it in memory. The parameter is a `SplFileObject`, which tests can replace with the
+`body_stream` option of the request, a method has at most one, and the
 body is never missing, an empty body is an empty file. For a form or a JSON object, use `#[Part]`.
 
 ```php

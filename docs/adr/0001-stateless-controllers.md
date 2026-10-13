@@ -254,14 +254,16 @@ the body left out.
   object, so it does not care about the encoding. The names `#[Get]` and `#[Post]` would echo
   `$_GET` and `$_POST`, but they are taken by the route shortcuts, and the source is not tied to the
   HTTP method: a `#[Put]` route reads its form data or JSON from the same `request_params`.
-- `#[Body]` is the raw body as a stream, `new SplFileObject('php://input', 'r')`. Decoded
+- `#[Body]` is the raw body as a stream, `Request::$body_stream`, a `SplFileObject` on
+  `php://input` that `icanboogie/http` opens, and that tests can replace. Decoded
   data is already available through `#[Part]`: PHP decodes `application/x-www-form-urlencoded` and
   `multipart/form-data`, and `Request` decodes `application/json`, all into `request_params`.
   `#[Body]` covers what `#[Part]` cannot, e.g. XML, a custom format, or a large upload to process
   without loading it in memory. At most one `#[Body]` per method is allowed.
   - The parameter is declared `SplFileObject`: a proper object, and no stream abstraction is
     imposed (no PSR-7 `StreamInterface`). The build rejects any other declared type. The file is
-    opened by the parameter, lazily, when the action is called.
+    provided by the request. A request without a stream, e.g. one created by a test, provides an
+    empty file.
 - **No hydration into classes, unless the parameter has a decoder** ([ADR 0002](0002-decoders.md)).
   `#[Part]` and `#[Body]` don't produce classes by themselves: a class-typed
   parameter is rejected at configuration time. The library cannot impose a serialization package

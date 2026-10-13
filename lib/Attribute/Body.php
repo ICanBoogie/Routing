@@ -6,8 +6,8 @@ use Attribute;
 use ICanBoogie\Routing\Decoder;
 
 /**
- * Binds a parameter of an action to the raw body of the request, a `SplFileObject` opened on
- * `php://input`.
+ * Binds a parameter of an action to the raw body of the request, the `SplFileObject` of
+ * `Request::$body_stream`, usually `php://input`.
  *
  * With a {@see Decoder}, the parameter is the object the decoder makes from the body, and the
  * decoder receives the file object. The `using` argument is optional when the type of the parameter

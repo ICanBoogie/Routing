@@ -127,7 +127,7 @@ What `$value` holds depends on the source:
 |---|---|
 | `#[Path]` | a `string` |
 | `#[Query]`, `#[Part]` | the value under `name`: a `string`, a number or boolean (JSON), or an `array` |
-| `#[Body]` | the body stream, a `SplFileObject` opened with `new SplFileObject('php://input', 'r')` |
+| `#[Body]` | the body stream, the `SplFileObject` of `Request::$body_stream` |
 
 `#[Query]` and `#[Part]` never hand the whole source to the decoder, only the value under `name`.
 Anything that needs the whole body uses `#[Body]`, which stays the raw body of ADR 0001, at most
