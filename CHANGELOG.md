@@ -31,6 +31,13 @@ PHP 8.4+
       `int $id`, throws `PathParameterNotValid`, which is a `NotFound`.
     - `Config\ActionDefinition` defines how to invoke an action: the method and the plan of its
       parameters. Parameters and definitions can be exported with `var_export()`.
+    - Attributes define the routes of a controller, they are ported from icanboogie/bind-routing. The
+      repeatable `Route` is for methods, with the shortcuts `Connect`, `Delete`, `Get`, `Head`,
+      `Options`, `Patch`, `Post`, `Put`, and `Trace`. `Prefix` is for the controller class, it
+      defines the prefixes shared by its methods: `#[Prefix(route: '/cart', action: 'cart')]` turns
+      the route `/photos/:id` with the action `photos:show` into `/cart/photos/:id` and
+      `cart:photos:show`. The pattern of a shortcut is optional, it can be left empty when the
+      `Prefix` defines the route.
 
 ### Deprecated Features
 
