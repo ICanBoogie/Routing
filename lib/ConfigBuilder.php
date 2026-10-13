@@ -3,6 +3,7 @@
 namespace ICanBoogie\Routing;
 
 use Closure;
+use ICanBoogie\Routing\Attribute\Name;
 use ICanBoogie\Routing\Attribute\Prefix;
 use ICanBoogie\Routing\Config\ActionDefinition;
 use ICanBoogie\Routing\Config\ControllerDefinition;
@@ -74,17 +75,22 @@ final class ConfigBuilder
      * the attribute {@see Attribute\Prefix} of the class or by {@see RouteBuilder::prefix()}, not
      * both.
      *
-     * The action of a route that doesn't specify one is inferred, see {@see ActionResolver}.
+     * The action of a route that doesn't specify one is inferred, see {@see ActionResolver}. The
+     * name of the controller in the action is inferred from its class, unless it is defined by the
+     * attribute {@see Attribute\Name} of the class or by the parameter `$name`, not both.
      *
      * @param class-string $controller
      * @param (Closure(RouteBuilder): mixed)|null $route_builder
      *     Defines the routes of the controller without attributes.
+     * @param non-empty-string|null $name
+     *     Name of the controller, used as is in the actions instead of the name inferred from the
+     *     class.
      *
      * @return $this
      *
      * @throws ConfigNotValid
      */
-    public function add_controller(string $controller, ?Closure $route_builder = null): self
+    public function add_controller(string $controller, ?Closure $route_builder = null, ?string $name = null): self
     {
         $class = $this->reflect($controller);
         $builder = new RouteBuilder();
@@ -94,6 +100,7 @@ final class ConfigBuilder
         }
 
         $prefix = $this->resolve_prefix($class, $builder);
+        $name = $this->resolve_name($class, $name);
         $routes_by_method = $this->collect_routes($class, $builder);
 
         if (!$routes_by_method) {
@@ -107,7 +114,7 @@ final class ConfigBuilder
         // Nothing is registered before everything is valid.
 
         foreach ($routes_by_method as $method_name => $method_routes) {
-            $resolved = $this->resolve_routes($class, $method_name, $method_routes, $prefix);
+            $resolved = $this->resolve_routes($class, $method_name, $method_routes, $prefix, $name);
             $plan = PlanBuilder::build(
                 $class->getMethod($method_name),
                 array_map(fn(Route $route): Pattern => $route->pattern, $resolved)
@@ -271,6 +278,34 @@ final class ConfigBuilder
 
     /**
      * @param ReflectionClass<object> $class
+     * @param non-empty-string|null $name
+     *
+     * @return non-empty-string|null
+     *
+     * @throws ConfigNotValid if the name is defined by both the attribute and the parameter.
+     */
+    private function resolve_name(ReflectionClass $class, ?string $name): ?string
+    {
+        $attributes = $class->getAttributes(Name::class, ReflectionAttribute::IS_INSTANCEOF);
+
+        if (!$attributes) {
+            return $name === null ? null : new Name($name)->value;
+        }
+
+        if ($name !== null) {
+            throw new ConfigNotValid(
+                "`$class->name` defines its name with both the attribute #[Name] and the parameter `name`."
+            );
+        }
+
+        /** @var Name $attribute */
+        $attribute = $attributes[0]->newInstance();
+
+        return $attribute->value;
+    }
+
+    /**
+     * @param ReflectionClass<object> $class
      *
      * @return array<non-empty-string, non-empty-list<TransientRoute>>
      *     Where _key_ is the name of a method, and _value_ its routes.
@@ -313,12 +348,20 @@ final class ConfigBuilder
      * @param non-empty-string $method
      *     Name of the method that the routes lead to.
      * @param non-empty-list<TransientRoute> $routes
+     * @param non-empty-string|null $name
+     *     Name of the controller, when it is not inferred from the class.
      *
      * @return list<Route>
      *
      * @throws ConfigNotValid
      */
-    private function resolve_routes(ReflectionClass $class, string $method, array $routes, ?Prefix $prefix): array
+    private function resolve_routes(
+        ReflectionClass $class,
+        string $method,
+        array $routes,
+        ?Prefix $prefix,
+        ?string $name,
+    ): array
     {
         $resolved = [];
 
@@ -336,7 +379,7 @@ final class ConfigBuilder
                 throw new ConfigNotValid("`$class->name::$method()` has a route with a blank action.");
             }
 
-            $action = $route->action ?? ActionResolver::resolve($class->name, $method);
+            $action = $route->action ?? ActionResolver::resolve($class->name, $method, $name);
 
             if ($prefix?->action !== null) {
                 $action = $prefix->action . Route::ACTION_SEPARATOR . $action;

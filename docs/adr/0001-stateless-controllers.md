@@ -72,8 +72,8 @@ interface Responder
 
 - **No reflection on the hot path.** Production reads precomputed plans from an opcache-friendly
   cache.
-- **Minimal required dependencies.** The attribute collector is optional. The inflector, which
-  infers action identifiers, is required.
+- **Minimal required dependencies.** The attribute collector is optional. Action identifiers are
+  inferred without an inflector.
 
 ### Project constraints
 

@@ -13,7 +13,7 @@ use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Attribute\Get;
 use ICanBoogie\Routing\Attribute\Post;
 
-final class InvoiceController
+final class InvoicesController
 {
     public function __construct(
         private readonly InvoiceRepository $invoices,
@@ -95,7 +95,7 @@ use ICanBoogie\Routing\Attribute\Get;
 use ICanBoogie\Routing\Attribute\Prefix;
 
 #[Prefix(pattern: '/billing', action: 'billing')]
-final class InvoiceController
+final class InvoicesController
 {
     #[Get('/invoices/:id')]
     public function show(int $id): Response
@@ -109,7 +109,7 @@ The pattern of a shortcut can be empty when the prefix defines the pattern:
 
 ```php
 #[Prefix(pattern: '/invoices')]
-final class InvoiceController
+final class InvoicesController
 {
     #[Get('')]
     public function list(): Response // GET /invoices
@@ -139,7 +139,7 @@ use ICanBoogie\Routing\ConfigBuilder;
 use ICanBoogie\Routing\RouteBuilder;
 
 $builder = new ConfigBuilder()
-    ->add_controller(InvoiceController::class, fn(RouteBuilder $r) => $r
+    ->add_controller(InvoicesController::class, fn(RouteBuilder $r) => $r
         ->prefix(pattern: '/billing', action: 'billing')
         ->get('/invoices', 'list')
         ->get('/invoices/:id', 'show')
@@ -158,18 +158,47 @@ inferred from the name of the controller and the name of the method, used as is:
 
 | Controller            | Method      | Action               |
 |-----------------------|-------------|----------------------|
-| `InvoiceController`   | `show`      | `invoices:show`      |
 | `InvoicesController`  | `show`      | `invoices:show`      |
-| `UserPostController`  | `show`      | `user-posts:show`    |
-| `PersonController`    | `list`      | `people:list`        |
-| `InvoiceController`   | `by_status` | `invoices:by_status` |
+| `ContactController`   | `show`      | `contact:show`       |
+| `UserPostsController` | `show`      | `user-posts:show`    |
+| `InvoicesController`  | `by_status` | `invoices:by_status` |
 
-The name of the controller loses its `Controller` suffix, is hyphenated, and pluralized, so the
-singular and the plural form of a name give the same actions. Use `action:` to choose another one,
-and `Prefix` to prepend a namespace.
+The name of the controller is its class name without the `Controller` suffix, hyphenated. It is
+not pluralized: the class name is what you get, so `ContactController` is a single resource and
+`InvoicesController` a collection. Use `action:` to choose the action of a route, `Prefix` to
+prepend a namespace, and `Name` to replace the name of the controller.
 
 ```php
 #[Get('/invoices/:id', action: 'invoice:display')]
+```
+
+### Names
+
+The `Name` attribute of the class replaces the name inferred from the class, it is used as is. It
+is useful when the class doesn't follow the convention, e.g. a suffix other than `Controller`
+(only `Controller` is stripped), or a name that you'd rather not have in the class. The name cannot
+be blank or contain `:`.
+
+```php
+<?php
+
+use ICanBoogie\HTTP\Response;
+use ICanBoogie\Routing\Attribute\Get;
+use ICanBoogie\Routing\Attribute\Name;
+
+#[Name('contact')]
+final class ContactPage
+{
+    #[Get('/contact')]
+    public function show(): Response // contact:show, instead of contact-page:show
+}
+```
+
+Without attributes, use the parameter `name:` of `ConfigBuilder::add_controller()`. Defining the
+name with both is an error.
+
+```php
+$builder->add_controller(ContactPage::class, name: 'contact');
 ```
 
 An action belongs to a single method of a single controller. Two methods with the same action are an
@@ -384,7 +413,7 @@ public function list(int $page = 1): Response
 
 A parameter that cannot be bound fails when the configuration is built, with the class, the method,
 and the parameter in the message, e.g.
-"`InvoiceController::show()` parameter `$slug`: no `:slug` in `/invoices/:id`."
+"`InvoicesController::show()` parameter `$slug`: no `:slug` in `/invoices/:id`."
 
 
 
@@ -508,7 +537,7 @@ everything as it goes, and nothing is registered when a controller is not valid.
 use ICanBoogie\Routing\ConfigBuilder;
 
 $config = new ConfigBuilder()
-    ->add_controller(InvoiceController::class)
+    ->add_controller(InvoicesController::class)
     ->add_controller(ContactController::class, fn(RouteBuilder $r) => $r
         ->get('/contact.html', 'new')
         ->post('/contact.html', 'create'))

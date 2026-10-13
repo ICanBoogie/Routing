@@ -6,6 +6,7 @@ use ICanBoogie\HTTP\RequestMethod;
 use ICanBoogie\Routing\ActionResolver;
 use ICanBoogie\Routing\Attribute\Get;
 use ICanBoogie\Routing\Attribute\Post;
+use ICanBoogie\Routing\Attribute\Name;
 use ICanBoogie\Routing\Attribute\Prefix;
 use ICanBoogie\Routing\CacheStrategy;
 use ICanBoogie\Routing\Config;
@@ -52,6 +53,8 @@ use Test\ICanBoogie\Routing\ConfigBuilder\PlainController;
 use Test\ICanBoogie\Routing\ConfigBuilder\PrivateRouteController;
 use Test\ICanBoogie\Routing\ConfigBuilder\SameIdController;
 use Test\ICanBoogie\Routing\ConfigBuilder\SecondIdController;
+use Test\ICanBoogie\Routing\ConfigBuilder\ContactController;
+use Test\ICanBoogie\Routing\ConfigBuilder\NamedController;
 use Test\ICanBoogie\Routing\ConfigBuilder\TwoPrefixesController;
 use Test\ICanBoogie\Routing\ConfigBuilder\UserPostsController;
 use Test\ICanBoogie\Routing\Discovery\InvoicesController;
@@ -65,6 +68,7 @@ use function iterator_to_array;
 #[UsesClass(ActionResolver::class)]
 #[UsesClass(Get::class)]
 #[UsesClass(Post::class)]
+#[UsesClass(Name::class)]
 #[UsesClass(Prefix::class)]
 #[UsesClass(\ICanBoogie\Routing\Attribute\Route::class)]
 #[UsesClass(ActionDefinition::class)]
@@ -241,6 +245,45 @@ final class ConfigBuilderTest extends TestCase
         );
     }
 
+    public function test_name_is_not_pluralized(): void
+    {
+        $config = new ConfigBuilder()->add_controller(ContactController::class)->build();
+
+        $this->assertSame(ContactController::class, $config->controller_by_action['contact:show']);
+    }
+
+    public function test_name_from_attribute(): void
+    {
+        $config = new ConfigBuilder()->add_controller(NamedController::class)->build();
+
+        $this->assertSame(NamedController::class, $config->controller_by_action['site:contact:show']);
+    }
+
+    public function test_name_from_parameter(): void
+    {
+        $config = new ConfigBuilder()->add_controller(PhotosController::class, name: 'pictures')->build();
+
+        $this->assertArrayHasKey('pictures:show', $config->controllers[PhotosController::class]->actions);
+        $this->assertArrayNotHasKey('photos:show', $config->controllers[PhotosController::class]->actions);
+    }
+
+    public function test_name_from_the_attribute_and_the_parameter(): void
+    {
+        $this->expectException(ConfigNotValid::class);
+        $this->expectExceptionMessage(
+            "`" . NamedController::class . "` defines its name with both the attribute #[Name] and the parameter `name`."
+        );
+
+        new ConfigBuilder()->add_controller(NamedController::class, name: 'other');
+    }
+
+    public function test_name_parameter_is_validated(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new ConfigBuilder()->add_controller(PhotosController::class, name: 'a:b');
+    }
+
     public function test_placeholders_of_the_prefix_are_path_parameters(): void
     {
         $config = new ConfigBuilder()->add_controller(UserPostsController::class)->build();
@@ -269,14 +312,14 @@ final class ConfigBuilderTest extends TestCase
 
         $this->assertEquals(
             [
-                'plains:list' => new ActionDefinition('list'),
-                'plains:show' => new ActionDefinition('show', [ new Path('id', 'int') ]),
+                'plain:list' => new ActionDefinition('list'),
+                'plain:show' => new ActionDefinition('show', [ new Path('id', 'int') ]),
                 'plain:store' => new ActionDefinition('create'),
             ],
             $config->controllers[PlainController::class]->actions
         );
 
-        $show = $config->routes->route_for_predicate(new ByAction('plains:show'));
+        $show = $config->routes->route_for_predicate(new ByAction('plain:show'));
 
         $this->assertSame('/plain/:id', $show?->pattern->pattern);
         $this->assertSame('plain-show', $show->id);
@@ -298,12 +341,12 @@ final class ConfigBuilderTest extends TestCase
             ->build();
 
         $this->assertEquals(
-            [ 'cart:plains:show' => new ActionDefinition('show', [ new Path('id', 'int') ]) ],
+            [ 'cart:plain:show' => new ActionDefinition('show', [ new Path('id', 'int') ]) ],
             $config->controllers[PlainController::class]->actions
         );
         $this->assertSame(
             '/cart/:id',
-            $config->routes->route_for_predicate(new ByAction('cart:plains:show'))?->pattern->pattern
+            $config->routes->route_for_predicate(new ByAction('cart:plain:show'))?->pattern->pattern
         );
     }
 
@@ -536,7 +579,7 @@ final class ConfigBuilderTest extends TestCase
 
         $this->expectException(ConfigNotValid::class);
         $this->expectExceptionMessage(
-            "The id `first-ids:show` of `" . IdOfAnActionController::class . "::show()` is also an action of `"
+            "The id `first-id:show` of `" . IdOfAnActionController::class . "::show()` is also an action of `"
             . FirstIdController::class . "`."
         );
 
@@ -645,7 +688,7 @@ final class ConfigBuilderTest extends TestCase
             ->add_controller(PlainController::class, fn(RouteBuilder $r) => $r->get('/plain', 'list'))
             ->build();
 
-        $this->assertArrayHasKey('plains:list', $config->controller_by_action);
+        $this->assertArrayHasKey('plain:list', $config->controller_by_action);
     }
 
     public function test_discover_controllers(): void

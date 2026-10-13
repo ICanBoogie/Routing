@@ -20,6 +20,12 @@ final class ActionResolverTest extends TestCase
         $this->assertSame($expected, ActionResolver::resolve($class, $method));
     }
 
+    public function test_name_replaces_the_inferred_one(): void
+    {
+        $this->assertSame('contact:show', ActionResolver::resolve('App\ContactsController', 'show', 'contact'));
+        $this->assertSame('Contact_Us:show', ActionResolver::resolve('App\ContactsController', 'show', 'Contact_Us'));
+    }
+
     /**
      * @return array<string, array{ class-string, string, string }>
      */
@@ -29,13 +35,16 @@ final class ActionResolverTest extends TestCase
 
             'controller suffix is stripped' => [ 'App\PhotosController', 'show', 'photos:show' ],
             'namespace is stripped' => [ 'App\Presentation\Frontend\Cart\PhotosController', 'list', 'photos:list' ],
-            'singular is pluralized' => [ 'App\ArticleController', 'show', 'articles:show' ],
-            'camel case is hyphenated' => [ 'App\PostCategoryController', 'list', 'post-categories:list' ],
+            'not pluralized' => [ 'App\ContactController', 'show', 'contact:show' ],
+            'plural is kept' => [ 'App\ContactsController', 'show', 'contacts:show' ],
+            'camel case is hyphenated' => [ 'App\PostCategoriesController', 'list', 'post-categories:list' ],
+            'acronym is hyphenated' => [ 'App\HTTPServerController', 'show', 'http-server:show' ],
+            'digits' => [ 'App\Oauth2ClientsController', 'list', 'oauth2-clients:list' ],
             'no suffix' => [ 'App\Photos', 'show', 'photos:show' ],
-            'no namespace' => [ 'ArticleController', 'show', 'articles:show' ],
+            'no namespace' => [ 'ArticlesController', 'show', 'articles:show' ],
             'method is used as is' => [ 'App\PhotosController', 'get_show', 'photos:get_show' ],
             'method case is kept' => [ 'App\PhotosController', 'showAll', 'photos:showAll' ],
-            'only the suffix' => [ 'App\Controller', 'index', 'controllers:index' ],
+            'only the suffix' => [ 'App\Controller', 'index', 'controller:index' ],
 
         ];
     }

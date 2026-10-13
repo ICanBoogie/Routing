@@ -7,7 +7,7 @@ use ICanBoogie\Routing\Attribute\Get;
 
 final class IdOfAnActionController
 {
-    #[Get('/x', id: 'first-ids:show')]
+    #[Get('/x', id: 'first-id:show')]
     public function show(): Response
     {
         return new Response();

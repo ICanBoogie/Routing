@@ -6,8 +6,6 @@
 
 PHP 8.4+
 
-[icanboogie/inflector](https://github.com/ICanBoogie/Inflector), to infer the actions of controllers.
-
 ### New features
 
 - Added `RouteProvider\Chain`, which asks a list of route providers in turn, the first route found wins.
@@ -39,7 +37,8 @@ PHP 8.4+
       defines the prefixes shared by its methods: `#[Prefix(pattern: '/cart', action: 'cart')]` turns
       the route `/photos/:id` with the action `photos:show` into `/cart/photos/:id` and
       `cart:photos:show`. The pattern of a shortcut is optional, it can be left empty when the
-      `Prefix` defines the pattern.
+      `Prefix` defines the pattern. `Name` is also for the controller class, it replaces the name of
+      the controller in the actions, `#[Name('contact')]` gives `contact:show`.
     - `PlanBuilder` analyzes a method with reflection, once, to build the plan of its parameters:
       a parameter typed `Request` or `Route` receives them, any other parameter is a path parameter
       found by its name in the patterns of the routes, so reordering placeholders can't pass the
@@ -53,7 +52,9 @@ PHP 8.4+
       when the controller is not valid, for instance when the `id` of a route is used by another route
       or is the action of another. The action is inferred from the name of the
       controller and the name of the method, used as is: `PhotosController::show` is `photos:show`,
-      see `ActionResolver`.
+      see `ActionResolver`. The name of the controller is its class name without the `Controller`
+      suffix, hyphenated, and not pluralized: `ContactController::show` is `contact:show`. The
+      parameter `name:` of `add_controller()` or the attribute `#[Name]` replace it, not both.
     - `RouteBuilder` defines the routes and the prefix of a controller without attributes:
       `add_controller(PhotosController::class, fn(RouteBuilder $r) => $r->prefix(pattern: '/cart',
       action: 'cart')->get('/photos/:id', 'show'))`.
