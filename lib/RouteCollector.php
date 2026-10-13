@@ -7,6 +7,11 @@ use ICanBoogie\Routing\RouteMaker\Options;
 
 /**
  * Collect routes to build a {@see RouteProvider}.
+ *
+ * @deprecated Obsolete. A route should exist because a controller defines it, with attributes or
+ *     a {@see RouteBuilder}, see {@see ConfigBuilder::add_responder()}, not because a collector
+ *     was told to create it, `resource()` being the clearest example of routes that a controller
+ *     might not implement.
  */
 class RouteCollector
 {

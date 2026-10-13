@@ -2,6 +2,11 @@
 
 namespace ICanBoogie\Routing\RouteMaker;
 
+/**
+ * Options of {@see \ICanBoogie\Routing\RouteMaker::resource()}.
+ *
+ * @deprecated Obsolete, see {@see \ICanBoogie\Routing\RouteMaker}.
+ */
 final class Options
 {
     public const string DEFAULT_ID_NAME = 'id';

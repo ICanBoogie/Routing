@@ -6,6 +6,8 @@
 
 PHP 8.4+
 
+[icanboogie/inflector](https://github.com/ICanBoogie/Inflector), to infer the actions of controllers.
+
 ### New features
 
 - Added `RouteProvider\Chain`, which asks a list of route providers in turn, the first route found wins.
@@ -45,10 +47,26 @@ PHP 8.4+
       `IntoResponse`. Mistakes throw `ConfigNotValid` with the class, the method, and the parameter,
       e.g. "`SkillController::show()` parameter `$slug`: no `:slug` in `/skills/:id`.", instead of
       failing when a request is handled.
+    - `ConfigBuilder::add_responder()` adds a controller: it reads the attributes of its methods,
+      applies the `Prefix`, infers the actions that are not specified, builds the plan of each
+      method, and defines the routes. Everything is validated right away, and nothing is registered
+      when the controller is not valid. The action is inferred from the name of the
+      controller and the name of the method, used as is: `PhotosController::show` is `photos:show`,
+      see `ActionResolver`.
+    - `RouteBuilder` defines the routes and the prefix of a controller without attributes:
+      `add_responder(PhotosController::class, fn(RouteBuilder $r) => $r->prefix(route: '/cart',
+      action: 'cart')->get('/photos/:id', 'show'))`.
+    - `ConfigBuilder::build()` returns a `Config`, a readonly object that holds the routes, and the
+      controllers with their actions. It can be exported with `var_export()` and cached as a PHP
+      file, so subsequent requests don't pay for reflecting or building it.
 
 ### Deprecated Features
 
-None
+- `RouteCollector`, `RouteMaker`, `RouteMaker\Options`, and `RouteMaker\Basics` are obsolete. A route
+  should exist because a controller defines it, not because a collector was told to create it or a
+  resource name implies routes that a controller might not implement, `resource()` being the
+  clearest example. Define routes with attributes or a `RouteBuilder`, see
+  `ConfigBuilder::add_responder()`.
 
 ### Backward Incompatible Changes
 

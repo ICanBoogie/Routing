@@ -52,6 +52,9 @@ final class ArticleController extends ControllerAbstract
 
 ## Resource controllers
 
+> **Warning:** [RouteMaker][] is obsolete. A route should exist because a controller defines it,
+> see [Creating routes](CreatingRoutes.md).
+
 With [ActionTrait][] and [RouteMaker][] resource controllers can be created with a minimum
 boilerplate.
 

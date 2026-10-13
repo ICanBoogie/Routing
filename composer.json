@@ -29,7 +29,8 @@
     "require": {
         "php": ">=8.4",
         "ext-json": "*",
-        "icanboogie/http": "^7.0"
+        "icanboogie/http": "^7.0",
+        "icanboogie/inflector": "^4.0"
     },
     "require-dev": {
         "olvlvl/phpunit-given": "^11.0",

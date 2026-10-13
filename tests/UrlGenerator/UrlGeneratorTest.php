@@ -2,7 +2,8 @@
 
 namespace Test\ICanBoogie\Routing\UrlGenerator;
 
-use ICanBoogie\Routing\RouteCollector;
+use ICanBoogie\Routing\Route;
+use ICanBoogie\Routing\RouteProvider\Immutable;
 use ICanBoogie\Routing\UrlGenerator\UrlGeneratorWithRouteProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -10,9 +11,10 @@ final class UrlGeneratorTest extends TestCase
 {
     public function test_generate_url(): void
     {
-        $routes = (new RouteCollector())
-            ->resource('articles')
-            ->collect();
+        $routes = new Immutable([
+            new Route('/articles', 'articles:list'),
+            new Route('/articles/:id', 'articles:show'),
+        ]);
 
         $generator = new UrlGeneratorWithRouteProvider($routes);
 

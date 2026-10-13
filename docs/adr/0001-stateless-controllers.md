@@ -72,8 +72,8 @@ interface Responder
 
 - **No reflection on the hot path.** Production reads precomputed plans from an opcache-friendly
   cache.
-- **Minimal required dependencies.** The inflector and attribute collector should be optional where
-  possible.
+- **Minimal required dependencies.** The attribute collector is optional. The inflector, which
+  infers action identifiers, is required.
 
 ### Project constraints
 
@@ -337,10 +337,18 @@ $builder->add_responder(
 
 `add_responder()` reflects the class once, merges attribute routes with those from the
 `RouteBuilder`, computes the action identifiers (an explicit `action:` is used as-is; when it is
-omitted, it is inferred from the controller's name and the method's name, e.g. `articles:show`, as
-`ActionResolver` does in bind-routing today; the inflector is used only if present), computes each
-method's parameter plan, and validates it against the pattern. Mistakes fail there with a clear
-message. `use_attributes()`-style discovery is a loop that calls `add_responder()`.
+omitted, it is inferred from the controller's name and the method's name, which is used as is, e.g.
+`PhotosController::show` is `photos:show`), computes each method's parameter plan, and validates it
+against the patterns. Mistakes fail there with a clear message, and nothing is registered when a
+controller is not valid. `use_attributes()`-style discovery is a loop that calls `add_responder()`.
+
+A route exists because a controller defines it, so `add_responder()` is the only way to add routes
+to the `ConfigBuilder`, which doesn't build on `RouteCollector`. The collector and `RouteMaker` are
+marked obsolete: they work the other way around, creating routes that nothing might answer,
+`resource()` being the clearest case. Routes can still be created by hand with
+`RouteProvider\Mutable` and `RouteProvider\Immutable`. Responders that are not method-based (a
+`ControllerAbstract` subclass, a hand-written `Responder`) are registered with `add_responder()`
+too, and define their routes the same way.
 
 `Config` holds a `RouteProvider\Compiled` for the routes, plus the data that bind-routing currently
 keeps in the Symfony container: which classes are responders (the `action_responder` tag), and which
