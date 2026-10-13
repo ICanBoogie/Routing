@@ -5,13 +5,16 @@ namespace Test\ICanBoogie\Routing\PlanBuilder;
 use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
+use ICanBoogie\Routing\Attribute\Body;
 use ICanBoogie\Routing\Attribute\Part;
 use ICanBoogie\Routing\Attribute\Path;
 use ICanBoogie\Routing\Attribute\Query;
 use ICanBoogie\Routing\IntoResponse;
 use ICanBoogie\Routing\Route;
+use SplFileObject;
 use Test\ICanBoogie\Routing\Decoder\Article;
 use Test\ICanBoogie\Routing\Decoder\NotADecoder;
+use Test\ICanBoogie\Routing\Decoder\Probe;
 use Test\ICanBoogie\Routing\Decoder\Slug;
 use Test\ICanBoogie\Routing\Decoder\SlugDecoder;
 use Test\ICanBoogie\Routing\Decoder\Unrelated;
@@ -122,6 +125,56 @@ final class PlanController
         #[Query] int $page = 1,
         #[Part] string $title = ''
     ): Response {
+        return new Response();
+    }
+
+    // body
+
+    public function body_parameter(#[Body] SplFileObject $body): Response
+    {
+        return new Response();
+    }
+
+    public function body_nullable(#[Body] ?SplFileObject $body): Response
+    {
+        return new Response();
+    }
+
+    public function decoded_body(#[Body(using: Probe::class)] Slug $payload): Response
+    {
+        return new Response();
+    }
+
+    public function decoded_self_body(#[Body] Article $article): Response
+    {
+        return new Response();
+    }
+
+    public function body_and_others(
+        #[Path] int $id,
+        #[Query] int $page = 1,
+        #[Body] ?SplFileObject $body = null
+    ): Response {
+        return new Response();
+    }
+
+    public function two_bodies(#[Body] SplFileObject $a, #[Body] SplFileObject $b): Response
+    {
+        return new Response();
+    }
+
+    public function body_string(#[Body] string $body): Response
+    {
+        return new Response();
+    }
+
+    public function body_untyped(#[Body] $body): Response
+    {
+        return new Response();
+    }
+
+    public function body_and_query(#[Query] #[Body] SplFileObject $body): Response
+    {
         return new Response();
     }
 

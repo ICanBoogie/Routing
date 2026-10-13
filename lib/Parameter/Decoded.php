@@ -11,14 +11,16 @@ use ICanBoogie\Routing\Exception\PathParameterNotValid;
 use ICanBoogie\Routing\Parameter;
 use InvalidArgumentException;
 use LogicException;
+use SplFileObject;
 use ValueError;
 
 /**
  * Provides an object, made by a {@see Decoder} from a value of the path, the query string, or the
- * body.
+ * body, or from the raw body, a `SplFileObject` opened on `php://input`.
  *
  * The decoder is never called for a missing value, a key that is absent or `null`: the value is the
- * default value, or `null` if the parameter is nullable, otherwise the request is not valid.
+ * default value, or `null` if the parameter is nullable, otherwise the request is not valid. The
+ * raw body is never missing, an empty body is an empty file.
  *
  * A decoder rejects a value with {@see NotDecodable}, `InvalidArgumentException`, or `ValueError`,
  * which are reported like a value that cannot be cast: a "not found" for a path value, a "bad
@@ -28,7 +30,7 @@ final readonly class Decoded implements Parameter
 {
     /**
      * @param array{
-     *     source: 'path'|'query'|'part',
+     *     source: 'path'|'query'|'part'|'body',
      *     name: non-empty-string,
      *     decoder: class-string<Decoder>,
      *     type: string,
@@ -43,10 +45,10 @@ final readonly class Decoded implements Parameter
     }
 
     /**
-     * @param 'path'|'query'|'part' $source
+     * @param 'path'|'query'|'part'|'body' $source
      *     Where the value is read from.
      * @param non-empty-string $name
-     *     Name of the value in its source.
+     *     Name of the value in its source, the name of the parameter for the body.
      * @param class-string<Decoder> $decoder
      * @param string $type
      *     Type of the parameter, used to report invalid values.
@@ -75,20 +77,19 @@ final readonly class Decoded implements Parameter
      */
     public function resolve(Request $request): mixed
     {
-        $values = match ($this->source) {
-            'path' => $request->path_params,
-            'query' => $request->query_params,
-            'part' => $request->request_params,
+        $value = match ($this->source) {
+            'path' => $request->path_params[$this->name] ?? null,
+            'query' => $request->query_params[$this->name] ?? null,
+            'part' => $request->request_params[$this->name] ?? null,
+            'body' => new SplFileObject('php://input', 'r'),
         };
-
-        $value = $values[$this->name] ?? null;
 
         if ($value === null) {
             return $this->resolve_missing();
         }
 
         try {
-            return $this->decoder::decode(new EncodedValue($value, $this->source, $this->name));
+            return $this->decoder::decode(new EncodedValue($value, $this->source, $this->source === 'body' ? null : $this->name));
         } catch (NotDecodable | InvalidArgumentException | ValueError $e) {
             throw $this->source === 'path'
                 ? new PathParameterNotValid($this->name, $this->type, $e)

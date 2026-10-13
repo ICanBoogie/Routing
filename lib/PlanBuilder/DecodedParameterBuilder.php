@@ -36,7 +36,7 @@ final readonly class DecodedParameterBuilder
     public static function try_build_decoded_parameter(
         ReflectionMethod $method,
         ReflectionParameter $parameter,
-        Attribute\Path|Attribute\Query|Attribute\Part|null $attribute
+        Attribute\Path|Attribute\Query|Attribute\Part|Attribute\Body|null $attribute
     ): ?Decoded {
         $decoder = self::find_decoder($method, $parameter, $attribute);
 
@@ -56,7 +56,7 @@ final readonly class DecodedParameterBuilder
     private static function find_decoder(
         ReflectionMethod $method,
         ReflectionParameter $parameter,
-        Attribute\Path|Attribute\Query|Attribute\Part|null $attribute
+        Attribute\Path|Attribute\Query|Attribute\Part|Attribute\Body|null $attribute
     ): ?string {
         $using = $attribute?->using;
 
@@ -127,7 +127,7 @@ final readonly class DecodedParameterBuilder
     private static function build_decoded_parameter(
         ReflectionMethod $method,
         ReflectionParameter $parameter,
-        Attribute\Path|Attribute\Query|Attribute\Part|null $attribute,
+        Attribute\Path|Attribute\Query|Attribute\Part|Attribute\Body|null $attribute,
         string $decoder
     ): Decoded {
         $type = $parameter->getType();
@@ -145,10 +145,11 @@ final readonly class DecodedParameterBuilder
         $source = match (true) {
             $attribute instanceof Attribute\Query => 'query',
             $attribute instanceof Attribute\Part => 'part',
+            $attribute instanceof Attribute\Body => 'body',
             default => 'path',
         };
 
-        $name = $attribute?->name ?? $parameter->getName();
+        $name = ($attribute instanceof Attribute\Body ? null : $attribute?->name) ?? $parameter->getName();
         $nullable = $parameter->allowsNull();
         $has_default = $parameter->isDefaultValueAvailable();
         $default = $has_default ? $parameter->getDefaultValue() : null;

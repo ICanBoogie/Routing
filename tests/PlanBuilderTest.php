@@ -5,6 +5,7 @@ namespace Test\ICanBoogie\Routing;
 use ICanBoogie\Routing\Exception\ConfigNotValid;
 use ICanBoogie\Routing\Parameter;
 use ICanBoogie\Routing\ParameterAbstract;
+use ICanBoogie\Routing\Parameter\Body;
 use ICanBoogie\Routing\Parameter\CurrentRequest;
 use ICanBoogie\Routing\Parameter\Decoded;
 use ICanBoogie\Routing\Parameter\MatchedRoute;
@@ -20,6 +21,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use Test\ICanBoogie\Routing\Decoder\Article;
+use Test\ICanBoogie\Routing\Decoder\Probe;
 use Test\ICanBoogie\Routing\Decoder\Slug;
 use Test\ICanBoogie\Routing\Decoder\SlugDecoder;
 use Test\ICanBoogie\Routing\Decoder\Wide;
@@ -32,6 +34,7 @@ use function array_map;
 
 #[CoversClass(PlanBuilder::class)]
 #[CoversClass(DecodedParameterBuilder::class)]
+#[UsesClass(\ICanBoogie\Routing\Attribute\Body::class)]
 #[UsesClass(\ICanBoogie\Routing\Attribute\Part::class)]
 #[UsesClass(\ICanBoogie\Routing\Attribute\Path::class)]
 #[UsesClass(\ICanBoogie\Routing\Attribute\Query::class)]
@@ -207,6 +210,23 @@ final class PlanBuilderTest extends TestCase
                 [ new Decoded('query', 'slug', SlugDecoder::class, Slug::class, true) ]
             ],
 
+            'body' => [ 'body_parameter', [ '/' ], [ new Body() ] ],
+            'nullable body' => [ 'body_nullable', [ '/' ], [ new Body() ] ],
+            'decoded body' => [
+                'decoded_body',
+                [ '/' ],
+                [ new Decoded('body', 'payload', Probe::class, Slug::class) ]
+            ],
+            'decoded body by its type' => [
+                'decoded_self_body',
+                [ '/' ],
+                [ new Decoded('body', 'article', Article::class, Article::class) ]
+            ],
+            'body and other sources' => [
+                'body_and_others',
+                [ '/articles/:id' ],
+                [ new Path('id', 'int'), new Query('page', 'int', null, false, true, 1), new Body() ]
+            ],
             'nullable, in some routes' => [
                 'nullable',
                 [ '/articles', '/articles/:page' ],
@@ -423,6 +443,29 @@ final class PlanBuilderTest extends TestCase
                 "A class needs a decoder, see `ICanBoogie\\Routing\\Decoder`."
             ],
 
+            'two bodies' => [
+                'two_bodies',
+                [ '/' ],
+                "`$class::two_bodies()` has 2 parameters with #[ICanBoogie\Routing\Attribute\Body], "
+                . "at most one is allowed."
+            ],
+            'body is not a file object' => [
+                'body_string',
+                [ '/' ],
+                "`$class::body_string()` parameter `\$body`: the type `string` is not supported for the body, "
+                . "expected `SplFileObject`, or a decoder with `using`."
+            ],
+            'body without a type' => [
+                'body_untyped',
+                [ '/' ],
+                "`$class::body_untyped()` parameter `\$body`: the type is missing for the body"
+            ],
+            'body and query' => [
+                'body_and_query',
+                [ '/' ],
+                "a parameter is bound to a single source, found "
+                . "#[ICanBoogie\Routing\Attribute\Query], #[ICanBoogie\Routing\Attribute\Body]."
+            ],
             'query array' => [
                 'query_array',
                 [ '/' ],

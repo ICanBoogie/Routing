@@ -322,7 +322,7 @@ the body left out.
   runtime resolver registry that could hold services is not planned.
 
 Slices: first, `Request`, `Route`, and path parameters; second, `#[Path]`, `#[Query]`, and `#[Part]`
-as single values; later, `#[Body]` as a file object.
+as single values, and `#[Body]` as a file object.
 
 #### Configuration
 
@@ -512,11 +512,11 @@ response. Both ship side by side in 7.x through the `ActionResponderProvider` ch
    ported from bind-routing, `PlanBuilder`, the builder with `add_controller()`,
    `discover_controllers()`, `cache_strategy()` and `RouteBuilder`, `Config`, and
    `ActionResponderProvider\FromConfig`.
-2. **Slice two**, implemented: `#[Path]`, `#[Query]`, `#[Part]`.
+2. **Slice two**, implemented: `#[Path]`, `#[Query]`, `#[Part]`, `#[Body]`.
 3. **Other packages**, tracked separately: bind-routing (thin `Builder` adapter, controller
    registration from `Config`, attributes re-exported or deprecated in favor of this library's);
    `icanboogie/view` and `bind-view` (`IntoResponse`, route-based templates).
-4. **Later**: `#[Body]`, optional pattern segments, converters for bare return objects, events
+4. **Later**: optional pattern segments, converters for bare return objects, events
    versus middleware, each with its own ADR.
 
 Each step is a commit with its tests and its `CHANGELOG.md` entry. The user documentation
@@ -565,11 +565,10 @@ belongs to a later major version.
   closure in the attribute is not exportable, and only first-class callables are accepted in
   attributes, which needs PHP 8.5. Third-party classes cannot be annotated; the controller builds
   them from a `string`.
-- Hydrating parameters into classes (`#[Part]`, `#[Body]`), with or without validation. The options
-  are an opt-in contract implemented by the class (like `FromRequest` in Axum), or a hydrator
-  service, which would require a service-holding parameter. Either needs its own ADR, and the status
-  for a validation failure (400 or 422) and for an unsupported `Content-Type` (415) are decided
-  there.
+- Hydrating parameters into classes (`#[Part]`, `#[Body]`) is decided in
+  [ADR 0002](0002-decoders.md), with static decoders. Validation, with a status of 422 for a
+  validation failure, and the status for an unsupported `Content-Type` (415) are still open and need
+  their own ADR.
 - Returning bare domain objects (DTOs, entities) or `string`. That would need a converter registry
   claiming return types at configuration time, the way parameters are claimed. It is a possible
   extension of the same plan, defined by its own ADR if the need arises.

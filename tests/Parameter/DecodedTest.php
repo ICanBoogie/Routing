@@ -15,6 +15,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Test\ICanBoogie\Routing\Decoder\Article;
+use Test\ICanBoogie\Routing\Decoder\Probe;
 use Test\ICanBoogie\Routing\Decoder\Rejecting;
 use Test\ICanBoogie\Routing\Decoder\Slug;
 use Test\ICanBoogie\Routing\Decoder\SlugDecoder;
@@ -57,6 +58,35 @@ final class DecodedTest extends TestCase
         $article = $parameter->resolve($this->request(part: [ 'article' => [ 'a' => 1 ] ]));
 
         $this->assertSame('part:article:{"a":1}', $article->description);
+    }
+
+    public function test_resolve_body(): void
+    {
+        $parameter = new Decoded('body', 'payload', Probe::class, Slug::class);
+        $slug = $parameter->resolve($this->request());
+
+        $this->assertSame('body|NULL|SplFileObject|php://input', $slug->value);
+    }
+
+    public function test_body_is_never_missing(): void
+    {
+        $parameter = new Decoded('body', 'payload', Probe::class, Slug::class, nullable: true);
+
+        $this->assertInstanceOf(Slug::class, $parameter->resolve($this->request()));
+    }
+
+    public function test_body_not_decodable_is_a_bad_request(): void
+    {
+        $parameter = new Decoded('body', 'payload', SlugDecoder::class, Slug::class);
+
+        try {
+            $parameter->resolve($this->request());
+            $this->fail("Expected exception");
+        } catch (ParameterNotValid $e) {
+            $this->assertSame(400, $e->getCode());
+            $this->assertSame('body', $e->source);
+            $this->assertSame('payload', $e->name);
+        }
     }
 
     #[DataProvider('provide_source')]

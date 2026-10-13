@@ -250,6 +250,7 @@ A parameter is bound to the part of the request it comes from, which is explicit
 | `#[Path]`  | A placeholder of the pattern (optional, it is the default)   |
 | `#[Query]` | A value of the query string                                  |
 | `#[Part]`  | A named piece of the body: a form field, or a property of a JSON object |
+| `#[Body]`  | The raw body, as a `SplFileObject` opened on `php://input` |
 
 The name of the value is the name of the parameter, give another one to the attribute when they
 differ. A parameter has a single source.
@@ -285,6 +286,22 @@ doesn't accept it. A path parameter, unlike the others, is always checked agains
 the configuration is built, whereas a value of the query string or of the body is the client's to
 provide.
 
+`#[Body]` is for what `#[Part]` can't provide: XML, a custom format, or a large upload to process
+without loading it in memory. The parameter is a `SplFileObject`, a method has at most one, and the
+body is never missing, an empty body is an empty file. For a form or a JSON object, use `#[Part]`.
+
+```php
+<?php
+
+#[Put('/invoices/:id/import')]
+public function import(int $id, #[Body] SplFileObject $body): Response
+{
+    foreach ($body as $line) {
+        // …
+    }
+}
+```
+
 `#[Query]` and `#[Part]` never read the path, and `#[Path]` never reads the query string, so
 `?id=2` can't take the place of a placeholder or fill in what the body left out.
 
@@ -314,7 +331,7 @@ final class SlugDecoder implements Decoder
 public function show(#[Path(using: SlugDecoder::class)] Slug $slug): Response
 ```
 
-`using` works with `#[Path]`, `#[Query]`, and `#[Part]`. It is optional when the type of the parameter
+`using` works with `#[Path]`, `#[Query]`, `#[Part]`, and `#[Body]`. It is optional when the type of the parameter
 is a decoder itself, a class that decodes itself:
 
 ```php
@@ -333,10 +350,12 @@ public function show(Slug $slug): Response
   not enough, narrow it. Mistakes are found when the configuration is built.
 - Decoders are static: pure functions of their input, without services. When the object needs a
   service, read the value and use the service in the action.
-- `EncodedValue` tells the `value`, the `source` (`path`, `query`, or `part`), and the `name`. The
-  value is a string for a path parameter. For the query string and the body it is whatever the client
-  provided under the name: a string, a number or a boolean in JSON, or an array. The decoder checks
-  and casts it as it needs.
+- `EncodedValue` tells the `value`, the `source` (`path`, `query`, `part`, or `body`), and the `name`,
+  `null` for the body. The value is a string for a path parameter. For the query string and the form
+  or JSON body it is whatever the client provided under the name: a string, a number or a boolean in
+  JSON, or an array. For `#[Body]` it is the `SplFileObject` of the raw body, and the decoder reads
+  it as it needs, e.g. `#[Body(using: ImportDecoder::class)] Import $import`. The decoder checks and
+  casts the value as it needs.
 - A decoder is never called for a missing value, or a `null`. The parameter gets its default value
   or `null` when nullable, and the request is not valid otherwise. The default must be `null`, a
   scalar, an array, or an enum case, so that the configuration can be exported; make the parameter
@@ -549,6 +568,6 @@ Failures are reported by exceptions that the HTTP stack turns into responses.
 A path value that cannot be cast designates a resource that doesn't exist, hence the 404.
 `PathParameterNotValid` extends `NotFound`, and tells the `name` and the `type` of the parameter.
 Any other value comes from the client and is not valid, hence the 400. `ParameterNotValid` extends
-`ClientError`, and tells the `source` (`query` or `part`), the `name`, the `type`, and whether the
+`ClientError`, and tells the `source` (`query`, `part`, or `body`), the `name`, the `type`, and whether the
 value was `missing`.
 `ConfigNotValid` is a `LogicException`, it is never thrown when handling requests.

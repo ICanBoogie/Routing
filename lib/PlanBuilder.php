@@ -6,6 +6,7 @@ use BackedEnum;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Exception\ConfigNotValid;
+use ICanBoogie\Routing\Parameter\Body;
 use ICanBoogie\Routing\Parameter\CurrentRequest;
 use ICanBoogie\Routing\Parameter\MatchedRoute;
 use ICanBoogie\Routing\Parameter\Part;
@@ -17,6 +18,7 @@ use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionParameter;
 use ReflectionUnionType;
+use SplFileObject;
 
 use function array_map;
 use function class_exists;
@@ -69,6 +71,7 @@ final readonly class PlanBuilder
 
         self::assert_invocable($method);
         self::assert_returns_response($method);
+        self::assert_single_body($method);
 
         $plan = [];
 
@@ -87,6 +90,48 @@ final readonly class PlanBuilder
         if (!$method->isPublic() || $method->isStatic() || $method->isAbstract()) {
             throw ConfigNotValid::for_method($method, "must be a public, non-static, non-abstract method.");
         }
+    }
+
+    /**
+     * A method has at most one parameter bound to the body, which can be read once.
+     *
+     * @throws ConfigNotValid
+     */
+    private static function assert_single_body(ReflectionMethod $method): void
+    {
+        $count = 0;
+
+        foreach ($method->getParameters() as $parameter) {
+            $count += count($parameter->getAttributes(Attribute\Body::class));
+        }
+
+        if ($count > 1) {
+            throw ConfigNotValid::for_method(
+                $method,
+                "has $count parameters with #[" . Attribute\Body::class . "], at most one is allowed."
+            );
+        }
+    }
+
+    /**
+     * The raw body is provided as a `SplFileObject`, a decoder is required for any other type.
+     *
+     * @throws ConfigNotValid
+     */
+    private static function build_body_parameter(ReflectionMethod $method, ReflectionParameter $parameter): Body
+    {
+        $type = $parameter->getType();
+
+        if (!$type instanceof ReflectionNamedType || $type->getName() !== SplFileObject::class) {
+            throw ConfigNotValid::for_parameter(
+                $method,
+                $parameter,
+                ($type ? "the type `$type` is not supported" : "the type is missing") . " for the body, expected `"
+                . SplFileObject::class . "`, or a decoder with `using`."
+            );
+        }
+
+        return new Body();
     }
 
     /**
@@ -172,6 +217,10 @@ final readonly class PlanBuilder
             return $decoded;
         }
 
+        if ($attribute instanceof Attribute\Body) {
+            return self::build_body_parameter($method, $parameter);
+        }
+
         return match (true) {
             $attribute instanceof Attribute\Query => self::build_input_parameter(
                 $method,
@@ -195,11 +244,12 @@ final readonly class PlanBuilder
     private static function find_source_attribute(
         ReflectionMethod $method,
         ReflectionParameter $parameter
-    ): Attribute\Path|Attribute\Query|Attribute\Part|null {
+    ): Attribute\Path|Attribute\Query|Attribute\Part|Attribute\Body|null {
         $attributes = [
             ...$parameter->getAttributes(Attribute\Path::class),
             ...$parameter->getAttributes(Attribute\Query::class),
             ...$parameter->getAttributes(Attribute\Part::class),
+            ...$parameter->getAttributes(Attribute\Body::class),
         ];
 
         if (count($attributes) > 1) {

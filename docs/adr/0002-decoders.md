@@ -1,6 +1,6 @@
 # 2. Decoders
 
-- Status: Accepted. Implementation pending.
+- Status: Accepted. Implemented.
 - Date: 2026-10-13
 - Deciders: Olivier Laviale
 - Amends: [ADR 0001](0001-stateless-controllers.md), "No hydration into classes".
