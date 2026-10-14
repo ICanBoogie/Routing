@@ -121,18 +121,6 @@ parameters:
 			path: tests/MethodResponderTest.php
 
 		-
-			message: '#^Parameter \#1 \$type_or_hook of method ICanBoogie\\EventCollection\:\:attach\(\) expects \(Closure\(ICanBoogie\\Event\)\: void\)\|\(Closure\(ICanBoogie\\Event, object\|null\)\: void\)\|string, Closure\(ICanBoogie\\Routing\\Route\\BeforeRespondEvent, ICanBoogie\\Routing\\Route\)\: void given\.$#'
-			identifier: argument.type
-			count: 1
-			path: tests/Middleware/AlterTest.php
-
-		-
-			message: '#^Parameter \#1 \$type_or_hook of method ICanBoogie\\EventCollection\:\:attach\(\) expects \(Closure\(ICanBoogie\\Event\)\: void\)\|\(Closure\(ICanBoogie\\Event, object\|null\)\: void\)\|string, Closure\(ICanBoogie\\Routing\\Route\\RespondEvent, ICanBoogie\\Routing\\Route\)\: ICanBoogie\\HTTP\\Response given\.$#'
-			identifier: argument.type
-			count: 1
-			path: tests/Middleware/AlterTest.php
-
-		-
 			message: '#^Cannot access property \$description on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -257,18 +245,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: tests/RequestResponderProviderTest.php
-
-		-
-			message: '#^Parameter \#1 \$type_or_hook of method ICanBoogie\\EventCollection\:\:attach\(\) expects \(Closure\(ICanBoogie\\Event\)\: void\)\|\(Closure\(ICanBoogie\\Event, object\|null\)\: void\)\|string, Closure\(ICanBoogie\\Routing\\Route\\BeforeRespondEvent, ICanBoogie\\Routing\\Route\)\: void given\.$#'
-			identifier: argument.type
-			count: 1
-			path: tests/Route/BeforeRespondEventTest.php
-
-		-
-			message: '#^Parameter \#1 \$type_or_hook of method ICanBoogie\\EventCollection\:\:attach\(\) expects \(Closure\(ICanBoogie\\Event\)\: void\)\|\(Closure\(ICanBoogie\\Event, object\|null\)\: void\)\|string, Closure\(ICanBoogie\\Routing\\Route\\RespondEvent, ICanBoogie\\Routing\\Route\)\: void given\.$#'
-			identifier: argument.type
-			count: 1
-			path: tests/Route/RespondEventTest.php
 
 		-
 			message: '#^Cannot access offset ''pattern'' on mixed\.$#'

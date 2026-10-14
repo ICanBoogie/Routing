@@ -33,11 +33,9 @@ final class AlterTest extends TestCase
         $this->request->context->add($route);
         $this->response = new Response();
 
-        EventCollectionProvider::define(function () {
-            static $events;
+        $events = new EventCollection();
 
-            return $events ??= new EventCollection();
-        });
+        EventCollectionProvider::define(fn() => $events);
     }
 
     public function test_response_from_next(): void
@@ -76,7 +74,9 @@ final class AlterTest extends TestCase
         $new_response = new Response();
 
         get_events()->attach(
-            fn(RespondEvent $event, Route $sender) => $event->response = $new_response
+            function (RespondEvent $event, Route $sender) use ($new_response): void {
+                $event->response = $new_response;
+            }
         );
 
         $this->assertSame($new_response, $this->respond($request));
