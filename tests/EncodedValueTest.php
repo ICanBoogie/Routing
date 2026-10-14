@@ -26,7 +26,7 @@ final class EncodedValueTest extends TestCase
 
     public function test_decoder_implementations_can_narrow_the_return_type(): void
     {
-        $decoder = new class implements Decoder {
+        $decoder = new class () implements Decoder {
             public static function decode(EncodedValue $value): \stdClass
             {
                 return (object) [ 'slug' => $value->value ];

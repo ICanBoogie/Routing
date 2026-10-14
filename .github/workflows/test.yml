@@ -15,7 +15,7 @@ jobs:
         - "8.5"
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Install PHP
       uses: shivammathur/setup-php@v2
       with:
@@ -29,8 +29,8 @@ jobs:
         path: |
           ~/.composer/cache
           vendor
-        key: "php-${{ matrix.php-version }}"
-        restore-keys: "php-${{ matrix.php-version }}"
+        key: "php-${{ matrix.php-version }}-${{ hashFiles('composer.json') }}"
+        restore-keys: "php-${{ matrix.php-version }}-"
 
     - name: Install dependencies
       run: composer install --no-interaction --no-progress

@@ -1,0 +1,307 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method Test\\ICanBoogie\\Routing\\ActionResolverTest\:\:provide_resolve\(\) should return array\<string, array\{class\-string, string, string\}\> but returns array\{''controller suffix is stripped''\: array\{''App\\\\PhotosController'', ''show'', ''photos\:show''\}, ''namespace is stripped''\: array\{''App\\\\Presentation…'', ''list'', ''photos\:list''\}, ''not pluralized''\: array\{''App…'', ''show'', ''contact\:show''\}, ''plural is kept''\: array\{''App…'', ''show'', ''contacts\:show''\}, ''camel case is hyphenated''\: array\{''App…'', ''list'', ''post\-categories\:list''\}, ''acronym is hyphenated''\: array\{''App…'', ''show'', ''http\-server\:show''\}, digits\: array\{''App…'', ''list'', ''oauth2\-clients\:list''\}, ''no suffix''\: array\{''App\\\\Photos'', ''show'', ''photos\:show''\}, \.\.\.\}\.$#'
+			identifier: return.type
+			count: 1
+			path: tests/ActionResolverTest.php
+
+		-
+			message: '#^Parameter \#1 \$class of static method ICanBoogie\\Routing\\ActionResolver\:\:resolve\(\) expects class\-string, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: tests/ActionResolverTest.php
+
+		-
+			message: '#^Cannot call method respond\(\) on ICanBoogie\\HTTP\\Responder\|null\.$#'
+			identifier: method.nonObject
+			count: 6
+			path: tests/ActionResponderProvider/FromConfigTest.php
+
+		-
+			message: '#^Method ICanBoogie\\Routing\\ActionResponderProvider@anonymous/tests/ActionResponderProvider/WithMiddlewareTest\.php\:22\:\:responder_for_action\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: tests/ActionResponderProvider/WithMiddlewareTest.php
+
+		-
+			message: '#^Parameter \#1 \$value of class ICanBoogie\\Routing\\Attribute\\Name constructor expects non\-empty\-string, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Attribute/NameTest.php
+
+		-
+			message: '#^Parameter \#1 \$pattern of class ICanBoogie\\Routing\\Attribute\\Prefix constructor expects non\-empty\-string\|null, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Attribute/PrefixTest.php
+
+		-
+			message: '#^Parameter \#2 \$action of class ICanBoogie\\Routing\\Attribute\\Prefix constructor expects non\-empty\-string\|null, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Attribute/PrefixTest.php
+
+		-
+			message: '#^Class ICanBoogie\\Routing\\Attribute\\Route constructor invoked with 0 parameters, 1\-4 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: tests/Attribute/RouteTest.php
+
+		-
+			message: '#^Parameter \#3 \$methods of class ICanBoogie\\Routing\\Attribute\\Route constructor expects array\<ICanBoogie\\HTTP\\RequestMethod\>\|ICanBoogie\\HTTP\\RequestMethod, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Attribute/RouteTest.php
+
+		-
+			message: '#^Method Test\\ICanBoogie\\Routing\\ConfigBuilder\\PrivateRouteController\:\:hidden\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: tests/ConfigBuilder/PrivateRouteController.php
+
+		-
+			message: '#^Attribute class ICanBoogie\\Routing\\Attribute\\Prefix is not repeatable but is already present above the class\.$#'
+			identifier: attribute.nonRepeatable
+			count: 1
+			path: tests/ConfigBuilder/TwoPrefixesController.php
+
+		-
+			message: '#^Method Test\\ICanBoogie\\Routing\\ConfigBuilderTest\:\:provide_not_valid\(\) should return array\<string, array\{class\-string, Closure\|null, string\}\> but returns array\{''not a class''\: array\{''Not\\\\A\\\\Class'', null, ''`Not\\\\A\\\\Class` is…''\}, abstract\: array\{''Test\\\\ICanBoogie\\\\Routing\\\\ConfigBuilder\\\\AbstractController'', null, ''`Test\\\\ICanBoogie…''\}, ''no routes''\: array\{''Test\\\\ICanBoogie\\\\Routing\\\\ConfigBuilder\\\\NoRoutesController'', null, ''`Test\\\\ICanBoogie…''\}, ''route builder, method does not exist''\: array\{''Test\\\\ICanBoogie\\\\Routing\\\\ConfigBuilder\\\\PlainController'', Closure\(ICanBoogie\\Routing\\RouteBuilder\)\: ICanBoogie\\Routing\\RouteBuilder, ''`Test\\\\ICanBoogie…''\}, ''attribute on a method that is not public''\: array\{''Test\\\\ICanBoogie\\\\Routing\\\\ConfigBuilder\\\\PrivateRouteController'', null, ''`Test\\\\ICanBoogie…''\}, ''same action, two methods''\: array\{''Test\\\\ICanBoogie\\\\Routing\\\\ConfigBuilder\\\\DuplicateActionController'', null, ''The action `dup…''\}, ''empty pattern, no prefix''\: array\{''Test\\\\ICanBoogie\\\\Routing\\\\ConfigBuilder\\\\EmptyPatternController'', null, ''`Test\\\\ICanBoogie…''\}, ''placeholder missing, plan is validated''\: array\{''Test\\\\ICanBoogie\\\\Routing\\\\ConfigBuilder\\\\MissingPlaceholderController'', null, ''`Test\\\\ICanBoogie…''\}, \.\.\.\}\.$#'
+			identifier: return.type
+			count: 1
+			path: tests/ConfigBuilderTest.php
+
+		-
+			message: '#^Parameter \#1 \$expected of method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) expects class\-string\<object\>, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/ConfigBuilderTest.php
+
+		-
+			message: '#^Parameter \$action of method ICanBoogie\\Routing\\RouteBuilder\:\:get\(\) expects non\-empty\-string\|null, '''' given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/ConfigBuilderTest.php
+
+		-
+			message: '#^Cannot call method getPathname\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Decoder/Probe.php
+
+		-
+			message: '#^Parameter \#2 \$array of function implode expects array\<string\>, array\<int, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Decoder/Probe.php
+
+		-
+			message: '#^Method JsonSerializable@anonymous/tests/IntoResponse/JsonTest\.php\:112\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/IntoResponse/JsonTest.php
+
+		-
+			message: '#^Method JsonSerializable@anonymous/tests/IntoResponse/JsonTest\.php\:39\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/IntoResponse/JsonTest.php
+
+		-
+			message: '#^Parameter \#1 \$value of function count expects array\|Countable, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/IntoResponse/JsonTest.php
+
+		-
+			message: '#^Parameter \#2 \$action of class ICanBoogie\\Routing\\Route constructor expects non\-empty\-string, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/MethodResponderTest.php
+
+		-
+			message: '#^Parameter \#1 \$type_or_hook of method ICanBoogie\\EventCollection\:\:attach\(\) expects \(Closure\(ICanBoogie\\Event\)\: void\)\|\(Closure\(ICanBoogie\\Event, object\|null\)\: void\)\|string, Closure\(ICanBoogie\\Routing\\Route\\BeforeRespondEvent, ICanBoogie\\Routing\\Route\)\: void given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Middleware/AlterTest.php
+
+		-
+			message: '#^Parameter \#1 \$type_or_hook of method ICanBoogie\\EventCollection\:\:attach\(\) expects \(Closure\(ICanBoogie\\Event\)\: void\)\|\(Closure\(ICanBoogie\\Event, object\|null\)\: void\)\|string, Closure\(ICanBoogie\\Routing\\Route\\RespondEvent, ICanBoogie\\Routing\\Route\)\: ICanBoogie\\HTTP\\Response given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Middleware/AlterTest.php
+
+		-
+			message: '#^Cannot access property \$description on mixed\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: tests/Parameter/DecodedTest.php
+
+		-
+			message: '#^Cannot access property \$value on mixed\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: tests/Parameter/DecodedTest.php
+
+		-
+			message: '#^Parameter \#1 \$source of class ICanBoogie\\Routing\\Parameter\\Decoded constructor expects ''body''\|''part''\|''path''\|''query'', string given\.$#'
+			identifier: argument.type
+			count: 3
+			path: tests/Parameter/DecodedTest.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: tests/PatternTest.php
+
+		-
+			message: '#^Method Test\\ICanBoogie\\Routing\\PatternTest\:\:test_parsing\(\) has parameter \$expected_params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/PatternTest.php
+
+		-
+			message: '#^Method Test\\ICanBoogie\\Routing\\PatternTest\:\:test_valid_values_are_formatted_and_matched\(\) has parameter \$values with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/PatternTest.php
+
+		-
+			message: '#^Method Test\\ICanBoogie\\Routing\\PatternTest\:\:test_value_must_satisfy_the_constraint\(\) has parameter \$values with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/PatternTest.php
+
+		-
+			message: '#^Method Test\\ICanBoogie\\Routing\\PlanBuilder\\PlanController\:\:array_type\(\) has parameter \$x with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/PlanBuilder/PlanController.php
+
+		-
+			message: '#^Method Test\\ICanBoogie\\Routing\\PlanBuilder\\PlanController\:\:body_untyped\(\) has parameter \$body with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: tests/PlanBuilder/PlanController.php
+
+		-
+			message: '#^Method Test\\ICanBoogie\\Routing\\PlanBuilder\\PlanController\:\:no_return_type\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: tests/PlanBuilder/PlanController.php
+
+		-
+			message: '#^Method Test\\ICanBoogie\\Routing\\PlanBuilder\\PlanController\:\:not_public\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: tests/PlanBuilder/PlanController.php
+
+		-
+			message: '#^Method Test\\ICanBoogie\\Routing\\PlanBuilder\\PlanController\:\:query_array\(\) has parameter \$tags with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/PlanBuilder/PlanController.php
+
+		-
+			message: '#^Method Test\\ICanBoogie\\Routing\\PlanBuilder\\PlanController\:\:returns_nullable\(\) never returns ICanBoogie\\HTTP\\Response so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: tests/PlanBuilder/PlanController.php
+
+		-
+			message: '#^Method Test\\ICanBoogie\\Routing\\PlanBuilder\\PlanController\:\:returns_union_with_null\(\) never returns ICanBoogie\\HTTP\\Response so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: tests/PlanBuilder/PlanController.php
+
+		-
+			message: '#^Method Test\\ICanBoogie\\Routing\\PlanBuilder\\PlanController\:\:returns_union_with_string\(\) never returns string so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: tests/PlanBuilder/PlanController.php
+
+		-
+			message: '#^Method Test\\ICanBoogie\\Routing\\PlanBuilder\\PlanController\:\:untyped\(\) has parameter \$x with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: tests/PlanBuilder/PlanController.php
+
+		-
+			message: '#^Parameter \$using of attribute class ICanBoogie\\Routing\\Attribute\\Query constructor expects class\-string\<ICanBoogie\\Routing\\Decoder\>\|null, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: tests/PlanBuilder/PlanController.php
+
+		-
+			message: '#^Method Test\\ICanBoogie\\Routing\\PlanBuilderTest\:\:patterns\(\) should return list\<ICanBoogie\\Routing\\Pattern\> but returns array\<ICanBoogie\\Routing\\Pattern\>\.$#'
+			identifier: return.type
+			count: 1
+			path: tests/PlanBuilderTest.php
+
+		-
+			message: '#^Method Test\\ICanBoogie\\Routing\\PlanBuilderTest\:\:test_not_valid_parameter\(\) has parameter \$patterns with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/PlanBuilderTest.php
+
+		-
+			message: '#^Parameter \#1 \$patterns of method Test\\ICanBoogie\\Routing\\PlanBuilderTest\:\:patterns\(\) expects array\<string\>, array given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/PlanBuilderTest.php
+
+		-
+			message: '#^Parameter \#1 \$uri of class ICanBoogie\\Routing\\RouteProvider\\ByUri constructor expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: tests/RequestResponderProviderTest.php
+
+		-
+			message: '#^Parameter \#1 \$type_or_hook of method ICanBoogie\\EventCollection\:\:attach\(\) expects \(Closure\(ICanBoogie\\Event\)\: void\)\|\(Closure\(ICanBoogie\\Event, object\|null\)\: void\)\|string, Closure\(ICanBoogie\\Routing\\Route\\BeforeRespondEvent, ICanBoogie\\Routing\\Route\)\: void given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Route/BeforeRespondEventTest.php
+
+		-
+			message: '#^Parameter \#1 \$type_or_hook of method ICanBoogie\\EventCollection\:\:attach\(\) expects \(Closure\(ICanBoogie\\Event\)\: void\)\|\(Closure\(ICanBoogie\\Event, object\|null\)\: void\)\|string, Closure\(ICanBoogie\\Routing\\Route\\RespondEvent, ICanBoogie\\Routing\\Route\)\: void given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Route/RespondEventTest.php
+
+		-
+			message: '#^Cannot access offset ''pattern'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/RouteProvider/CompiledTest.php
+
+		-
+			message: '#^Cannot access offset 0 on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/RouteProvider/CompiledTest.php
+
+		-
+			message: '#^Parameter \#1 \$array of function array_keys expects array, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: tests/RouteProvider/CompiledTest.php
+
+		-
+			message: '#^Parameter \#1 \$names of static method Test\\ICanBoogie\\Routing\\RouteProvider\\CompiledTest\:\:sorted\(\) expects array\<string\>, list\<int\|string\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: tests/RouteProvider/CompiledTest.php
+
+		-
+			message: '#^Parameter \#2 \$action of class ICanBoogie\\Routing\\Route constructor expects non\-empty\-string, '''' given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/RouteTest.php
+
+		-
+			message: '#^Method Test\\ICanBoogie\\Routing\\SetStateHelper\:\:export_import\(\) should return T of object but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: tests/SetStateHelper.php

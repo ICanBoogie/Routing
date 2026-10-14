@@ -32,7 +32,7 @@ final class ControllerAbstractTest extends TestCase
 
     public function test_get_route(): void
     {
-        $controller = new class extends ControllerAbstract {
+        $controller = new class () extends ControllerAbstract {
             protected function action(Request $request): string
             {
                 return $this->route->action;
@@ -47,7 +47,7 @@ final class ControllerAbstractTest extends TestCase
 
     public function test_builtin_response(): void
     {
-        $controller = new class extends ControllerAbstract {
+        $controller = new class () extends ControllerAbstract {
             protected function action(Request $request): null
             {
                 $this->response->body = "Hello!";

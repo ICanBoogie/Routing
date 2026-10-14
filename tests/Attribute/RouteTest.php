@@ -139,7 +139,7 @@ final class RouteTest extends TestCase
 
     public function test_read_from_a_method(): void
     {
-        $controller = new class {
+        $controller = new class () {
             #[Get('/articles/:id', action: 'articles:show')]
             #[Post('/articles/:id', action: 'articles:update')]
             public function show(): void

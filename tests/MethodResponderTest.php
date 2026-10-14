@@ -41,7 +41,7 @@ final class MethodResponderTest extends TestCase
 
     public function test_calls_the_method_of_the_action(): void
     {
-        $controller = new class {
+        $controller = new class () {
             public function list(): Response
             {
                 return new Response('list');
@@ -67,7 +67,7 @@ final class MethodResponderTest extends TestCase
 
     public function test_arguments_come_from_the_plan_in_order(): void
     {
-        $controller = new class {
+        $controller = new class () {
             public function show(Request $request, int $year, Route $route, string $slug): Response
             {
                 return new Response("$request->uri|$year|$slug|$route->action");
@@ -202,7 +202,7 @@ final class MethodResponderTest extends TestCase
             function () use (&$count) {
                 $count++;
 
-                return new class {
+                return new class () {
                     public function show(): Response
                     {
                         return new Response();

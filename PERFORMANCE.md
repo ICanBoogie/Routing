@@ -2,10 +2,9 @@
 
 Suggestions to improve the performance of the package, inspired by how
 [symfony/routing](https://github.com/symfony/routing) and
-[nikic/FastRoute](https://github.com/nikic/FastRoute) match and generate URLs. They are
-suggestions, not commitments. Each one is measured with `make benchmark` before it is adopted; the
-ones
-that were done say so in the triage table.
+[nikic/FastRoute](https://github.com/nikic/FastRoute) match and generate URLs. They are suggestions,
+not commitments. Each one is measured with `make benchmark` before it is adopted; the ones that were
+done say so in the triage table.
 
 ## Ground rules
 
@@ -15,8 +14,7 @@ it passes one of these tests:
 1. **Measured:** `make benchmark` shows a clear improvement on a scenario that matters, without
    regressing the others. The numbers go in the commit message.
 2. **Better API:** the change makes the package easier or safer to use, even if the speed is the
-   same. These belong in [SUGGESTIONS.md](SUGGESTIONS.md) or CHANGELOG.md, not under a `PERF`
-   prefix.
+   same. These belong in CHANGELOG.md, not under a `PERF` prefix.
 
 Anything that passes neither is dropped, however well it works elsewhere.
 
@@ -35,9 +33,9 @@ What the baseline (see *Measuring*) supports, and what it does not:
 |  6 | Cheaper `Pattern::matches()`      | **Only if profiled**     | Micro-optimizations; do them if a profile shows `matches()` dominating after 1 and 3.                                                                            |
 |  7 | Faster `Pattern::format()`        | **Drop for now**         | `generate_url()` is flat at 0.8 µs for 10 to 1,000 routes. There is nothing to win. `rawurlencode` is a correctness question, not performance.                   |
 |  8 | Fewer allocations                 | **Drop for now**         | Not measured; the `static` counter in `Router` is only an issue if suggestion 4 happens.                                                                         |
-| 10 | Validate the table when built     | **API, not performance** | Detecting shadowed or duplicate routes is a usability gain (see SUGGESTIONS.md); also a prerequisite for safely reordering routes in 3.                          |
+| 10 | Validate the table when built     | **API, not performance** | Detecting shadowed or duplicate routes is a usability gain; also a prerequisite for safely reordering routes in 3.                          |
 | 11 | Atomic compiled file              | **Left to the app**      | The provider is exported as a value, the application (e.g. the configuration cache) writes the file.                                                             |
-| 12 | Validate parameters in `format()` | **API, not performance** | Costs time. Only a usability feature; belongs in SUGGESTIONS.md.                                                                                                 |
+| 12 | Validate parameters in `format()` | **API, not performance** | Costs time. Only a usability feature, not a performance one.                                                                                                 |
 
 ## How requests are resolved today
 
@@ -291,9 +289,7 @@ handler instead of allocating one per call.
 `Pattern::format()` does no validation: `format([ 'id' => 'abc' ])` for `<id:\d+>` produces a URL
 that will never match. FastRoute validates each value with its parameter regex (`GenerateUri`),
 which costs a `preg_match()` per parameter. If added, make it opt-in or reserve it for debug
-mode, and keep the unvalidated path as the default for speed. It pairs well with the clear
-missing-value
-error proposed in [SUGGESTIONS.md](SUGGESTIONS.md).
+mode, and keep the unvalidated path as the default for speed.
 
 ## Measuring
 

@@ -26,12 +26,12 @@ final class RouteBuilder
     /**
      * The prefix defined with {@see prefix()}.
      */
-    private(set) ?Prefix $prefix = null;
+    public private(set) ?Prefix $prefix = null;
 
     /**
      * @var list<TransientRoute>
      */
-    private(set) array $routes = [];
+    public private(set) array $routes = [];
 
     /**
      * Defines the prefixes of the routes of the controller, it applies to all of them wherever the

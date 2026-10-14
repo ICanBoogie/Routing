@@ -36,7 +36,7 @@ final class JsonTest extends TestCase
 
     public function test_encodes_a_json_serializable(): void
     {
-        $value = new class implements JsonSerializable {
+        $value = new class () implements JsonSerializable {
             public string $secret = 'nope';
 
             public function jsonSerialize(): array
@@ -109,7 +109,7 @@ final class JsonTest extends TestCase
 
     public function test_encodes_a_list_of_json_serializable(): void
     {
-        $item = static fn(int $id): JsonSerializable => new class($id) implements JsonSerializable {
+        $item = static fn(int $id): JsonSerializable => new class ($id) implements JsonSerializable {
             public function __construct(private int $id)
             {
             }

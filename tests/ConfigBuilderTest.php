@@ -34,7 +34,6 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
-
 use Test\ICanBoogie\Routing\ConfigBuilder\AbstractController;
 use Test\ICanBoogie\Routing\ConfigBuilder\ActionOfAnIdController;
 use Test\ICanBoogie\Routing\ConfigBuilder\ArticlesController;
@@ -59,6 +58,7 @@ use Test\ICanBoogie\Routing\ConfigBuilder\TwoPrefixesController;
 use Test\ICanBoogie\Routing\ConfigBuilder\UserPostsController;
 use Test\ICanBoogie\Routing\Discovery\InvoicesController;
 use Test\ICanBoogie\Routing\Discovery\ReportsController;
+
 use function array_map;
 use function iterator_to_array;
 

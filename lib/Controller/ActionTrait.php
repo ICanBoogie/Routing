@@ -26,6 +26,8 @@ trait ActionTrait
 {
     protected function action(Request $request): Response|Closure|Stringable|string|null
     {
+        // The action method is resolved at runtime, its return type can't be known statically.
+        // @phpstan-ignore return.type
         return $this->resolve_action($request)();
     }
 
@@ -46,7 +48,8 @@ trait ActionTrait
         $methods = [];
 
         for (;;) {
-            $base = preg_replace('/[^A-Za-z]+/', '_', $action);
+            $base = preg_replace('/[^A-Za-z]+/', '_', $action)
+                ?? throw new LogicException("Unable to build the base name of action `$action`");
             $methods[] = strtolower($request->method->value) . '_' . $base;
             $methods[] = 'any_' . $base;
             $methods[] = $base;
@@ -70,7 +73,7 @@ trait ActionTrait
     }
 
     /**
-     * @return string[]
+     * @return list<mixed>
      */
     private function resolve_action_args(Request $request): array
     {

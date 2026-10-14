@@ -78,7 +78,7 @@ final class PrefixTest extends TestCase
 
     public function test_can_be_extended(): void
     {
-        $extension = new readonly class extends Prefix {
+        $extension = new readonly class () extends Prefix {
             public function __construct()
             {
                 parent::__construct(pattern: '/cart', action: 'cart');

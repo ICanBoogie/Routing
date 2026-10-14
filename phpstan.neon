@@ -1,7 +1,11 @@
+# $schema: https://phpstan.olvlvl.com/schema.json
+includes:
+  - phpstan-baseline.neon
+
 parameters:
   level: max
   paths:
     - lib
-#    - tests
+    - tests
   excludePaths:
     - tests/sandbox/*

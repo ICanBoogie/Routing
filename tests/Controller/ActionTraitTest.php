@@ -77,7 +77,6 @@ final class ActionTraitTest extends TestCase
                         resolve_action_method as public;
                     }
 
-                    /** @phpstan-ignore-next-line */
                     private function get_articles_show(): void
                     {
                     }
@@ -94,7 +93,6 @@ final class ActionTraitTest extends TestCase
                         resolve_action_method as public;
                     }
 
-                    /** @phpstan-ignore-next-line */
                     private function any_articles_show(): void
                     {
                     }
@@ -111,7 +109,6 @@ final class ActionTraitTest extends TestCase
                         resolve_action_method as public;
                     }
 
-                    /** @phpstan-ignore-next-line */
                     private function articles_show(): void
                     {
                     }
@@ -128,7 +125,6 @@ final class ActionTraitTest extends TestCase
                         resolve_action_method as public;
                     }
 
-                    /** @phpstan-ignore-next-line */
                     private function get_show(): void
                     {
                     }
@@ -145,7 +141,6 @@ final class ActionTraitTest extends TestCase
                         resolve_action_method as public;
                     }
 
-                    /** @phpstan-ignore-next-line */
                     private function any_show(): void
                     {
                     }
@@ -162,7 +157,6 @@ final class ActionTraitTest extends TestCase
                         resolve_action_method as public;
                     }
 
-                    /** @phpstan-ignore-next-line */
                     private function show(): void
                     {
                     }
@@ -195,7 +189,6 @@ final class ActionTraitTest extends TestCase
             ) {
             }
 
-            /** @phpstan-ignore-next-line */
             private function show(string $nid): string
             {
                 ($this->assert)($nid);

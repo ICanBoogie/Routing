@@ -361,8 +361,7 @@ final class ConfigBuilder
         array $routes,
         ?Prefix $prefix,
         ?string $name,
-    ): array
-    {
+    ): array {
         $resolved = [];
 
         foreach ($routes as $route) {

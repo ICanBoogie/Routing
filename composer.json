@@ -21,10 +21,13 @@
         "source": "https://github.com/ICanBoogie/Routing"
     },
     "config": {
-        "sort-packages": true,
         "allow-plugins": {
             "olvlvl/composer-attribute-collector": true
-        }
+        },
+        "platform": {
+            "php": "8.4.1"
+        },
+        "sort-packages": true
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
