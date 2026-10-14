@@ -8,28 +8,23 @@ jobs:
   phpstan:
     name: phpstan
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        php-version:
-        - "8.4"
-        - "8.5"
     steps:
     - name: Checkout
       uses: actions/checkout@v5
     - name: Install PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: "${{ matrix.php-version }}"
+        php-version: latest
         ini-values: memory_limit=-1
         tools: composer:v2
     - name: Cache dependencies
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: |
           ~/.composer/cache
           vendor
-        key: "phpstan-${{ matrix.php-version }}-${{ hashFiles('composer.json') }}"
-        restore-keys: "phpstan-${{ matrix.php-version }}-"
+        key: "phpstan-${{ hashFiles('composer.json') }}"
+        restore-keys: "phpstan-"
 
     - name: Install dependencies
       run: composer install --no-interaction --no-progress

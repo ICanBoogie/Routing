@@ -6,7 +6,7 @@ RUN <<-EOF
 	apt-get install -y autoconf pkg-config unzip
 	pecl channel-update pecl.php.net
 	pecl install xdebug
-	docker-php-ext-enable opcache xdebug
+	docker-php-ext-enable xdebug
 EOF
 
 RUN <<-EOF
@@ -27,7 +27,8 @@ EOF
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER 1
-ENV PATH="/root/.composer/vendor/bin:${PATH}"
+ENV COMPOSER_HOME=/opt/composer
+ENV PATH="/opt/composer/vendor/bin:${PATH}"
 
 # lint
 

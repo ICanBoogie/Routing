@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v7.0
+## v7.0.0
 
 ### New Requirements
 
@@ -133,6 +133,7 @@ PHP 8.4+
 
 ### Other changes
 
+- Require `composer/pcre` ^3.2 and `symfony/finder` ^7.0 for development, to avoid the PHP 8.4 deprecations of the older versions that `composer/class-map-generator` allows.
 - `Pattern` keeps the `*` of a catch-all pattern: `/files/*` was exposed as `/files/`, and `format()`
   ignored the `all` value. It now formats it, keeping the `/` between segments.
 - Added `Pattern::captured()`, which pairs and decodes captured values. Route providers use it, so

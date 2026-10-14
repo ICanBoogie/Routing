@@ -9,7 +9,7 @@ services:
         PHP_IDE_CONFIG: 'serverName=icanboogie-routing'
     volumes:
     - .:/app:delegated
-    - composer-cache:/root/.composer:delegated
+    - composer-cache:/opt/composer/cache
     working_dir: /app
 
   app85:
@@ -21,7 +21,7 @@ services:
         PHP_IDE_CONFIG: 'serverName=icanboogie-routing'
     volumes:
     - .:/app:delegated
-    - composer-cache:/root/.composer:delegated
+    - composer-cache:/opt/composer/cache
     working_dir: /app
 
 volumes:
