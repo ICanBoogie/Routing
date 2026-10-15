@@ -353,8 +353,8 @@ $builder->add_controller(
 omitted, it is inferred from the controller's name and the method's name, which is used as is, e.g.
 `PhotosController::show` is `photos:show`), computes each method's parameter plan, and validates it
 against the patterns. Mistakes fail there with a clear message, and nothing is registered when a
-controller is not valid. Discovery, `discover_controllers()`, is a loop that calls
-`add_controller()`.
+controller is not valid. Discovery, enabled with `enable_discovery()`, is a loop that calls
+`add_controller()` when the configuration is built.
 
 A route exists because a controller defines it, so `add_controller()` is the only way to add routes
 to the `ConfigBuilder`, which doesn't build on `RouteCollector`. The collector and `RouteMaker` are
@@ -512,7 +512,7 @@ response. Both ship side by side in 7.x through the `ActionResponderProvider` ch
 1. **Slice one**, in this library, implemented: `Parameter` (`Request`, `Route`, path),
    `IntoResponse`, `MethodResponder`, `ActionDefinition`/`ControllerDefinition`, the attributes
    ported from bind-routing, `PlanBuilder`, the builder with `add_controller()`,
-   `discover_controllers()`, `cache_strategy()` and `RouteBuilder`, `Config`, and
+   `enable_discovery()`, `cache_strategy()` and `RouteBuilder`, `Config`, and
    `ActionResponderProvider\FromConfig`.
 2. **Slice two**, implemented: `#[Path]`, `#[Query]`, `#[Part]`, `#[Body]`.
 3. **Other packages**, tracked separately: bind-routing (thin `Builder` adapter, controller

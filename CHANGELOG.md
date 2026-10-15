@@ -4,10 +4,11 @@
 
 ### New Requirements
 
-PHP 8.4+
+PHP 8.4+, `icanboogie/config`
 
 ### New features
 
+- `ConfigBuilder` implements `ICanBoogie\Config\Builder`, its fragments are named `routes`.
 - Added `RouteProvider\Chain`, which asks a list of route providers in turn, the first route found wins.
   Use it with a `Mutable` alongside a decorated `Immutable` to add a bit of freedom at runtime, see
   [docs/RouteProviders.md](docs/RouteProviders.md).
@@ -89,11 +90,11 @@ PHP 8.4+
       `RouteProvider\Memoize`, meant for development, where the configuration is built on each
       request, the resulting `Config` can't be exported; `COMPILE` uses `RouteProvider\Compiled`,
       meant for production.
-    - `ConfigBuilder::discover_controllers()` adds the controllers found through the `Route`
-      attributes of their methods, so they don't have to be listed. Discovery relies on
+    - `ConfigBuilder::enable_discovery()` and `disable_discovery()` control whether the controllers found through
+      the `Route` attributes of their methods are added when the configuration is built, so they don't have to be listed. Discovery relies on
       [olvlvl/composer-attribute-collector](https://github.com/olvlvl/composer-attribute-collector),
       which the application decides to require; it is not a requirement of the library. Controllers
-      already added with `add_controller()` are skipped.
+      added with `add_controller()` are skipped, before or after.
 - Added `IntoResponse\Json`, an `IntoResponse` that encodes data as a JSON response. Arrays and scalars
   are encoded as they are, objects, even nested, must implement `JsonSerializable` so that nothing is
   exposed by accident. A list is encoded item by item. Use `encode` to plug a

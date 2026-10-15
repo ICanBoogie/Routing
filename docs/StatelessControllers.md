@@ -548,19 +548,23 @@ $config->routes; // a RouteProvider
 
 ### Discovering controllers
 
-Instead of listing the controllers, `discover_controllers()` adds the ones that have methods with a
-`Route` attribute. It relies on
-[olvlvl/composer-attribute-collector](https://github.com/olvlvl/composer-attribute-collector), which
-you decide to require. Load the `vendor/attributes.php` file it generates before building the
-configuration, see its documentation. Controllers already added with `add_controller()` are skipped,
-so a controller can be added by hand, to use a `RouteBuilder` for instance, before or after
-discovery.
+Instead of adding each controller with `add_controller()`, call `enable_discovery()` and let the
+builder find them. When the configuration is built, every class with a method marked with a `Route`
+attribute (`Get`, `Post`…) is added as a controller. `disable_discovery()` turns it off again.
+
+Discovery relies on [olvlvl/composer-attribute-collector][], which your application has to require.
+Load the `vendor/attributes.php` file it generates before building the configuration, see its
+documentation.
+
+A controller added with `add_controller()` is never discovered a second time, whether you add it
+before or after enabling discovery. Use this to add a controller by hand, with a `RouteBuilder` for
+instance, while discovering the others.
 
 ```php
 <?php
 
 $config = new ConfigBuilder()
-    ->discover_controllers()
+    ->enable_discovery()
     ->build();
 ```
 
@@ -590,7 +594,7 @@ use ICanBoogie\Routing\CacheStrategy;
 use ICanBoogie\Routing\ConfigBuilder;
 
 $config = new ConfigBuilder()
-    ->discover_controllers()
+    ->enable_discovery()
     ->cache_strategy(CacheStrategy::COMPILE)
     ->build();
 
@@ -677,3 +681,7 @@ Any other value comes from the client and is not valid, hence the 400. `Paramete
 whether the value was `missing`.
 
 `ConfigNotValid` is a `LogicException`, it is never thrown when handling requests.
+
+
+
+[olvlvl/composer-attribute-collector]: https://github.com/olvlvl/composer-attribute-collector

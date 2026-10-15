@@ -87,6 +87,11 @@ use function iterator_to_array;
 #[UsesClass(ById::class)]
 final class ConfigBuilderTest extends TestCase
 {
+    public function test_fragment_filename(): void
+    {
+        $this->assertSame('routes', ConfigBuilder::get_fragment_filename());
+    }
+
     public function test_empty(): void
     {
         $config = new ConfigBuilder()->build();
@@ -691,9 +696,9 @@ final class ConfigBuilderTest extends TestCase
         $this->assertArrayHasKey('plain:list', $config->controller_by_action);
     }
 
-    public function test_discover_controllers(): void
+    public function test_enable_discovery(): void
     {
-        $config = new ConfigBuilder()->discover_controllers()->build();
+        $config = new ConfigBuilder()->enable_discovery()->build();
 
         $this->assertEqualsCanonicalizing(
             [ InvoicesController::class, ReportsController::class ],
@@ -704,18 +709,47 @@ final class ConfigBuilderTest extends TestCase
         $this->assertSame(ReportsController::class, $config->controller_by_action['admin:reports:show']);
     }
 
-    public function test_discover_controllers_skips_the_controllers_already_added(): void
+    public function test_discovery_skips_the_controllers_already_added(): void
     {
         $config = new ConfigBuilder()
             ->add_controller(
                 InvoicesController::class,
                 fn(RouteBuilder $r) => $r->prefix(pattern: '/billing', action: 'billing')
             )
-            ->discover_controllers()
+            ->enable_discovery()
             ->build();
 
         $this->assertSame(InvoicesController::class, $config->controller_by_action['billing:invoices:list']);
         $this->assertArrayNotHasKey('invoices:list', $config->controller_by_action);
         $this->assertArrayHasKey('admin:reports:show', $config->controller_by_action);
+    }
+
+    public function test_discovery_skips_the_controllers_added_afterwards(): void
+    {
+        $config = new ConfigBuilder()
+            ->enable_discovery()
+            ->add_controller(
+                InvoicesController::class,
+                fn(RouteBuilder $r) => $r->prefix(pattern: '/billing', action: 'billing')
+            )
+            ->build();
+
+        $this->assertSame(InvoicesController::class, $config->controller_by_action['billing:invoices:list']);
+        $this->assertArrayNotHasKey('invoices:list', $config->controller_by_action);
+    }
+
+    public function test_disable_discovery(): void
+    {
+        $config = new ConfigBuilder()
+            ->enable_discovery()
+            ->disable_discovery()
+            ->build();
+
+        $this->assertSame([], $config->controllers);
+    }
+
+    public function test_discovery_is_disabled_by_default(): void
+    {
+        $this->assertSame([], new ConfigBuilder()->build()->controllers);
     }
 }

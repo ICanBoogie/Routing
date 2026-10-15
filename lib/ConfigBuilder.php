@@ -3,6 +3,7 @@
 namespace ICanBoogie\Routing;
 
 use Closure;
+use ICanBoogie\Config\Builder;
 use ICanBoogie\Routing\Attribute\Name;
 use ICanBoogie\Routing\Attribute\Prefix;
 use ICanBoogie\Routing\Config\ActionDefinition;
@@ -10,7 +11,6 @@ use ICanBoogie\Routing\Config\ControllerDefinition;
 use ICanBoogie\Routing\Config\TransientRoute;
 use ICanBoogie\Routing\Exception\ConfigNotValid;
 use ICanBoogie\Routing\Exception\InvalidPattern;
-use LogicException;
 use olvlvl\ComposerAttributeCollector\Attributes;
 use ReflectionAttribute;
 use ReflectionClass;
@@ -18,15 +18,15 @@ use ReflectionClass;
 use function array_map;
 use function class_exists;
 use function count;
-use function sprintf;
 
 /**
- * Builds the routing {@see Config}.
+ * Builds the routing {@see Config}, the one of the `routes` fragments.
  *
  * Controllers are plain classes, they are added with {@see add_controller()}, which reads the
- * attributes of the class and its methods, and optionally a {@see RouteBuilder}. Everything is
- * validated and resolved right away, so that mistakes are reported when the configuration is built,
- * not when requests are handled.
+ * attributes of the class and its methods, and optionally a {@see RouteBuilder}, or found with
+ * {@see enable_discovery()}. Everything is validated and resolved when a controller is added, or
+ * when the configuration is built for the discovered controllers, so that mistakes are reported
+ * then, not when requests are handled.
  *
  * Routes exist because a controller defines them: there is no way to add a route without the
  * action that answers it.
@@ -39,9 +39,19 @@ use function sprintf;
  *         ->post('/contact.html', 'create'))
  *     ->build();
  * ```
+ *
+ * The cache strategy is up to the configuration file: use {@see CacheStrategy::COMPILE} in
+ * production, and {@see CacheStrategy::MEMOIZE} in development.
+ *
+ * @implements Builder<Config>
  */
-final class ConfigBuilder
+final class ConfigBuilder implements Builder
 {
+    public static function get_fragment_filename(): string
+    {
+        return 'routes';
+    }
+
     private RouteProvider\Mutable $routes;
 
     /**
@@ -55,6 +65,8 @@ final class ConfigBuilder
     private array $controller_by_action = [];
 
     private CacheStrategy $cache_strategy = CacheStrategy::NONE;
+
+    private bool $discovery = false;
 
     /**
      * @var array<string, string>
@@ -144,39 +156,31 @@ final class ConfigBuilder
     }
 
     /**
-     * Adds the controllers found with the {@see Attribute\Route} attributes of their methods.
+     * Enables the discovery of the controllers with methods marked with the {@see Attribute\Route}
+     * attributes, they are added to the configuration when {@see build()} is invoked.
      *
      * The controllers are discovered by `olvlvl/composer-attribute-collector`, which is up to the
-     * application to require. The controllers already added with {@see add_controller()} are
-     * skipped, so a controller can be added by hand, e.g. with a {@see RouteBuilder}, before or
-     * after discovery.
+     * application to require. The controllers added with {@see add_controller()} are skipped, whether
+     * they are added before or after, so a controller can be added by hand, e.g. with a
+     * {@see RouteBuilder}, and not be discovered.
      *
      * @return $this
-     *
-     * @throws ConfigNotValid
-     * @throws LogicException if the attribute collector is not available.
      */
-    public function discover_controllers(): self
+    public function enable_discovery(): self
     {
-        if (!class_exists(Attributes::class)) {
-            throw new LogicException(
-                sprintf(
-                    "Unable to configure using attributes, the class %s is not available, "
-                    . "require olvlvl/composer-attribute-collector.",
-                    Attributes::class
-                )
-            );
-        }
+        $this->discovery = true;
 
-        foreach (Attributes::filterTargetMethods(
-            Attributes::predicateForAttributeInstanceOf(Attribute\Route::class)
-        ) as $target) {
-            $class = $target->class;
+        return $this;
+    }
 
-            if (!isset($this->controllers[$class])) {
-                $this->add_controller($class);
-            }
-        }
+    /**
+     * Disables the discovery of the controllers, it is disabled by default.
+     *
+     * @return $this
+     */
+    public function disable_discovery(): self
+    {
+        $this->discovery = false;
 
         return $this;
     }
@@ -203,9 +207,15 @@ final class ConfigBuilder
      * In production, the routes are compiled and the configuration is cached as a PHP file, so the
      * work is done once, when the configuration is built, and not by every request. See
      * {@see cache_strategy()}.
+     *
+     * @throws ConfigNotValid
      */
     public function build(): Config
     {
+        if ($this->discovery) {
+            $this->discover_controllers();
+        }
+
         return new Config(
             $this->build_routes(),
             $this->controllers,
@@ -220,6 +230,28 @@ final class ConfigBuilder
             CacheStrategy::MEMOIZE => new RouteProvider\Memoize(new RouteProvider\Immutable($this->routes)),
             CacheStrategy::COMPILE => new RouteProvider\Compiled($this->routes),
         };
+    }
+
+    /**
+     * Adds the controllers found with the {@see Attribute\Route} attributes of their methods, that
+     * have not been added already.
+     *
+     * @throws ConfigNotValid if the attribute collector is not available, or a controller is not valid.
+     */
+    private function discover_controllers(): void
+    {
+        class_exists(Attributes::class)
+        or throw new ConfigNotValid("Discovery requires `olvlvl/composer-attribute-collector`");
+
+        foreach (Attributes::filterTargetMethods(
+            Attributes::predicateForAttributeInstanceOf(Attribute\Route::class)
+        ) as $target) {
+            $class = $target->class;
+
+            if (!isset($this->controllers[$class])) {
+                $this->add_controller($class);
+            }
+        }
     }
 
     /**
