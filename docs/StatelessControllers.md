@@ -307,6 +307,14 @@ public function add_note(#[Path('id')] int $invoice_id, #[Part] string $text, #[
 }
 ```
 
+`#[Part]` reads `Request::$request_params`. PHP fills it from `$_POST` for
+`application/x-www-form-urlencoded` and `multipart/form-data`, but **nobody decodes
+`application/json`**: `icanboogie/http` leaves the body untouched, so for a JSON request
+`request_params` is empty and every `#[Part]` is missing. To use `#[Part]` with JSON, decode the body
+into `request_params` before routing, see [Reading a JSON body](#reading-a-json-body). Otherwise read
+the body with a [decoder](#decoders) bound to `#[Body]`, which suits a JSON body that makes an object
+(a command, a DTO) better than one `#[Part]` per property.
+
 Values are cast like path values. A JSON body also provides numbers and booleans, which are accepted
 when they have the type of the parameter. Arrays are not supported, a value is a single value.
 
@@ -319,7 +327,8 @@ provide.
 `#[Body]` is for what `#[Part]` can't provide: XML, a custom format, or a large upload to process
 without loading it in memory. The parameter is a `SplFileObject`, which tests can replace with the
 `body_stream` option of the request, a method has at most one, and the
-body is never missing, an empty body is an empty file. For a form or a JSON object, use `#[Part]`.
+body is never missing, an empty body is an empty file. For a form, use `#[Part]`; for a JSON object, use
+`#[Part]` once the body is decoded into `request_params`, or a decoder on `#[Body]`.
 
 ```php
 <?php
@@ -332,6 +341,63 @@ public function import(int $id, #[Body] SplFileObject $body): Response
     }
 }
 ```
+
+### Reading a JSON body
+
+A middleware can decode a JSON body into `request_params`, after which `#[Part]` works the same for
+a form and for JSON. The value of a malformed body is a 400, not a 500:
+
+```php
+<?php
+
+use ICanBoogie\HTTP\ClientError;
+use ICanBoogie\HTTP\Request;
+use ICanBoogie\HTTP\Responder;
+use ICanBoogie\HTTP\Response;
+use ICanBoogie\Routing\Middleware;
+use JsonException;
+
+final class DecodeJsonBody implements Middleware
+{
+    public function responder(Responder $next): Responder
+    {
+        return new class ($next) implements Responder {
+            public function __construct(private Responder $next)
+            {
+            }
+
+            public function respond(Request $request): Response
+            {
+                if ($request->headers->content_type->type === 'application/json' && $request->body_stream) {
+                    $request->body_stream->rewind();
+
+                    $json = '';
+
+                    while (!$request->body_stream->eof()) {
+                        $json .= $request->body_stream->fread(8192);
+                    }
+
+                    try {
+                        $data = json_decode($json, true, flags: JSON_THROW_ON_ERROR);
+                    } catch (JsonException $e) {
+                        throw new ClientError("The body is not valid JSON.", previous: $e);
+                    }
+
+                    if (!is_array($data) || ($data !== [] && array_is_list($data))) {
+                        throw new ClientError("Expected a JSON object.");
+                    }
+
+                    $request->request_params = $data;
+                }
+
+                return $this->next->respond($request);
+            }
+        };
+    }
+}
+```
+
+The stream is rewound by the next reader, so `#[Body]` still gets the whole body.
 
 `#[Query]` and `#[Part]` never read the path, and `#[Path]` never reads the query string, so
 `?id=2` can't take the place of a placeholder or fill in what the body left out.

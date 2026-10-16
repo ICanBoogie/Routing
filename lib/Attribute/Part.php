@@ -9,6 +9,14 @@ use ICanBoogie\Routing\Decoder;
  * Binds a parameter of an action to a named piece of the request body, a field of a form or a
  * property of a JSON object.
  *
+ * The pieces are those of {@see \ICanBoogie\HTTP\Request::$request_params}, which PHP fills from
+ * `$_POST` for a form. A JSON body is **not** decoded by `icanboogie/http`: decode it into
+ * `request_params` (e.g. in a middleware) or `#[Part]` finds nothing, see
+ * docs/StatelessControllers.md.
+ *
+ * `#[Part]` suits flat values. To build an object from a JSON body, e.g. a command, use {@see Body}
+ * with a {@see Decoder}.
+ *
  * The value is cast to the type of the parameter, `int`, `float`, `string`, `bool`, or a backed
  * enum. A missing value is the default value of the parameter, or `null` if it is nullable,
  * otherwise the request is not valid.

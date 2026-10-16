@@ -13,8 +13,9 @@ use ICanBoogie\Routing\Decoder;
  * decoder receives the file object. The `using` argument is optional when the type of the parameter
  * is a decoder itself. A method has at most one `#[Body]`.
  *
- * Decoded data is also available through {@see Part}, a form or a JSON object; the body is for what
- * `Part` can't provide, e.g. XML, a custom format, or a large upload to process without loading it in
+ * Decoded data is also available through {@see Part}, a form, or a JSON object once the application has
+ * decoded it into `Request::$request_params`; the body is for what `Part` can't provide, e.g. XML, a
+ * custom format, a JSON body that is not decoded, or a large upload to process without loading it in
  * memory.
  */
 #[Attribute(Attribute::TARGET_PARAMETER)]

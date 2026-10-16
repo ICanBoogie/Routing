@@ -250,14 +250,17 @@ the body left out.
   or the body.
 - The key defaults to the parameter name; `#[Query('q')] string $search` overrides it.
 - `#[Part]` names a piece of the body, as a part of `multipart/form-data` has a name. It reads
-  `request_params`, which `Request` fills with `$_POST` or, for `application/json`, the decoded JSON
-  object, so it does not care about the encoding. The names `#[Get]` and `#[Post]` would echo
+  `request_params`, which `Request` fills with `$_POST`. The ADR assumed `Request` also fills it with
+  the decoded JSON object for `application/json`, but `icanboogie/http` does not decode the body,
+  the application does, e.g. with a middleware, see docs/StatelessControllers.md. Once filled,
+  `#[Part]` does not care about the encoding. The names `#[Get]` and `#[Post]` would echo
   `$_GET` and `$_POST`, but they are taken by the route shortcuts, and the source is not tied to the
   HTTP method: a `#[Put]` route reads its form data or JSON from the same `request_params`.
 - `#[Body]` is the raw body as a stream, `Request::$body_stream`, a `SplFileObject` on
   `php://input` that `icanboogie/http` opens, and that tests can replace. Decoded
   data is already available through `#[Part]`: PHP decodes `application/x-www-form-urlencoded` and
-  `multipart/form-data`, and `Request` decodes `application/json`, all into `request_params`.
+  `multipart/form-data`, into `request_params`; `Request` does not decode `application/json`, the
+  application must.
   `#[Body]` covers what `#[Part]` cannot, e.g. XML, a custom format, or a large upload to process
   without loading it in memory. At most one `#[Body]` per method is allowed.
   - The parameter is declared `SplFileObject`: a proper object, and no stream abstraction is
