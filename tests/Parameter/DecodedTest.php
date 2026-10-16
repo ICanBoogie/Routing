@@ -21,6 +21,7 @@ use Test\ICanBoogie\Routing\Decoder\Probe;
 use Test\ICanBoogie\Routing\Decoder\Rejecting;
 use Test\ICanBoogie\Routing\Decoder\Slug;
 use Test\ICanBoogie\Routing\Decoder\SlugDecoder;
+use Test\ICanBoogie\Routing\Decoder\Wide;
 use Test\ICanBoogie\Routing\SetStateHelper;
 
 #[CoversClass(Decoded::class)]
@@ -43,6 +44,14 @@ final class DecodedTest extends TestCase
     {
         $parameter = new Decoded('query', 'slug', SlugDecoder::class, Slug::class);
         $slug = $parameter->resolve($this->request(query: [ 'slug' => 'hello', 'other' => 'x' ]));
+
+        $this->assertEquals(new Slug('hello'), $slug);
+    }
+
+    public function test_decoder_receives_the_class_to_produce(): void
+    {
+        $parameter = new Decoded('query', 'slug', Wide::class, Slug::class);
+        $slug = $parameter->resolve($this->request(query: [ 'slug' => 'hello' ]));
 
         $this->assertEquals(new Slug('hello'), $slug);
     }

@@ -107,15 +107,18 @@ library, or to decode the same type in several ways.
   state. This keeps the plan plain data and agrees with ADR 0001. A decoder that needs a service
   cannot be one; the action reads the values and calls the service. Switching to instance decoders
   later would break the interface, so static is a decision, not a default.
-- The return type is `object`, narrowed by implementations.
+- The return type is `object`, narrowed by implementations. A decoder that serves many types
+  keeps `object` and reads `EncodedValue::$into_class`; the builder accepts it, and the result is
+  checked against the parameter when the action is called.
 - `EncodedValue` is an envelope, not a bare `mixed`, so fields can be added without breaking
   decoders.
 
-| Member of `EncodedValue` | Description |
-|---|---|
-| `$value` | The raw value, see below. |
-| `$source` | `path`, `query`, `part` or `body`. |
-| `$name` | Name of the value in its source, for error messages. |
+| Member of `EncodedValue` | Description                                                           |
+|--------------------------|-----------------------------------------------------------------------|
+| `$value`                 | The raw value, see below.                                             |
+| `$source`                | `path`, `query`, `part` or `body`.                                    |
+| `$into_class`            | The class the decoder is asked to produce, the type of the parameter. |
+| `$name`                  | Name of the value in its source, for error messages.                  |
 
 The envelope has no cast helpers: what a decoder needs from a value is its own business, and it
 does its own checks and casting in PHP. `Casting` stays internal to the scalar parameters. Helpers
@@ -123,11 +126,11 @@ can be added later, the envelope exists so that they can.
 
 What `$value` holds depends on the source:
 
-| Source | `$value` |
-|---|---|
-| `#[Path]` | a `string` |
+| Source                | `$value`                                                                      |
+|-----------------------|-------------------------------------------------------------------------------|
+| `#[Path]`             | a `string`                                                                    |
 | `#[Query]`, `#[Part]` | the value under `name`: a `string`, a number or boolean (JSON), or an `array` |
-| `#[Body]` | the body stream, the `SplFileObject` of `Request::$body_stream` |
+| `#[Body]`             | the body stream, the `SplFileObject` of `Request::$body_stream`               |
 
 `#[Query]` and `#[Part]` never hand the whole source to the decoder, only the value under `name`.
 Anything that needs the whole body uses `#[Body]`, which stays the raw body of ADR 0001, at most

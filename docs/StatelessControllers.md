@@ -444,11 +444,39 @@ final readonly class Slug implements Decoder
 public function show(Slug $slug): Response
 ```
 
-- The return type of `decode()` must be a class assignable to the type of the parameter, `object` is
-  not enough, narrow it. Mistakes are found when the configuration is built.
+A decoder can serve many types by returning `object` and reading `EncodedValue::$into_class`, the
+class of the parameter. This one deserializes a JSON body into whatever class the action expects:
+
+```php
+<?php
+
+final class JsonBody implements Decoder
+{
+    public static function decode(EncodedValue $value): object
+    {
+        $class = $value->into_class;
+
+        return $value->value instanceof SplFileObject
+            ? MyDeserializer::deserialize($value->value->fread(…), $class)
+            : throw new NotDecodable("Expected the body of the request");
+    }
+}
+
+#[Post('/articles')]
+public function create(#[Body(using: JsonBody::class)] CreateArticle $command): Response
+
+#[Put('/articles/:id')]
+public function update(int $id, #[Body(using: JsonBody::class)] UpdateArticle $command): Response
+```
+
+- The return type of `decode()` must be a class assignable to the type of the parameter, narrow it.
+  Mistakes are found when the configuration is built. A decoder that serves many types, e.g. one
+  that deserializes JSON, may return `object` and read the class to produce from
+  `EncodedValue::$into_class`; its result is not checked until the action is called.
 - Decoders are static: pure functions of their input, without services. When the object needs a
   service, read the value and use the service in the action.
-- `EncodedValue` tells the `value`, the `source` (`path`, `query`, `part`, or `body`), and the
+- `EncodedValue` tells the `value`, the `source` (`path`, `query`, `part`, or `body`), the
+  `into_class` (the class of the parameter, `object` if it is typed `object`), and the
   `name`, `null` for the body. The value is a string for a path parameter. For the query string and
   the form or JSON body it is whatever the client provided under the name: a string, a number or a
   boolean in JSON, or an array. For `#[Body]` it is the `SplFileObject` of the raw body, and the

@@ -199,6 +199,11 @@ final class PlanBuilderTest extends TestCase
                 [ '/' ],
                 [ new Decoded('query', 'value', Wide::class, 'object') ]
             ],
+            'decoded by a decoder returning object' => [
+                'decoded_wide',
+                [ '/' ],
+                [ new Decoded('query', 'slug', Wide::class, Slug::class) ]
+            ],
             'decoded with a default' => [
                 'decoded_with_default',
                 [ '/' ],
@@ -403,12 +408,6 @@ final class PlanBuilderTest extends TestCase
                 'decoded_not_a_class',
                 [ '/' ],
                 "`$class::decoded_not_a_class()` parameter `\$slug`: `Nope\\Missing` is not a decoder"
-            ],
-            'decoder does not narrow its return type' => [
-                'decoded_wide',
-                [ '/' ],
-                "`$class::decoded_wide()` parameter `\$slug`: `Test\\ICanBoogie\\Routing\\Decoder\\Wide::decode()` "
-                . "returns `object`, which is not assignable to `Test\\ICanBoogie\\Routing\\Decoder\\Slug`"
             ],
             'decoder returns another type' => [
                 'decoded_unrelated',

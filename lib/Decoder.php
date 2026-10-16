@@ -13,7 +13,8 @@ use ICanBoogie\Routing\Exception\NotDecodable;
  *
  * Decoders are static: pure functions of their input, without state or services, so that the plan
  * of an action remains plain data. The return type is `object`, implementations narrow it:
- * `decode(EncodedValue $value): Slug`.
+ * `decode(EncodedValue $value): Slug`. A decoder that serves many types keeps `object` and reads
+ * the class to produce from {@see EncodedValue::$into_class}.
  *
  * The design is explained in docs/adr/0002-decoders.md.
  */

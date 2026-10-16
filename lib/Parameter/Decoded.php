@@ -32,7 +32,7 @@ final readonly class Decoded implements Parameter
      *     source: 'path'|'query'|'part'|'body',
      *     name: non-empty-string,
      *     decoder: class-string<Decoder>,
-     *     type: string,
+     *     into_class: string,
      *     nullable: bool,
      *     has_default: bool,
      *     default: mixed,
@@ -49,8 +49,9 @@ final readonly class Decoded implements Parameter
      * @param non-empty-string $name
      *     Name of the value in its source, the name of the parameter for the body.
      * @param class-string<Decoder> $decoder
-     * @param string $type
-     *     Type of the parameter, used to report invalid values.
+     * @param string $into_class
+     *     Type of the parameter, without its nullability. It is given to the decoder, and used to
+     *     report invalid values.
      * @param bool $nullable
      *     Whether the parameter accepts `null`, which is the value when the value is missing and
      *     there is no default.
@@ -63,7 +64,7 @@ final readonly class Decoded implements Parameter
         public string $source,
         public string $name,
         public string $decoder,
-        public string $type,
+        public string $into_class,
         public bool $nullable = false,
         public bool $has_default = false,
         public mixed $default = null,
@@ -88,11 +89,16 @@ final readonly class Decoded implements Parameter
         }
 
         try {
-            return $this->decoder::decode(new EncodedValue($value, $this->source, $this->source === 'body' ? null : $this->name));
+            return $this->decoder::decode(new EncodedValue(
+                $value,
+                $this->source,
+                $this->into_class,
+                $this->source === 'body' ? null : $this->name,
+            ));
         } catch (NotDecodable | InvalidArgumentException | ValueError $e) {
             throw $this->source === 'path'
-                ? new PathParameterNotValid($this->name, $this->type, $e)
-                : new ParameterNotValid($this->source, $this->name, $this->type, previous: $e);
+                ? new PathParameterNotValid($this->name, $this->into_class, $e)
+                : new ParameterNotValid($this->source, $this->name, $this->into_class, previous: $e);
         }
     }
 
@@ -106,7 +112,7 @@ final readonly class Decoded implements Parameter
             $this->has_default => $this->default,
             $this->nullable => null,
             $this->source === 'path' => throw new LogicException("The path parameter '$this->name' is not available."),
-            default => throw new ParameterNotValid($this->source, $this->name, $this->type, missing: true),
+            default => throw new ParameterNotValid($this->source, $this->name, $this->into_class, missing: true),
         };
     }
 }

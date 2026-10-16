@@ -19,12 +19,17 @@ final readonly class EncodedValue
      *     - `body`: a `SplFileObject` opened on the raw body.
      * @param 'path'|'query'|'part'|'body' $source
      *     Where the value comes from.
+     * @param string $into_class
+     *     The class the decoder is asked to produce: the type of the parameter, without its
+     *     nullability, or `object` when the parameter is typed `object`. It lets a single decoder
+     *     serve many types, e.g. one that deserializes JSON into whatever class the action expects.
      * @param non-empty-string|null $name
      *     Name of the value in its source, `null` for the body.
      */
     public function __construct(
         public mixed $value,
         public string $source,
+        public string $into_class,
         public ?string $name = null,
     ) {
     }

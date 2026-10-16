@@ -76,6 +76,9 @@ PHP 8.4+, `icanboogie/config`
       and `#[Part]`; `using` is optional when the type of the parameter is a decoder itself. The
       `Decoded` parameter reports a value that can't be decoded like one that can't be cast, and
       `PlanBuilder` checks the decoder and its return type when the configuration is built.
+      `EncodedValue::$into_class` is the class to produce, so that a single decoder can serve many
+      types by keeping `object` as its return type, e.g. deserializing a JSON body into the class of
+      the parameter.
     - `Body` provides the raw body of the request, the `SplFileObject` found in
       `Request::$body_stream`, which `Request::from_server()` opens on `php://input`. It is bound with
       `#[Body]`, for what `#[Part]` can't provide, e.g. XML or a large upload. With a decoder,

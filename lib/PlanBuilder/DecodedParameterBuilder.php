@@ -82,8 +82,9 @@ final readonly class DecodedParameterBuilder
     }
 
     /**
-     * The return type of the decoder must be a class, assignable to the type of the parameter, the
-     * decoder has to narrow `object`.
+     * The return type of the decoder must be a class assignable to the type of the parameter, or
+     * `object`, for a decoder that serves many types, using {@see EncodedValue::$into_class}. A
+     * decoder returning `object` is checked when it is called.
      *
      * @param class-string<Decoder> $decoder
      *
@@ -107,14 +108,14 @@ final readonly class DecodedParameterBuilder
         if (
             !$returned_name
             || $returned->isBuiltin() && $returned_name !== 'object'
-            || $returned_name === 'object' && $expected_name !== 'object'
-            || $expected_name !== 'object' && !is_a($returned_name, $expected_name, true)
+            || $returned_name !== 'object' && $expected_name !== 'object'
+                && !is_a($returned_name, $expected_name, true)
         ) {
             throw ConfigNotValid::for_parameter(
                 $method,
                 $parameter,
                 "`$decoder::decode()` returns `" . ($returned ?? 'mixed') . "`, which is not assignable to "
-                . "`$expected_name`, declare a return type that is."
+                . "`$expected_name`, declare a return type that is, or `object`."
             );
         }
     }
@@ -167,7 +168,7 @@ final readonly class DecodedParameterBuilder
             source: $source,
             name: $name,
             decoder: $decoder,
-            type: $type->getName(),
+            into_class: $type->getName(),
             nullable: $nullable,
             has_default: $has_default,
             default: $default,
