@@ -317,7 +317,39 @@ the body with a [decoder](#decoders) bound to `#[Body]`, which suits a JSON body
 (a command, a DTO) better than one `#[Part]` per property.
 
 Values are cast like path values. A JSON body also provides numbers and booleans, which are accepted
-when they have the type of the parameter. Arrays are not supported, a value is a single value.
+when they have the type of the parameter.
+
+A parameter typed `array` receives a list of values, such as the `tags[]` field of a form or
+`?tags[]=a&tags[]=b`. PHP can't declare the type of the elements in a signature, so `of` does:
+
+```php
+<?php
+
+use ICanBoogie\Routing\Attribute\ElementType;
+use ICanBoogie\Routing\Attribute\Part;
+use ICanBoogie\Routing\Attribute\Query;
+
+#[Post('/posts')]
+public function create(
+    #[Part] array $meta,                                   // as the client sent it
+    #[Part(of: ElementType::String)] array $tags,          // tags[]=php&tags[]=routing
+    #[Part(of: ElementType::Int)] array $category_ids,
+    #[Part(of: Status::class)] array $statuses,            // a backed enum
+    #[Query(of: ElementType::Int)] array $ids = [],        // ?ids[]=1&ids[]=2
+): Response
+```
+
+`of` is an `ElementType` case, `String`, `Int`, `Float`, `Bool`, or `Mixed`, or the class of a backed
+enum. Elements are cast like a single value, and the keys are preserved: `tags[]` makes a list,
+`tags[a]` a map. A value that is not an array, or an element that cannot be cast, or that is an array
+itself, makes the request not valid. A missing array follows the rules of any other value, use
+`= []` for an optional one.
+
+Without `of`, the default is `ElementType::Mixed`: the array is provided as the client sent it, with
+its nested arrays and, in JSON, its numbers and booleans. Nothing is validated, so a controller that
+expects strings must say so with `ElementType::String`, otherwise `tags[a][]=x` reaches it as a nested
+array. `of` is only valid for a parameter typed `array`, and an array cannot be decoded with
+`using`.
 
 A value that is missing, or `null`, is the default value of the parameter, or `null` when it is
 nullable. Otherwise, the request is not valid. An empty string is a value, an `int` parameter

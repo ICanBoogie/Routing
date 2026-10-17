@@ -90,6 +90,13 @@ PHP 8.4+, `icanboogie/config`
       that was not sent, or that the browser left empty (`UPLOAD_ERR_NO_FILE`), is `null` if the
       parameter is nullable, otherwise `ParameterNotValid` is thrown. A file that failed to upload,
       or that is empty, throws `ParameterNotValid` too.
+    - `#[Query]` and `#[Part]` accept an `array` parameter, e.g. the `tags[]` field of a form or
+      `?tags[]=a&tags[]=b`. The type of the elements is the `of` argument, an
+      `Attribute\ElementType` case (`String`, `Int`, `Float`, `Bool`, `Mixed`) or a backed enum
+      class, e.g. `#[Part(of: ElementType::Int)] array $ids`. Elements are cast like a single value
+      and keys are preserved. Without `of`, the array is provided as the client sent it,
+      unvalidated. A value that is not an array, or an element that cannot be cast, throws
+      `ParameterNotValid`.
     - `ActionResponderProvider\FromConfig` provides the responders of the controllers of a `Config`:
       one `MethodResponder` per controller, created when one of its actions is first requested. The
       controllers are obtained through a closure, which is where services are wired. Use it with

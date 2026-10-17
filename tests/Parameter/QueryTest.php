@@ -147,6 +147,24 @@ final class QueryTest extends TestCase
         $this->assertNull($parameter->resolve($request));
     }
 
+    public function test_array_casts_the_elements(): void
+    {
+        $parameter = new Query('ids', 'int', array: true);
+
+        $actual = $parameter->resolve($this->request([ 'ids' => [ '1', '2' ] ]));
+
+        $this->assertSame([ 1, 2 ], $actual);
+    }
+
+    public function test_array_is_not_valid_when_an_element_cannot_be_cast(): void
+    {
+        $parameter = new Query('ids', 'int', array: true);
+
+        $this->expectException(ParameterNotValid::class);
+
+        $parameter->resolve($this->request([ 'ids' => [ '1', 'x' ] ]));
+    }
+
     public function test_export(): void
     {
         $parameter = new Query('status', StringBackedEnum::class, 'string', true, true, StringBackedEnum::DRAFT);

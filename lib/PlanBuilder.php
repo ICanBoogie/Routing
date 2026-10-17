@@ -29,6 +29,7 @@ use function enum_exists;
 use function implode;
 use function in_array;
 use function is_a;
+use function is_string;
 use function is_subclass_of;
 use function sprintf;
 
@@ -46,7 +47,8 @@ use function sprintf;
  * - A parameter with a {@see Decoder}, from the `using` argument of its attribute or because its
  *   type is a decoder itself, receives the object the decoder makes from the value.
  * - A parameter with the attribute {@see Attribute\Query} or {@see Attribute\Part} receives a value
- *   of the query string or of the body, cast to its type.
+ *   of the query string or of the body, cast to its type. A parameter typed `array` receives a list of
+ *   values, cast to the type of the attribute's `of` argument.
  * - A parameter typed {@see File}, with or without the attribute {@see Attribute\Upload}, receives
  *   the file of the request found by its name.
  * - Any other parameter is a path parameter, found by its name in the pattern of the route, or by
@@ -278,12 +280,14 @@ final readonly class PlanBuilder
                 $method,
                 $parameter,
                 $attribute->name,
+                $attribute->of,
                 Query::class
             ),
             $attribute instanceof Attribute\Part => self::build_input_parameter(
                 $method,
                 $parameter,
                 $attribute->name,
+                $attribute->of,
                 Part::class
             ),
             default => self::build_path_parameter(
@@ -326,6 +330,8 @@ final readonly class PlanBuilder
      * @param class-string<Query>|class-string<Part> $class
      * @param non-empty-string|null $name
      *     Name of the value in the source, defaults to the name of the parameter.
+     * @param Attribute\ElementType|class-string<BackedEnum>|null $of
+     *     Type of the elements of an `array` parameter.
      *
      * @throws ConfigNotValid
      */
@@ -333,9 +339,22 @@ final readonly class PlanBuilder
         ReflectionMethod $method,
         ReflectionParameter $parameter,
         ?string $name,
+        Attribute\ElementType|string|null $of,
         string $class
     ): Query|Part {
-        [ $type, $backing ] = self::resolve_path_type($method, $parameter);
+        $array = self::is_array($parameter);
+
+        [ $type, $backing ] = $array
+            ? self::resolve_element_type($method, $parameter, $of)
+            : self::resolve_path_type($method, $parameter);
+
+        if (!$array && $of !== null) {
+            throw ConfigNotValid::for_parameter(
+                $method,
+                $parameter,
+                "`of` is for a parameter typed `array`."
+            );
+        }
 
         $has_default = $parameter->isDefaultValueAvailable();
 
@@ -346,7 +365,51 @@ final readonly class PlanBuilder
             nullable: $parameter->allowsNull(),
             has_default: $has_default,
             default: $has_default ? $parameter->getDefaultValue() : null,
+            array: $array,
         );
+    }
+
+    private static function is_array(ReflectionParameter $parameter): bool
+    {
+        $type = $parameter->getType();
+
+        return $type instanceof ReflectionNamedType && $type->getName() === 'array';
+    }
+
+    /**
+     * @param Attribute\ElementType|class-string<BackedEnum>|null $of
+     *
+     * @return array{ 'int'|'float'|'string'|'bool'|'mixed'|class-string<BackedEnum>, 'int'|'string'|null }
+     *     The type of the elements, and the type backing the enum if the type is an enum.
+     *
+     * @throws ConfigNotValid
+     */
+    private static function resolve_element_type(
+        ReflectionMethod $method,
+        ReflectionParameter $parameter,
+        Attribute\ElementType|string|null $of
+    ): array {
+        if (is_string($of)) {
+            if (!enum_exists($of) || !is_subclass_of($of, BackedEnum::class)) {
+                throw ConfigNotValid::for_parameter(
+                    $method,
+                    $parameter,
+                    "`of: '$of'` is not valid, expected a " . Attribute\ElementType::class . " case or a backed enum."
+                );
+            }
+
+            $backing = new ReflectionEnum($of)->getBackingType()?->getName();
+
+            return [ $of, $backing === 'int' ? 'int' : 'string' ];
+        }
+
+        return match ($of ?? Attribute\ElementType::Mixed) {
+            Attribute\ElementType::String => [ 'string', null ],
+            Attribute\ElementType::Int => [ 'int', null ],
+            Attribute\ElementType::Float => [ 'float', null ],
+            Attribute\ElementType::Bool => [ 'bool', null ],
+            Attribute\ElementType::Mixed => [ 'mixed', null ],
+        };
     }
 
     /**

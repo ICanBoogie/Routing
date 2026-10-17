@@ -188,6 +188,16 @@ final class PlanBuilderTest extends TestCase
                 [ '/' ],
                 [ new Part('author_name', 'string', null, true) ]
             ],
+            'arrays' => [
+                'array_parameters',
+                [ '/' ],
+                [
+                    new Part('items', 'mixed', array: true),
+                    new Part('category_ids', 'int', array: true),
+                    new Query('s', StringBackedEnum::class, 'string', true, array: true),
+                    new Query('tags', 'string', null, false, true, [], true),
+                ]
+            ],
             'upload' => [ 'upload_parameter', [ '/' ], [ new Upload('image') ] ],
             'upload with a name' => [ 'upload_renamed', [ '/' ], [ new Upload('photo', true) ] ],
             'upload without the attribute' => [
@@ -460,6 +470,27 @@ final class PlanBuilderTest extends TestCase
                 "`$class::attribute_on_route()` parameter `\$route`: the parameter receives the route, "
                 . "it cannot have the attribute #[ICanBoogie\Routing\Attribute\Part]."
             ],
+            'of is not an enum' => [
+                'array_of_not_an_enum',
+                [ '/' ],
+                "`$class::array_of_not_an_enum()` parameter `\$items`: "
+                . "`of: 'Test\\ICanBoogie\\Routing\\Decoder\\Slug'` is not valid"
+            ],
+            'of without an array' => [
+                'of_without_array',
+                [ '/' ],
+                "`$class::of_without_array()` parameter `\$id`: `of` is for a parameter typed `array`."
+            ],
+            'array with a decoder' => [
+                'array_with_decoder',
+                [ '/' ],
+                "`$class::array_with_decoder()` parameter `\$items`: the type `array` cannot be decoded"
+            ],
+            'array path parameter' => [
+                'array_path',
+                [ '/:items' ],
+                "`$class::array_path()` parameter `\$items`: the type `array` is not supported"
+            ],
             'decoder is not a decoder' => [
                 'decoded_not_a_decoder',
                 [ '/' ],
@@ -526,11 +557,6 @@ final class PlanBuilderTest extends TestCase
                 [ '/' ],
                 "a parameter is bound to a single source, found "
                 . "#[ICanBoogie\Routing\Attribute\Query], #[ICanBoogie\Routing\Attribute\Body]."
-            ],
-            'query array' => [
-                'query_array',
-                [ '/' ],
-                "`$class::query_array()` parameter `\$tags`: the type `array` is not supported, $expected"
             ],
             'part class' => [
                 'part_class',

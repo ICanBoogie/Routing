@@ -164,6 +164,109 @@ final class PartTest extends TestCase
         new Part('name', 'string')->resolve($this->request([ 'name' => 123 ]));
     }
 
+    public function test_array_casts_the_elements(): void
+    {
+        $parameter = new Part('ids', 'int', array: true);
+
+        $actual = $parameter->resolve($this->request([ 'ids' => [ '1', 2, '3' ] ]));
+
+        $this->assertSame([ 1, 2, 3 ], $actual);
+    }
+
+    public function test_array_preserves_keys(): void
+    {
+        $parameter = new Part('flags', 'bool', array: true);
+
+        $actual = $parameter->resolve($this->request([ 'flags' => [ 'a' => '1', 'b' => 'false' ] ]));
+
+        $this->assertSame([ 'a' => true, 'b' => false ], $actual);
+    }
+
+    public function test_array_of_enum(): void
+    {
+        $parameter = new Part('statuses', StringBackedEnum::class, 'string', array: true);
+
+        $actual = $parameter->resolve($this->request([ 'statuses' => [ 'draft', 'published' ] ]));
+
+        $this->assertSame([ StringBackedEnum::DRAFT, StringBackedEnum::PUBLISHED ], $actual);
+    }
+
+    public function test_array_of_mixed_is_returned_as_is(): void
+    {
+        $parameter = new Part('items', 'mixed', array: true);
+        $items = [ [ 'sku' => 'x', 'qty' => 2 ], 'y', 3, null ];
+
+        $actual = $parameter->resolve($this->request([ 'items' => $items ]));
+
+        $this->assertSame($items, $actual);
+    }
+
+    public function test_array_of_strings_rejects_native_numbers(): void
+    {
+        $parameter = new Part('tags', 'string', array: true);
+
+        $this->expectException(ParameterNotValid::class);
+
+        $parameter->resolve($this->request([ 'tags' => [ 'a', 1 ] ]));
+    }
+
+    public function test_array_rejects_nested_arrays_when_typed(): void
+    {
+        $parameter = new Part('tags', 'string', array: true);
+
+        try {
+            $parameter->resolve($this->request([ 'tags' => [ 'a', [ 'b' ] ] ]));
+            $this->fail("Expected exception");
+        } catch (ParameterNotValid $e) {
+            $this->assertSame('array<string>', $e->type);
+            $this->assertFalse($e->missing);
+            $this->assertSame("The part parameter 'tags' is not a valid array<string>.", $e->getMessage());
+        }
+    }
+
+    public function test_array_rejects_a_scalar(): void
+    {
+        $parameter = new Part('items', 'mixed', array: true);
+
+        try {
+            $parameter->resolve($this->request([ 'items' => 'x' ]));
+            $this->fail("Expected exception");
+        } catch (ParameterNotValid $e) {
+            $this->assertSame('array', $e->type);
+            $this->assertFalse($e->missing);
+        }
+    }
+
+    public function test_array_missing_uses_the_default(): void
+    {
+        $parameter = new Part('tags', 'string', has_default: true, default: [], array: true);
+
+        $actual = $parameter->resolve($this->request([]));
+
+        $this->assertSame([], $actual);
+    }
+
+    public function test_array_missing_is_not_valid(): void
+    {
+        $parameter = new Part('tags', 'string', array: true);
+
+        try {
+            $parameter->resolve($this->request([]));
+            $this->fail("Expected exception");
+        } catch (ParameterNotValid $e) {
+            $this->assertTrue($e->missing);
+        }
+    }
+
+    public function test_export_array(): void
+    {
+        $parameter = new Part('ids', 'int', has_default: true, default: [], array: true);
+        $actual = SetStateHelper::export_import($parameter);
+
+        $this->assertEquals($parameter, $actual);
+        $this->assertTrue($actual->array);
+    }
+
     public function test_export(): void
     {
         $parameter = new Part('status', StringBackedEnum::class, 'string', true, true, StringBackedEnum::DRAFT);

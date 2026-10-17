@@ -31,7 +31,8 @@ use const FILTER_VALIDATE_INT;
 final class Casting
 {
     /**
-     * @param 'int'|'float'|'string'|'bool'|class-string<BackedEnum> $type
+     * @param 'int'|'float'|'string'|'bool'|'mixed'|class-string<BackedEnum> $type
+     *     `mixed` is the elements of an array that is provided as is, the value is not cast.
      * @param 'int'|'string'|null $backing
      *     The type backing the enum, when `$type` is an enum.
      *
@@ -40,7 +41,7 @@ final class Casting
     public static function cast(string $type, ?string $backing, string $value): mixed
     {
         return match ($type) {
-            'string' => $value,
+            'mixed', 'string' => $value,
             'int' => self::to_int($value),
             'float' => self::to_float($value),
             'bool' => self::to_bool($value),
@@ -52,13 +53,17 @@ final class Casting
      * Casts a value found in a request body, which unlike the other sources may already have the
      * right type, e.g. the numbers and booleans of a JSON object. Strings are cast like path values.
      *
-     * @param 'int'|'float'|'string'|'bool'|class-string<BackedEnum> $type
+     * @param 'int'|'float'|'string'|'bool'|'mixed'|class-string<BackedEnum> $type
      * @param 'int'|'string'|null $backing
      *
      * @throws NotCastable
      */
     public static function cast_input(string $type, ?string $backing, mixed $value): mixed
     {
+        if ($type === 'mixed') {
+            return $value;
+        }
+
         if (is_string($value)) {
             return self::cast($type, $backing, $value);
         }

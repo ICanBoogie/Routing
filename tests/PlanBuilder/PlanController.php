@@ -7,6 +7,7 @@ use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Attribute\Body;
+use ICanBoogie\Routing\Attribute\ElementType;
 use ICanBoogie\Routing\Attribute\Part;
 use ICanBoogie\Routing\Attribute\Path;
 use ICanBoogie\Routing\Attribute\Query;
@@ -119,6 +120,35 @@ final class PlanController
     }
 
     public function part_renamed(#[Part('author_name')] ?string $author): Response
+    {
+        return new Response();
+    }
+
+    public function array_parameters(
+        #[Part] array $items,
+        #[Part(of: ElementType::Int)] array $category_ids,
+        #[Query('s', of: StringBackedEnum::class)] ?array $statuses,
+        #[Query(of: ElementType::String)] array $tags = [],
+    ): Response {
+        return new Response();
+    }
+
+    public function array_of_not_an_enum(#[Part(of: Slug::class)] array $items): Response
+    {
+        return new Response();
+    }
+
+    public function of_without_array(#[Part(of: ElementType::Int)] int $id): Response
+    {
+        return new Response();
+    }
+
+    public function array_with_decoder(#[Part(using: SlugDecoder::class)] array $items): Response
+    {
+        return new Response();
+    }
+
+    public function array_path(array $items): Response
     {
         return new Response();
     }
@@ -326,11 +356,6 @@ final class PlanController
     }
 
     public function attribute_on_route(#[Part] Route $route): Response
-    {
-        return new Response();
-    }
-
-    public function query_array(#[Query] array $tags): Response
     {
         return new Response();
     }
