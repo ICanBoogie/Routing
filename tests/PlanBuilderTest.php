@@ -10,6 +10,7 @@ use ICanBoogie\Routing\Parameter\CurrentRequest;
 use ICanBoogie\Routing\Parameter\Decoded;
 use ICanBoogie\Routing\Parameter\MatchedRoute;
 use ICanBoogie\Routing\Parameter\Part;
+use ICanBoogie\Routing\Parameter\Upload;
 use ICanBoogie\Routing\Parameter\Path;
 use ICanBoogie\Routing\Parameter\Query;
 use ICanBoogie\Routing\Pattern;
@@ -50,7 +51,10 @@ final class PlanBuilderTest extends TestCase
     #[DataProvider('provide_plan')]
     public function test_plan(string $method, array $patterns, array $expected): void
     {
-        $this->assertEquals($expected, PlanBuilder::build($this->method($method), $this->patterns($patterns)));
+        $this->assertEquals(
+            $expected,
+            PlanBuilder::build($this->method($method), $this->patterns($patterns))
+        );
     }
 
     /**
@@ -74,12 +78,22 @@ final class PlanBuilderTest extends TestCase
             'all scalars' => [
                 'all_scalars',
                 [ '/:a/:b/:c/:d' ],
-                [ new Path('a', 'int'), new Path('b', 'float'), new Path('c', 'string'), new Path('d', 'bool') ]
+                [
+                    new Path('a', 'int'),
+                    new Path('b', 'float'),
+                    new Path('c', 'string'),
+                    new Path('d', 'bool')
+                ]
             ],
             'by name, not by position' => [
                 'all_scalars',
                 [ '/:d/:c/:b/:a' ],
-                [ new Path('a', 'int'), new Path('b', 'float'), new Path('c', 'string'), new Path('d', 'bool') ]
+                [
+                    new Path('a', 'int'),
+                    new Path('b', 'float'),
+                    new Path('c', 'string'),
+                    new Path('d', 'bool')
+                ]
             ],
             'request and route' => [
                 'request_and_route',
@@ -98,7 +112,16 @@ final class PlanBuilderTest extends TestCase
             'enum with default' => [
                 'enum_with_default',
                 [ '/:status' ],
-                [ new Path('status', StringBackedEnum::class, 'string', false, true, StringBackedEnum::DRAFT) ]
+                [
+                    new Path(
+                        'status',
+                        StringBackedEnum::class,
+                        'string',
+                        false,
+                        true,
+                        StringBackedEnum::DRAFT
+                    )
+                ]
             ],
             'with default' => [
                 'with_default',
@@ -135,9 +158,21 @@ final class PlanBuilderTest extends TestCase
                 [ '/articles', '/articles/:page' ],
                 [ new Path('page', 'int', null, false, true, 1) ]
             ],
-            'path attribute' => [ 'path_attribute', [ '/articles/:id' ], [ new Path('id', 'int') ] ],
-            'path attribute with a name' => [ 'path_renamed', [ '/articles/:id' ], [ new Path('id', 'int') ] ],
-            'query' => [ 'query_parameter', [ '/' ], [ new Query('page', 'int', null, false, true, 1) ] ],
+            'path attribute' => [
+                'path_attribute',
+                [ '/articles/:id' ],
+                [ new Path('id', 'int') ]
+            ],
+            'path attribute with a name' => [
+                'path_renamed',
+                [ '/articles/:id' ],
+                [ new Path('id', 'int') ]
+            ],
+            'query' => [
+                'query_parameter',
+                [ '/' ],
+                [ new Query('page', 'int', null, false, true, 1) ]
+            ],
             'query with a name' => [ 'query_renamed', [ '/' ], [ new Query('q', 'string') ] ],
             'query enum and nullable' => [
                 'query_enum',
@@ -148,7 +183,18 @@ final class PlanBuilderTest extends TestCase
                 ]
             ],
             'part' => [ 'part_parameter', [ '/' ], [ new Part('title', 'string') ] ],
-            'part with a name' => [ 'part_renamed', [ '/' ], [ new Part('author_name', 'string', null, true) ] ],
+            'part with a name' => [
+                'part_renamed',
+                [ '/' ],
+                [ new Part('author_name', 'string', null, true) ]
+            ],
+            'upload' => [ 'upload_parameter', [ '/' ], [ new Upload('image') ] ],
+            'upload with a name' => [ 'upload_renamed', [ '/' ], [ new Upload('photo', true) ] ],
+            'upload without the attribute' => [
+                'upload_inferred',
+                [ '/' ],
+                [ new Upload('image'), new Upload('thumbnail', true) ]
+            ],
             'all sources' => [
                 'all_sources',
                 [ '/articles/:id' ],
@@ -230,7 +276,11 @@ final class PlanBuilderTest extends TestCase
             'body and other sources' => [
                 'body_and_others',
                 [ '/articles/:id' ],
-                [ new Path('id', 'int'), new Query('page', 'int', null, false, true, 1), new Body() ]
+                [
+                    new Path('id', 'int'),
+                    new Query('page', 'int', null, false, true, 1),
+                    new Body()
+                ]
             ],
             'nullable, in some routes' => [
                 'nullable',
@@ -301,10 +351,22 @@ final class PlanBuilderTest extends TestCase
             'string' => [ 'returns_string', "`$class::returns_string()` $return" ],
             'mixed' => [ 'returns_mixed', "`$class::returns_mixed()` $return" ],
             'nullable' => [ 'returns_nullable', "`$class::returns_nullable()` $return" ],
-            'union with null' => [ 'returns_union_with_null', "`$class::returns_union_with_null()` $return" ],
-            'union with string' => [ 'returns_union_with_string', "`$class::returns_union_with_string()` $return" ],
-            'unrelated class' => [ 'returns_unrelated_class', "`$class::returns_unrelated_class()` $return" ],
-            'intersection' => [ 'returns_intersection', "`$class::returns_intersection()` $return" ],
+            'union with null' => [
+                'returns_union_with_null',
+                "`$class::returns_union_with_null()` $return"
+            ],
+            'union with string' => [
+                'returns_union_with_string',
+                "`$class::returns_union_with_string()` $return"
+            ],
+            'unrelated class' => [
+                'returns_unrelated_class',
+                "`$class::returns_unrelated_class()` $return"
+            ],
+            'intersection' => [
+                'returns_intersection',
+                "`$class::returns_intersection()` $return"
+            ],
             'static, of a class that is not a response' => [
                 'returns_static',
                 "`$class::returns_static()` $return"
@@ -474,6 +536,36 @@ final class PlanBuilderTest extends TestCase
                 'part_class',
                 [ '/' ],
                 "`$class::part_class()` parameter `\$payload`: the type `stdClass` is not supported, $expected"
+            ],
+            'upload string' => [
+                'upload_string',
+                [ '/' ],
+                "`$class::upload_string()` parameter `\$image`: the type `string` is not supported for an upload, "
+                . "expected `ICanBoogie\HTTP\File`."
+            ],
+            'upload untyped' => [
+                'upload_untyped',
+                [ '/' ],
+                "`$class::upload_untyped()` parameter `\$image`: the type is missing for an upload, "
+                . "expected `ICanBoogie\HTTP\File`."
+            ],
+            'upload union' => [
+                'upload_union',
+                [ '/' ],
+                "`$class::upload_union()` parameter `\$image`: the type `ICanBoogie\HTTP\File|string` is not "
+                . "supported for an upload, expected `ICanBoogie\HTTP\File`."
+            ],
+            'upload and part' => [
+                'upload_and_part',
+                [ '/' ],
+                "`$class::upload_and_part()` parameter `\$image`: a parameter is bound to a single source, found "
+                . "#[ICanBoogie\Routing\Attribute\Part], #[ICanBoogie\Routing\Attribute\Upload]."
+            ],
+            'file and query' => [
+                'file_and_query',
+                [ '/' ],
+                "`$class::file_and_query()` parameter `\$image`: the type `ICanBoogie\HTTP\File` is not "
+                . "supported, $expected A file comes from `#[ICanBoogie\Routing\Attribute\Upload]`, or no attribute."
             ],
             'renamed placeholder is not in the pattern' => [
                 'path_renamed_missing',

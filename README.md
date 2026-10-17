@@ -10,20 +10,22 @@ Events are emitted along the way to allow listeners to alter the request or the 
 from failure.
 
 Routes are defined with attributes on plain controller classes. Path, query string, and body values
-are cast to the types of the action's parameters, and routes work both ways: they match requests and
-generate URLs.
+are cast to the types of the action's parameters, uploaded files are provided as `File`, and routes
+work both ways: they match requests and generate URLs.
 
 ```php
 <?php
 
 namespace App\Articles;
 
+use ICanBoogie\HTTP\File;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Attribute\Get;
 use ICanBoogie\Routing\Attribute\Part;
 use ICanBoogie\Routing\Attribute\Post;
 use ICanBoogie\Routing\Attribute\Prefix;
 use ICanBoogie\Routing\Attribute\Query;
+use ICanBoogie\Routing\Attribute\Upload;
 use ICanBoogie\Routing\IntoResponse\Json;
 
 enum Status: string
@@ -66,6 +68,14 @@ final readonly class ArticlesController
     public function create(#[Part] string $title, #[Part] Status $status = Status::DRAFT): Json
     {
         return new Json($this->articles->create($title, $status), status: 201);
+    }
+
+    // POST /articles/42/cover, as multipart/form-data — a missing or failed upload of "cover" is a 400,
+    // "thumb" is optional because the parameter is nullable
+    #[Post('/<id:\d+>/cover')]
+    public function set_cover(int $id, File $cover, #[Upload('thumb')] ?File $thumbnail): Json
+    {
+        return new Json($this->articles->set_cover($id, $cover, $thumbnail));
     }
 }
 ```

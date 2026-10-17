@@ -16,7 +16,7 @@ use Throwable;
 class ParameterNotValid extends ClientError implements Exception
 {
     /**
-     * @param 'query'|'part'|'body' $source
+     * @param 'query'|'part'|'upload'|'body' $source
      *     Where the value is read from.
      * @param string $name
      *     Name of the value in the source.

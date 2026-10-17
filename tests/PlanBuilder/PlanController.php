@@ -2,6 +2,7 @@
 
 namespace Test\ICanBoogie\Routing\PlanBuilder;
 
+use ICanBoogie\HTTP\File;
 use ICanBoogie\HTTP\RedirectResponse;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
@@ -9,6 +10,7 @@ use ICanBoogie\Routing\Attribute\Body;
 use ICanBoogie\Routing\Attribute\Part;
 use ICanBoogie\Routing\Attribute\Path;
 use ICanBoogie\Routing\Attribute\Query;
+use ICanBoogie\Routing\Attribute\Upload;
 use ICanBoogie\Routing\IntoResponse;
 use ICanBoogie\Routing\Route;
 use SplFileObject;
@@ -104,8 +106,10 @@ final class PlanController
         return new Response();
     }
 
-    public function query_enum(#[Query] StringBackedEnum $status, #[Query] ?bool $archived): Response
-    {
+    public function query_enum(
+        #[Query] StringBackedEnum $status,
+        #[Query] ?bool $archived
+    ): Response {
         return new Response();
     }
 
@@ -115,6 +119,21 @@ final class PlanController
     }
 
     public function part_renamed(#[Part('author_name')] ?string $author): Response
+    {
+        return new Response();
+    }
+
+    public function upload_parameter(#[Upload] File $image): Response
+    {
+        return new Response();
+    }
+
+    public function upload_renamed(#[Upload('photo')] ?File $image): Response
+    {
+        return new Response();
+    }
+
+    public function upload_inferred(File $image, ?File $thumbnail): Response
     {
         return new Response();
     }
@@ -185,8 +204,9 @@ final class PlanController
         return new Response();
     }
 
-    public function decoded_path_renamed(#[Path('slug', using: SlugDecoder::class)] Slug $article_slug): Response
-    {
+    public function decoded_path_renamed(
+        #[Path('slug', using: SlugDecoder::class)] Slug $article_slug
+    ): Response {
         return new Response();
     }
 
@@ -215,8 +235,9 @@ final class PlanController
         return new Response();
     }
 
-    public function decoded_with_default(#[Query(using: SlugDecoder::class)] ?Slug $slug = null): Response
-    {
+    public function decoded_with_default(
+        #[Query(using: SlugDecoder::class)] ?Slug $slug = null
+    ): Response {
         return new Response();
     }
 
@@ -250,13 +271,15 @@ final class PlanController
         return new Response();
     }
 
-    public function decoded_object_default(#[Query(using: SlugDecoder::class)] Slug $slug = new Slug('x')): Response
-    {
+    public function decoded_object_default(
+        #[Query(using: SlugDecoder::class)] Slug $slug = new Slug('x')
+    ): Response {
         return new Response();
     }
 
-    public function decoded_missing_placeholder(#[Path(using: SlugDecoder::class)] Slug $slug): Response
-    {
+    public function decoded_missing_placeholder(
+        #[Path(using: SlugDecoder::class)] Slug $slug
+    ): Response {
         return new Response();
     }
 
@@ -313,6 +336,34 @@ final class PlanController
     }
 
     public function part_class(#[Part] \stdClass $payload): Response
+    {
+        return new Response();
+    }
+
+    public function upload_string(#[Upload] string $image): Response
+    {
+        return new Response();
+    }
+
+    /**
+     * @param mixed $image
+     */
+    public function upload_untyped(#[Upload] $image): Response
+    {
+        return new Response();
+    }
+
+    public function upload_union(#[Upload] File|string $image): Response
+    {
+        return new Response();
+    }
+
+    public function upload_and_part(#[Upload] #[Part] File $image): Response
+    {
+        return new Response();
+    }
+
+    public function file_and_query(#[Query] File $image): Response
     {
         return new Response();
     }

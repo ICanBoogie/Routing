@@ -84,6 +84,12 @@ PHP 8.4+, `icanboogie/config`
       `#[Body]`, for what `#[Part]` can't provide, e.g. XML or a large upload. With a decoder,
       `#[Body(using: ImportDecoder::class)]` is the object the decoder makes from the file object. A
       method has at most one `#[Body]`.
+    - `Upload` provides a file of `Request::$files` as an `ICanBoogie\HTTP\File`. It is bound by
+      its type, any parameter typed `File` receives the file with the name of the parameter, or with
+      `#[Upload]`, which takes the name of the file when it is not the name of the parameter. A file
+      that was not sent, or that the browser left empty (`UPLOAD_ERR_NO_FILE`), is `null` if the
+      parameter is nullable, otherwise `ParameterNotValid` is thrown. A file that failed to upload,
+      or that is empty, throws `ParameterNotValid` too.
     - `ActionResponderProvider\FromConfig` provides the responders of the controllers of a `Config`:
       one `MethodResponder` per controller, created when one of its actions is first requested. The
       controllers are obtained through a closure, which is where services are wired. Use it with

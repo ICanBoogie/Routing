@@ -3,6 +3,7 @@
 namespace ICanBoogie\Routing;
 
 use BackedEnum;
+use ICanBoogie\HTTP\File;
 use ICanBoogie\HTTP\Request;
 use ICanBoogie\HTTP\Response;
 use ICanBoogie\Routing\Exception\ConfigNotValid;
@@ -12,6 +13,7 @@ use ICanBoogie\Routing\Parameter\MatchedRoute;
 use ICanBoogie\Routing\Parameter\Part;
 use ICanBoogie\Routing\Parameter\Path;
 use ICanBoogie\Routing\Parameter\Query;
+use ICanBoogie\Routing\Parameter\Upload;
 use ICanBoogie\Routing\PlanBuilder\DecodedParameterBuilder;
 use ReflectionEnum;
 use ReflectionMethod;
@@ -45,6 +47,8 @@ use function sprintf;
  *   type is a decoder itself, receives the object the decoder makes from the value.
  * - A parameter with the attribute {@see Attribute\Query} or {@see Attribute\Part} receives a value
  *   of the query string or of the body, cast to its type.
+ * - A parameter typed {@see File}, with or without the attribute {@see Attribute\Upload}, receives
+ *   the file of the request found by its name.
  * - Any other parameter is a path parameter, found by its name in the pattern of the route, or by
  *   the name of {@see Attribute\Path}, and cast to its type: `int`, `float`, `string`, `bool`, or a
  *   backed enum.
@@ -88,7 +92,10 @@ final readonly class PlanBuilder
     private static function assert_invocable(ReflectionMethod $method): void
     {
         if (!$method->isPublic() || $method->isStatic() || $method->isAbstract()) {
-            throw ConfigNotValid::for_method($method, "must be a public, non-static, non-abstract method.");
+            throw ConfigNotValid::for_method(
+                $method,
+                "must be a public, non-static, non-abstract method."
+            );
         }
     }
 
@@ -118,8 +125,10 @@ final readonly class PlanBuilder
      *
      * @throws ConfigNotValid
      */
-    private static function build_body_parameter(ReflectionMethod $method, ReflectionParameter $parameter): Body
-    {
+    private static function build_body_parameter(
+        ReflectionMethod $method,
+        ReflectionParameter $parameter
+    ): Body {
         $type = $parameter->getType();
 
         if (!$type instanceof ReflectionNamedType || $type->getName() !== SplFileObject::class) {
@@ -132,6 +141,33 @@ final readonly class PlanBuilder
         }
 
         return new Body();
+    }
+
+    /**
+     * An uploaded file is provided as a {@see File}, there is no cast and no decoder.
+     *
+     * @param non-empty-string|null $name
+     *     Name of the file in the form, defaults to the name of the parameter.
+     *
+     * @throws ConfigNotValid
+     */
+    private static function build_upload_parameter(
+        ReflectionMethod $method,
+        ReflectionParameter $parameter,
+        ?string $name
+    ): Upload {
+        $type = $parameter->getType();
+
+        if (!$type instanceof ReflectionNamedType || $type->getName() !== File::class) {
+            throw ConfigNotValid::for_parameter(
+                $method,
+                $parameter,
+                ($type ? "the type `$type` is not supported" : "the type is missing") . " for an upload, expected `"
+                . File::class . "`."
+            );
+        }
+
+        return new Upload($name ?? $parameter->getName(), $parameter->allowsNull());
     }
 
     /**
@@ -176,7 +212,11 @@ final readonly class PlanBuilder
         array $patterns
     ): Parameter {
         if ($parameter->isVariadic()) {
-            throw ConfigNotValid::for_parameter($method, $parameter, "variadic parameters are not supported.");
+            throw ConfigNotValid::for_parameter(
+                $method,
+                $parameter,
+                "variadic parameters are not supported."
+            );
         }
 
         $attribute = self::find_source_attribute($method, $parameter);
@@ -201,7 +241,19 @@ final readonly class PlanBuilder
             }
         }
 
-        $decoded = DecodedParameterBuilder::try_build_decoded_parameter($method, $parameter, $attribute);
+        if ($attribute instanceof Attribute\Upload) {
+            return self::build_upload_parameter($method, $parameter, $attribute->name);
+        }
+
+        if (!$attribute && $type instanceof ReflectionNamedType && $type->getName() === File::class) {
+            return self::build_upload_parameter($method, $parameter, null);
+        }
+
+        $decoded = DecodedParameterBuilder::try_build_decoded_parameter(
+            $method,
+            $parameter,
+            $attribute
+        );
 
         if ($decoded) {
             if ($decoded->source === 'path') {
@@ -234,7 +286,12 @@ final readonly class PlanBuilder
                 $attribute->name,
                 Part::class
             ),
-            default => self::build_path_parameter($method, $parameter, $patterns, $attribute?->name),
+            default => self::build_path_parameter(
+                $method,
+                $parameter,
+                $patterns,
+                $attribute?->name
+            ),
         };
     }
 
@@ -244,11 +301,12 @@ final readonly class PlanBuilder
     private static function find_source_attribute(
         ReflectionMethod $method,
         ReflectionParameter $parameter
-    ): Attribute\Path|Attribute\Query|Attribute\Part|Attribute\Body|null {
+    ): Attribute\Path|Attribute\Query|Attribute\Part|Attribute\Upload|Attribute\Body|null {
         $attributes = [
             ...$parameter->getAttributes(Attribute\Path::class),
             ...$parameter->getAttributes(Attribute\Query::class),
             ...$parameter->getAttributes(Attribute\Part::class),
+            ...$parameter->getAttributes(Attribute\Upload::class),
             ...$parameter->getAttributes(Attribute\Body::class),
         ];
 
@@ -328,18 +386,28 @@ final readonly class PlanBuilder
      *
      * @throws ConfigNotValid
      */
-    private static function resolve_path_type(ReflectionMethod $method, ReflectionParameter $parameter): array
-    {
+    private static function resolve_path_type(
+        ReflectionMethod $method,
+        ReflectionParameter $parameter
+    ): array {
         $type = $parameter->getType();
         $expected = "expected " . implode(', ', self::SCALARS) . ", a backed enum, "
             . Request::class . ", or " . Route::class . ".";
 
         if (!$type) {
-            throw ConfigNotValid::for_parameter($method, $parameter, "the type is missing, $expected");
+            throw ConfigNotValid::for_parameter(
+                $method,
+                $parameter,
+                "the type is missing, $expected"
+            );
         }
 
         if (!$type instanceof ReflectionNamedType) {
-            throw ConfigNotValid::for_parameter($method, $parameter, "the type `$type` is not supported, $expected");
+            throw ConfigNotValid::for_parameter(
+                $method,
+                $parameter,
+                "the type `$type` is not supported, $expected"
+            );
         }
 
         $name = $type->getName();
@@ -359,10 +427,12 @@ final readonly class PlanBuilder
                 $method,
                 $parameter,
                 "the type `$name` is not supported, $expected"
-                . (class_exists($name)
-                    ? " To use a class, make it implement `" . Decoder::class . "`, or bind a decoder"
-                    . " with `using: MyDecoder::class`."
-                    : "")
+                . ($name === File::class
+                    ? " A file comes from `#[" . Attribute\Upload::class . "]`, or no attribute."
+                    : (class_exists($name)
+                        ? " To use a class, make it implement `" . Decoder::class . "`, or bind a decoder"
+                        . " with `using: MyDecoder::class`."
+                        : ""))
             ),
         };
     }

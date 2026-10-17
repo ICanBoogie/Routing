@@ -275,12 +275,13 @@ The catch-all `*` of a pattern is a parameter named `all`.
 
 A parameter is bound to the part of the request it comes from, which is explicit in the signature:
 
-| Attribute  | Reads                                                                   |
-|------------|-------------------------------------------------------------------------|
-| `#[Path]`  | A placeholder of the pattern (optional, it is the default)              |
-| `#[Query]` | A value of the query string                                             |
-| `#[Part]`  | A named piece of the body: a form field, or a property of a JSON object |
-| `#[Body]`  | The raw body, the `SplFileObject` of `Request::$body_stream`            |
+| Attribute   | Reads                                                                        |
+|-------------|------------------------------------------------------------------------------|
+| `#[Path]`   | A placeholder of the pattern (optional, it is the default)                   |
+| `#[Query]`  | A value of the query string                                                  |
+| `#[Part]`   | A named piece of the body: a form field, or a property of a JSON object      |
+| `#[Upload]` | A file uploaded with a `multipart/form-data` form, an `HTTP\File` (optional) |
+| `#[Body]`   | The raw body, the `SplFileObject` of `Request::$body_stream`                 |
 
 The name of the value is the name of the parameter, give another one to the attribute when they
 differ. A parameter has a single source.
@@ -323,6 +324,39 @@ nullable. Otherwise, the request is not valid. An empty string is a value, an `i
 doesn't accept it. A path parameter, unlike the others, is always checked against the pattern when
 the configuration is built, whereas a value of the query string or of the body is the client's to
 provide.
+
+`#[Upload]` reads `Request::$files`, and the parameter must be typed `ICanBoogie\HTTP\File`. Since
+a `File` can only come from there, the attribute is optional, like `#[Path]`: use it to name the
+file when it is not the name of the parameter, `#[Upload('photo')] File $image`. A file
+that was not sent is missing, which includes the form field a browser submits when "no file" was
+chosen (`UPLOAD_ERR_NO_FILE`): `null` when the parameter is nullable, otherwise the request is not
+valid. A file that failed to upload, such as one over `upload_max_filesize`, or that is empty, is
+never missing, it makes the request not valid, even if the parameter is nullable. Repeated fields
+(`photos[]`) are not supported. The controller receives a valid file, it only has to move it.
+
+```php
+<?php
+
+use ICanBoogie\HTTP\File;
+use ICanBoogie\Routing\Attribute\Part;
+use ICanBoogie\Routing\Attribute\Post;
+use ICanBoogie\Routing\Attribute\Upload;
+
+#[Post('/photos')]
+public function create(#[Part] string $title, File $image): Response
+{
+    // the image is required
+}
+
+#[Post('/photos/:id')]
+public function update(int $id, #[Upload('photo')] ?File $image): Response
+{
+    // the image is optional
+}
+```
+
+Tests build the request with `Request::OPTION_FILES`, e.g. `new FileList([ 'image' => new File(...) ])`,
+or call the method with a `File`.
 
 `#[Body]` is for what `#[Part]` can't provide: XML, a custom format, or a large upload to process
 without loading it in memory. The parameter is a `SplFileObject`, which tests can replace with the
