@@ -158,6 +158,8 @@ PHP 8.4+, `icanboogie/config`
 - `Pattern::from()` caches patterns with weak references, a pattern that nothing holds is freed instead
   of staying in memory for the life of the process.
 - `RouteNotFound` extends `NotFound`.
+- Documented when the matched `Route` is added to the request context, and how to require
+  authentication with a middleware, see [docs/Middleware.md](docs/Middleware.md).
 - Improved route resolution performance: `MemoizeByUri` finds static routes with a single array
   lookup instead of scanning them, and tests dynamic routes by chunks of about 30 with a single
   regex per chunk instead of one regex per route.

@@ -71,7 +71,9 @@ $response();
 ```
 
 During dispatch the matched route is available as `$request->context->get(Route::class)` and the
-values captured from the path as `$request->path_params`.
+values captured from the path as `$request->path_params`. Both are set just before the responder of
+the action is invoked, so use [middleware](Middleware.md#the-request-context) to run code that needs
+them.
 
 ## Step 3: generate URLs
 
@@ -85,15 +87,15 @@ See [URL generation](UrlGeneration.md).
 
 ## Where to go next
 
-| I want to…                                      | Read                                          |
-|-------------------------------------------------|-----------------------------------------------|
-| Understand the pattern syntax                   | [Route patterns](RoutePatterns.md)            |
-| Define many routes                              | [Defining routes](CreatingRoutes.md)          |
-| Organize handlers in classes                    | [Stateless controllers](StatelessControllers.md) |
-| Resolve responders from a DI container          | [Action responders](ActionResponders.md)      |
-| Run code around every route (cache, redirects)  | [Middleware and events](Middleware.md)        |
-| Make route lookup faster in production          | [Route providers](RouteProviders.md)          |
-| Understand an error                             | [Exceptions](Exceptions.md)                   |
+| I want to…                                     | Read                                             |
+|------------------------------------------------|--------------------------------------------------|
+| Understand the pattern syntax                  | [Route patterns](RoutePatterns.md)               |
+| Define many routes                             | [Defining routes](CreatingRoutes.md)             |
+| Organize handlers in classes                   | [Stateless controllers](StatelessControllers.md) |
+| Resolve responders from a DI container         | [Action responders](ActionResponders.md)         |
+| Run code around every route (cache, redirects) | [Middleware and events](Middleware.md)           |
+| Make route lookup faster in production         | [Route providers](RouteProviders.md)             |
+| Understand an error                            | [Exceptions](Exceptions.md)                      |
 
 
 
